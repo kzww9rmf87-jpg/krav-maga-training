@@ -23,6 +23,9 @@ struct HomeView: View {
                     if let recommendation {
                         VStack(alignment: .leading, spacing: 12) {
                             SessionCard(title: recommendation.session.title, subtitle: recommendation.session.subtitle)
+                            Text(Self.formattedDuration(recommendation.session.estimatedDurationMinutes))
+                                .font(CASTypography.caption)
+                                .foregroundStyle(CASTheme.Colors.secondaryText)
                             Text(recommendation.reason)
                                 .font(CASTypography.caption)
                                 .foregroundStyle(CASTheme.Colors.secondaryText)
@@ -65,6 +68,14 @@ struct HomeView: View {
                 }
             }
         }
+    }
+
+    /// "≈ 25 min" under an hour, "≈ 1 h 40" at or above one hour.
+    private static func formattedDuration(_ minutes: Int) -> String {
+        guard minutes >= 60 else { return "≈ \(minutes) min" }
+        let hours = minutes / 60
+        let remainder = minutes % 60
+        return remainder == 0 ? "≈ \(hours) h" : "≈ \(hours) h \(remainder)"
     }
 }
 

@@ -178,4 +178,42 @@ struct ModelsTests {
         #expect(AdaptationDomain.maximumStrength.displayName == "Force maximale")
         #expect(AdaptationDomain.specificSkill.displayName == "Compétence spécifique")
     }
+
+    @Test func estimatedDurationSumsRestPlusAFlatPerStepAssumptionRoundedToFiveMinutes() {
+        // Two steps, 90s rest each after the first (not the last, so it
+        // doesn't count): 90 rest + 2*30 execution = 150s = 2.5min,
+        // rounded to the nearest 5 -> 5 (the floor from `max(5, ...)`).
+        let session = TrainingSession(
+            id: "duration-test",
+            title: "Duration test",
+            subtitle: "",
+            format: .standard(modules: [
+                SessionModule(
+                    module: CapabilityModuleCatalog.strength,
+                    exercises: [
+                        SessionExercise(
+                            exercise: Exercise(id: "a", name: "A", primaryAdaptation: .maximumStrength),
+                            restGuidance: "90 sec",
+                            groups: [SetGroup(kind: .work, sets: [
+                                SetSpec(load: "80kg", reps: "5"),
+                                SetSpec(load: "80kg", reps: "5"),
+                            ])],
+                            note: ""
+                        ),
+                    ]
+                ),
+            ])
+        )
+        #expect(session.estimatedDurationMinutes == 5)
+    }
+
+    @Test func estimatedDurationIsNeverBelowFiveMinutes() {
+        let session = TrainingSession(
+            id: "tiny",
+            title: "Tiny",
+            subtitle: "",
+            format: .standard(modules: [])
+        )
+        #expect(session.estimatedDurationMinutes == 5)
+    }
 }
