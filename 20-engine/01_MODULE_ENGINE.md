@@ -55,21 +55,84 @@ Current domains are:
 
 Every module belongs primarily to one Adaptation Domain.
 
+An Adaptation Domain is not a Capability Module. A domain describes a
+physiological finality — what the body is being asked to become. It is
+not something the engine assembles into a session directly.
+
 ---
 
 ## Capability Module
 
 A Capability Module is the smallest functional training unit of CAS.
 
-A module exists to improve one primary adaptation.
+A Capability Module is not an Adaptation Domain. Where a domain describes
+a finality, a module describes an operational, reusable building block —
+the thing the Module Engine actually assembles into sessions. A module
+pursues exactly one Adaptation Domain as its primary adaptation, but it
+is deliberately more granular than the domain itself: several distinct
+modules may serve the same domain (Grip and Robustness both primarily
+serve Robustness; Preparation and Movement both primarily serve
+Movement), because they represent different operational moments or
+mechanisms, not different finalities.
 
-It may produce secondary adaptations, but these are never its purpose.
+A module exists to improve exactly one primary adaptation — required,
+never more than one.
+
+A module may also list zero to several secondary adaptations, but these
+are never its purpose. The Decision Engine reasons primarily on the
+primary adaptation; secondary adaptations exist for documentation and
+future analysis, to better represent physiological reality without
+weakening the primary/secondary distinction that keeps module selection
+simple.
 
 A module is independent from any particular exercise.
 
 Different exercises may implement the same module.
 
 Likewise, one exercise may serve different modules depending on execution parameters.
+
+---
+
+## Canonical Capability Module Catalog
+
+The Module Engine assembles sessions from a fixed catalog of Capability
+Modules, not from Adaptation Domains directly and not from ad hoc groupings
+invented per session. This catalog follows the default assembly order
+defined below (see Session Assembly).
+
+- Preparation — primary: Movement — secondary: none
+- Movement — primary: Movement — secondary: none
+- Power — primary: Power — secondary: none
+- Strength — primary: Maximum Strength — secondary: Power, Robustness
+- Functional Hypertrophy — primary: Functional Hypertrophy — secondary: none
+- Robustness — primary: Robustness — secondary: none
+- Grip — primary: Robustness — secondary: none
+- Core — primary: Movement — secondary: none
+- Conditioning — primary: Conditioning — secondary: none
+- Recovery — primary: Recovery — secondary: none
+
+Strength is the only module with secondary adaptations listed, because
+`10-science/01_THE_PHYSICAL_MODEL.md` explicitly states them: strength
+development improves power potential and joint stability. Every other
+secondary is left empty rather than inferred — Scientific Integrity
+forbids asserting a physiological relationship the foundation documents
+do not already state. Secondaries should be added only when a specific
+document or analysis justifies them, not by default.
+
+Specific Skill is deliberately absent from this catalog. CAS is a
+physical preparation engine; specific skill is developed by practicing
+the target discipline itself, not by a Capability Module. See
+`10-science/01_THE_PHYSICAL_MODEL.md`: "La préparation physique ne
+remplace jamais la pratique."
+
+This catalog is stable business data, not a per-session invention.
+Sessions are temporary assemblies of these modules; the modules
+themselves are not derived from sessions.
+
+The catalog may grow as new operational needs are identified, but any
+addition must satisfy the same rules as the modules above: one primary
+adaptation, a distinct justification for existing separately from the
+domain it serves, and reusability across sessions and cycles.
 
 ---
 
