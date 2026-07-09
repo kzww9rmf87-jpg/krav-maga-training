@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @State private var viewModel = HomeViewModel()
     @State private var selectedSession: TrainingSession?
+    @State private var showHistory = false
 
     var body: some View {
         NavigationStack {
@@ -21,8 +22,21 @@ struct HomeView: View {
             }
             .background(CASTheme.Colors.background)
             .navigationTitle("CAS")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showHistory = true
+                    } label: {
+                        Image(systemName: "clock.arrow.circlepath")
+                    }
+                    .accessibilityLabel("Historique")
+                }
+            }
             .fullScreenCover(item: $selectedSession) { session in
                 SessionExecutionView(session: session)
+            }
+            .sheet(isPresented: $showHistory) {
+                HistoryView()
             }
         }
     }
