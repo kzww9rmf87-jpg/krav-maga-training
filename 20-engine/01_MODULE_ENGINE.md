@@ -75,6 +75,17 @@ serve Robustness; Preparation and Movement both primarily serve
 Movement), because they represent different operational moments or
 mechanisms, not different finalities.
 
+A Capability Module is also not a Capability, despite the shared word. A
+Capability is a real action a human performs, expressed as a verb — carry,
+push, pull, run, get up, maintain a grip, resist a perturbation, transmit
+force. A Capability Module is the training block that develops the
+physical quality (or qualities) that action requires. Capabilities are
+the "why" the Manifesto describes ("we don't train the pectorals, we
+develop a pushing capacity"); Capability Modules are the "how" the engine
+assembles. This distinction is acknowledged doctrine but not yet a
+modeled layer — no Capability type or field exists in the engine today.
+It is recorded here only so the two terms are never read as synonyms.
+
 A module exists to improve exactly one primary adaptation — required,
 never more than one.
 
