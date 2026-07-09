@@ -24,7 +24,7 @@ import Foundation
 /// or rest value changes — accepted as-is per Sprint 1.5 review.
 enum SeanceD {
     static let session = TrainingSession(
-        id: SeedSessionID.seanceD.rawValue,
+        id: LegacySessionID.seanceD.rawValue,
         title: "Séance D — Spécialisation pieds",
         subtitle: "Renforcement ciblé des chaînes musculaires du coup de pied",
         format: .standard(modules: [

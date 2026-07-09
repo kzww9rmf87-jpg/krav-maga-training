@@ -19,7 +19,7 @@ import Foundation
 /// Gainage" example — there is no `core` module here.
 enum SeanceA {
     static let session = TrainingSession(
-        id: SeedSessionID.seanceA.rawValue,
+        id: LegacySessionID.seanceA.rawValue,
         title: "Séance A — Force maximale",
         subtitle: "Demi-pyramide montante · Stop & Go sur toutes les répétitions",
         format: .standard(modules: [

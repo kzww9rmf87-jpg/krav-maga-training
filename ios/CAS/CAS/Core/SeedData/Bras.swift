@@ -12,7 +12,7 @@ import Foundation
 /// folded into the hypertrophy block.
 enum Bras {
     static let session = TrainingSession(
-        id: SeedSessionID.bras.rawValue,
+        id: LegacySessionID.bras.rawValue,
         title: "Bras (optionnel)",
         subtitle: "À ajouter en fin de séance si la récupération le permet",
         format: .standard(modules: [

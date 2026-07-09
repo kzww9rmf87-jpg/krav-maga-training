@@ -13,7 +13,7 @@ import Foundation
 /// `CapabilityModule.swift`).
 enum SeanceB {
     static let session = TrainingSession(
-        id: SeedSessionID.seanceB.rawValue,
+        id: LegacySessionID.seanceB.rawValue,
         title: "Séance B — Explosivité + Pieds",
         subtitle: "Vitesse d'exécution maximale sur chaque répétition",
         format: .standard(modules: [
