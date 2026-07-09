@@ -1,0 +1,67 @@
+export const nutrition = {
+  totalKcal: 3085,
+  totalProtein: 170,
+  meals: [
+    {
+      heure: '06:30',
+      nom: 'Réveil',
+      aliments: "3 œufs entiers + 3 blancs d'œufs, 70g flocons d'avoine, 1 banane, café noir + Créatine 5g",
+      kcal: 640,
+      proteines: 34,
+    },
+    {
+      heure: '09:30',
+      nom: 'Collation matin',
+      aliments: '100g fromage blanc 0%, 30g amandes, 1 pomme',
+      kcal: 320,
+      proteines: 12,
+    },
+    {
+      heure: '12:30',
+      nom: 'Déjeuner',
+      aliments: "150g blanc de poulet, 90g riz basmati (poids cru), brocolis vapeur, 1 c.à.s. huile d'olive",
+      kcal: 640,
+      proteines: 42,
+    },
+    {
+      heure: '15:30',
+      nom: 'Collation pré-séance',
+      aliments: "1 banane, 40g flocons d'avoine, 1 café",
+      kcal: 280,
+      proteines: 6,
+    },
+    {
+      heure: '17:30',
+      nom: 'Post-séance',
+      aliments: 'Shaker Whey 40g + eau, 1 petite banane',
+      kcal: 250,
+      proteines: 41,
+    },
+    {
+      heure: '19:00',
+      nom: 'Dîner',
+      aliments: "120g pavé de saumon, 250g patate douce, salade verte, 1 c.à.s. huile d'olive + Magnésium 300mg",
+      kcal: 630,
+      proteines: 20,
+    },
+    {
+      heure: '21:00',
+      nom: 'Collation soir',
+      aliments: '150g fromage blanc 0%, 1 c.à.s. miel, 10g noix',
+      kcal: 220,
+      proteines: 10,
+    },
+    {
+      heure: '22:30',
+      nom: 'Avant coucher',
+      aliments: '80g fromage blanc 0% ou caséine, 10g amandes',
+      kcal: 105,
+      proteines: 5,
+    },
+  ],
+  supplements: [
+    { moment: 'Réveil', produit: 'Créatine', dose: '5g' },
+    { moment: 'Post-séance', produit: 'Whey', dose: '40g' },
+    { moment: 'Dîner', produit: 'Magnésium', dose: '300mg' },
+  ],
+}
