@@ -7,11 +7,15 @@ import Foundation
 /// with no consumer yet that needs numeric values.
 struct SetSpec: Identifiable, Codable, Hashable, Sendable {
     let id: UUID
+    /// Optional row context from the source data, e.g. "1 — Position 6-7",
+    /// "Contrôlé", "Super-set 1", "MAX".
+    let label: String?
     let load: String
     let reps: String
 
-    init(id: UUID = UUID(), load: String, reps: String) {
+    init(id: UUID = UUID(), label: String? = nil, load: String, reps: String) {
         self.id = id
+        self.label = label
         self.load = load
         self.reps = reps
     }

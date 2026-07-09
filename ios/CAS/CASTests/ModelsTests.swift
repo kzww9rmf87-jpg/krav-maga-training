@@ -27,19 +27,113 @@ struct ModelsTests {
         #expect(decoded == original)
     }
 
-    @Test func sessionAggregatesExercisesInOrder() {
+    @Test func standardSessionAggregatesExercisesInOrder() {
         let exerciseA = Exercise(id: "a", name: "A", primaryAdaptation: .movement)
         let exerciseB = Exercise(id: "b", name: "B", primaryAdaptation: .power)
         let session = TrainingSession(
             id: "seance-a",
             title: "Séance A — Force maximale",
             subtitle: "Demi-pyramide montante",
-            exercises: [
-                SessionExercise(exercise: exerciseA, note: "Note A"),
-                SessionExercise(exercise: exerciseB, note: "Note B"),
-            ]
+            format: .standard(exercises: [
+                SessionExercise(
+                    exercise: exerciseA,
+                    groups: [SetGroup(kind: .work, sets: [SetSpec(load: "80kg", reps: "5")])],
+                    note: "Note A"
+                ),
+                SessionExercise(
+                    exercise: exerciseB,
+                    groups: [SetGroup(kind: .work, sets: [SetSpec(load: "40kg", reps: "6")])],
+                    note: "Note B"
+                ),
+            ])
         )
-        #expect(session.exercises.map(\.exercise.id) == ["a", "b"])
+        #expect(session.steps.map(\.exerciseName) == ["A", "B"])
+    }
+
+    @Test func standardStepsCarryRestParsedFromExerciseGuidance() {
+        let exercise = Exercise(id: "a", name: "A", primaryAdaptation: .maximumStrength)
+        let sessionExercise = SessionExercise(
+            exercise: exercise,
+            restGuidance: "3-4 min entre séries lourdes",
+            groups: [SetGroup(kind: .work, sets: [SetSpec(load: "80kg", reps: "5")])],
+            note: "Note"
+        )
+        let steps = sessionExercise.makeSteps()
+        #expect(steps.count == 1)
+        #expect(steps[0].restAfter?.seconds == 240)
+    }
+
+    @Test func unparseableRestGuidanceYieldsNoTimerButKeepsLabel() {
+        let exercise = Exercise(id: "finition", name: "Finition", primaryAdaptation: .conditioning)
+        let sessionExercise = SessionExercise(
+            exercise: exercise,
+            restGuidance: "Aucun — enchaîné",
+            note: "Fatigue technique",
+            freeText: "5 min de sac de frappe"
+        )
+        let steps = sessionExercise.makeSteps()
+        #expect(steps.count == 1)
+        #expect(steps[0].instruction == .freeText("5 min de sac de frappe"))
+        #expect(steps[0].restAfter?.seconds == nil)
+        #expect(steps[0].restAfter?.label == "Aucun — enchaîné")
+    }
+
+    @Test func circuitStepsRestOnlyBetweenRoundsNeverAfterTheLastOne() {
+        let spec = CircuitSpec(
+            exercises: [
+                CircuitExercise(name: "Coups de poing poulie", detail: "Vitesse max"),
+                CircuitExercise(name: "Squats partiels", detail: "60kg"),
+            ],
+            rounds: 3,
+            restBetweenRounds: "30 sec entre circuits",
+            note: "Ne jamais enchaîner avant une séance A ou B."
+        )
+        let steps = spec.makeSteps()
+
+        // 2 exercises x 3 rounds = 6 steps.
+        #expect(steps.count == 6)
+
+        // No rest between exercises within a round (chained).
+        #expect(steps[0].restAfter == nil)
+        // Rest after the last exercise of round 1 and round 2...
+        #expect(steps[1].restAfter?.seconds == 30)
+        #expect(steps[3].restAfter?.seconds == 30)
+        // ...but never after the last exercise of the final round.
+        #expect(steps[5].restAfter == nil)
+
+        #expect(steps[0].label == "Tour 1/3")
+        #expect(steps[4].label == "Tour 3/3")
+    }
+
+    @Test func sessionFormatsAreInterchangeableThroughSteps() {
+        // The point of SessionFormat: the execution engine only ever needs
+        // `[ExecutionStep]`, regardless of which format produced them.
+        let standard = TrainingSession(
+            id: "standard",
+            title: "Standard",
+            subtitle: "",
+            format: .standard(exercises: [
+                SessionExercise(
+                    exercise: Exercise(id: "a", name: "A", primaryAdaptation: .maximumStrength),
+                    groups: [SetGroup(kind: .work, sets: [SetSpec(load: "80kg", reps: "5")])],
+                    note: ""
+                ),
+            ])
+        )
+        let circuit = TrainingSession(
+            id: "circuit",
+            title: "Circuit",
+            subtitle: "",
+            format: .circuit(CircuitSpec(
+                exercises: [CircuitExercise(name: "B", detail: "Vitesse max")],
+                rounds: 1,
+                restBetweenRounds: nil,
+                note: nil
+            ))
+        )
+        for session in [standard, circuit] {
+            #expect(!session.steps.isEmpty)
+        }
     }
 
     @Test func setGroupPreservesLoadAndRepsAsFreeText() {
@@ -52,6 +146,14 @@ struct ModelsTests {
         )
         #expect(group.kind == .work)
         #expect(group.sets.map(\.load) == ["88-90kg", "+2kg"])
+    }
+
+    @Test func restAfterParsesRangesAndUnits() {
+        #expect(RestAfter.parse("90 sec").seconds == 90)
+        #expect(RestAfter.parse("60-90 sec").seconds == 90)
+        #expect(RestAfter.parse("2-3 min").seconds == 180)
+        #expect(RestAfter.parse("45 sec entre super-sets").seconds == 45)
+        #expect(RestAfter.parse("Aucun — enchaîné").seconds == nil)
     }
 
     @Test func adaptationDomainHasAFrenchDisplayName() {
