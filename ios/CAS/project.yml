@@ -28,6 +28,9 @@ targets:
     platform: iOS
     sources:
       - path: CASTests
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
     dependencies:
       - target: CAS
 schemes:
