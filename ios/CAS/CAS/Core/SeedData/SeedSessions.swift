@@ -9,6 +9,12 @@ import Foundation
 /// categorization against `10-science/01_THE_PHYSICAL_MODEL.md`, made
 /// while porting — not an authoritative analysis. It should be revisited
 /// when the Exercise Knowledge Base (20-engine/02) is actually built.
+///
+/// Sprint 1.5: each session's `format` is now an assembly of
+/// `CapabilityModuleCatalog` entries — see `20-engine/01_MODULE_ENGINE.md`
+/// and the module-choice comment at the top of each `Seance*.swift` file.
+/// The catalog is the stable object; these five sessions are demo data
+/// built on top of it, not the other way around.
 enum SeedSessions {
     static let all: [TrainingSession] = [
         SeanceA.session,

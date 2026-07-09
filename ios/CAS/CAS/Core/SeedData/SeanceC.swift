@@ -2,12 +2,17 @@ import Foundation
 
 /// Ported from src/data/seanceC.js. Circuit format — see CircuitSpec's
 /// documentation for why only week 1's parameters are captured here.
+///
+/// Module choice: the whole circuit assembles under `conditioning` — the
+/// source data doesn't decompose a circuit round by exercise-level
+/// adaptation, and the note itself frames the block as "endurance de
+/// force" (work-capacity), which is `conditioning`'s canonical primary.
 enum SeanceC {
     static let session = TrainingSession(
         id: "seance-c",
         title: "Séance C — Circuit conditioning",
         subtitle: "Circuit enchaîné sans repos entre exercices",
-        format: .circuit(CircuitSpec(
+        format: .circuit(module: CapabilityModuleCatalog.conditioning, spec: CircuitSpec(
             exercises: [
                 CircuitExercise(name: "Coups de poing poulie", detail: "Vitesse max"),
                 CircuitExercise(name: "Squats partiels", detail: "60kg"),
