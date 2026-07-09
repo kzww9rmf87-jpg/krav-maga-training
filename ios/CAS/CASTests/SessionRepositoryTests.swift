@@ -10,7 +10,7 @@ struct SessionRepositoryTests {
 
     @Test func seedRepositoryFindsASessionById() {
         let repository: SessionRepository = SeedSessionRepository()
-        #expect(repository.session(id: "seance-c")?.title == "Séance C — Circuit conditioning")
+        #expect(repository.session(id: SeedSessionID.seanceC.rawValue)?.title == "Séance C — Circuit conditioning")
     }
 
     @Test func seedRepositoryReturnsNilForAnUnknownId() {

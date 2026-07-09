@@ -29,13 +29,14 @@ protocol SessionRecommendationService: Sendable {
 }
 
 /// Fixed rotation: A → B → C → D → Bras → A. Not derived from anything
-/// physiological — purely "what's next in a fixed list." Falls back to
-/// the first session in the rotation when there's no history yet, or
-/// when the last completed session isn't part of the rotation (e.g.
-/// seed data changed since that session was logged).
+/// physiological — purely "what's next in a fixed list," using
+/// `SeedSessionID`'s declaration order as the single source of that
+/// order. Falls back to the first session in the rotation when there's
+/// no history yet, or when the last completed session isn't part of the
+/// rotation (e.g. seed data changed since that session was logged).
 struct RotationRecommendationService: SessionRecommendationService {
     private let repository: SessionRepository
-    private let order = ["seance-a", "seance-b", "seance-c", "seance-d", "bras"]
+    private let order = SeedSessionID.allCases.map(\.rawValue)
 
     init(repository: SessionRepository = SeedSessionRepository()) {
         self.repository = repository

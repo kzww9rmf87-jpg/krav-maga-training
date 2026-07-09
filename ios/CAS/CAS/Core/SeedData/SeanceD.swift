@@ -10,9 +10,21 @@ import Foundation
 /// genoux), `core` (trunk rotation — same placement as in Séance B),
 /// `robustness` (isometric hip hold, matches the module's tendon/joint
 /// definition directly), `functionalHypertrophy` (calf raises).
+///
+/// KNOWN ORDER CHANGE vs. the original src/data/seanceD.js sequence: the
+/// source order was Presse, Relevés de jambe lestés, **SDT à genoux**,
+/// Coups de genou, Rotation, Adductions, Extensions — SDT à genoux ran
+/// *before* Coups de genou. Because a `SessionModule` is one contiguous
+/// exercise block, and the two Power exercises (Relevés de jambe lestés,
+/// Coups de genou) are not adjacent in the source order (SDT à genoux, a
+/// Strength exercise, sits between them), merging both Power exercises
+/// into one block shifts SDT à genoux to run *after* Coups de genou
+/// instead of before. This is the only exercise-order change across all
+/// five demo sessions (see Sprint 1.5 commit dcf4cc9). No set, rep, load
+/// or rest value changes — accepted as-is per Sprint 1.5 review.
 enum SeanceD {
     static let session = TrainingSession(
-        id: "seance-d",
+        id: SeedSessionID.seanceD.rawValue,
         title: "Séance D — Spécialisation pieds",
         subtitle: "Renforcement ciblé des chaînes musculaires du coup de pied",
         format: .standard(modules: [
@@ -42,6 +54,10 @@ enum SeanceD {
                 ]
             ),
             SessionModule(
+                // Merging these two Power exercises into one contiguous
+                // block is what causes the order swap documented above —
+                // SDT à genoux (the Strength module right after this one)
+                // now runs after Coups de genou, not before it.
                 module: CapabilityModuleCatalog.power,
                 exercises: [
                     SessionExercise(

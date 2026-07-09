@@ -11,7 +11,7 @@ struct HomeViewModelTests {
 
     @Test func recommendationDelegatesToTheRecommendationService() {
         let viewModel = HomeViewModel()
-        let recommendation = viewModel.recommendation(afterLastCompletedSessionId: "seance-b")
-        #expect(recommendation?.session.id == "seance-c")
+        let recommendation = viewModel.recommendation(afterLastCompletedSessionId: SeedSessionID.seanceB.rawValue)
+        #expect(recommendation?.session.id == SeedSessionID.seanceC.rawValue)
     }
 }

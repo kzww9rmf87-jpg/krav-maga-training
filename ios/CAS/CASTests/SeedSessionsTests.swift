@@ -5,7 +5,7 @@ struct SeedSessionsTests {
 
     @Test func allFiveRealSessionsArePresent() {
         let ids = SeedSessions.all.map(\.id)
-        #expect(ids == ["seance-a", "seance-b", "seance-c", "seance-d", "bras"])
+        #expect(ids == SeedSessionID.allCases.map(\.rawValue))
     }
 
     @Test func sessionIdsAreUnique() {

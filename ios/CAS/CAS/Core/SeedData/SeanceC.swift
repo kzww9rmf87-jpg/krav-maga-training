@@ -9,7 +9,7 @@ import Foundation
 /// force" (work-capacity), which is `conditioning`'s canonical primary.
 enum SeanceC {
     static let session = TrainingSession(
-        id: "seance-c",
+        id: SeedSessionID.seanceC.rawValue,
         title: "Séance C — Circuit conditioning",
         subtitle: "Circuit enchaîné sans repos entre exercices",
         format: .circuit(module: CapabilityModuleCatalog.conditioning, spec: CircuitSpec(
