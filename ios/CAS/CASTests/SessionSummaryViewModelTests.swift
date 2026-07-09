@@ -23,7 +23,7 @@ private final class FakeSessionHistoryStore: SessionHistoryStore {
 struct SessionSummaryViewModelTests {
 
     private func makeSession() -> TrainingSession {
-        TrainingSession(id: "seance-a", title: "Séance A", subtitle: "", format: .standard(exercises: []))
+        TrainingSession(id: "seance-a", title: "Séance A", subtitle: "", format: .standard(modules: []))
     }
 
     @Test func savingPersistsASessionLogWithTheEnteredFeedback() {

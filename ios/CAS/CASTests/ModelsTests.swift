@@ -27,23 +27,33 @@ struct ModelsTests {
         #expect(decoded == original)
     }
 
-    @Test func standardSessionAggregatesExercisesInOrder() {
+    @Test func standardSessionAggregatesModulesAndExercisesInOrder() {
         let exerciseA = Exercise(id: "a", name: "A", primaryAdaptation: .movement)
         let exerciseB = Exercise(id: "b", name: "B", primaryAdaptation: .power)
         let session = TrainingSession(
             id: "seance-a",
             title: "Séance A — Force maximale",
             subtitle: "Demi-pyramide montante",
-            format: .standard(exercises: [
-                SessionExercise(
-                    exercise: exerciseA,
-                    groups: [SetGroup(kind: .work, sets: [SetSpec(load: "80kg", reps: "5")])],
-                    note: "Note A"
+            format: .standard(modules: [
+                SessionModule(
+                    module: CapabilityModuleCatalog.movement,
+                    exercises: [
+                        SessionExercise(
+                            exercise: exerciseA,
+                            groups: [SetGroup(kind: .work, sets: [SetSpec(load: "80kg", reps: "5")])],
+                            note: "Note A"
+                        ),
+                    ]
                 ),
-                SessionExercise(
-                    exercise: exerciseB,
-                    groups: [SetGroup(kind: .work, sets: [SetSpec(load: "40kg", reps: "6")])],
-                    note: "Note B"
+                SessionModule(
+                    module: CapabilityModuleCatalog.power,
+                    exercises: [
+                        SessionExercise(
+                            exercise: exerciseB,
+                            groups: [SetGroup(kind: .work, sets: [SetSpec(load: "40kg", reps: "6")])],
+                            note: "Note B"
+                        ),
+                    ]
                 ),
             ])
         )
@@ -112,11 +122,16 @@ struct ModelsTests {
             id: "standard",
             title: "Standard",
             subtitle: "",
-            format: .standard(exercises: [
-                SessionExercise(
-                    exercise: Exercise(id: "a", name: "A", primaryAdaptation: .maximumStrength),
-                    groups: [SetGroup(kind: .work, sets: [SetSpec(load: "80kg", reps: "5")])],
-                    note: ""
+            format: .standard(modules: [
+                SessionModule(
+                    module: CapabilityModuleCatalog.strength,
+                    exercises: [
+                        SessionExercise(
+                            exercise: Exercise(id: "a", name: "A", primaryAdaptation: .maximumStrength),
+                            groups: [SetGroup(kind: .work, sets: [SetSpec(load: "80kg", reps: "5")])],
+                            note: ""
+                        ),
+                    ]
                 ),
             ])
         )
@@ -124,12 +139,15 @@ struct ModelsTests {
             id: "circuit",
             title: "Circuit",
             subtitle: "",
-            format: .circuit(CircuitSpec(
-                exercises: [CircuitExercise(name: "B", detail: "Vitesse max")],
-                rounds: 1,
-                restBetweenRounds: nil,
-                note: nil
-            ))
+            format: .circuit(
+                module: CapabilityModuleCatalog.conditioning,
+                spec: CircuitSpec(
+                    exercises: [CircuitExercise(name: "B", detail: "Vitesse max")],
+                    rounds: 1,
+                    restBetweenRounds: nil,
+                    note: nil
+                )
+            )
         )
         for session in [standard, circuit] {
             #expect(!session.steps.isEmpty)

@@ -10,15 +10,20 @@ struct SessionExecutionViewModelTests {
             id: "test",
             title: "Test",
             subtitle: "",
-            format: .standard(exercises: [
-                SessionExercise(
-                    exercise: exercise,
-                    restGuidance: "90 sec",
-                    groups: [SetGroup(kind: .work, sets: [
-                        SetSpec(load: "80kg", reps: "5"),
-                        SetSpec(load: "85kg", reps: "4"),
-                    ])],
-                    note: "Note"
+            format: .standard(modules: [
+                SessionModule(
+                    module: CapabilityModuleCatalog.strength,
+                    exercises: [
+                        SessionExercise(
+                            exercise: exercise,
+                            restGuidance: "90 sec",
+                            groups: [SetGroup(kind: .work, sets: [
+                                SetSpec(load: "80kg", reps: "5"),
+                                SetSpec(load: "85kg", reps: "4"),
+                            ])],
+                            note: "Note"
+                        ),
+                    ]
                 ),
             ])
         )
