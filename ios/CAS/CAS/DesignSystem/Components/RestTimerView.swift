@@ -21,7 +21,7 @@ struct RestTimerView: View {
                 .font(CASTypography.restTimer)
                 .monospacedDigit()
                 .foregroundStyle(CASTheme.Colors.primaryText)
-            PrimaryButton(title: "Passer", action: onSkip)
+            PrimaryButton(title: timer.isRunning ? "Passer" : "Continuer", action: onSkip)
                 .frame(maxWidth: 220)
         }
     }
