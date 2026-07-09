@@ -6,12 +6,12 @@ struct HomeViewModelTests {
 
     @Test func exposesAllSessionsFromTheRepository() {
         let viewModel = HomeViewModel()
-        #expect(viewModel.sessions.map(\.id) == SeedSessions.all.map(\.id))
+        #expect(viewModel.sessions.map(\.id) == SeedSessions.primary.map(\.id))
     }
 
     @Test func recommendationDelegatesToTheRecommendationService() {
         let viewModel = HomeViewModel()
-        let recommendation = viewModel.recommendation(afterLastCompletedSessionId: SeedSessionID.seanceB.rawValue)
-        #expect(recommendation?.session.id == SeedSessionID.seanceC.rawValue)
+        let recommendation = viewModel.recommendation(afterLastCompletedSessionId: CASSessionID.force.rawValue)
+        #expect(recommendation?.session.id == CASSessionID.power.rawValue)
     }
 }

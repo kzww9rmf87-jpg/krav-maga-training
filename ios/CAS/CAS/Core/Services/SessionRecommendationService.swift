@@ -28,15 +28,21 @@ protocol SessionRecommendationService: Sendable {
     func recommend(lastCompletedSessionId: String?) -> SessionRecommendation?
 }
 
-/// Fixed rotation: A → B → C → D → Bras → A. Not derived from anything
-/// physiological — purely "what's next in a fixed list," using
-/// `SeedSessionID`'s declaration order as the single source of that
+/// Fixed rotation over CAS V0.1: Force → Puissance → Hypertrophie
+/// fonctionnelle → Robustesse → Base aérobie → Force. Not derived from
+/// anything physiological — purely "what's next in a fixed list," using
+/// `CASSessionID`'s declaration order as the single source of that
 /// order. Falls back to the first session in the rotation when there's
 /// no history yet, or when the last completed session isn't part of the
-/// rotation (e.g. seed data changed since that session was logged).
+/// rotation (e.g. it's legacy content, or seed data changed since that
+/// session was logged).
+///
+/// Sprint 3: Base aérobie is a full rotation member, not a bonus/optional
+/// branch — a second "sometimes in, sometimes out" list would be more
+/// rotation logic than this sprint's scope justifies.
 struct RotationRecommendationService: SessionRecommendationService {
     private let repository: SessionRepository
-    private let order = SeedSessionID.allCases.map(\.rawValue)
+    private let order = CASSessionID.allCases.map(\.rawValue)
 
     init(repository: SessionRepository = SeedSessionRepository()) {
         self.repository = repository

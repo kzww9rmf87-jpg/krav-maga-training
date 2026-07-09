@@ -23,6 +23,25 @@ struct HomeView: View {
                     if let recommendation {
                         VStack(alignment: .leading, spacing: 12) {
                             SessionCard(title: recommendation.session.title, subtitle: recommendation.session.subtitle)
+
+                            if !recommendation.session.primaryActionCapability.isEmpty {
+                                // The Action Capability gets body-weight
+                                // emphasis, not caption — see
+                                // 10-science/03_ACTION_CAPABILITIES.md:
+                                // "Action Capabilities constitute the
+                                // true product of CAS." It's the "why,"
+                                // modules and duration are supporting detail.
+                                Text(recommendation.session.primaryActionCapability)
+                                    .font(CASTypography.body.weight(.semibold))
+                                    .foregroundStyle(CASTheme.Colors.primaryText)
+                            }
+
+                            if !recommendation.session.moduleNames.isEmpty {
+                                Text(recommendation.session.moduleNames.joined(separator: " → "))
+                                    .font(CASTypography.caption)
+                                    .foregroundStyle(CASTheme.Colors.secondaryText)
+                            }
+
                             Text(Self.formattedDuration(recommendation.session.estimatedDurationMinutes))
                                 .font(CASTypography.caption)
                                 .foregroundStyle(CASTheme.Colors.secondaryText)

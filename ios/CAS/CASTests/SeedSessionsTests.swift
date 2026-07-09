@@ -3,12 +3,17 @@ import Testing
 
 struct SeedSessionsTests {
 
-    @Test func allFiveRealSessionsArePresent() {
-        let ids = SeedSessions.all.map(\.id)
-        #expect(ids == SeedSessionID.allCases.map(\.rawValue))
+    @Test func primaryIsTheFiveCASV0SessionsInRotationOrder() {
+        let ids = SeedSessions.primary.map(\.id)
+        #expect(ids == CASSessionID.allCases.map(\.rawValue))
     }
 
-    @Test func sessionIdsAreUnique() {
+    @Test func legacyIsTheFiveOriginalSessions() {
+        let ids = SeedSessions.legacy.map(\.id)
+        #expect(ids == LegacySessionID.allCases.map(\.rawValue))
+    }
+
+    @Test func sessionIdsAreUniqueAcrossPrimaryAndLegacy() {
         let ids = SeedSessions.all.map(\.id)
         #expect(Set(ids).count == ids.count)
     }
@@ -59,5 +64,34 @@ struct SeedSessionsTests {
                 )
             }
         }
+    }
+
+    @Test func everyPrimarySessionDeclaresANonEmptyActionCapability() {
+        // Sprint 3: Home shows this per session — an empty string would
+        // silently hide the row rather than fail loudly, so this test is
+        // the actual guarantee.
+        for session in SeedSessions.primary {
+            #expect(!session.primaryActionCapability.isEmpty, "\(session.title) has no Action Capability")
+        }
+    }
+
+    @Test func casForceUsesTheValidatedModuleSequence() {
+        #expect(CASForce.session.moduleNames == ["Force maximale", "Hypertrophie fonctionnelle", "Grip", "Gainage"])
+    }
+
+    @Test func casPuissanceUsesTheValidatedModuleSequence() {
+        #expect(CASPuissance.session.moduleNames == ["Puissance", "Gainage", "Mouvement"])
+    }
+
+    @Test func casHypertrophieUsesTheValidatedModuleSequence() {
+        #expect(CASHypertrophie.session.moduleNames == ["Hypertrophie fonctionnelle", "Grip", "Gainage"])
+    }
+
+    @Test func casRobustesseUsesTheValidatedModuleSequence() {
+        #expect(CASRobustesse.session.moduleNames == ["Robustesse", "Grip", "Gainage", "Récupération"])
+    }
+
+    @Test func casBaseAerobieUsesTheValidatedModuleSequence() {
+        #expect(CASBaseAerobie.session.moduleNames == ["Conditionnement", "Récupération"])
     }
 }

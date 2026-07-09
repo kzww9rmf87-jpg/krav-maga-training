@@ -13,11 +13,16 @@ protocol SessionRepository: Sendable {
 }
 
 struct SeedSessionRepository: SessionRepository {
+    /// Sprint 3: only CAS V0.1 (`SeedSessions.primary`) — the legacy
+    /// A/B/C/D/Bras content stays in the codebase and tests but is no
+    /// longer reachable through the repository, so nothing built on top
+    /// of it (Home, "Toutes les séances", the rotation) can surface it
+    /// by accident.
     func allSessions() -> [TrainingSession] {
-        SeedSessions.all
+        SeedSessions.primary
     }
 
     func session(id: String) -> TrainingSession? {
-        SeedSessions.all.first { $0.id == id }
+        SeedSessions.primary.first { $0.id == id }
     }
 }
