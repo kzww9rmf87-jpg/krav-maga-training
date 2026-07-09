@@ -8,8 +8,17 @@ struct SessionExecutionView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel: SessionExecutionViewModel
-    @State private var showSummary = false
-    @State private var completedLogs: [SetLog] = []
+    @State private var summaryPayload: SummaryPayload?
+
+    /// Bundles the completed logs into the value that drives sheet
+    /// presentation itself, instead of a separate `Bool` + `[SetLog]` pair —
+    /// two independent `@State` writes race against `.sheet(isPresented:)`,
+    /// which can build its content closure before the second write
+    /// propagates. `.sheet(item:)` can't observe a half-updated state.
+    private struct SummaryPayload: Identifiable {
+        let id = UUID()
+        let logs: [SetLog]
+    }
 
     init(session: TrainingSession) {
         _viewModel = State(initialValue: SessionExecutionViewModel(session: session))
@@ -38,15 +47,14 @@ struct SessionExecutionView: View {
         }
         .onAppear {
             viewModel.onFinish = { logs in
-                completedLogs = logs
-                showSummary = true
+                summaryPayload = SummaryPayload(logs: logs)
             }
         }
-        .sheet(isPresented: $showSummary) {
+        .sheet(item: $summaryPayload) { payload in
             SessionSummaryView(
                 viewModel: SessionSummaryViewModel(
                     session: viewModel.session,
-                    setLogs: completedLogs,
+                    setLogs: payload.logs,
                     historyStore: SwiftDataSessionHistoryStore(context: modelContext)
                 ),
                 onDone: { dismiss() }
