@@ -1,22 +1,42 @@
+import SwiftData
 import SwiftUI
 
+/// UX.md "Home Screen": answers "what should I do today?" and "why
+/// today?" with one card and one action — not a list. "Toutes les
+/// séances" is the deliberate escape hatch (a `.sheet`, not the Home
+/// screen itself) for picking something else.
 struct HomeView: View {
     @State private var viewModel = HomeViewModel()
     @State private var selectedSession: TrainingSession?
     @State private var showHistory = false
+    @State private var showAllSessions = false
+    @Query(sort: [SortDescriptor(\SessionLog.date, order: .reverse)]) private var recentLogs: [SessionLog]
+
+    private var recommendation: SessionRecommendation? {
+        viewModel.recommendation(afterLastCompletedSessionId: recentLogs.first?.sessionId)
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 12) {
-                    ForEach(viewModel.sessions) { session in
-                        Button {
-                            selectedSession = session
-                        } label: {
-                            SessionCard(title: session.title, subtitle: session.subtitle)
+                VStack(spacing: 16) {
+                    if let recommendation {
+                        VStack(alignment: .leading, spacing: 12) {
+                            SessionCard(title: recommendation.session.title, subtitle: recommendation.session.subtitle)
+                            Text(recommendation.reason)
+                                .font(CASTypography.caption)
+                                .foregroundStyle(CASTheme.Colors.secondaryText)
+                            PrimaryButton(title: "Commencer") {
+                                selectedSession = recommendation.session
+                            }
                         }
-                        .buttonStyle(.plain)
                     }
+
+                    Button("Toutes les séances") {
+                        showAllSessions = true
+                    }
+                    .font(CASTypography.caption)
+                    .foregroundStyle(CASTheme.Colors.secondaryText)
                 }
                 .padding()
             }
@@ -38,10 +58,17 @@ struct HomeView: View {
             .sheet(isPresented: $showHistory) {
                 HistoryView()
             }
+            .sheet(isPresented: $showAllSessions) {
+                AllSessionsView(sessions: viewModel.sessions) { session in
+                    showAllSessions = false
+                    selectedSession = session
+                }
+            }
         }
     }
 }
 
 #Preview {
     HomeView()
+        .modelContainer(PersistenceController.makeContainer(inMemory: true))
 }

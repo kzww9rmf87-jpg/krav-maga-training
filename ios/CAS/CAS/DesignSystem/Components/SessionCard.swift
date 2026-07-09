@@ -1,9 +1,8 @@
 import SwiftUI
 
-/// One session in the Home list. UX.md: Home is a temporary list of
-/// sessions until the Decision Engine can offer a single recommendation —
-/// the card stays deliberately plain (title, subtitle) rather than trying
-/// to look like a dashboard.
+/// One session, shown either as Home's single recommendation or in the
+/// "Toutes les séances" list. Stays deliberately plain (title, subtitle)
+/// rather than trying to look like a dashboard — UX.md.
 struct SessionCard: View {
     let title: String
     let subtitle: String
