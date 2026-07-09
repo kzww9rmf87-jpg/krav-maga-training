@@ -20,6 +20,12 @@ final class SetLog {
     var actualLoad: String
     var actualReps: String
     var completed: Bool
+    /// Inverse of `SessionLog.sets`. Required for SwiftData to reliably
+    /// cascade-insert new SetLog instances when their parent SessionLog is
+    /// saved to a persistent (on-disk) store — without it, an in-memory
+    /// store can appear to work in tests while the real store silently
+    /// drops the children.
+    var session: SessionLog?
 
     init(
         id: UUID = UUID(),

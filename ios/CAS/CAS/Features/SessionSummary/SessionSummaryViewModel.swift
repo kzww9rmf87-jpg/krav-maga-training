@@ -26,6 +26,15 @@ final class SessionSummaryViewModel {
     }
 
     func save() {
+        // Idempotent on purpose: setLogs are shared, already-tracked SetLog
+        // instances once historyStore.save() runs once. A second call
+        // (e.g. a double tap on "Terminer" before the sheet dismisses)
+        // would build a second SessionLog reusing those same SetLog
+        // instances — since SetLog.session is a to-one inverse, that
+        // reassigns each set away from the first SessionLog, silently
+        // emptying it. Guarding here is cheaper and more certain than
+        // trying to make every possible double-submission path race-free.
+        guard !isSaved else { return }
         let log = SessionLog(
             sessionId: session.id,
             sessionTitle: session.title,

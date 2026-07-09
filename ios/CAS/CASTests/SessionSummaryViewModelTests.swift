@@ -53,6 +53,22 @@ struct SessionSummaryViewModelTests {
         #expect(store.savedLogs[0].painNote == nil)
     }
 
+    @Test func callingSaveTwiceOnlyPersistsOnce() {
+        // A double tap on "Terminer" (or any repeat call) must not build a
+        // second SessionLog reusing the same SetLog instances — that would
+        // reassign them away from the first SessionLog via the to-one
+        // inverse relationship, silently emptying it.
+        let store = FakeSessionHistoryStore()
+        let setLog = SetLog(exerciseName: "A", groupKind: .work, plannedLoad: "10kg", plannedReps: "10")
+        let viewModel = SessionSummaryViewModel(session: makeSession(), setLogs: [setLog], historyStore: store)
+
+        viewModel.save()
+        viewModel.save()
+
+        #expect(store.savedLogs.count == 1)
+        #expect(store.savedLogs[0].sets.count == 1)
+    }
+
     @Test func aStorageFailureSurfacesAnErrorInsteadOfCrashing() {
         let store = FakeSessionHistoryStore()
         store.shouldThrow = true

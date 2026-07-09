@@ -19,6 +19,15 @@ final class SwiftDataSessionHistoryStore: SessionHistoryStore {
     }
 
     func save(_ log: SessionLog) throws {
+        // Insert every SetLog explicitly rather than relying on SwiftData
+        // to cascade-insert new (not-yet-tracked) relationship children —
+        // that cascade proved intermittent on a persistent store: the same
+        // code sometimes persisted all sets, sometimes none, with no
+        // observable difference in the object graph being saved.
+        // Explicit insertion is deterministic.
+        for setLog in log.sets {
+            context.insert(setLog)
+        }
         context.insert(log)
         try context.save()
     }

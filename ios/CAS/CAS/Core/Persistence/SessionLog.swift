@@ -16,7 +16,7 @@ final class SessionLog {
     var pain: Bool
     var painNote: String?
     var comment: String?
-    @Relationship(deleteRule: .cascade) var sets: [SetLog]
+    @Relationship(deleteRule: .cascade, inverse: \SetLog.session) var sets: [SetLog]
 
     init(
         id: UUID = UUID(),
