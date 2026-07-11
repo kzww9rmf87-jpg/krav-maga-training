@@ -10,6 +10,12 @@ final class SessionSummaryViewModel {
     private let session: TrainingSession
     private let setLogs: [SetLog]
     private let historyStore: SessionHistoryStore
+    let elapsedSeconds: Int
+
+    /// Alpha 1.1, item 6 — built once at init, before `save()` can run,
+    /// so `SessionRecapBuilder`'s personal-record comparison sees history
+    /// that doesn't yet include this session.
+    let recap: SessionRecap
 
     var energyBefore = 3
     var difficulty = 3
@@ -19,10 +25,12 @@ final class SessionSummaryViewModel {
     private(set) var isSaved = false
     private(set) var saveError: String?
 
-    init(session: TrainingSession, setLogs: [SetLog], historyStore: SessionHistoryStore) {
+    init(session: TrainingSession, setLogs: [SetLog], historyStore: SessionHistoryStore, elapsedSeconds: Int = 0) {
         self.session = session
         self.setLogs = setLogs
         self.historyStore = historyStore
+        self.elapsedSeconds = elapsedSeconds
+        self.recap = SessionRecapBuilder.build(setLogs: setLogs, historyStore: historyStore)
     }
 
     func save() {

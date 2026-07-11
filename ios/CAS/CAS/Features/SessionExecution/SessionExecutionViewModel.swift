@@ -14,10 +14,18 @@ final class SessionExecutionViewModel {
     private(set) var setLogs: [SetLog?]
     private(set) var isResting = false
     let restTimer: RestTimerService
+    private let startedAt = Date()
 
     /// Set by the presenting view once the last step is validated, so it
     /// can hand the completed logs to `SessionSummaryView`.
     var onFinish: (([SetLog]) -> Void)?
+
+    /// Alpha 1.1, item 6: real elapsed time for the end-of-session recap
+    /// ("durée totale") — distinct from `TrainingSession.
+    /// estimatedDurationMinutes`, which is a pre-session guess.
+    var elapsedSeconds: Int {
+        Int(Date().timeIntervalSince(startedAt))
+    }
 
     /// `restTimer` is injectable — not for production flexibility, but
     /// because its default `RestTimerService()` reaches the real

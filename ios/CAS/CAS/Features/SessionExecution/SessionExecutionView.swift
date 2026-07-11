@@ -18,6 +18,7 @@ struct SessionExecutionView: View {
     private struct SummaryPayload: Identifiable {
         let id = UUID()
         let logs: [SetLog]
+        let elapsedSeconds: Int
     }
 
     init(session: TrainingSession) {
@@ -58,7 +59,10 @@ struct SessionExecutionView: View {
         }
         .onAppear {
             viewModel.onFinish = { logs in
-                summaryPayload = SummaryPayload(logs: logs)
+                // Captured once, here — reading viewModel.elapsedSeconds
+                // later (e.g. from inside the sheet's content closure)
+                // would keep growing while the athlete fills the form.
+                summaryPayload = SummaryPayload(logs: logs, elapsedSeconds: viewModel.elapsedSeconds)
             }
         }
         .sheet(item: $summaryPayload) { payload in
@@ -66,7 +70,8 @@ struct SessionExecutionView: View {
                 viewModel: SessionSummaryViewModel(
                     session: viewModel.session,
                     setLogs: payload.logs,
-                    historyStore: SwiftDataSessionHistoryStore(context: modelContext)
+                    historyStore: SwiftDataSessionHistoryStore(context: modelContext),
+                    elapsedSeconds: payload.elapsedSeconds
                 ),
                 onDone: { dismiss() }
             )

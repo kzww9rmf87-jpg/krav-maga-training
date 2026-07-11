@@ -88,6 +88,16 @@ struct SessionSummaryViewModelTests {
         #expect(store.savedLogs[0].sets.count == 1)
     }
 
+    @Test func exposesTheElapsedSecondsItWasGivenAndBuildsARecap() {
+        let store = FakeSessionHistoryStore()
+        let setLog = SetLog(exerciseName: "A", groupKind: .work, plannedLoad: .weighted(value: 10, unit: .kg), plannedReps: "10", actualReps: "10")
+        let viewModel = SessionSummaryViewModel(session: makeSession(), setLogs: [setLog], historyStore: store, elapsedSeconds: 1830)
+
+        #expect(viewModel.elapsedSeconds == 1830)
+        #expect(viewModel.recap.setCount == 1)
+        #expect(viewModel.recap.exerciseCount == 1)
+    }
+
     @Test func aStorageFailureSurfacesAnErrorInsteadOfCrashing() {
         let store = FakeSessionHistoryStore()
         store.shouldThrow = true
