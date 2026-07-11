@@ -1,5 +1,10 @@
 import Foundation
-import UserNotifications
+// UNNotificationSettings isn't marked Sendable in the SDK yet, which
+// Swift 6 strict concurrency would otherwise reject at the `await
+// center.notificationSettings()` call below — @preconcurrency defers to
+// the framework's own (correct, Apple-internal) thread-safety instead of
+// requiring a Sendable annotation it doesn't have.
+@preconcurrency import UserNotifications
 
 /// Alerts the athlete when rest ends even if the phone is locked or the
 /// app is backgrounded — Alpha 1.1's "chronomètre robuste." A local
@@ -25,16 +30,26 @@ final class RestNotificationScheduler: RestNotificationScheduling {
     func schedule(after seconds: Int) {
         cancel()
         guard seconds > 0 else { return }
-        center.getNotificationSettings { [weak self] settings in
+        // A `Task {}` created from a @MainActor method inherits that
+        // isolation, so `self`/`center` stay safe to touch directly
+        // across every `await` below — no completion-handler closure
+        // ever runs on a background queue and reaches back into this
+        // MainActor-isolated instance. That was the bug in the first
+        // version of this method: UNUserNotificationCenter's completion-
+        // handler APIs call back on an arbitrary queue, and dereferencing
+        // `self` there tripped Swift's actor-isolation runtime check —
+        // crashed instantly, every time, the moment a rest period first
+        // needed a notification.
+        Task { [weak self] in
             guard let self else { return }
+            let settings = await center.notificationSettings()
             switch settings.authorizationStatus {
             case .authorized, .provisional:
-                Task { @MainActor in self.submitRequest(after: seconds) }
+                submitRequest(after: seconds)
             case .notDetermined:
-                self.center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
-                    guard granted else { return }
-                    Task { @MainActor in self.submitRequest(after: seconds) }
-                }
+                let granted = (try? await center.requestAuthorization(options: [.alert, .sound])) ?? false
+                guard granted else { return }
+                submitRequest(after: seconds)
             case .denied, .ephemeral:
                 break
             @unknown default:
