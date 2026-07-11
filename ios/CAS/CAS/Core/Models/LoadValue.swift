@@ -21,6 +21,16 @@ enum LoadValue: Hashable, Sendable {
 enum MassUnit: String, Hashable, Sendable, CaseIterable {
     case kg
     case lb
+
+    /// Exact, standard conversion (1 lb = 0.45359237 kg) — used only to
+    /// combine weighted loads into one total for volume/progression
+    /// display. Not a physiological claim, just arithmetic.
+    var kilogramsPerUnit: Double {
+        switch self {
+        case .kg: return 1
+        case .lb: return 0.45359237
+        }
+    }
 }
 
 enum QualitativeLevel: String, Hashable, Sendable, CaseIterable {

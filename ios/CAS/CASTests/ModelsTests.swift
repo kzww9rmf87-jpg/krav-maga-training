@@ -218,4 +218,91 @@ struct ModelsTests {
         )
         #expect(session.estimatedDurationMinutes == 5)
     }
+
+    @Test func repCountParsesSingleValuesAndUpperBoundsOfRanges() {
+        #expect(RepCount.parse("8") == 8)
+        #expect(RepCount.parse("8-10") == 10)
+        #expect(RepCount.parse("10 vitesse max") == 10)
+        #expect(RepCount.parse("Tenue max") == nil)
+        #expect(RepCount.parse("Max reps") == nil)
+    }
+
+    @Test func exerciseOverviewsCountDistinctExercisesAndTheirSets() {
+        let session = TrainingSession(
+            id: "overview-test",
+            title: "Overview test",
+            subtitle: "",
+            format: .standard(modules: [
+                SessionModule(
+                    module: CapabilityModuleCatalog.strength,
+                    exercises: [
+                        SessionExercise(
+                            exercise: Exercise(id: "a", name: "A", primaryAdaptation: .maximumStrength),
+                            groups: [SetGroup(kind: .work, sets: [
+                                SetSpec(load: .weighted(value: 80, unit: .kg), reps: "5"),
+                                SetSpec(load: .weighted(value: 80, unit: .kg), reps: "5"),
+                            ])],
+                            note: ""
+                        ),
+                        SessionExercise(
+                            exercise: Exercise(id: "b", name: "B", primaryAdaptation: .maximumStrength),
+                            groups: [SetGroup(kind: .work, sets: [SetSpec(load: .bodyweight, reps: "10")])],
+                            note: ""
+                        ),
+                    ]
+                ),
+            ])
+        )
+        #expect(session.exerciseCount == 2)
+        #expect(session.setCount == 3)
+        #expect(session.exerciseOverviews == [
+            ExerciseOverview(exerciseName: "A", setCount: 2),
+            ExerciseOverview(exerciseName: "B", setCount: 1),
+        ])
+    }
+
+    @Test func estimatedVolumeOnlyCountsWeightedLoadsWithParseableReps() {
+        let session = TrainingSession(
+            id: "volume-test",
+            title: "Volume test",
+            subtitle: "",
+            format: .standard(modules: [
+                SessionModule(
+                    module: CapabilityModuleCatalog.strength,
+                    exercises: [
+                        SessionExercise(
+                            exercise: Exercise(id: "a", name: "A", primaryAdaptation: .maximumStrength),
+                            groups: [SetGroup(kind: .work, sets: [
+                                SetSpec(load: .weighted(value: 100, unit: .kg), reps: "5"),
+                            ])],
+                            note: ""
+                        ),
+                    ]
+                ),
+            ])
+        )
+        #expect(session.estimatedVolumeKg == 500)
+    }
+
+    @Test func estimatedVolumeIsNilWhenNothingIsNumeric() {
+        // Every CAS V0.1 session today — qualitative loads by design.
+        let session = TrainingSession(
+            id: "qualitative-only",
+            title: "Qualitative only",
+            subtitle: "",
+            format: .standard(modules: [
+                SessionModule(
+                    module: CapabilityModuleCatalog.strength,
+                    exercises: [
+                        SessionExercise(
+                            exercise: Exercise(id: "a", name: "A", primaryAdaptation: .maximumStrength),
+                            groups: [SetGroup(kind: .work, sets: [SetSpec(load: .qualitative(.heavy), reps: "5")])],
+                            note: ""
+                        ),
+                    ]
+                ),
+            ])
+        )
+        #expect(session.estimatedVolumeKg == nil)
+    }
 }

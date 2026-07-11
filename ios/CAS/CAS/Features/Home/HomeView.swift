@@ -75,7 +75,7 @@ struct HomeView: View {
                 }
             }
             .fullScreenCover(item: $selectedSession) { session in
-                SessionExecutionView(session: session)
+                SessionFlowContainer(session: session)
             }
             .sheet(isPresented: $showHistory) {
                 HistoryView()

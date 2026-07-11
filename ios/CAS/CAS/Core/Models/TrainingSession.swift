@@ -50,6 +50,15 @@ struct TrainingSession: Identifiable, Codable, Hashable, Sendable {
     }
 }
 
+/// One exercise as it appears in the pre-session overview: its name and
+/// how many sets it prescribes. Not `SessionExercise` — this is a display
+/// summary derived from `steps`, valid for any `SessionFormat`.
+struct ExerciseOverview: Identifiable, Hashable, Sendable {
+    var id: String { exerciseName }
+    let exerciseName: String
+    let setCount: Int
+}
+
 extension TrainingSession {
     /// A rough estimate for Home's "how long will it take?" (UX.md) —
     /// not a scientific claim, and deliberately not a per-session
@@ -91,5 +100,62 @@ extension TrainingSession {
             return assumedSecondsPerStep
         }
         return max(assumedSecondsPerStep, parsed)
+    }
+}
+
+extension TrainingSession {
+    /// Distinct exercises this session touches — Alpha 1.1's pre-session
+    /// overview ("liste complète des exercices").
+    var exerciseCount: Int {
+        Set(steps.map(\.exerciseName)).count
+    }
+
+    /// One `.setRow` step is one prescribed set. `.freeText` steps
+    /// (a circuit pass, a timed conditioning block) aren't "a set" in
+    /// this sense, so they're excluded.
+    var setCount: Int {
+        steps.filter {
+            if case .setRow = $0.instruction { return true }
+            return false
+        }.count
+    }
+
+    /// Exercises in first-appearance order, each with how many `.setRow`
+    /// steps it contributes — the pre-session overview's "liste complète
+    /// des exercices" (Alpha 1.1).
+    var exerciseOverviews: [ExerciseOverview] {
+        var order: [String] = []
+        var setCounts: [String: Int] = [:]
+        for step in steps {
+            if setCounts[step.exerciseName] == nil {
+                order.append(step.exerciseName)
+                setCounts[step.exerciseName] = 0
+            }
+            if case .setRow = step.instruction {
+                setCounts[step.exerciseName, default: 0] += 1
+            }
+        }
+        return order.map { ExerciseOverview(exerciseName: $0, setCount: setCounts[$0] ?? 0) }
+    }
+
+    /// Planned volume (kg·reps), only from steps where both the load has
+    /// a real number (`LoadValue.volumeContribution` — `.weighted` only,
+    /// never a bodyweight-relative delta) and the reps parse
+    /// (`RepCount`). `nil` rather than a partial/misleading total when
+    /// nothing in the session qualifies — true today for every CAS V0.1
+    /// session, whose loads are all qualitative by design.
+    var estimatedVolumeKg: Double? {
+        let contributions = steps.compactMap { step -> Double? in
+            guard
+                case .setRow(let load, let reps) = step.instruction,
+                let (value, unit) = load.volumeContribution,
+                let repCount = RepCount.parse(reps)
+            else {
+                return nil
+            }
+            return value * unit.kilogramsPerUnit * Double(repCount)
+        }
+        guard !contributions.isEmpty else { return nil }
+        return contributions.reduce(0, +)
     }
 }
