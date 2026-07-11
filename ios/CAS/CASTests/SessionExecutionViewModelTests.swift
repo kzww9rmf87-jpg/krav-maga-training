@@ -18,8 +18,8 @@ struct SessionExecutionViewModelTests {
                             exercise: exercise,
                             restGuidance: "90 sec",
                             groups: [SetGroup(kind: .work, sets: [
-                                SetSpec(load: "80kg", reps: "5"),
-                                SetSpec(load: "85kg", reps: "4"),
+                                SetSpec(load: .weighted(value: 80, unit: .kg), reps: "5"),
+                                SetSpec(load: .weighted(value: 85, unit: .kg), reps: "4"),
                             ])],
                             note: "Note"
                         ),
@@ -29,8 +29,18 @@ struct SessionExecutionViewModelTests {
         )
     }
 
+    private func makeViewModel(session: TrainingSession) -> SessionExecutionViewModel {
+        // Injects a fake notification scheduler — RestTimerService()'s
+        // default reaches the real UNUserNotificationCenter, which
+        // crashes the unit test host.
+        SessionExecutionViewModel(
+            session: session,
+            restTimer: RestTimerService(notificationScheduler: FakeRestNotificationScheduler())
+        )
+    }
+
     @Test func advancingThroughASetWithRestShowsTheRestScreen() {
-        let viewModel = SessionExecutionViewModel(session: makeSession())
+        let viewModel = makeViewModel(session: makeSession())
         #expect(viewModel.currentIndex == 0)
         #expect(viewModel.isLastStep == false)
 
@@ -44,7 +54,7 @@ struct SessionExecutionViewModelTests {
     }
 
     @Test func finishingRestMovesToTheNextStep() {
-        let viewModel = SessionExecutionViewModel(session: makeSession())
+        let viewModel = makeViewModel(session: makeSession())
         viewModel.advance()
         viewModel.finishResting()
         #expect(viewModel.currentIndex == 1)
@@ -53,7 +63,7 @@ struct SessionExecutionViewModelTests {
     }
 
     @Test func advancingOnTheLastStepCallsOnFinishWithAllLogs() {
-        let viewModel = SessionExecutionViewModel(session: makeSession())
+        let viewModel = makeViewModel(session: makeSession())
         viewModel.advance()
         viewModel.finishResting()
 
@@ -67,12 +77,12 @@ struct SessionExecutionViewModelTests {
     }
 
     @Test func editingTheCurrentStepUpdatesOnlyThatStepsLog() {
-        let viewModel = SessionExecutionViewModel(session: makeSession())
-        viewModel.updateCurrentLoad("82.5kg")
+        let viewModel = makeViewModel(session: makeSession())
+        viewModel.updateCurrentLoad(.weighted(value: 82.5, unit: .kg))
         viewModel.updateCurrentReps("6")
 
-        #expect(viewModel.setLogs[0]?.actualLoad == "82.5kg")
+        #expect(viewModel.setLogs[0]?.actualLoadValue == .weighted(value: 82.5, unit: .kg))
         #expect(viewModel.setLogs[0]?.actualReps == "6")
-        #expect(viewModel.setLogs[1]?.actualLoad == "85kg") // untouched, still planned value
+        #expect(viewModel.setLogs[1]?.actualLoadValue == .weighted(value: 85, unit: .kg)) // untouched, still planned value
     }
 }

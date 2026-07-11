@@ -8,7 +8,13 @@ struct EndToEndFlowTests {
 
     @Test func walkingSeanceAEndToEndPersistsAllTwentyFiveSetLogs() throws {
         let session = SeanceA.session
-        let viewModel = SessionExecutionViewModel(session: session)
+        // Fake notification scheduler — RestTimerService()'s default
+        // reaches the real UNUserNotificationCenter, which crashes the
+        // unit test host across ~26 steps' worth of rest periods.
+        let viewModel = SessionExecutionViewModel(
+            session: session,
+            restTimer: RestTimerService(notificationScheduler: FakeRestNotificationScheduler())
+        )
 
         var finished: [SetLog]?
         viewModel.onFinish = { finished = $0 }

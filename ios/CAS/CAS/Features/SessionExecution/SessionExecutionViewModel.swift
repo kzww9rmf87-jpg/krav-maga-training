@@ -13,16 +13,22 @@ final class SessionExecutionViewModel {
     private(set) var currentIndex = 0
     private(set) var setLogs: [SetLog?]
     private(set) var isResting = false
-    let restTimer = RestTimerService()
+    let restTimer: RestTimerService
 
     /// Set by the presenting view once the last step is validated, so it
     /// can hand the completed logs to `SessionSummaryView`.
     var onFinish: (([SetLog]) -> Void)?
 
-    init(session: TrainingSession) {
+    /// `restTimer` is injectable — not for production flexibility, but
+    /// because its default `RestTimerService()` reaches the real
+    /// `UNUserNotificationCenter`, which crashes when exercised from a
+    /// unit test host. Tests that don't care about notifications inject
+    /// `RestTimerService(notificationScheduler: <fake>)`.
+    init(session: TrainingSession, restTimer: RestTimerService = RestTimerService()) {
         self.session = session
         self.steps = session.steps
         self.setLogs = steps.map { SetLog(step: $0) }
+        self.restTimer = restTimer
     }
 
     var currentStep: ExecutionStep? {
@@ -38,8 +44,8 @@ final class SessionExecutionViewModel {
         return "\(currentIndex + 1) / \(steps.count)"
     }
 
-    func updateCurrentLoad(_ load: String) {
-        setLogs[currentIndex]?.actualLoad = load
+    func updateCurrentLoad(_ load: LoadValue) {
+        setLogs[currentIndex]?.actualLoadValue = load
     }
 
     func updateCurrentReps(_ reps: String) {
@@ -60,7 +66,11 @@ final class SessionExecutionViewModel {
 
     /// Called when the athlete skips the rest, or the countdown reaches
     /// zero and they confirm — UX.md: rest is quiet and never enforced.
+    /// Always stops the timer first: without this, a rest ended early by
+    /// tapping "Passer" would leave its notification scheduled and fire
+    /// "Repos terminé" in the middle of the next exercise.
     func finishResting() {
+        restTimer.skip()
         isResting = false
         proceedToNextStepOrFinish()
     }
