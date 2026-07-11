@@ -23,7 +23,7 @@ struct SessionLogDetailView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(set.exerciseName)
                                 .font(CASTypography.body.weight(.semibold))
-                            Text("\(set.actualLoad) × \(set.actualReps)")
+                            Text("\(set.actualLoadValue.displayText) × \(set.actualReps)")
                                 .font(CASTypography.caption)
                                 .foregroundStyle(CASTheme.Colors.secondaryText)
                         }

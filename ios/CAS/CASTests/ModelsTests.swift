@@ -40,7 +40,7 @@ struct ModelsTests {
                     exercises: [
                         SessionExercise(
                             exercise: exerciseA,
-                            groups: [SetGroup(kind: .work, sets: [SetSpec(load: "80kg", reps: "5")])],
+                            groups: [SetGroup(kind: .work, sets: [SetSpec(load: .weighted(value: 80, unit: .kg), reps: "5")])],
                             note: "Note A"
                         ),
                     ]
@@ -50,7 +50,7 @@ struct ModelsTests {
                     exercises: [
                         SessionExercise(
                             exercise: exerciseB,
-                            groups: [SetGroup(kind: .work, sets: [SetSpec(load: "40kg", reps: "6")])],
+                            groups: [SetGroup(kind: .work, sets: [SetSpec(load: .weighted(value: 40, unit: .kg), reps: "6")])],
                             note: "Note B"
                         ),
                     ]
@@ -65,7 +65,7 @@ struct ModelsTests {
         let sessionExercise = SessionExercise(
             exercise: exercise,
             restGuidance: "3-4 min entre séries lourdes",
-            groups: [SetGroup(kind: .work, sets: [SetSpec(load: "80kg", reps: "5")])],
+            groups: [SetGroup(kind: .work, sets: [SetSpec(load: .weighted(value: 80, unit: .kg), reps: "5")])],
             note: "Note"
         )
         let steps = sessionExercise.makeSteps()
@@ -128,7 +128,7 @@ struct ModelsTests {
                     exercises: [
                         SessionExercise(
                             exercise: Exercise(id: "a", name: "A", primaryAdaptation: .maximumStrength),
-                            groups: [SetGroup(kind: .work, sets: [SetSpec(load: "80kg", reps: "5")])],
+                            groups: [SetGroup(kind: .work, sets: [SetSpec(load: .weighted(value: 80, unit: .kg), reps: "5")])],
                             note: ""
                         ),
                     ]
@@ -154,16 +154,18 @@ struct ModelsTests {
         }
     }
 
-    @Test func setGroupPreservesLoadAndRepsAsFreeText() {
+    @Test func setGroupPreservesRangesAndRelativeLoadsAsCustomText() {
+        // Ranges ("88-90kg") and relative labels ("+2kg") don't collapse
+        // into a single number — they stay `.custom`, never reinterpreted.
         let group = SetGroup(
             kind: .work,
             sets: [
-                SetSpec(load: "88-90kg", reps: "2-3"),
-                SetSpec(load: "+2kg", reps: "5"),
+                SetSpec(load: .custom("88-90kg"), reps: "2-3"),
+                SetSpec(load: .custom("+2kg"), reps: "5"),
             ]
         )
         #expect(group.kind == .work)
-        #expect(group.sets.map(\.load) == ["88-90kg", "+2kg"])
+        #expect(group.sets.map(\.load) == [.custom("88-90kg"), .custom("+2kg")])
     }
 
     @Test func restAfterParsesRangesAndUnits() {
@@ -195,8 +197,8 @@ struct ModelsTests {
                             exercise: Exercise(id: "a", name: "A", primaryAdaptation: .maximumStrength),
                             restGuidance: "90 sec",
                             groups: [SetGroup(kind: .work, sets: [
-                                SetSpec(load: "80kg", reps: "5"),
-                                SetSpec(load: "80kg", reps: "5"),
+                                SetSpec(load: .weighted(value: 80, unit: .kg), reps: "5"),
+                                SetSpec(load: .weighted(value: 80, unit: .kg), reps: "5"),
                             ])],
                             note: ""
                         ),

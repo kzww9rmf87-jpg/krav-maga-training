@@ -59,7 +59,7 @@ struct SessionSummaryViewModelTests {
         // reassign them away from the first SessionLog via the to-one
         // inverse relationship, silently emptying it.
         let store = FakeSessionHistoryStore()
-        let setLog = SetLog(exerciseName: "A", groupKind: .work, plannedLoad: "10kg", plannedReps: "10")
+        let setLog = SetLog(exerciseName: "A", groupKind: .work, plannedLoad: .weighted(value: 10, unit: .kg), plannedReps: "10")
         let viewModel = SessionSummaryViewModel(session: makeSession(), setLogs: [setLog], historyStore: store)
 
         viewModel.save()

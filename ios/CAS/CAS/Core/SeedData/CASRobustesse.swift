@@ -29,10 +29,10 @@ enum CASRobustesse {
                         restGuidance: "90 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Lourd", reps: "30-40 m"),
-                                SetSpec(load: "Lourd", reps: "30-40 m"),
-                                SetSpec(load: "Lourd", reps: "30-40 m"),
-                                SetSpec(load: "Lourd", reps: "30-40 m"),
+                                SetSpec(load: .qualitative(.heavy), reps: "30-40 m"),
+                                SetSpec(load: .qualitative(.heavy), reps: "30-40 m"),
+                                SetSpec(load: .qualitative(.heavy), reps: "30-40 m"),
+                                SetSpec(load: .qualitative(.heavy), reps: "30-40 m"),
                             ]),
                         ],
                         note: "Gainage rigide, pas de bascule des hanches."
@@ -46,10 +46,10 @@ enum CASRobustesse {
                         restGuidance: "45 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "—", reps: "30-45 sec"),
-                                SetSpec(load: "—", reps: "30-45 sec"),
-                                SetSpec(load: "—", reps: "30-45 sec"),
-                                SetSpec(load: "—", reps: "30-45 sec"),
+                                SetSpec(load: .bodyweight, reps: "30-45 sec"),
+                                SetSpec(load: .bodyweight, reps: "30-45 sec"),
+                                SetSpec(load: .bodyweight, reps: "30-45 sec"),
+                                SetSpec(load: .bodyweight, reps: "30-45 sec"),
                             ]),
                         ],
                         note: "La robustesse conditionne la capacité à continuer à s'entraîner pendant des années."
@@ -68,9 +68,9 @@ enum CASRobustesse {
                         restGuidance: "60 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "—", reps: "Tenue max"),
-                                SetSpec(load: "—", reps: "Tenue max"),
-                                SetSpec(load: "—", reps: "Tenue max"),
+                                SetSpec(load: .bodyweight, reps: "Tenue max"),
+                                SetSpec(load: .bodyweight, reps: "Tenue max"),
+                                SetSpec(load: .bodyweight, reps: "Tenue max"),
                             ]),
                         ],
                         note: "Le module qui donne son nom à la capacité de cette séance."
@@ -90,9 +90,9 @@ enum CASRobustesse {
                         restGuidance: "60 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "—", reps: "12 / côté"),
-                                SetSpec(load: "—", reps: "12 / côté"),
-                                SetSpec(load: "—", reps: "12 / côté"),
+                                SetSpec(load: .bodyweight, reps: "12 / côté"),
+                                SetSpec(load: .bodyweight, reps: "12 / côté"),
+                                SetSpec(load: .bodyweight, reps: "12 / côté"),
                             ]),
                         ],
                         note: "Stabilise le tronc pendant l'effort de préhension — la compensation ne vient pas du dos."

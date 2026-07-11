@@ -36,14 +36,14 @@ enum SeanceA {
                         restGuidance: "3-4 min entre séries lourdes",
                         groups: [
                             SetGroup(kind: .warmup, sets: [
-                                SetSpec(load: "50kg", reps: "15"),
-                                SetSpec(load: "65kg", reps: "8"),
+                                SetSpec(load: .weighted(value: 50, unit: .kg), reps: "15"),
+                                SetSpec(load: .weighted(value: 65, unit: .kg), reps: "8"),
                             ]),
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "75kg", reps: "5"),
-                                SetSpec(load: "80kg", reps: "4"),
-                                SetSpec(load: "85kg", reps: "3"),
-                                SetSpec(load: "88-90kg", reps: "2-3"),
+                                SetSpec(load: .weighted(value: 75, unit: .kg), reps: "5"),
+                                SetSpec(load: .weighted(value: 80, unit: .kg), reps: "4"),
+                                SetSpec(load: .weighted(value: 85, unit: .kg), reps: "3"),
+                                SetSpec(load: .custom("88-90kg"), reps: "2-3"),
                             ]),
                         ],
                         note: SeedNotes.stopAndGo
@@ -59,14 +59,14 @@ enum SeanceA {
                         restGuidance: "3-4 min",
                         groups: [
                             SetGroup(kind: .warmup, sets: [
-                                SetSpec(load: "60kg", reps: "15"),
-                                SetSpec(load: "80kg", reps: "8"),
+                                SetSpec(load: .weighted(value: 60, unit: .kg), reps: "15"),
+                                SetSpec(load: .weighted(value: 80, unit: .kg), reps: "8"),
                             ]),
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "90kg", reps: "6"),
-                                SetSpec(load: "95kg", reps: "5"),
-                                SetSpec(load: "98kg", reps: "4"),
-                                SetSpec(load: "100kg", reps: "3"),
+                                SetSpec(load: .weighted(value: 90, unit: .kg), reps: "6"),
+                                SetSpec(load: .weighted(value: 95, unit: .kg), reps: "5"),
+                                SetSpec(load: .weighted(value: 98, unit: .kg), reps: "4"),
+                                SetSpec(load: .weighted(value: 100, unit: .kg), reps: "3"),
                             ]),
                         ],
                         note: "Amplitude partielle (quart/demi-squat) dans la zone de force maximale des "
@@ -83,13 +83,13 @@ enum SeanceA {
                         restGuidance: "3-4 min",
                         groups: [
                             SetGroup(kind: .warmup, sets: [
-                                SetSpec(load: "60kg", reps: "15"),
-                                SetSpec(load: "80kg", reps: "8"),
+                                SetSpec(load: .weighted(value: 60, unit: .kg), reps: "15"),
+                                SetSpec(load: .weighted(value: 80, unit: .kg), reps: "8"),
                             ]),
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "90kg", reps: "5"),
-                                SetSpec(load: "95kg", reps: "5"),
-                                SetSpec(load: "100kg", reps: "4"),
+                                SetSpec(load: .weighted(value: 90, unit: .kg), reps: "5"),
+                                SetSpec(load: .weighted(value: 95, unit: .kg), reps: "5"),
+                                SetSpec(load: .weighted(value: 100, unit: .kg), reps: "4"),
                             ]),
                         ],
                         note: "Jambes semi-tendues = tension continue sur la chaîne postérieure "
@@ -106,13 +106,13 @@ enum SeanceA {
                         restGuidance: "2-3 min",
                         groups: [
                             SetGroup(kind: .warmup, sets: [
-                                SetSpec(load: "Léger", reps: "15"),
+                                SetSpec(load: .qualitative(.light), reps: "15"),
                             ]),
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Base", reps: "6"),
-                                SetSpec(load: "+2kg", reps: "5"),
-                                SetSpec(load: "+4kg", reps: "5"),
-                                SetSpec(load: "+6kg", reps: "4"),
+                                SetSpec(load: .custom("Base"), reps: "6"),
+                                SetSpec(load: .custom("+2kg"), reps: "5"),
+                                SetSpec(load: .custom("+4kg"), reps: "5"),
+                                SetSpec(load: .custom("+6kg"), reps: "4"),
                             ]),
                         ],
                         note: "Séries montantes de +2kg : on augmente la charge à chaque série tout en "
@@ -134,9 +134,9 @@ enum SeanceA {
                         restGuidance: "2 min",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Base", reps: "6"),
-                                SetSpec(load: "+2kg", reps: "6"),
-                                SetSpec(load: "+4kg", reps: "5"),
+                                SetSpec(load: .custom("Base"), reps: "6"),
+                                SetSpec(load: .custom("+2kg"), reps: "6"),
+                                SetSpec(load: .custom("+4kg"), reps: "5"),
                             ]),
                         ],
                         note: "Renforce trapèzes et cervicales — zone critique pour l'absorption des "

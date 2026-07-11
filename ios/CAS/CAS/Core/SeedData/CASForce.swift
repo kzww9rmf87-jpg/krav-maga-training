@@ -29,14 +29,14 @@ enum CASForce {
                         restGuidance: "3 min",
                         groups: [
                             SetGroup(kind: .warmup, sets: [
-                                SetSpec(load: "Léger", reps: "10"),
-                                SetSpec(load: "Modéré", reps: "8"),
+                                SetSpec(load: .qualitative(.light), reps: "10"),
+                                SetSpec(load: .qualitative(.moderate), reps: "8"),
                             ]),
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Lourd", reps: "4-6"),
-                                SetSpec(load: "Lourd", reps: "4-6"),
-                                SetSpec(load: "Lourd", reps: "4-6"),
-                                SetSpec(load: "Lourd", reps: "4-6"),
+                                SetSpec(load: .qualitative(.heavy), reps: "4-6"),
+                                SetSpec(load: .qualitative(.heavy), reps: "4-6"),
+                                SetSpec(load: .qualitative(.heavy), reps: "4-6"),
+                                SetSpec(load: .qualitative(.heavy), reps: "4-6"),
                             ]),
                         ],
                         note: "Descente contrôlée, remontée puissante — technique avant charge."
@@ -51,13 +51,13 @@ enum CASForce {
                         restGuidance: "3 min",
                         groups: [
                             SetGroup(kind: .warmup, sets: [
-                                SetSpec(load: "Léger", reps: "10"),
+                                SetSpec(load: .qualitative(.light), reps: "10"),
                             ]),
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Lourd", reps: "4-6"),
-                                SetSpec(load: "Lourd", reps: "4-6"),
-                                SetSpec(load: "Lourd", reps: "4-6"),
-                                SetSpec(load: "Lourd", reps: "4-6"),
+                                SetSpec(load: .qualitative(.heavy), reps: "4-6"),
+                                SetSpec(load: .qualitative(.heavy), reps: "4-6"),
+                                SetSpec(load: .qualitative(.heavy), reps: "4-6"),
+                                SetSpec(load: .qualitative(.heavy), reps: "4-6"),
                             ]),
                         ],
                         note: "Trajectoire stable, coudes ni trop ouverts ni collés."
@@ -72,9 +72,9 @@ enum CASForce {
                         restGuidance: "2-3 min",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Modéré-lourd", reps: "6-8"),
-                                SetSpec(load: "Modéré-lourd", reps: "6-8"),
-                                SetSpec(load: "Modéré-lourd", reps: "6-8"),
+                                SetSpec(load: .qualitative(.heavy), reps: "6-8"),
+                                SetSpec(load: .qualitative(.heavy), reps: "6-8"),
+                                SetSpec(load: .qualitative(.heavy), reps: "6-8"),
                             ]),
                         ],
                         note: "Tirer avec le dos, pas avec les bras."
@@ -93,9 +93,9 @@ enum CASForce {
                         restGuidance: "90 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Modéré", reps: "8-10"),
-                                SetSpec(load: "Modéré", reps: "8-10"),
-                                SetSpec(load: "Modéré", reps: "8-10"),
+                                SetSpec(load: .qualitative(.moderate), reps: "8-10"),
+                                SetSpec(load: .qualitative(.moderate), reps: "8-10"),
+                                SetSpec(load: .qualitative(.moderate), reps: "8-10"),
                             ]),
                         ],
                         note: "Amplitude complète, contrôle en descente."
@@ -114,9 +114,9 @@ enum CASForce {
                         restGuidance: "60 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "—", reps: "Tenue max"),
-                                SetSpec(load: "—", reps: "Tenue max"),
-                                SetSpec(load: "—", reps: "Tenue max"),
+                                SetSpec(load: .bodyweight, reps: "Tenue max"),
+                                SetSpec(load: .bodyweight, reps: "Tenue max"),
+                                SetSpec(load: .bodyweight, reps: "Tenue max"),
                             ]),
                         ],
                         note: "Épaules engagées, pas juste pendu passivement."
@@ -135,9 +135,9 @@ enum CASForce {
                         ),
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "—", reps: "30-45 sec"),
-                                SetSpec(load: "—", reps: "30-45 sec"),
-                                SetSpec(load: "—", reps: "30-45 sec"),
+                                SetSpec(load: .bodyweight, reps: "30-45 sec"),
+                                SetSpec(load: .bodyweight, reps: "30-45 sec"),
+                                SetSpec(load: .bodyweight, reps: "30-45 sec"),
                             ]),
                         ],
                         note: "Le tronc transmet la force entre le bas et le haut du corps."

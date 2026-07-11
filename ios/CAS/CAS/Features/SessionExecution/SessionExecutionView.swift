@@ -83,7 +83,7 @@ struct SessionExecutionView: View {
                 SetRow(
                     label: nil,
                     load: Binding(
-                        get: { viewModel.setLogs[viewModel.currentIndex]?.actualLoad ?? load },
+                        get: { viewModel.setLogs[viewModel.currentIndex]?.actualLoadValue ?? load },
                         set: { viewModel.updateCurrentLoad($0) }
                     ),
                     reps: Binding(

@@ -29,10 +29,10 @@ enum Bras {
                         restGuidance: "90 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "14kg", reps: "10"),
-                                SetSpec(load: "16kg", reps: "10"),
-                                SetSpec(load: "18kg", reps: "8"),
-                                SetSpec(load: "20kg", reps: "8"),
+                                SetSpec(load: .weighted(value: 14, unit: .kg), reps: "10"),
+                                SetSpec(load: .weighted(value: 16, unit: .kg), reps: "10"),
+                                SetSpec(load: .weighted(value: 18, unit: .kg), reps: "8"),
+                                SetSpec(load: .weighted(value: 20, unit: .kg), reps: "8"),
                             ]),
                         ],
                         note: "Prise marteau = sollicite le brachial et l'avant-bras, utile pour la "
@@ -47,9 +47,9 @@ enum Bras {
                         restGuidance: "90 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "25kg", reps: "8"),
-                                SetSpec(load: "30kg", reps: "8"),
-                                SetSpec(load: "35kg", reps: "6"),
+                                SetSpec(load: .weighted(value: 25, unit: .kg), reps: "8"),
+                                SetSpec(load: .weighted(value: 30, unit: .kg), reps: "8"),
+                                SetSpec(load: .weighted(value: 35, unit: .kg), reps: "6"),
                             ]),
                         ],
                         note: "Exercice d'isolation biceps — volume d'accessoire, non prioritaire sur "
@@ -64,9 +64,9 @@ enum Bras {
                         restGuidance: "60-90 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "30kg", reps: "12"),
-                                SetSpec(load: "35kg", reps: "10"),
-                                SetSpec(load: "40kg", reps: "8"),
+                                SetSpec(load: .weighted(value: 30, unit: .kg), reps: "12"),
+                                SetSpec(load: .weighted(value: 35, unit: .kg), reps: "10"),
+                                SetSpec(load: .weighted(value: 40, unit: .kg), reps: "8"),
                             ]),
                         ],
                         note: "Complète le travail de poussée du développé-couché de la séance A."
@@ -85,9 +85,9 @@ enum Bras {
                         restGuidance: "45 sec entre super-sets",
                         groups: [
                             SetGroup(kind: .option, sets: [
-                                SetSpec(label: "Super-set 1", load: "Léger", reps: "15 + 15"),
-                                SetSpec(label: "Super-set 2", load: "Léger", reps: "15 + 15"),
-                                SetSpec(label: "Super-set 3", load: "Léger", reps: "15 + 15"),
+                                SetSpec(label: "Super-set 1", load: .qualitative(.light), reps: "15 + 15"),
+                                SetSpec(label: "Super-set 2", load: .qualitative(.light), reps: "15 + 15"),
+                                SetSpec(label: "Super-set 3", load: .qualitative(.light), reps: "15 + 15"),
                             ]),
                         ],
                         note: "Enchaînement extension puis flexion du poignet sans repos — prévention "

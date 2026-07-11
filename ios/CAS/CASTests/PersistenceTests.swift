@@ -20,7 +20,7 @@ struct PersistenceTests {
             difficulty: 3,
             pain: false,
             sets: [
-                SetLog(exerciseName: "Développé-couché mains serrées", groupKind: .work, plannedLoad: "80kg", plannedReps: "5"),
+                SetLog(exerciseName: "Développé-couché mains serrées", groupKind: .work, plannedLoad: .weighted(value: 80, unit: .kg), plannedReps: "5"),
             ]
         )
         context.insert(log)
@@ -29,7 +29,7 @@ struct PersistenceTests {
         let fetched = try context.fetch(FetchDescriptor<SessionLog>())
         #expect(fetched.count == 1)
         #expect(fetched[0].sets.count == 1)
-        #expect(fetched[0].sets[0].actualLoad == "80kg")
+        #expect(fetched[0].sets[0].actualLoadValue == .weighted(value: 80, unit: .kg))
     }
 
     @Test @MainActor
@@ -37,12 +37,23 @@ struct PersistenceTests {
         let step = ExecutionStep(
             exerciseName: "Squats partiels",
             groupKind: .work,
-            instruction: .setRow(load: "90kg", reps: "6")
+            instruction: .setRow(load: .weighted(value: 90, unit: .kg), reps: "6")
         )
         let setLog = try #require(SetLog(step: step))
-        #expect(setLog.plannedLoad == "90kg")
-        #expect(setLog.actualLoad == "90kg")
+        #expect(setLog.plannedLoadValue == .weighted(value: 90, unit: .kg))
+        #expect(setLog.actualLoadValue == .weighted(value: 90, unit: .kg))
         #expect(setLog.completed == false)
+    }
+
+    @Test @MainActor
+    func aSetLogStringWrittenBeforeLoadValueExistedDecodesAsCustomText() {
+        // Simulates a SetLog saved by a build before Alpha 1.1 — the raw
+        // column holds a plain free-text string with no structured
+        // encoding prefix. Must never crash and must never be
+        // reinterpreted as a number.
+        let setLog = SetLog(exerciseName: "Old exercise", groupKind: .work, plannedLoad: .custom("ignored"), plannedReps: "5")
+        setLog.plannedLoad = "80kg"
+        #expect(setLog.plannedLoadValue == .custom("80kg"))
     }
 
     @Test func freeTextStepsProduceNoSetLog() {
@@ -63,7 +74,7 @@ struct PersistenceTests {
             energyBefore: 3,
             difficulty: 2,
             pain: false,
-            sets: [SetLog(exerciseName: "Hammer curls", groupKind: .work, plannedLoad: "14kg", plannedReps: "10")]
+            sets: [SetLog(exerciseName: "Hammer curls", groupKind: .work, plannedLoad: .weighted(value: 14, unit: .kg), plannedReps: "10")]
         )
         context.insert(log)
         try context.save()

@@ -60,12 +60,12 @@ struct CapabilityModuleTests {
             exercises: [
                 SessionExercise(
                     exercise: exerciseA,
-                    groups: [SetGroup(kind: .work, sets: [SetSpec(load: "80kg", reps: "5")])],
+                    groups: [SetGroup(kind: .work, sets: [SetSpec(load: .weighted(value: 80, unit: .kg), reps: "5")])],
                     note: ""
                 ),
                 SessionExercise(
                     exercise: exerciseB,
-                    groups: [SetGroup(kind: .work, sets: [SetSpec(load: "40kg", reps: "6")])],
+                    groups: [SetGroup(kind: .work, sets: [SetSpec(load: .weighted(value: 40, unit: .kg), reps: "6")])],
                     note: ""
                 ),
             ]

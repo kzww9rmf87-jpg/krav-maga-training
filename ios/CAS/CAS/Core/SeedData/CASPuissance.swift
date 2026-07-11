@@ -26,11 +26,11 @@ enum CASPuissance {
                         restGuidance: "2 min",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Léger-modéré", reps: "3-5"),
-                                SetSpec(load: "Léger-modéré", reps: "3-5"),
-                                SetSpec(load: "Léger-modéré", reps: "3-5"),
-                                SetSpec(load: "Léger-modéré", reps: "3-5"),
-                                SetSpec(load: "Léger-modéré", reps: "3-5"),
+                                SetSpec(load: .qualitative(.moderate), reps: "3-5"),
+                                SetSpec(load: .qualitative(.moderate), reps: "3-5"),
+                                SetSpec(load: .qualitative(.moderate), reps: "3-5"),
+                                SetSpec(load: .qualitative(.moderate), reps: "3-5"),
+                                SetSpec(load: .qualitative(.moderate), reps: "3-5"),
                             ]),
                         ],
                         note: "Vitesse maximale à chaque répétition — dès que ça ralentit, on arrête la série."
@@ -44,10 +44,10 @@ enum CASPuissance {
                         restGuidance: "2 min",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Léger", reps: "5"),
-                                SetSpec(load: "Léger", reps: "5"),
-                                SetSpec(load: "Léger", reps: "5"),
-                                SetSpec(load: "Léger", reps: "5"),
+                                SetSpec(load: .qualitative(.light), reps: "5"),
+                                SetSpec(load: .qualitative(.light), reps: "5"),
+                                SetSpec(load: .qualitative(.light), reps: "5"),
+                                SetSpec(load: .qualitative(.light), reps: "5"),
                             ]),
                         ],
                         note: "Explosivité en sortie, réception contrôlée."
@@ -61,10 +61,10 @@ enum CASPuissance {
                         restGuidance: "90 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Léger", reps: "8-10"),
-                                SetSpec(load: "Léger", reps: "8-10"),
-                                SetSpec(load: "Léger", reps: "8-10"),
-                                SetSpec(load: "Léger", reps: "8-10"),
+                                SetSpec(load: .qualitative(.light), reps: "8-10"),
+                                SetSpec(load: .qualitative(.light), reps: "8-10"),
+                                SetSpec(load: .qualitative(.light), reps: "8-10"),
+                                SetSpec(load: .qualitative(.light), reps: "8-10"),
                             ]),
                         ],
                         note: "Transfert jambes → bras, pas juste les bras."
@@ -84,9 +84,9 @@ enum CASPuissance {
                         restGuidance: "60 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(label: "Contrôlé", load: "—", reps: "10 / côté"),
-                                SetSpec(label: "Rapide", load: "—", reps: "10 / côté"),
-                                SetSpec(label: "Explosif", load: "—", reps: "10 / côté"),
+                                SetSpec(label: "Contrôlé", load: .bodyweight, reps: "10 / côté"),
+                                SetSpec(label: "Rapide", load: .bodyweight, reps: "10 / côté"),
+                                SetSpec(label: "Explosif", load: .bodyweight, reps: "10 / côté"),
                             ]),
                         ],
                         note: "Même chaîne cinétique que Force, mais à vitesse plus élevée."
@@ -104,9 +104,9 @@ enum CASPuissance {
                         ),
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "—", reps: "30 sec"),
-                                SetSpec(load: "—", reps: "30 sec"),
-                                SetSpec(load: "—", reps: "30 sec"),
+                                SetSpec(load: .bodyweight, reps: "30 sec"),
+                                SetSpec(load: .bodyweight, reps: "30 sec"),
+                                SetSpec(load: .bodyweight, reps: "30 sec"),
                             ]),
                         ],
                         note: "La puissance sans qualité de mouvement devient un risque de blessure."

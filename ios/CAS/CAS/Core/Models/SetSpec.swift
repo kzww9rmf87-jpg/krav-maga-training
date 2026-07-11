@@ -1,19 +1,21 @@
 import Foundation
 
-/// One prescribed row of load/reps. Kept as free text ("50kg", "88-90kg",
-/// "+2kg") rather than parsed numbers — this is what the real session data
-/// (src/data/seanceA.js etc.) already looks like, and forcing it into a
-/// numeric model now would lose information (ranges, relative progressions)
-/// with no consumer yet that needs numeric values.
+/// One prescribed row of load/reps. `load` is a `LoadValue` (Alpha 1.1) —
+/// hybrid between real numbers ("50kg"), bodyweight variants, qualitative
+/// levels (Léger/Modéré/Lourd/Tenue max) and free text, so volume/records/
+/// progression can activate only where a real number actually exists
+/// rather than guessing one out of "Lourd". `reps` stays free text: reps
+/// are always a clean, unambiguous count or a simple range, nothing here
+/// has needed a richer model the way load did.
 struct SetSpec: Identifiable, Codable, Hashable, Sendable {
     let id: UUID
     /// Optional row context from the source data, e.g. "1 — Position 6-7",
     /// "Contrôlé", "Super-set 1", "MAX".
     let label: String?
-    let load: String
+    let load: LoadValue
     let reps: String
 
-    init(id: UUID = UUID(), label: String? = nil, load: String, reps: String) {
+    init(id: UUID = UUID(), label: String? = nil, load: LoadValue, reps: String) {
         self.id = id
         self.label = label
         self.load = load

@@ -44,7 +44,7 @@ struct ExecutionStep: Identifiable, Hashable, Sendable {
 }
 
 enum StepInstruction: Hashable, Sendable {
-    case setRow(load: String, reps: String)
+    case setRow(load: LoadValue, reps: String)
     case freeText(String)
 }
 

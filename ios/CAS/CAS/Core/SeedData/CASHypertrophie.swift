@@ -27,10 +27,10 @@ enum CASHypertrophie {
                         restGuidance: "90 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Modéré", reps: "8-10"),
-                                SetSpec(load: "Modéré", reps: "8-10"),
-                                SetSpec(load: "Modéré", reps: "8-10"),
-                                SetSpec(load: "Modéré", reps: "8-10"),
+                                SetSpec(load: .qualitative(.moderate), reps: "8-10"),
+                                SetSpec(load: .qualitative(.moderate), reps: "8-10"),
+                                SetSpec(load: .qualitative(.moderate), reps: "8-10"),
+                                SetSpec(load: .qualitative(.moderate), reps: "8-10"),
                             ]),
                         ],
                         note: "Amplitude complète, contrôle en descente."
@@ -44,10 +44,10 @@ enum CASHypertrophie {
                         restGuidance: "90 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Modéré", reps: "8-10"),
-                                SetSpec(load: "Modéré", reps: "8-10"),
-                                SetSpec(load: "Modéré", reps: "8-10"),
-                                SetSpec(load: "Modéré", reps: "8-10"),
+                                SetSpec(load: .qualitative(.moderate), reps: "8-10"),
+                                SetSpec(load: .qualitative(.moderate), reps: "8-10"),
+                                SetSpec(load: .qualitative(.moderate), reps: "8-10"),
+                                SetSpec(load: .qualitative(.moderate), reps: "8-10"),
                             ]),
                         ],
                         note: "Tirer avec le dos, amplitude complète."
@@ -61,9 +61,9 @@ enum CASHypertrophie {
                         restGuidance: "90 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Modéré", reps: "10-12"),
-                                SetSpec(load: "Modéré", reps: "10-12"),
-                                SetSpec(load: "Modéré", reps: "10-12"),
+                                SetSpec(load: .qualitative(.moderate), reps: "10-12"),
+                                SetSpec(load: .qualitative(.moderate), reps: "10-12"),
+                                SetSpec(load: .qualitative(.moderate), reps: "10-12"),
                             ]),
                         ],
                         note: "Pas long, contrôle sur la descente du genou arrière."
@@ -77,9 +77,9 @@ enum CASHypertrophie {
                         restGuidance: "60 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Léger", reps: "12-15"),
-                                SetSpec(load: "Léger", reps: "12-15"),
-                                SetSpec(load: "Léger", reps: "12-15"),
+                                SetSpec(load: .qualitative(.light), reps: "12-15"),
+                                SetSpec(load: .qualitative(.light), reps: "12-15"),
+                                SetSpec(load: .qualitative(.light), reps: "12-15"),
                             ]),
                         ],
                         note: "Amplitude contrôlée, pas d'élan."
@@ -99,9 +99,9 @@ enum CASHypertrophie {
                         restGuidance: "60 sec entre supersets",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(label: "Superset 1", load: "Modéré", reps: "10-12 + 10-12"),
-                                SetSpec(label: "Superset 2", load: "Modéré", reps: "10-12 + 10-12"),
-                                SetSpec(label: "Superset 3", load: "Modéré", reps: "10-12 + 10-12"),
+                                SetSpec(label: "Superset 1", load: .qualitative(.moderate), reps: "10-12 + 10-12"),
+                                SetSpec(label: "Superset 2", load: .qualitative(.moderate), reps: "10-12 + 10-12"),
+                                SetSpec(label: "Superset 3", load: .qualitative(.moderate), reps: "10-12 + 10-12"),
                             ]),
                         ],
                         note: "Accessoire de préhension et de finition, sans charge structurale lourde."
@@ -120,9 +120,9 @@ enum CASHypertrophie {
                         ),
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "—", reps: "12-15"),
-                                SetSpec(load: "—", reps: "12-15"),
-                                SetSpec(load: "—", reps: "12-15"),
+                                SetSpec(load: .bodyweight, reps: "12-15"),
+                                SetSpec(load: .bodyweight, reps: "12-15"),
+                                SetSpec(load: .bodyweight, reps: "12-15"),
                             ]),
                         ],
                         note: "Maintient la qualité de gainage pendant une séance orientée volume."

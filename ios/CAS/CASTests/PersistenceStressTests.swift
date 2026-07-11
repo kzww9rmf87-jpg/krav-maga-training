@@ -33,7 +33,7 @@ struct PersistenceStressTests {
             let store = SwiftDataSessionHistoryStore(context: writeContext)
 
             let setLogs = (0..<5).map { i in
-                SetLog(exerciseName: "Exercise \(i)", groupKind: .work, plannedLoad: "10kg", plannedReps: "10")
+                SetLog(exerciseName: "Exercise \(i)", groupKind: .work, plannedLoad: .weighted(value: 10, unit: .kg), plannedReps: "10")
             }
             let log = SessionLog(
                 sessionId: "stress-\(iteration)",

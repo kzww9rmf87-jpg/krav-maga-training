@@ -28,11 +28,11 @@ enum SeanceB {
                         ),
                         restGuidance: "2-3 min",
                         groups: [
-                            SetGroup(kind: .warmup, sets: [SetSpec(load: "20kg", reps: "8")]),
+                            SetGroup(kind: .warmup, sets: [SetSpec(load: .weighted(value: 20, unit: .kg), reps: "8")]),
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "30kg", reps: "6"),
-                                SetSpec(load: "35kg", reps: "6"),
-                                SetSpec(load: "38kg", reps: "6"),
+                                SetSpec(load: .weighted(value: 30, unit: .kg), reps: "6"),
+                                SetSpec(load: .weighted(value: 35, unit: .kg), reps: "6"),
+                                SetSpec(load: .weighted(value: 38, unit: .kg), reps: "6"),
                             ]),
                         ],
                         note: "Mouvement complet hanche-épaule à vitesse maximale — transfert direct vers "
@@ -48,11 +48,11 @@ enum SeanceB {
                         restGuidance: "90 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(label: "1 — Position 6-7", load: "—", reps: "10 vitesse max"),
-                                SetSpec(label: "2 — Position 6-7", load: "—", reps: "10 vitesse max"),
-                                SetSpec(label: "3 — Position 6-7", load: "—", reps: "10 vitesse max"),
-                                SetSpec(label: "4 — Position 7-8", load: "—", reps: "10 vitesse max"),
-                                SetSpec(label: "5 — Position 7-8", load: "—", reps: "10 vitesse max"),
+                                SetSpec(label: "1 — Position 6-7", load: .bodyweight, reps: "10 vitesse max"),
+                                SetSpec(label: "2 — Position 6-7", load: .bodyweight, reps: "10 vitesse max"),
+                                SetSpec(label: "3 — Position 6-7", load: .bodyweight, reps: "10 vitesse max"),
+                                SetSpec(label: "4 — Position 7-8", load: .bodyweight, reps: "10 vitesse max"),
+                                SetSpec(label: "5 — Position 7-8", load: .bodyweight, reps: "10 vitesse max"),
                             ]),
                         ],
                         note: "Réglage de poulie en position 6-7 puis 7-8 : la résistance/l'angle "
@@ -68,10 +68,10 @@ enum SeanceB {
                         restGuidance: "90 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "4-6kg", reps: "15"),
-                                SetSpec(load: "4-6kg", reps: "15"),
-                                SetSpec(load: "4-6kg", reps: "15"),
-                                SetSpec(load: "4-6kg", reps: "15"),
+                                SetSpec(load: .custom("4-6kg"), reps: "15"),
+                                SetSpec(load: .custom("4-6kg"), reps: "15"),
+                                SetSpec(load: .custom("4-6kg"), reps: "15"),
+                                SetSpec(load: .custom("4-6kg"), reps: "15"),
                             ]),
                         ],
                         note: "Lancer complet du buste — transfert de puissance des jambes vers les bras, "
@@ -87,10 +87,10 @@ enum SeanceB {
                         restGuidance: "90 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "2-3kg", reps: "6"),
-                                SetSpec(load: "3-4kg", reps: "6"),
-                                SetSpec(load: "4-5kg", reps: "6"),
-                                SetSpec(load: "4-5kg", reps: "6"),
+                                SetSpec(load: .custom("2-3kg"), reps: "6"),
+                                SetSpec(load: .custom("3-4kg"), reps: "6"),
+                                SetSpec(load: .custom("4-5kg"), reps: "6"),
+                                SetSpec(load: .custom("4-5kg"), reps: "6"),
                             ]),
                         ],
                         note: SeedNotes.stopAndGo
@@ -105,11 +105,11 @@ enum SeanceB {
                         ),
                         restGuidance: "2-3 min",
                         groups: [
-                            SetGroup(kind: .warmup, sets: [SetSpec(load: "50kg", reps: "10")]),
+                            SetGroup(kind: .warmup, sets: [SetSpec(load: .weighted(value: 50, unit: .kg), reps: "10")]),
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "65kg", reps: "8"),
-                                SetSpec(load: "70kg", reps: "8"),
-                                SetSpec(load: "75kg", reps: "6"),
+                                SetSpec(load: .weighted(value: 65, unit: .kg), reps: "8"),
+                                SetSpec(load: .weighted(value: 70, unit: .kg), reps: "8"),
+                                SetSpec(load: .weighted(value: 75, unit: .kg), reps: "6"),
                             ]),
                         ],
                         note: "Même mouvement que la séance A mais orienté vitesse de sortie plutôt que "
@@ -120,9 +120,9 @@ enum SeanceB {
                         restGuidance: "60 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(label: "1 — Contrôlé", load: "—", reps: "10 / jambe"),
-                                SetSpec(label: "2 — Rapide", load: "—", reps: "10 / jambe"),
-                                SetSpec(label: "3 — Explosif", load: "—", reps: "10 / jambe"),
+                                SetSpec(label: "1 — Contrôlé", load: .bodyweight, reps: "10 / jambe"),
+                                SetSpec(label: "2 — Rapide", load: .bodyweight, reps: "10 / jambe"),
+                                SetSpec(label: "3 — Explosif", load: .bodyweight, reps: "10 / jambe"),
                             ]),
                         ],
                         note: "Progression contrôlé → rapide → explosif : on apprend d'abord la "
@@ -143,12 +143,12 @@ enum SeanceB {
                         restGuidance: "90 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "—", reps: "15-20"),
-                                SetSpec(load: "—", reps: "15-20"),
-                                SetSpec(load: "—", reps: "15-20"),
+                                SetSpec(load: .bodyweight, reps: "15-20"),
+                                SetSpec(load: .bodyweight, reps: "15-20"),
+                                SetSpec(load: .bodyweight, reps: "15-20"),
                             ]),
                             SetGroup(kind: .option, sets: [
-                                SetSpec(label: "MAX", load: "—", reps: "Max reps"),
+                                SetSpec(label: "MAX", load: .bodyweight, reps: "Max reps"),
                             ]),
                         ],
                         note: "Gainage suspendu — renforce la sangle abdominale basse et la préhension "
@@ -159,9 +159,9 @@ enum SeanceB {
                         restGuidance: "60 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(label: "1 — Contrôlé", load: "—", reps: "15 / côté"),
-                                SetSpec(label: "2 — Rapide", load: "—", reps: "15 / côté"),
-                                SetSpec(label: "3 — Explosif", load: "—", reps: "15 / côté"),
+                                SetSpec(label: "1 — Contrôlé", load: .bodyweight, reps: "15 / côté"),
+                                SetSpec(label: "2 — Rapide", load: .bodyweight, reps: "15 / côté"),
+                                SetSpec(label: "3 — Explosif", load: .bodyweight, reps: "15 / côté"),
                             ]),
                         ],
                         note: "Rotation du tronc = transmission de la force entre le bas et le haut du "

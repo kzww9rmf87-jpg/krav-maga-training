@@ -41,10 +41,10 @@ enum SeanceD {
                         restGuidance: "2-3 min",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Progressive", reps: "12"),
-                                SetSpec(load: "Progressive", reps: "10"),
-                                SetSpec(load: "Progressive", reps: "10"),
-                                SetSpec(load: "Progressive", reps: "8"),
+                                SetSpec(load: .custom("Progressive"), reps: "12"),
+                                SetSpec(load: .custom("Progressive"), reps: "10"),
+                                SetSpec(load: .custom("Progressive"), reps: "10"),
+                                SetSpec(load: .custom("Progressive"), reps: "8"),
                             ]),
                         ],
                         note: "Amplitude complète (à l'inverse des squats partiels de la séance A) : on "
@@ -70,9 +70,9 @@ enum SeanceD {
                         restGuidance: "90 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "2-3kg", reps: "8"),
-                                SetSpec(load: "3-4kg", reps: "8"),
-                                SetSpec(load: "4-5kg", reps: "8"),
+                                SetSpec(load: .custom("2-3kg"), reps: "8"),
+                                SetSpec(load: .custom("3-4kg"), reps: "8"),
+                                SetSpec(load: .custom("4-5kg"), reps: "8"),
                             ]),
                         ],
                         note: SeedNotes.stopAndGo
@@ -82,10 +82,10 @@ enum SeanceD {
                         restGuidance: "60 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "—", reps: "10 / jambe"),
-                                SetSpec(load: "—", reps: "10 / jambe"),
-                                SetSpec(load: "—", reps: "10 / jambe"),
-                                SetSpec(load: "—", reps: "10 / jambe"),
+                                SetSpec(load: .bodyweight, reps: "10 / jambe"),
+                                SetSpec(load: .bodyweight, reps: "10 / jambe"),
+                                SetSpec(load: .bodyweight, reps: "10 / jambe"),
+                                SetSpec(load: .bodyweight, reps: "10 / jambe"),
                             ]),
                         ],
                         note: "Volume plus élevé qu'en séance B (4 séries) pour ancrer le mouvement en "
@@ -105,9 +105,9 @@ enum SeanceD {
                         restGuidance: "2-3 min",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "60kg", reps: "8"),
-                                SetSpec(load: "65kg", reps: "6"),
-                                SetSpec(load: "70kg", reps: "5"),
+                                SetSpec(load: .weighted(value: 60, unit: .kg), reps: "8"),
+                                SetSpec(load: .weighted(value: 65, unit: .kg), reps: "6"),
+                                SetSpec(load: .weighted(value: 70, unit: .kg), reps: "5"),
                             ]),
                         ],
                         note: "Position à genoux : supprime la contribution des jambes, isole les "
@@ -123,9 +123,9 @@ enum SeanceD {
                         restGuidance: "60 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "—", reps: "15 / côté"),
-                                SetSpec(load: "—", reps: "15 / côté"),
-                                SetSpec(load: "—", reps: "15 / côté"),
+                                SetSpec(load: .bodyweight, reps: "15 / côté"),
+                                SetSpec(load: .bodyweight, reps: "15 / côté"),
+                                SetSpec(load: .bodyweight, reps: "15 / côté"),
                             ]),
                         ],
                         note: "Renforce le gainage rotatoire, nécessaire à la stabilité du bassin lors "
@@ -145,11 +145,11 @@ enum SeanceD {
                         restGuidance: "45 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "—", reps: "30 sec"),
-                                SetSpec(load: "—", reps: "30 sec"),
-                                SetSpec(load: "—", reps: "30 sec"),
-                                SetSpec(load: "—", reps: "30 sec"),
-                                SetSpec(load: "—", reps: "30 sec"),
+                                SetSpec(load: .bodyweight, reps: "30 sec"),
+                                SetSpec(load: .bodyweight, reps: "30 sec"),
+                                SetSpec(load: .bodyweight, reps: "30 sec"),
+                                SetSpec(load: .bodyweight, reps: "30 sec"),
+                                SetSpec(load: .bodyweight, reps: "30 sec"),
                             ]),
                         ],
                         note: "Tenue isométrique : renforce la stabilité de la hanche en "
@@ -171,10 +171,10 @@ enum SeanceD {
                         restGuidance: "60 sec",
                         groups: [
                             SetGroup(kind: .work, sets: [
-                                SetSpec(load: "Progressive", reps: "12-15"),
-                                SetSpec(load: "Progressive", reps: "12-15"),
-                                SetSpec(load: "Progressive", reps: "12-15"),
-                                SetSpec(load: "Progressive", reps: "12-15"),
+                                SetSpec(load: .custom("Progressive"), reps: "12-15"),
+                                SetSpec(load: .custom("Progressive"), reps: "12-15"),
+                                SetSpec(load: .custom("Progressive"), reps: "12-15"),
+                                SetSpec(load: .custom("Progressive"), reps: "12-15"),
                             ]),
                         ],
                         note: "Force des mollets = transmission finale de la puissance au sol sur "

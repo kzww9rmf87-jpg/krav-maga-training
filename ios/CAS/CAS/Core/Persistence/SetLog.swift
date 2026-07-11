@@ -15,6 +15,13 @@ final class SetLog {
     var exerciseName: String
     var groupKind: SetGroupKind
     var label: String?
+    /// Stored as `LoadValue.encoded` strings, not the enum directly —
+    /// deliberately keeps this column's name and type exactly as they
+    /// were before Alpha 1.1's structured load model, so nothing here
+    /// requires a SwiftData schema migration. Every `SetLog` already
+    /// saved on a real device decodes through `plannedLoadValue`/
+    /// `actualLoadValue` below; anything written before `LoadValue`
+    /// existed degrades to `.custom(text:)` automatically.
     var plannedLoad: String
     var plannedReps: String
     var actualLoad: String
@@ -27,14 +34,26 @@ final class SetLog {
     /// drops the children.
     var session: SessionLog?
 
+    /// The `LoadValue` view onto `plannedLoad`/`actualLoad`. Everything
+    /// outside this file should read/write these, not the raw strings.
+    var plannedLoadValue: LoadValue {
+        get { LoadValue(decoding: plannedLoad) }
+        set { plannedLoad = newValue.encoded }
+    }
+
+    var actualLoadValue: LoadValue {
+        get { LoadValue(decoding: actualLoad) }
+        set { actualLoad = newValue.encoded }
+    }
+
     init(
         id: UUID = UUID(),
         exerciseName: String,
         groupKind: SetGroupKind,
         label: String? = nil,
-        plannedLoad: String,
+        plannedLoad: LoadValue,
         plannedReps: String,
-        actualLoad: String? = nil,
+        actualLoad: LoadValue? = nil,
         actualReps: String? = nil,
         completed: Bool = false
     ) {
@@ -42,9 +61,9 @@ final class SetLog {
         self.exerciseName = exerciseName
         self.groupKind = groupKind
         self.label = label
-        self.plannedLoad = plannedLoad
+        self.plannedLoad = plannedLoad.encoded
         self.plannedReps = plannedReps
-        self.actualLoad = actualLoad ?? plannedLoad
+        self.actualLoad = (actualLoad ?? plannedLoad).encoded
         self.actualReps = actualReps ?? plannedReps
         self.completed = completed
     }
