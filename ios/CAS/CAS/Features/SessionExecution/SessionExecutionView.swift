@@ -24,10 +24,16 @@ struct SessionExecutionView: View {
         _viewModel = State(initialValue: SessionExecutionViewModel(session: session))
     }
 
+    /// Alpha 1.1, item 4. Built fresh per read, same as `HomeView`'s
+    /// `@Query` pattern — cheap, and always reflects the latest saves.
+    private var historyStore: SessionHistoryStore {
+        SwiftDataSessionHistoryStore(context: modelContext)
+    }
+
     var body: some View {
         Group {
             if viewModel.isResting {
-                RestTimerView(timer: viewModel.restTimer, onSkip: viewModel.finishResting)
+                RestTimerView(timer: viewModel.restTimer, nextStep: viewModel.nextStep, onSkip: viewModel.finishResting)
             } else if let step = viewModel.currentStep {
                 stepView(for: step)
             }
@@ -35,13 +41,18 @@ struct SessionExecutionView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(CASTheme.Colors.background)
         .safeAreaInset(edge: .top) {
-            HStack {
-                Button("Quitter") { dismiss() }
-                    .foregroundStyle(CASTheme.Colors.secondaryText)
-                Spacer()
-                Text(viewModel.progressText)
-                    .font(CASTypography.caption)
-                    .foregroundStyle(CASTheme.Colors.secondaryText)
+            VStack(spacing: 8) {
+                HStack {
+                    Button("Quitter") { dismiss() }
+                        .foregroundStyle(CASTheme.Colors.secondaryText)
+                    Spacer()
+                    Text(viewModel.progressText)
+                        .font(CASTypography.caption)
+                        .foregroundStyle(CASTheme.Colors.secondaryText)
+                }
+                ProgressView(value: viewModel.progressFraction)
+                    .tint(CASTheme.Colors.primary)
+                    .animation(.easeInOut, value: viewModel.progressFraction)
             }
             .padding()
         }
@@ -91,6 +102,9 @@ struct SessionExecutionView: View {
                         set: { viewModel.updateCurrentReps($0) }
                     )
                 )
+                if let lastSets = historyStore.lastPerformance(ofExerciseNamed: step.exerciseName) {
+                    exerciseHistory(lastSets: lastSets, best: historyStore.bestPerformance(ofExerciseNamed: step.exerciseName))
+                }
             case .freeText(let text):
                 Text(text)
                     .font(CASTypography.body)
@@ -111,5 +125,34 @@ struct SessionExecutionView: View {
             )
         }
         .padding()
+    }
+
+    /// Alpha 1.1, item 4. Textual regardless of `LoadValue` kind —
+    /// qualitative and custom loads show exactly as prescribed/logged,
+    /// never reinterpreted. "Record" only appears when a reliable number
+    /// exists (`bestPerformance` returns nil otherwise).
+    @ViewBuilder
+    private func exerciseHistory(lastSets: [SetLog], best: SetLog?) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text("Dernière séance")
+                .font(CASTypography.caption)
+                .foregroundStyle(CASTheme.Colors.secondaryText)
+            Text(Self.historyLine(for: lastSets))
+                .font(CASTypography.caption.weight(.medium))
+                .foregroundStyle(CASTheme.Colors.primaryText)
+            if let best {
+                Text("Record : \(best.actualLoadValue.displayText) × \(best.actualReps)")
+                    .font(CASTypography.caption)
+                    .foregroundStyle(CASTheme.Colors.secondaryText)
+            }
+        }
+    }
+
+    private static func historyLine(for sets: [SetLog]) -> String {
+        let distinctLoads = Set(sets.map(\.actualLoadValue))
+        if distinctLoads.count == 1, let load = distinctLoads.first {
+            return "\(load.displayText) — " + sets.map(\.actualReps).joined(separator: " / ")
+        }
+        return sets.map { "\($0.actualLoadValue.displayText) × \($0.actualReps)" }.joined(separator: " · ")
     }
 }

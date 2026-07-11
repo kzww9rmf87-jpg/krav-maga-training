@@ -85,4 +85,23 @@ struct SessionExecutionViewModelTests {
         #expect(viewModel.setLogs[0]?.actualReps == "6")
         #expect(viewModel.setLogs[1]?.actualLoadValue == .weighted(value: 85, unit: .kg)) // untouched, still planned value
     }
+
+    @Test func nextStepPreviewsTheUpcomingStepAndIsNilOnTheLastOne() {
+        let viewModel = makeViewModel(session: makeSession())
+        #expect(viewModel.nextStep != nil)
+
+        viewModel.advance()
+        viewModel.finishResting()
+        #expect(viewModel.isLastStep == true)
+        #expect(viewModel.nextStep == nil)
+    }
+
+    @Test func progressFractionTracksCurrentIndexOverStepCount() {
+        let viewModel = makeViewModel(session: makeSession())
+        #expect(viewModel.progressFraction == 0)
+
+        viewModel.advance()
+        viewModel.finishResting()
+        #expect(viewModel.progressFraction == 0.5)
+    }
 }

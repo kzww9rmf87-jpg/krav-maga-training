@@ -35,6 +35,14 @@ final class SessionExecutionViewModel {
         steps.indices.contains(currentIndex) ? steps[currentIndex] : nil
     }
 
+    /// Alpha 1.1, item 3: shown during rest so the athlete can prepare
+    /// their equipment before the countdown ends. `nil` on the last step
+    /// — nothing comes after it.
+    var nextStep: ExecutionStep? {
+        let nextIndex = currentIndex + 1
+        return steps.indices.contains(nextIndex) ? steps[nextIndex] : nil
+    }
+
     var isLastStep: Bool {
         currentIndex == steps.count - 1
     }
@@ -42,6 +50,12 @@ final class SessionExecutionViewModel {
     var progressText: String {
         guard !steps.isEmpty else { return "" }
         return "\(currentIndex + 1) / \(steps.count)"
+    }
+
+    /// Alpha 1.1, item 2: fraction of steps completed, for a progress bar.
+    var progressFraction: Double {
+        guard !steps.isEmpty else { return 0 }
+        return Double(currentIndex) / Double(steps.count)
     }
 
     func updateCurrentLoad(_ load: LoadValue) {

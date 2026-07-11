@@ -17,6 +17,25 @@ private final class FakeSessionHistoryStore: SessionHistoryStore {
     func recentLogs(limit: Int) -> [SessionLog] {
         Array(savedLogs.prefix(limit))
     }
+
+    func lastPerformance(ofExerciseNamed exerciseName: String) -> [SetLog]? {
+        for log in savedLogs.sorted(by: { $0.date > $1.date }) {
+            let matching = log.sets.filter { $0.exerciseName == exerciseName }
+            if !matching.isEmpty { return matching }
+        }
+        return nil
+    }
+
+    func bestPerformance(ofExerciseNamed exerciseName: String) -> SetLog? {
+        savedLogs.flatMap(\.sets)
+            .filter { $0.exerciseName == exerciseName }
+            .compactMap { set -> (SetLog, Double)? in
+                guard let anchor = set.actualLoadValue.progressionAnchor else { return nil }
+                return (set, anchor.value * anchor.unit.kilogramsPerUnit)
+            }
+            .max { $0.1 < $1.1 }?
+            .0
+    }
 }
 
 @MainActor
