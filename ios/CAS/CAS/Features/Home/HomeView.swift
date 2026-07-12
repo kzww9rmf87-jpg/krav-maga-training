@@ -7,15 +7,27 @@ import SwiftUI
 /// screen itself) for picking something else.
 struct HomeView: View {
     @State private var viewModel = HomeViewModel()
-    @State private var selectedSession: TrainingSession?
+    @State private var selectedResolved: ResolvedTrainingSession?
     @State private var showHistory = false
     @State private var showAllSessions = false
     @State private var isEditingProfile = false
     @Environment(\.modelContext) private var modelContext
     @Query(sort: [SortDescriptor(\SessionLog.date, order: .reverse)]) private var recentLogs: [SessionLog]
 
+    /// `nil` while the profile isn't `.loaded` — see
+    /// `AthleteProfileLoadState.equipmentForRecommendation`. A recommendation
+    /// is only ever computed once the athlete's real equipment is known.
     private var recommendation: SessionRecommendation? {
-        viewModel.recommendation(afterLastCompletedSessionId: recentLogs.first?.sessionId)
+        guard let equipment = viewModel.profileLoadState.equipmentForRecommendation else { return nil }
+        return viewModel.recommendation(afterLastCompletedSessionId: recentLogs.first?.sessionId, availableEquipment: equipment)
+    }
+
+    /// The original (unsubstituted) session matching a resolved one, for
+    /// `SessionOverviewView`'s "Adaptations" section — falls back to the
+    /// resolved session itself in the unreachable case where the id isn't
+    /// found among `viewModel.sessions`.
+    private func originalSession(for resolved: ResolvedTrainingSession) -> TrainingSession {
+        viewModel.sessions.first { $0.id == resolved.session.id } ?? resolved.session
     }
 
     /// Beta 1.0. Built fresh per read, same pattern as `SessionExecutionView`'s
@@ -39,37 +51,11 @@ struct HomeView: View {
                 VStack(spacing: 16) {
                     profileStatusBanner
 
-                    if let recommendation {
-                        VStack(alignment: .leading, spacing: 12) {
-                            SessionCard(title: recommendation.session.title, subtitle: recommendation.session.subtitle)
-
-                            if !recommendation.session.primaryActionCapability.isEmpty {
-                                // The Action Capability gets body-weight
-                                // emphasis, not caption — see
-                                // 10-science/03_ACTION_CAPABILITIES.md:
-                                // "Action Capabilities constitute the
-                                // true product of CAS." It's the "why,"
-                                // modules and duration are supporting detail.
-                                Text(recommendation.session.primaryActionCapability)
-                                    .font(CASTypography.body.weight(.semibold))
-                                    .foregroundStyle(CASTheme.Colors.primaryText)
-                            }
-
-                            if !recommendation.session.moduleNames.isEmpty {
-                                Text(recommendation.session.moduleNames.joined(separator: " → "))
-                                    .font(CASTypography.caption)
-                                    .foregroundStyle(CASTheme.Colors.secondaryText)
-                            }
-
-                            Text(Self.formattedDuration(recommendation.session.estimatedDurationMinutes))
-                                .font(CASTypography.caption)
-                                .foregroundStyle(CASTheme.Colors.secondaryText)
-                            Text(recommendation.reason)
-                                .font(CASTypography.caption)
-                                .foregroundStyle(CASTheme.Colors.secondaryText)
-                            PrimaryButton(title: "Commencer") {
-                                selectedSession = recommendation.session
-                            }
+                    if case .loaded = viewModel.profileLoadState {
+                        if let recommendation {
+                            recommendationCard(recommendation)
+                        } else {
+                            noSessionAvailableCard
                         }
                     }
 
@@ -78,6 +64,7 @@ struct HomeView: View {
                     }
                     .font(CASTypography.caption)
                     .foregroundStyle(CASTheme.Colors.secondaryText)
+                    .disabled(viewModel.profileLoadState.equipmentForRecommendation == nil)
                 }
                 .padding()
             }
@@ -105,8 +92,8 @@ struct HomeView: View {
             .task {
                 viewModel.loadProfileIfNeeded(using: profileStore)
             }
-            .fullScreenCover(item: $selectedSession) { session in
-                SessionFlowContainer(session: session)
+            .fullScreenCover(item: $selectedResolved) { resolved in
+                SessionFlowContainer(originalSession: originalSession(for: resolved), resolved: resolved)
             }
             .fullScreenCover(isPresented: isOnboardingPresented) {
                 AthleteProfileFlowView(
@@ -131,12 +118,81 @@ struct HomeView: View {
                 HistoryView()
             }
             .sheet(isPresented: $showAllSessions) {
-                AllSessionsView(sessions: viewModel.sessions) { session in
-                    showAllSessions = false
-                    selectedSession = session
+                // Same discipline as the recommendation card: never
+                // resolves against a fallback empty set — if the profile
+                // genuinely isn't loaded, the button that gets here is
+                // disabled in the first place (see the toolbar `Button`
+                // below).
+                if let equipment = viewModel.profileLoadState.equipmentForRecommendation {
+                    AllSessionsView(items: viewModel.sessionAvailabilities(for: equipment)) { resolved in
+                        showAllSessions = false
+                        selectedResolved = resolved
+                    }
                 }
             }
         }
+    }
+
+    private func recommendationCard(_ recommendation: SessionRecommendation) -> some View {
+        let session = recommendation.resolved.session
+        return VStack(alignment: .leading, spacing: 12) {
+            SessionCard(title: session.title, subtitle: session.subtitle)
+
+            if !recommendation.resolved.substitutions.filter({ $0.equivalence == .partial }).isEmpty {
+                // Discreet on purpose — UX.md "one card, one decision":
+                // the full explanation belongs to the pre-session
+                // summary, not to Home.
+                Text("Séance adaptée à votre équipement")
+                    .font(CASTypography.caption.weight(.medium))
+                    .foregroundStyle(CASTheme.Colors.warning)
+            }
+
+            if !session.primaryActionCapability.isEmpty {
+                // The Action Capability gets body-weight emphasis, not
+                // caption — see 10-science/03_ACTION_CAPABILITIES.md:
+                // "Action Capabilities constitute the true product of
+                // CAS." It's the "why," modules and duration are
+                // supporting detail.
+                Text(session.primaryActionCapability)
+                    .font(CASTypography.body.weight(.semibold))
+                    .foregroundStyle(CASTheme.Colors.primaryText)
+            }
+
+            if !session.moduleNames.isEmpty {
+                Text(session.moduleNames.joined(separator: " → "))
+                    .font(CASTypography.caption)
+                    .foregroundStyle(CASTheme.Colors.secondaryText)
+            }
+
+            Text(Self.formattedDuration(session.estimatedDurationMinutes))
+                .font(CASTypography.caption)
+                .foregroundStyle(CASTheme.Colors.secondaryText)
+            Text(recommendation.reason)
+                .font(CASTypography.caption)
+                .foregroundStyle(CASTheme.Colors.secondaryText)
+            PrimaryButton(title: "Commencer") {
+                selectedResolved = recommendation.resolved
+            }
+        }
+    }
+
+    /// Reached only when the profile is genuinely `.loaded` and every one
+    /// of the five sessions resolved `.unavailable` for its equipment —
+    /// never shown while the profile is still loading or failed to load.
+    private var noSessionAvailableCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Aucune séance disponible avec votre équipement actuel.")
+                .font(CASTypography.body)
+                .foregroundStyle(CASTheme.Colors.primaryText)
+            HStack(spacing: 16) {
+                Button("Modifier mon profil") { isEditingProfile = true }
+                Button("Toutes les séances") { showAllSessions = true }
+            }
+            .font(CASTypography.caption.weight(.medium))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(CASTheme.Colors.secondaryBackground, in: RoundedRectangle(cornerRadius: CASTheme.Metrics.controlCornerRadius, style: .continuous))
     }
 
     /// Only ever visible for `.loading`/`.failed` — `.idle`, `.loaded` and

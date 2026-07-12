@@ -33,8 +33,23 @@ final class HomeViewModel {
         self.recommendationService = recommendationService
     }
 
-    func recommendation(afterLastCompletedSessionId lastCompletedSessionId: String?) -> SessionRecommendation? {
-        recommendationService.recommend(lastCompletedSessionId: lastCompletedSessionId)
+    func recommendation(afterLastCompletedSessionId lastCompletedSessionId: String?, availableEquipment: Set<Equipment>) -> SessionRecommendation? {
+        recommendationService.recommend(lastCompletedSessionId: lastCompletedSessionId, availableEquipment: availableEquipment)
+    }
+
+    /// The five CAS V0.1 sessions, each resolved against `equipment` —
+    /// "Toutes les séances" always shows all five, never a filtered
+    /// subset, so an unavailable one still carries its reasons instead of
+    /// silently disappearing. Same rule as `recommendation`: only CAS
+    /// Puissance is ever evaluated with a substitution table.
+    func sessionAvailabilities(for equipment: Set<Equipment>) -> [(session: TrainingSession, availability: SessionAvailability)] {
+        sessions.map { session in
+            let substitutions = session.id == CASSessionID.power.rawValue
+                ? CASPuissanceSubstitutions.byExerciseId
+                : [:]
+            let availability = SessionAvailabilityResolver.evaluate(session, availableEquipment: equipment, substitutions: substitutions)
+            return (session, availability)
+        }
     }
 
     /// No-ops outside `.idle` — called from `HomeView.task`, which can in

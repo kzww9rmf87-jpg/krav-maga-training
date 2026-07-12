@@ -1,9 +1,11 @@
 import Foundation
 
 /// The recommended session plus the one-line explanation UX.md requires
-/// Home to show ("Why today?").
+/// Home to show ("Why today?"). Carries the already-resolved session
+/// (substitutions, if any, already applied) rather than a bare
+/// `TrainingSession` — nothing downstream re-resolves it.
 struct SessionRecommendation: Sendable {
-    let session: TrainingSession
+    let resolved: ResolvedTrainingSession
     let reason: String
 }
 
@@ -15,31 +17,27 @@ struct SessionRecommendation: Sendable {
 /// Capability Modules before exercises, and explains itself. This
 /// protocol is deliberately none of that.
 ///
-/// Sprint 2's only goal is to prove Home can be a decision screen (UX.md:
-/// "What should I do today? Why today?"), not to build intelligence. Pain,
-/// fatigue, physiological cost, module selection and athlete profile are
-/// explicitly out of scope — the rule below only ever looks at the id of
-/// the last completed session. Naming this type `DecisionEngine` would
-/// overclaim what it does; when the real engine described in
-/// `04_DECISION_ENGINE.md` is built, it becomes a new implementation of
-/// this same protocol (or replaces it), and `Features/Home` doesn't
-/// change — the same seam `SessionRepository` already proved in Sprint 1.
+/// Beta 1.0: `availableEquipment` is the one piece of athlete-profile
+/// state this placeholder consumes — via `SessionAvailabilityResolver`,
+/// never by inventing its own equipment logic. Everything else (pain,
+/// fatigue, physiological cost, module selection) stays out of scope.
 protocol SessionRecommendationService: Sendable {
-    func recommend(lastCompletedSessionId: String?) -> SessionRecommendation?
+    func recommend(lastCompletedSessionId: String?, availableEquipment: Set<Equipment>) -> SessionRecommendation?
 }
 
 /// Fixed rotation over CAS V0.1: Force → Puissance → Hypertrophie
 /// fonctionnelle → Robustesse → Base aérobie → Force. Not derived from
 /// anything physiological — purely "what's next in a fixed list," using
 /// `CASSessionID`'s declaration order as the single source of that
-/// order. Falls back to the first session in the rotation when there's
-/// no history yet, or when the last completed session isn't part of the
-/// rotation (e.g. it's legacy content, or seed data changed since that
-/// session was logged).
+/// order.
 ///
-/// Sprint 3: Base aérobie is a full rotation member, not a bonus/optional
-/// branch — a second "sometimes in, sometimes out" list would be more
-/// rotation logic than this sprint's scope justifies.
+/// Beta 1.0: a candidate the resolver marks `.unavailable` for
+/// `availableEquipment` is skipped, never recommended — the rotation
+/// order itself never changes, only which candidates in it currently
+/// qualify. CAS Puissance is the only candidate ever evaluated with a
+/// substitution table (`CASPuissanceSubstitutions`); every other
+/// candidate is checked for feasibility only, per the validated
+/// audit — substituting for them isn't part of this increment's scope.
 struct RotationRecommendationService: SessionRecommendationService {
     private let repository: SessionRepository
     private let order = CASSessionID.allCases.map(\.rawValue)
@@ -48,26 +46,69 @@ struct RotationRecommendationService: SessionRecommendationService {
         self.repository = repository
     }
 
-    func recommend(lastCompletedSessionId: String?) -> SessionRecommendation? {
+    func recommend(lastCompletedSessionId: String?, availableEquipment: Set<Equipment>) -> SessionRecommendation? {
         let sessions = repository.allSessions()
 
-        guard
+        let startIndex: Int
+        let lastSessionTitle: String?
+        if
             let lastCompletedSessionId,
             let lastIndex = order.firstIndex(of: lastCompletedSessionId),
             let lastSession = sessions.first(where: { $0.id == lastCompletedSessionId })
-        else {
-            guard let first = sessions.first(where: { $0.id == order[0] }) else { return nil }
+        {
+            startIndex = (lastIndex + 1) % order.count
+            lastSessionTitle = lastSession.title
+        } else {
+            startIndex = 0
+            lastSessionTitle = nil
+        }
+
+        var skippedCount = 0
+        for offset in 0..<order.count {
+            let index = (startIndex + offset) % order.count
+            guard let candidate = sessions.first(where: { $0.id == order[index] }) else { continue }
+
+            let substitutions = candidate.id == CASSessionID.power.rawValue
+                ? CASPuissanceSubstitutions.byExerciseId
+                : [:]
+            let availability = SessionAvailabilityResolver.evaluate(
+                candidate,
+                availableEquipment: availableEquipment,
+                substitutions: substitutions
+            )
+
+            let resolved: ResolvedTrainingSession
+            switch availability {
+            case .available(let r), .availableWithCompromises(let r):
+                resolved = r
+            case .unavailable:
+                skippedCount += 1
+                continue
+            }
+
             return SessionRecommendation(
-                session: first,
-                reason: "Aucune séance récente — on commence par \(first.title)."
+                resolved: resolved,
+                reason: Self.reason(skippedCount: skippedCount, lastSessionTitle: lastSessionTitle, chosenTitle: resolved.session.title)
             )
         }
 
-        let nextId = order[(lastIndex + 1) % order.count]
-        guard let next = sessions.first(where: { $0.id == nextId }) else { return nil }
-        return SessionRecommendation(
-            session: next,
-            reason: "Recommandée car votre dernière séance était \(lastSession.title)."
-        )
+        // Every candidate in the rotation was unavailable.
+        return nil
+    }
+
+    /// A skip is always explained in one short, count-based sentence —
+    /// never by naming every skipped session on Home's single
+    /// recommendation card. The full per-session reasons live in "Toutes
+    /// les séances," not here.
+    private static func reason(skippedCount: Int, lastSessionTitle: String?, chosenTitle: String) -> String {
+        if skippedCount > 0 {
+            let plural = skippedCount > 1
+            return "Prochaine séance disponible dans votre rotation. "
+                + "\(skippedCount) séance\(plural ? "s" : "") \(plural ? "sont" : "est") incompatible\(plural ? "s" : "") avec votre équipement actuel."
+        }
+        if let lastSessionTitle {
+            return "Recommandée car votre dernière séance était \(lastSessionTitle)."
+        }
+        return "Aucune séance récente — on commence par \(chosenTitle)."
     }
 }

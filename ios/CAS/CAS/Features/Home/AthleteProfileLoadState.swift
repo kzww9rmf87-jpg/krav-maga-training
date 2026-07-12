@@ -33,4 +33,22 @@ enum AthleteProfileLoadState: Equatable {
         if case .missing = self { return true }
         return false
     }
+
+    /// `nil` means "do not compute a personalized recommendation right
+    /// now" — deliberately distinct from `Optional(Set())`, which means
+    /// "compute one, and the athlete genuinely has no equipment." Only
+    /// `.loaded` ever returns the latter: `.idle`/`.loading` haven't read
+    /// anything yet, `.missing` is covered by mandatory onboarding, and
+    /// `.failed` must not be treated as "bodyweight only" just because
+    /// SwiftData hasn't answered — that would recommend CAS Puissance or
+    /// Base aérobie as if the athlete had chosen an environment they
+    /// never confirmed.
+    var equipmentForRecommendation: Set<Equipment>? {
+        switch self {
+        case .loaded(let profile):
+            return profile.availableEquipment
+        case .idle, .loading, .missing, .failed:
+            return nil
+        }
+    }
 }
