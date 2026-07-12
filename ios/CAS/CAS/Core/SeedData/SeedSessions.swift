@@ -34,5 +34,20 @@ enum SeedSessions {
         Bras.session,
     ]
 
+    /// Beta 1.0: native bodyweight-only implementations of CAS Force,
+    /// Hypertrophie fonctionnelle and Robustesse's Action Capabilities —
+    /// see each file's own doc comment for what's preserved and what's
+    /// explicitly not. Deliberately **not** part of `primary` or `all`
+    /// yet: nothing in the repository, resolver or rotation selects
+    /// between a session's loaded and bodyweight implementation — that
+    /// selection logic is a separate, not-yet-designed step. These
+    /// compile and are unit-tested like any other seed content, but
+    /// aren't reachable from the app.
+    static let bodyweightNative: [TrainingSession] = [
+        CASForceBodyweight.session,
+        CASHypertrophieBodyweight.session,
+        CASRobustesseBodyweight.session,
+    ]
+
     static let all: [TrainingSession] = primary + legacy
 }
