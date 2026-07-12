@@ -10,4 +10,12 @@ enum TrainingExperience: String, Codable, CaseIterable, Sendable {
     case beginner
     case intermediate
     case advanced
+
+    var displayName: String {
+        switch self {
+        case .beginner: return "Débutant"
+        case .intermediate: return "Intermédiaire"
+        case .advanced: return "Avancé"
+        }
+    }
 }

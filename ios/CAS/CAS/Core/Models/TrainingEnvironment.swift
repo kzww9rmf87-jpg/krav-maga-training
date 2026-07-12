@@ -9,6 +9,16 @@ enum TrainingEnvironment: String, Codable, CaseIterable, Sendable {
     case combatGym
     case homeGym
     case mixed
+
+    var displayName: String {
+        switch self {
+        case .bodyweightOnly: return "Poids du corps uniquement"
+        case .commercialGym: return "Salle de musculation"
+        case .combatGym: return "Salle de combat équipée"
+        case .homeGym: return "Home gym"
+        case .mixed: return "Environnement mixte"
+        }
+    }
 }
 
 extension TrainingEnvironment {

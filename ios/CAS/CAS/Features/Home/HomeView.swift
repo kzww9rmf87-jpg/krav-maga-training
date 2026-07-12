@@ -10,16 +10,35 @@ struct HomeView: View {
     @State private var selectedSession: TrainingSession?
     @State private var showHistory = false
     @State private var showAllSessions = false
+    @State private var isEditingProfile = false
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: [SortDescriptor(\SessionLog.date, order: .reverse)]) private var recentLogs: [SessionLog]
 
     private var recommendation: SessionRecommendation? {
         viewModel.recommendation(afterLastCompletedSessionId: recentLogs.first?.sessionId)
     }
 
+    /// Beta 1.0. Built fresh per read, same pattern as `SessionExecutionView`'s
+    /// `historyStore` — cheap, and always talks to the current context.
+    private var profileStore: AthleteProfileStore {
+        SwiftDataAthleteProfileStore(context: modelContext)
+    }
+
+    /// Drives `.fullScreenCover(isPresented:)` for mandatory onboarding.
+    /// The `set` closure is effectively unreachable in normal use: nothing
+    /// on this screen offers to dismiss onboarding directly, only
+    /// `AthleteProfileFlowView.onFinished` moves `profileLoadState` out of
+    /// `.missing`, which is what actually closes the cover.
+    private var isOnboardingPresented: Binding<Bool> {
+        Binding(get: { viewModel.profileLoadState.isMissing }, set: { _ in })
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
+                    profileStatusBanner
+
                     if let recommendation {
                         VStack(alignment: .leading, spacing: 12) {
                             SessionCard(title: recommendation.session.title, subtitle: recommendation.session.subtitle)
@@ -65,6 +84,15 @@ struct HomeView: View {
             .background(CASTheme.Colors.background)
             .navigationTitle("CAS")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        isEditingProfile = true
+                    } label: {
+                        Image(systemName: "person.crop.circle")
+                    }
+                    .accessibilityLabel("Profil")
+                    .disabled(viewModel.profileLoadState.editableProfile == nil)
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showHistory = true
@@ -74,8 +102,30 @@ struct HomeView: View {
                     .accessibilityLabel("Historique")
                 }
             }
+            .task {
+                viewModel.loadProfileIfNeeded(using: profileStore)
+            }
             .fullScreenCover(item: $selectedSession) { session in
                 SessionFlowContainer(session: session)
+            }
+            .fullScreenCover(isPresented: isOnboardingPresented) {
+                AthleteProfileFlowView(
+                    viewModel: AthleteProfileFlowViewModel(mode: .onboarding, existingProfile: nil, store: profileStore),
+                    onFinished: { profile in viewModel.profileSaved(profile) },
+                    onCancel: nil
+                )
+            }
+            .sheet(isPresented: $isEditingProfile) {
+                if let editableProfile = viewModel.profileLoadState.editableProfile {
+                    AthleteProfileFlowView(
+                        viewModel: AthleteProfileFlowViewModel(mode: .edit, existingProfile: editableProfile, store: profileStore),
+                        onFinished: { profile in
+                            viewModel.profileSaved(profile)
+                            isEditingProfile = false
+                        },
+                        onCancel: { isEditingProfile = false }
+                    )
+                }
             }
             .sheet(isPresented: $showHistory) {
                 HistoryView()
@@ -86,6 +136,34 @@ struct HomeView: View {
                     selectedSession = session
                 }
             }
+        }
+    }
+
+    /// Only ever visible for `.loading`/`.failed` — `.idle`, `.loaded` and
+    /// `.missing` all render nothing here (`.missing` shows the
+    /// full-screen onboarding cover instead).
+    @ViewBuilder
+    private var profileStatusBanner: some View {
+        switch viewModel.profileLoadState {
+        case .loading:
+            ProgressView()
+                .frame(maxWidth: .infinity)
+        case .failed(let message):
+            VStack(alignment: .leading, spacing: 8) {
+                Text(message)
+                    .font(CASTypography.caption)
+                    .foregroundStyle(CASTheme.Colors.primaryText)
+                Button("Réessayer") {
+                    viewModel.retryLoadingProfile(using: profileStore)
+                }
+                .font(CASTypography.caption.weight(.semibold))
+                .foregroundStyle(CASTheme.Colors.warning)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+            .background(CASTheme.Colors.secondaryBackground, in: RoundedRectangle(cornerRadius: CASTheme.Metrics.controlCornerRadius, style: .continuous))
+        default:
+            EmptyView()
         }
     }
 

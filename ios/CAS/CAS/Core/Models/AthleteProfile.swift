@@ -8,7 +8,7 @@ import Foundation
 ///
 /// One profile per installation — there is no multi-athlete concept here,
 /// and none is planned; this is a local, single-user app.
-struct AthleteProfile: Identifiable, Codable, Sendable {
+struct AthleteProfile: Identifiable, Codable, Sendable, Equatable {
     let id: UUID
     var combatExperience: TrainingExperience
     var strengthTrainingExperience: TrainingExperience

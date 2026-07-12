@@ -23,4 +23,22 @@ enum Equipment: String, Codable, CaseIterable, Sendable {
     case sled
     case heavyBag
     case cardioMachine
+
+    var displayName: String {
+        switch self {
+        case .pullUpBar: return "Barre de traction"
+        case .dipBars: return "Barres parallèles"
+        case .resistanceBands: return "Élastiques"
+        case .dumbbells: return "Haltères"
+        case .barbell: return "Barre olympique"
+        case .rack: return "Rack"
+        case .bench: return "Banc"
+        case .cableMachine: return "Poulie / câble"
+        case .kettlebell: return "Kettlebell"
+        case .medicineBall: return "Medicine ball"
+        case .sled: return "Traîneau (sled)"
+        case .heavyBag: return "Sac de frappe"
+        case .cardioMachine: return "Machine cardio"
+        }
+    }
 }
