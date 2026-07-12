@@ -35,7 +35,7 @@ extension TrainingEnvironment {
         case .homeGym:
             return [.pullUpBar, .dumbbells, .kettlebell, .resistanceBands]
         case .commercialGym:
-            return [.barbell, .rack, .bench, .dumbbells, .cableMachine, .pullUpBar, .dipBars, .cardioMachine]
+            return [.barbell, .rack, .bench, .dumbbells, .cableMachine, .pullUpBar, .dipBars, .cardioMachine, .externalLoad]
         case .combatGym:
             return [.heavyBag, .medicineBall, .kettlebell, .pullUpBar]
         case .mixed:

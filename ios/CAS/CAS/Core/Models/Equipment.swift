@@ -23,6 +23,12 @@ enum Equipment: String, Codable, CaseIterable, Sendable {
     case sled
     case heavyBag
     case cardioMachine
+    /// A generic loadable weight (plate, weighted vest, sandbag...) — not
+    /// tied to a specific apparatus. Added for Beta 1.0's session
+    /// resolution: some exercises need "some additional load" without
+    /// needing dumbbells/kettlebell/barbell specifically (e.g. a weighted
+    /// dead hang), and `pullUpBar` alone doesn't imply any load exists.
+    case externalLoad
 
     var displayName: String {
         switch self {
@@ -39,6 +45,7 @@ enum Equipment: String, Codable, CaseIterable, Sendable {
         case .sled: return "Traîneau (sled)"
         case .heavyBag: return "Sac de frappe"
         case .cardioMachine: return "Machine cardio"
+        case .externalLoad: return "Charge additionnelle (disque, gilet lesté...)"
         }
     }
 }
