@@ -88,47 +88,78 @@ struct SessionRecommendationServiceTests {
 
     // MARK: - Beta 1.0: equipment-driven skipping
 
-    @Test func noEquipmentAlternatesOnlyBetweenPuissanceAndAerobicBase() throws {
+    /// Beta 1.0: with no equipment, Force/Hypertrophie fonctionnelle/
+    /// Robustesse each resolve via their bodyweight-native counterpart
+    /// (not a skip anymore), Puissance still resolves via its
+    /// substitution table, and Base aérobie needs nothing to begin with —
+    /// so a full cycle now visits all five conceptual slots, three of
+    /// them under their bodyweight id.
+    @Test func noEquipmentWalksAllFiveSlotsUsingBodyweightNativeWhereAvailable() throws {
         let service = RotationRecommendationService()
         var lastCompletedSessionId: String?
         var visited: [String] = []
-        for _ in 0..<6 {
+        for _ in CASSessionID.allCases {
             let recommendation = service.recommend(lastCompletedSessionId: lastCompletedSessionId, availableEquipment: [])
             let nextId = try #require(recommendation?.resolved.session.id)
             visited.append(nextId)
             lastCompletedSessionId = nextId
         }
-        #expect(Set(visited) == [CASSessionID.power.rawValue, CASSessionID.aerobicBase.rawValue])
+        #expect(visited == [
+            CASForceBodyweight.session.id,
+            CASSessionID.power.rawValue,
+            CASHypertrophieBodyweight.session.id,
+            CASRobustesseBodyweight.session.id,
+            CASSessionID.aerobicBase.rawValue,
+        ])
+    }
+
+    /// A completed bodyweight session must advance the rotation exactly
+    /// as if its gym counterpart had been completed — `rotationSlot`'s
+    /// whole purpose.
+    @Test func recommendationContinuesRotationAfterABodyweightSessionWasLastCompleted() {
+        let service = RotationRecommendationService()
+        let recommendation = service.recommend(lastCompletedSessionId: CASForceBodyweight.session.id, availableEquipment: Self.fullyEquippedGym)
+        #expect(recommendation?.resolved.session.id == CASSessionID.power.rawValue)
+    }
+
+    /// The explicitly validated Beta 1.0 behavior change: a no-equipment
+    /// profile with no history now recommends the native bodyweight
+    /// implementation of the first rotation slot, not a skip straight to
+    /// CAS Puissance.
+    @Test func recommendationForNoEquipmentAndNoHistoryIsForceBodyweight() {
+        let service = RotationRecommendationService()
+        let recommendation = service.recommend(lastCompletedSessionId: nil, availableEquipment: [])
+        #expect(recommendation?.resolved.session.id == CASForceBodyweight.session.id)
+        #expect(recommendation?.reason == "Aucune séance récente — on commence par CAS Force — Poids du corps.")
     }
 
     @Test func noEquipmentResolvesPuissanceWithTheThreeValidatedSubstitutions() {
         let service = RotationRecommendationService()
-        let recommendation = service.recommend(lastCompletedSessionId: CASSessionID.aerobicBase.rawValue, availableEquipment: [])
+        // Force (bodyweight-native) is the slot right before Puissance —
+        // completing it is what makes Puissance the next candidate.
+        let recommendation = service.recommend(lastCompletedSessionId: CASSessionID.force.rawValue, availableEquipment: [])
         #expect(recommendation?.resolved.session.id == CASSessionID.power.rawValue)
         let partial = recommendation?.resolved.substitutions.filter { $0.equivalence == .partial }
         #expect(partial?.count == 3)
     }
 
-    @Test func skippingUnavailableSessionsProducesAShortCountBasedReason() {
-        let service = RotationRecommendationService()
-        // After Force (unavailable with no equipment), the next available
-        // candidate is Puissance — one skip (Force itself isn't a skip,
-        // it's the starting point; Force IS skipped as a candidate here
-        // since the theoretical next after a hypothetical "no history"
-        // start is Force itself, which is unavailable).
-        let recommendation = service.recommend(lastCompletedSessionId: nil, availableEquipment: [])
-        #expect(recommendation?.resolved.session.id == CASSessionID.power.rawValue)
+    /// Beta 1.0 note: with real content, a genuine equipment-driven skip
+    /// is now only reachable through CAS Puissance — Force/Hypertrophie
+    /// fonctionnelle/Robustesse always resolve via their bodyweight-
+    /// native counterpart, Base aérobie needs no equipment to begin
+    /// with, and Puissance's own substitution table already covers a
+    /// zero-equipment profile in practice. Since the two slots without a
+    /// bodyweight counterpart (Puissance, Base aérobie) are never
+    /// adjacent in the rotation without Force/Hypertrophie/Robustesse
+    /// between them, a *plural* skip (2+ in a row) is no longer
+    /// reachable at all with real content — only this fixture, which
+    /// forces a single genuine skip, remains to verify the skip-and-
+    /// explain mechanism itself still works.
+    @Test func skippingAnUndocumentedCandidateWithNoFallbackProducesASingularCountBasedReason() {
+        let service = RotationRecommendationService(repository: UndocumentedPuissanceRepository())
+        let recommendation = service.recommend(lastCompletedSessionId: CASSessionID.force.rawValue, availableEquipment: [])
+        #expect(recommendation?.resolved.session.id == CASHypertrophieBodyweight.session.id)
         #expect(recommendation?.reason == "Prochaine séance disponible dans votre rotation. 1 séance est incompatible avec votre équipement actuel.")
-    }
-
-    @Test func skippingMultipleSessionsPluralizesTheReason() {
-        let service = RotationRecommendationService()
-        // After Puissance, the theoretical next is Hypertrophie
-        // fonctionnelle, then Robustesse — both unavailable — before
-        // Base aérobie.
-        let recommendation = service.recommend(lastCompletedSessionId: CASSessionID.power.rawValue, availableEquipment: [])
-        #expect(recommendation?.resolved.session.id == CASSessionID.aerobicBase.rawValue)
-        #expect(recommendation?.reason == "Prochaine séance disponible dans votre rotation. 2 séances sont incompatibles avec votre équipement actuel.")
     }
 
     @Test func allSessionsUnavailableProducesNoRecommendation() {
@@ -178,4 +209,37 @@ struct SessionRecommendationServiceTests {
 private struct EmptyRepository: SessionRepository {
     func allSessions() -> [TrainingSession] { [] }
     func session(id: String) -> TrainingSession? { nil }
+}
+
+/// Keeps all four other CAS V0.1 sessions real, but swaps CAS Puissance
+/// for a fixture with one undocumented exercise — the only way left to
+/// force a genuine equipment-driven skip, since Force/Hypertrophie
+/// fonctionnelle/Robustesse always fall back to their bodyweight-native
+/// counterpart regardless of what this repository returns for them
+/// (`SessionImplementationSelector.bodyweightCounterpart` isn't
+/// injectable, by design — it's real content, not a fixture).
+private struct UndocumentedPuissanceRepository: SessionRepository {
+    private let real = SeedSessionRepository()
+    private let broken = TrainingSession(
+        id: CASSessionID.power.rawValue,
+        title: "CAS Puissance (fixture)",
+        subtitle: "test fixture",
+        format: .standard(modules: [
+            SessionModule(module: CapabilityModuleCatalog.power, exercises: [
+                SessionExercise(
+                    exercise: Exercise(id: "test-undocumented-exercise", name: "Test", primaryAdaptation: .power),
+                    groups: [SetGroup(kind: .work, sets: [SetSpec(load: .bodyweight, reps: "5")])],
+                    note: "test"
+                ),
+            ]),
+        ])
+    )
+
+    func allSessions() -> [TrainingSession] {
+        real.allSessions().map { $0.id == broken.id ? broken : $0 }
+    }
+
+    func session(id: String) -> TrainingSession? {
+        id == broken.id ? broken : real.session(id: id)
+    }
 }

@@ -79,4 +79,41 @@ struct CASBodyweightSessionsTests {
     @Test func casRobustesseBodyweightHasFiveExercisesMatchingTheFrozenContent() {
         #expect(CASRobustesseBodyweight.session.exerciseCount == 5)
     }
+
+    // MARK: - Beta 1.0: bodyweight sessions are equipment-verified, not assumed
+
+    /// Every exercise these three sessions reference must have an
+    /// explicit `[]` entry in `ExerciseEquipmentRequirements` — the
+    /// documentation `SessionImplementationSelector` actually checks
+    /// instead of assuming zero-equipment membership.
+    @Test func everyBodyweightNativeExerciseHasAnExplicitEquipmentRequirementEntry() {
+        for session in SeedSessions.bodyweightNative {
+            guard case .standard(let modules) = session.format else { continue }
+            for module in modules {
+                for sessionExercise in module.exercises {
+                    #expect(
+                        ExerciseEquipmentRequirements.byExerciseId[sessionExercise.exercise.id] != nil,
+                        "\(sessionExercise.exercise.id) has no entry in ExerciseEquipmentRequirements"
+                    )
+                }
+            }
+        }
+    }
+
+    /// Fail-closed at the resolver level: a bodyweight session with one
+    /// exercise missing from `requirements` is `.unavailable`, exactly
+    /// like an undocumented gym exercise — never assumed feasible just
+    /// because it's bodyweight content.
+    @Test func aBodyweightSessionWithAnUndocumentedExerciseIsUnavailable() {
+        let reducedRequirements = ExerciseEquipmentRequirements.byExerciseId
+            .filter { $0.key != "cas-force-bodyweight-pistol-squat" }
+        let availability = SessionAvailabilityResolver.evaluate(
+            CASForceBodyweight.session,
+            availableEquipment: [],
+            requirements: reducedRequirements
+        )
+        guard case .unavailable = availability else {
+            Issue.record("Expected .unavailable when an exercise is undocumented"); return
+        }
+    }
 }

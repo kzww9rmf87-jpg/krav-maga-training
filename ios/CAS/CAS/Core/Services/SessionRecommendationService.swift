@@ -25,19 +25,20 @@ protocol SessionRecommendationService: Sendable {
     func recommend(lastCompletedSessionId: String?, availableEquipment: Set<Equipment>) -> SessionRecommendation?
 }
 
-/// Fixed rotation over CAS V0.1: Force → Puissance → Hypertrophie
-/// fonctionnelle → Robustesse → Base aérobie → Force. Not derived from
-/// anything physiological — purely "what's next in a fixed list," using
-/// `CASSessionID`'s declaration order as the single source of that
-/// order.
+/// Fixed rotation over CAS V0.1's five conceptual slots: Force →
+/// Puissance → Hypertrophie fonctionnelle → Robustesse → Base aérobie →
+/// Force. Not derived from anything physiological — purely "what's next
+/// in a fixed list," using `CASSessionID`'s declaration order as the
+/// single source of that order.
 ///
-/// Beta 1.0: a candidate the resolver marks `.unavailable` for
-/// `availableEquipment` is skipped, never recommended — the rotation
-/// order itself never changes, only which candidates in it currently
-/// qualify. CAS Puissance is the only candidate ever evaluated with a
+/// Beta 1.0: each slot's implementation is chosen by
+/// `SessionImplementationSelector`, never the gym version directly — a
+/// slot only becomes a genuine skip when neither its gym version, its
+/// bodyweight-native counterpart (if any) nor a gym substitution table
+/// resolves it. CAS Puissance is the only candidate ever evaluated with a
 /// substitution table (`CASPuissanceSubstitutions`); every other
-/// candidate is checked for feasibility only, per the validated
-/// audit — substituting for them isn't part of this increment's scope.
+/// candidate is checked for feasibility (gym, then bodyweight) only, per
+/// the validated audit.
 struct RotationRecommendationService: SessionRecommendationService {
     private let repository: SessionRepository
     private let order = CASSessionID.allCases.map(\.rawValue)
@@ -53,11 +54,11 @@ struct RotationRecommendationService: SessionRecommendationService {
         let lastSessionTitle: String?
         if
             let lastCompletedSessionId,
-            let lastIndex = order.firstIndex(of: lastCompletedSessionId),
-            let lastSession = sessions.first(where: { $0.id == lastCompletedSessionId })
+            let lastSlot = SessionImplementationSelector.rotationSlot(forSessionId: lastCompletedSessionId),
+            let lastIndex = order.firstIndex(of: lastSlot.rawValue)
         {
             startIndex = (lastIndex + 1) % order.count
-            lastSessionTitle = lastSession.title
+            lastSessionTitle = Self.title(forSessionId: lastCompletedSessionId, gymSessions: sessions)
         } else {
             startIndex = 0
             lastSessionTitle = nil
@@ -66,13 +67,15 @@ struct RotationRecommendationService: SessionRecommendationService {
         var skippedCount = 0
         for offset in 0..<order.count {
             let index = (startIndex + offset) % order.count
-            guard let candidate = sessions.first(where: { $0.id == order[index] }) else { continue }
+            let slot = CASSessionID.allCases[index]
+            guard let candidate = sessions.first(where: { $0.id == slot.rawValue }) else { continue }
 
-            let substitutions = candidate.id == CASSessionID.power.rawValue
+            let substitutions = slot == .power
                 ? CASPuissanceSubstitutions.byExerciseId
                 : [:]
-            let availability = SessionAvailabilityResolver.evaluate(
-                candidate,
+            let availability = SessionImplementationSelector.select(
+                sessionId: slot,
+                gymSession: candidate,
                 availableEquipment: availableEquipment,
                 substitutions: substitutions
             )
@@ -94,6 +97,16 @@ struct RotationRecommendationService: SessionRecommendationService {
 
         // Every candidate in the rotation was unavailable.
         return nil
+    }
+
+    /// `lastCompletedSessionId` may be a gym id or a bodyweight-native
+    /// id — the reason text always names whichever was actually
+    /// completed, not the slot's gym title.
+    private static func title(forSessionId sessionId: String, gymSessions: [TrainingSession]) -> String? {
+        if let gymSession = gymSessions.first(where: { $0.id == sessionId }) {
+            return gymSession.title
+        }
+        return SessionImplementationSelector.bodyweightCounterpart.values.first { $0.id == sessionId }?.title
     }
 
     /// A skip is always explained in one short, count-based sentence —

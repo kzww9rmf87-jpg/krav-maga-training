@@ -37,18 +37,31 @@ final class HomeViewModel {
         recommendationService.recommend(lastCompletedSessionId: lastCompletedSessionId, availableEquipment: availableEquipment)
     }
 
-    /// The five CAS V0.1 sessions, each resolved against `equipment` —
-    /// "Toutes les séances" always shows all five, never a filtered
-    /// subset, so an unavailable one still carries its reasons instead of
-    /// silently disappearing. Same rule as `recommendation`: only CAS
-    /// Puissance is ever evaluated with a substitution table.
+    /// The five CAS V0.1 conceptual slots, each resolved against
+    /// `equipment` via `SessionImplementationSelector` — "Toutes les
+    /// séances" always shows exactly five rows, never a filtered subset
+    /// and never a bodyweight/gym duplicate: an unavailable slot still
+    /// carries its reasons instead of silently disappearing.
+    ///
+    /// `session` (the tuple's first element) is always the gym session —
+    /// the row's identity and its fallback title when unavailable.
+    /// `availability` carries whichever implementation was actually
+    /// selected; the UI reads the displayed title from
+    /// `ResolvedTrainingSession.session`, never assumes it matches
+    /// `session`.
     func sessionAvailabilities(for equipment: Set<Equipment>) -> [(session: TrainingSession, availability: SessionAvailability)] {
-        sessions.map { session in
-            let substitutions = session.id == CASSessionID.power.rawValue
+        CASSessionID.allCases.compactMap { slot in
+            guard let gymSession = sessions.first(where: { $0.id == slot.rawValue }) else { return nil }
+            let substitutions = slot == .power
                 ? CASPuissanceSubstitutions.byExerciseId
                 : [:]
-            let availability = SessionAvailabilityResolver.evaluate(session, availableEquipment: equipment, substitutions: substitutions)
-            return (session, availability)
+            let availability = SessionImplementationSelector.select(
+                sessionId: slot,
+                gymSession: gymSession,
+                availableEquipment: equipment,
+                substitutions: substitutions
+            )
+            return (gymSession, availability)
         }
     }
 

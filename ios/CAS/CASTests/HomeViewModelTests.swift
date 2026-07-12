@@ -25,18 +25,32 @@ struct HomeViewModelTests {
         #expect(availabilities.map(\.session.id) == SeedSessions.primary.map(\.id))
     }
 
-    @Test func sessionAvailabilitiesMarksForceHypertrophyAndRobustnessUnavailableWithNoEquipment() {
+    /// Beta 1.0: Force/Hypertrophie fonctionnelle/Robustesse are no
+    /// longer unavailable with no equipment — they resolve via their
+    /// bodyweight-native counterpart. The row's identity (`session.id`)
+    /// stays the gym id (the emplacement key), but the *displayed*
+    /// implementation (`ResolvedTrainingSession.session`) is the
+    /// bodyweight one — locking in that "Toutes les séances" shows the
+    /// selected implementation's own title, not the gym title, for an
+    /// available row.
+    @Test func sessionAvailabilitiesShowsBodyweightNativeForForceHypertrophyAndRobustnessWithNoEquipment() {
         let viewModel = HomeViewModel()
         let availabilities = viewModel.sessionAvailabilities(for: [])
-        let unavailableIds = availabilities.compactMap { item -> String? in
-            if case .unavailable = item.availability { return item.session.id }
-            return nil
+
+        let expectations: [(slot: CASSessionID, bodyweightId: String)] = [
+            (.force, CASForceBodyweight.session.id),
+            (.functionalHypertrophy, CASHypertrophieBodyweight.session.id),
+            (.robustness, CASRobustesseBodyweight.session.id),
+        ]
+        for expectation in expectations {
+            let item = availabilities.first { $0.session.id == expectation.slot.rawValue }
+            #expect(item?.session.id == expectation.slot.rawValue, "row identity should stay the gym id for \(expectation.slot)")
+            guard case .available(let resolved) = item?.availability else {
+                Issue.record("Expected .available (bodyweight native) for \(expectation.slot)")
+                continue
+            }
+            #expect(resolved.session.id == expectation.bodyweightId)
         }
-        #expect(Set(unavailableIds) == [
-            CASSessionID.force.rawValue,
-            CASSessionID.functionalHypertrophy.rawValue,
-            CASSessionID.robustness.rawValue,
-        ])
     }
 
     @Test func sessionAvailabilitiesMarksPuissanceWithCompromisesAndAerobicBaseAvailableWithNoEquipment() {
