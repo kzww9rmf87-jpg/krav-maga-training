@@ -1,0 +1,947 @@
+# CAS Reference Architecture
+
+### Building an Explainable Decision System for Combat Physical Preparation
+
+---
+
+## Status
+
+**Draft — Architecture Phase**
+
+This document defines the conceptual architecture of CAS.
+
+It is the highest-level reference document of the project.
+
+Every scientific document, every engine specification and every line of code must remain consistent with the principles defined here.
+
+If an implementation contradicts this document, the implementation is considered incorrect until the architecture itself is revised.
+
+---
+
+# Purpose
+
+CAS is not a workout generator.
+
+CAS is not a bodybuilding application.
+
+CAS is not an AI coach.
+
+CAS is an explainable decision support system whose objective is to help practitioners of combat sports develop their physical capabilities while respecting the constraints imposed by technical practice, recovery and long-term progression.
+
+---
+
+# Scope
+
+This document defines:
+
+- the philosophy of CAS;
+- the conceptual model;
+- the decision model;
+- scientific principles;
+- architectural constraints;
+- governance rules.
+
+It does **not** define:
+
+- exercise libraries;
+- programming details;
+- user interface;
+- implementation choices.
+
+Those are specified in lower-level documents.
+
+---
+
+# Reading order
+
+The complete architecture must be read in the following order:
+
+1. CAS.md
+2. CLAUDE.md
+3. 00-foundation
+4. 10-science
+5. 20-engine
+6. 30-product
+7. This document
+
+---
+
+# Guiding Principles
+
+The following principles are considered non-negotiable.
+
+1. Technique always has priority over physical preparation.
+
+2. Every recommendation must be explainable.
+
+3. Uncertainty must never be hidden.
+
+4. Recovery is part of training.
+
+5. Long-term progression is more important than short-term performance.
+
+6. Safety always overrides optimization.
+
+7. Scientific evidence has priority over intuition whenever robust evidence exists.
+
+8. Expert judgement remains necessary whenever evidence is insufficient.
+
+---
+
+# Current Version
+
+Version 1.0 is focused on defining the architecture.
+
+Implementation details remain described in their respective documents.
+
+---
+
+# Next chapters
+
+The following chapters will be progressively written.
+
+- Chapter 1 — Why CAS exists
+- Chapter 2 — State of the Art
+- Chapter 3 — The Combat Athlete Model
+- Chapter 4 — The Decision Model
+- Chapter 5 — Managing Uncertainty
+- Chapter 6 — Scientific Principles
+- Chapter 7 — System Architecture
+- Chapter 8 — Governance
+- Chapter 9 — Roadmap
+
+- CAS is not designed to replace the judgement of an experienced coach. It is designed to make expert reasoning explicit, transparent and accessible.
+# Chapter 1 — Why CAS Exists
+
+## The Problem
+
+Physical preparation has never been more accessible.
+
+Today, thousands of applications can generate workouts, count repetitions, estimate one-repetition maximums, track progress or propose complete training plans.
+
+Artificial intelligence has accelerated this trend even further.
+
+In a few seconds, almost anyone can obtain a seemingly coherent training program.
+
+However, a fundamental limitation remains.
+
+Most existing systems optimize exercises.
+
+Very few attempt to model the reasoning of an experienced coach.
+
+The central question is rarely:
+
+> "Which exercise should this athlete perform today?"
+
+Instead, it is:
+
+> "Given this athlete, this context, this recovery state and these objectives, should this athlete even perform this type of work today?"
+
+The difference is substantial.
+
+A workout is not a decision.
+
+It is the consequence of a decision.
+
+CAS was born from this distinction.
+
+---
+
+## Combat Sports Are Different
+
+Combat sports impose constraints that differ profoundly from those of general fitness or bodybuilding.
+
+Technical practice already generates considerable physical stress.
+
+Sparring, pad work, grappling, tactical learning and technical repetition all consume recovery resources.
+
+Physical preparation therefore cannot be planned independently.
+
+Its role is not to replace technical practice.
+
+Its role is to support it.
+
+The best physical preparation is not the one that produces the hardest workout.
+
+It is the one that allows technical progression while improving long-term athletic capacity.
+
+---
+
+## Beyond Workout Generation
+
+CAS does not attempt to become another workout generator.
+
+Its objective is different.
+
+CAS aims to model the decision process that precedes training.
+
+Before selecting exercises, CAS attempts to answer questions such as:
+
+- Is physical preparation appropriate today?
+- Which physical quality deserves priority?
+- Which qualities should simply be maintained?
+- Which constraints currently limit adaptation?
+- What level of uncertainty exists in the available information?
+
+Only after answering these questions does exercise selection become meaningful.
+
+---
+
+## Explainability
+
+Every recommendation generated by CAS should be explainable.
+
+A recommendation without justification has little educational value.
+
+Whenever possible, CAS should be capable of answering:
+
+- Why this recommendation?
+- Which observations led to this conclusion?
+- Which scientific principles support it?
+- Which assumptions remain uncertain?
+
+Explainability is therefore considered a core architectural requirement rather than an optional feature.
+
+---
+
+## Humility
+
+Human performance is a complex adaptive system.
+
+No application can perfectly estimate recovery, fatigue or future adaptation.
+
+CAS deliberately refuses false precision.
+
+Whenever uncertainty becomes too important, the system should acknowledge its limits rather than fabricate confidence.
+
+The objective is not to appear intelligent.
+
+The objective is to remain trustworthy.
+
+---
+
+## Long-Term Perspective
+
+CAS is designed around long-term athlete development.
+
+Individual workouts matter little in isolation.
+
+Meaningful adaptation emerges from months and years of coherent decisions.
+
+The system therefore prioritizes sustainable progression over short-term optimization.
+
+Success is not defined by today's performance.
+
+Success is defined by the athlete's ability to continue progressing safely over time.
+# Chapter 2 — A New Paradigm
+
+## From Workout Generation to Decision Support
+
+Most training applications begin with the same assumption:
+
+> The goal is to generate workouts.
+
+CAS starts from a different premise.
+
+A workout is never the objective.
+
+A workout is merely the visible consequence of a much larger decision-making process.
+
+Between the athlete's situation and the exercise selection lies a sequence of evaluations, assumptions, constraints and trade-offs.
+
+This sequence is where coaching expertise resides.
+
+CAS therefore does not attempt to automate coaching.
+
+It attempts to model the reasoning that precedes coaching decisions.
+
+---
+
+## The Athlete Is Not a Collection of Muscles
+
+Traditional programming often begins with body parts.
+
+Chest.
+
+Back.
+
+Legs.
+
+Shoulders.
+
+Arms.
+
+This organization is practical for bodybuilding.
+
+It is less relevant for combat sports.
+
+Combat athletes do not perform isolated muscular actions.
+
+They accelerate.
+
+They decelerate.
+
+They strike.
+
+They grapple.
+
+They rotate.
+
+They stabilize.
+
+They recover.
+
+They solve movement problems under fatigue.
+
+For this reason, CAS considers the athlete primarily as a system of interacting capabilities rather than independent muscles.
+
+Exercises become tools.
+
+Capabilities remain the objective.
+
+---
+
+## Decisions Before Exercises
+
+A competent coach rarely begins by asking:
+
+> Which exercise should I prescribe?
+
+Instead, the reasoning typically follows a different sequence.
+
+First:
+
+What is happening?
+
+Then:
+
+Why might it be happening?
+
+Only then:
+
+What intervention is most appropriate?
+
+CAS adopts the same philosophy.
+
+The system postpones exercise selection until the underlying problem has been sufficiently characterized.
+
+---
+
+## Constraints Drive Decisions
+
+Performance never exists in isolation.
+
+Every recommendation is constrained by reality.
+
+Among the most important constraints are:
+
+- technical training load;
+- recovery capacity;
+- injury history;
+- available time;
+- equipment;
+- age;
+- experience;
+- current objectives;
+- uncertainty.
+
+Two athletes with identical strength levels may therefore receive completely different recommendations because their constraints differ.
+
+Context is not an accessory.
+
+Context is the starting point of every decision.
+
+---
+
+## Explainable Intelligence
+
+CAS deliberately rejects opaque recommendations.
+
+Every important decision should be traceable.
+
+Whenever possible, the system should be capable of reconstructing its reasoning.
+
+Observation.
+
+↓
+
+Interpretation.
+
+↓
+
+Hypothesis.
+
+↓
+
+Decision.
+
+↓
+
+Recommendation.
+
+If this chain cannot be reconstructed, the recommendation should not be considered reliable.
+
+Explainability is therefore not a user-interface feature.
+
+It is an architectural constraint.
+
+---
+
+## Uncertainty Is Information
+
+Human performance cannot be measured perfectly.
+
+Sleep quality.
+
+Fatigue.
+
+Pain.
+
+Stress.
+
+Motivation.
+
+Training response.
+
+All remain partially uncertain.
+
+Most systems attempt to hide this uncertainty behind numerical scores.
+
+CAS follows the opposite philosophy.
+
+Uncertainty should remain visible.
+
+When confidence is limited, recommendations become more conservative.
+
+The objective is not to maximize apparent intelligence.
+
+The objective is to maximize trustworthiness.
+
+---
+
+## CAS Is a Decision System
+
+The primary output of CAS is not a workout.
+
+It is a decision.
+
+Examples include:
+
+- train;
+- recover;
+- maintain;
+- progress;
+- reduce volume;
+- postpone intensity;
+- seek additional information;
+- stop and consult a healthcare professional.
+
+Exercises appear only after these higher-level decisions have been made.
+
+This inversion defines the identity of CAS.
+
+The system does not optimize workouts.
+
+It optimizes decisions.
+# Chapter 3 — The Combat Athlete Model
+
+## The Central Principle
+
+Physical preparation should never begin with exercises.
+
+Nor should it begin with muscles.
+
+It should begin with performance.
+
+Every combat sport ultimately requires the athlete to solve movement problems under constantly changing constraints.
+
+The objective of physical preparation is therefore not to develop isolated physical qualities.
+
+Its objective is to increase the athlete's capacity to successfully solve these problems repeatedly, efficiently and safely.
+
+CAS therefore models the athlete as a dynamic system of interacting capabilities rather than a collection of muscles or isolated fitness components.
+
+---
+
+## Capabilities Before Exercises
+
+Exercises are not objectives.
+
+Exercises are interventions.
+
+Their value depends entirely on the capability they are intended to improve.
+
+The same squat may therefore be appropriate for one athlete and unnecessary for another.
+
+The question is never:
+
+> "Is this a good exercise?"
+
+The relevant question is:
+
+> "Which capability is currently limiting this athlete's performance?"
+
+Only after identifying that limitation does exercise selection become meaningful.
+
+---
+
+## Performance Emerges From Interactions
+
+No combat action depends on a single physical quality.
+
+A punch is not produced by strength alone.
+
+It results from the interaction of multiple systems:
+
+- force production;
+- rate of force development;
+- coordination;
+- mobility;
+- stability;
+- technical skill;
+- timing;
+- decision making.
+
+Likewise, a takedown, an escape, or a defensive movement cannot be reduced to one isolated attribute.
+
+CAS therefore rejects one-dimensional thinking.
+
+Performance always emerges from interactions.
+
+---
+
+## Primary Capabilities
+
+Following the scientific review conducted during the conception of CAS, the system considers several primary capabilities that repeatedly appear across combat sports literature.
+
+These capabilities are not muscles.
+
+They are functional properties of the athlete.
+
+Examples include:
+
+- maximal force production;
+- rapid force production;
+- repeated high-intensity effort;
+- aerobic support capacity;
+- movement efficiency;
+- robustness to mechanical stress.
+
+Each capability represents an adaptation target rather than a training method.
+
+---
+
+## Secondary Adaptations
+
+Many commonly discussed training concepts are not considered primary capabilities.
+
+Instead, they are viewed as adaptations or means that support higher-level objectives.
+
+Examples include:
+
+- muscle hypertrophy;
+- trunk stiffness;
+- grip endurance;
+- tendon adaptation;
+- mobility improvements.
+
+These remain important.
+
+However, they acquire meaning only when connected to a specific performance objective.
+
+CAS therefore distinguishes carefully between:
+
+- what the athlete must ultimately be capable of doing;
+- and the physiological adaptations used to achieve that outcome.
+
+---
+
+## The Athlete Exists Within Constraints
+
+Capabilities never exist independently of context.
+
+Every athlete is influenced by:
+
+- technical practice;
+- recovery capacity;
+- age;
+- injury history;
+- available time;
+- psychological state;
+- occupational demands;
+- competitive calendar.
+
+The same physical profile may therefore require completely different decisions depending on these constraints.
+
+Context is inseparable from capability.
+
+---
+
+## Adaptation Is Dynamic
+
+No capability develops indefinitely.
+
+Every adaptation follows a dynamic process.
+
+Development.
+
+Maintenance.
+
+Regression.
+
+Recovery.
+
+Rebuilding.
+
+CAS therefore considers physical preparation as a continuous process of adaptation rather than a sequence of isolated workouts.
+
+The objective is not simply to increase performance.
+
+The objective is to continuously balance adaptation and recovery over months and years.
+
+---
+
+## A Living System
+
+The Combat Athlete Model is intentionally designed as a living model.
+
+Scientific knowledge evolves.
+
+Coaching practice evolves.
+
+Combat sports themselves evolve.
+
+The conceptual model described in CAS is therefore expected to evolve as stronger evidence becomes available.
+
+Stability is important.
+
+Scientific rigidity is not.
+
+The architecture must remain capable of integrating better evidence without losing internal coherence.
+
+# Chapter 4 — The Decision Model
+
+## Coaching Is a Sequence of Decisions
+
+An experienced coach does not begin by selecting exercises.
+
+Exercise selection is one of the final steps of the reasoning process.
+
+Instead, coaching consists of a continuous sequence of observations, interpretations, hypotheses, decisions and reassessments.
+
+CAS attempts to reproduce this reasoning explicitly.
+
+The objective is not to imitate human intuition.
+
+The objective is to model the observable structure of expert decision-making.
+
+---
+
+## Decisions Before Programming
+
+Programming is often presented as the central problem of physical preparation.
+
+CAS considers this perspective incomplete.
+
+Programming is only one consequence of a larger process.
+
+Before any session can be prescribed, several questions must already have been answered.
+
+For example:
+
+- Is training appropriate today?
+- What currently limits performance?
+- What constraints exist?
+- Which adaptations are realistic?
+- Which risks must be avoided?
+
+Only once these questions have been addressed does exercise programming become meaningful.
+
+---
+
+## The Decision Pipeline
+
+CAS organizes reasoning into successive layers.
+
+Each layer answers a different question.
+
+```
+Observation
+        ↓
+Safety
+        ↓
+Data Quality
+        ↓
+Context
+        ↓
+Hypothesis
+        ↓
+Recovery Budget
+        ↓
+Prioritization
+        ↓
+Decision
+        ↓
+Exercise Selection
+        ↓
+Monitoring
+        ↓
+Learning
+```
+
+Each stage constrains the following one.
+
+A later stage can never invalidate a higher-priority constraint.
+
+Safety always overrides optimization.
+
+---
+
+## Observation
+
+Every decision begins with observation.
+
+CAS gathers information describing the current state of the athlete.
+
+Examples include:
+
+- training history;
+- technical practice;
+- sleep;
+- fatigue;
+- pain;
+- available time;
+- recent progression;
+- current objectives.
+
+Observation does not attempt to explain.
+
+It only attempts to describe.
+
+---
+
+## Safety
+
+Before interpreting performance, CAS first evaluates whether a recommendation should be produced at all.
+
+Certain situations immediately interrupt the reasoning process.
+
+Examples include:
+
+- acute pain;
+- neurological symptoms;
+- suspected injury;
+- unexplained cardiovascular symptoms;
+- medical contraindications.
+
+In these situations, optimization becomes irrelevant.
+
+The correct decision is to suspend recommendation and encourage professional evaluation.
+
+Safety therefore acts as the first architectural filter.
+
+---
+
+## Data Quality
+
+Every decision depends on information.
+
+Not all information deserves the same level of confidence.
+
+CAS therefore evaluates the quality of its own inputs before producing recommendations.
+
+Examples:
+
+- complete history;
+- partial history;
+- contradictory reports;
+- missing information;
+- uncertain estimates.
+
+The confidence assigned to the recommendation can never exceed the confidence assigned to the available data.
+
+This principle prevents artificial certainty.
+
+---
+
+## Context
+
+Performance cannot be interpreted independently from context.
+
+Two identical athletes may require different decisions because their environments differ.
+
+Context includes:
+
+- technical workload;
+- occupational demands;
+- recovery opportunities;
+- competitive calendar;
+- available equipment;
+- personal objectives.
+
+Context transforms isolated observations into meaningful information.
+
+---
+
+## Hypothesis
+
+Expert coaching rarely follows deterministic rules.
+
+Instead, observations generate hypotheses.
+
+Examples:
+
+High fatigue may result from:
+
+- accumulated training load;
+- poor sleep;
+- occupational stress;
+- illness;
+- nutritional problems.
+
+Rather than immediately acting on one explanation, CAS attempts to identify the most plausible hypotheses while acknowledging remaining uncertainty.
+
+Hypotheses therefore remain provisional.
+
+They guide investigation rather than replacing it.
+
+---
+
+## Recovery Budget
+
+Once the current context has been characterized, CAS estimates the athlete's available recovery capacity.
+
+Importantly, this is not represented as a numerical score.
+
+Current scientific evidence does not justify pretending that recovery can be measured with such precision using subjective inputs.
+
+Instead, CAS represents recovery qualitatively.
+
+Examples:
+
+- Available
+- Reduced
+- Severely Reduced
+
+This representation intentionally favors honesty over apparent precision.
+
+---
+
+## Prioritization
+
+The athlete rarely needs to improve everything simultaneously.
+
+CAS therefore determines:
+
+- the primary adaptation target;
+- secondary capacities to maintain;
+- qualities temporarily reduced;
+- qualities temporarily avoided.
+
+Prioritization emerges from the interaction between:
+
+- athlete goals;
+- current deficits;
+- technical workload;
+- recovery capacity;
+- long-term planning.
+
+No single variable determines priority.
+
+---
+
+## Decision
+
+Only after completing all previous stages does CAS produce a recommendation.
+
+Importantly, the recommendation is never reduced to exercise selection.
+
+Possible decisions include:
+
+- proceed as planned;
+- reduce volume;
+- reduce intensity;
+- maintain current workload;
+- postpone progression;
+- substitute training modality;
+- prioritize recovery;
+- request additional information;
+- suspend recommendation.
+
+Exercise programming becomes meaningful only after this decision has been made.
+
+---
+
+## Exercise Selection
+
+Exercises represent implementation strategies.
+
+They are not objectives.
+
+Several different exercise combinations may satisfy the same decision.
+
+Selection therefore depends on practical constraints:
+
+- equipment;
+- experience;
+- injuries;
+- technical proficiency;
+- available time.
+
+This separation between decision and implementation is fundamental to the architecture of CAS.
+
+---
+
+## Monitoring
+
+Every recommendation generates new observations.
+
+CAS continuously records:
+
+- adherence;
+- progression;
+- perceived effort;
+- recovery;
+- unexpected events.
+
+These observations become future inputs.
+
+The system therefore evolves through repeated decision cycles rather than isolated sessions.
+
+---
+
+## Learning
+
+Long-term individualization emerges from accumulated experience.
+
+CAS progressively replaces generic assumptions with athlete-specific knowledge.
+
+The objective is not to become more complex.
+
+The objective is to become more accurate for one particular individual.
+
+Learning therefore represents the closing loop of the decision architecture.
+
+Every recommendation modifies future decisions.
+
+The system continuously refines itself through interaction with the athlete.
+
+---
+
+## Explainable Decisions
+
+At every stage, CAS should be capable of answering four fundamental questions:
+
+**What did I observe?**
+
+**What do I think is happening?**
+
+**Why do I think this?**
+
+**Why did I choose this recommendation instead of another?**
+
+If these questions cannot be answered, the recommendation should not be considered trustworthy.
+
+Explainability is therefore not an interface feature.
+
+It is the defining property of the CAS architecture.
