@@ -55,9 +55,13 @@ final class SessionExecutionViewModel {
         currentIndex == steps.count - 1
     }
 
+    /// Alpha 2.0, item 4: the percentage always derives from
+    /// `progressFraction` — the same value driving the bar's fill — so the
+    /// two never disagree.
     var progressText: String {
         guard !steps.isEmpty else { return "" }
-        return "\(currentIndex + 1) / \(steps.count)"
+        let percent = Int((progressFraction * 100).rounded())
+        return "\(currentIndex + 1) / \(steps.count) • \(percent) %"
     }
 
     /// Alpha 1.1, item 2: fraction of steps completed, for a progress bar.

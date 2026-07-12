@@ -104,4 +104,14 @@ struct SessionExecutionViewModelTests {
         viewModel.finishResting()
         #expect(viewModel.progressFraction == 0.5)
     }
+
+    @Test func progressTextIncludesBothTheStepCountAndAMatchingPercentage() {
+        // makeSession() has 2 steps — one exercise, two work sets.
+        let viewModel = makeViewModel(session: makeSession())
+        #expect(viewModel.progressText == "1 / 2 • 0 %")
+
+        viewModel.advance()
+        viewModel.finishResting()
+        #expect(viewModel.progressText == "2 / 2 • 50 %")
+    }
 }
