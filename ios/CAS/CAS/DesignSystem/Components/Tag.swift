@@ -1,9 +1,25 @@
 import SwiftUI
 
 /// CHAUFFE / TRAVAIL / OPTION badge — mirrors the web prototype's Tag,
-/// the only per-set visual distinction the app makes.
+/// the only per-set visual distinction the app makes. 03_TYPOGRAPHY.md
+/// classes labels under Medium (500) — Bold is reserved for primary
+/// metrics and stays exceptional, so this uses `smallCaption` +
+/// `.medium` rather than introducing an unnecessary Bold weight here.
+///
+/// `tint.opacity(0.15)` (the tinted badge background) has no dedicated
+/// opacity token today — accepted as-is rather than inventing a token
+/// category for a single use.
 struct Tag: View {
     let kind: SetGroupKind
+
+    private var typeScale = CASTypeScale()
+
+    /// Explicit, not the synthesized memberwise init — see
+    /// `PrimaryButton`'s identical `init` for why a `private` stored
+    /// property (`typeScale`) requires this.
+    init(kind: SetGroupKind) {
+        self.kind = kind
+    }
 
     private var label: String {
         switch kind {
@@ -23,10 +39,10 @@ struct Tag: View {
 
     var body: some View {
         Text(label)
-            .font(.caption2.weight(.bold))
+            .font(typeScale.smallCaption.weight(.medium))
             .foregroundStyle(tint)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
+            .padding(.horizontal, CASSpacing.xs)
+            .padding(.vertical, CASSpacing.xxs)
             .background(tint.opacity(0.15), in: Capsule())
     }
 }

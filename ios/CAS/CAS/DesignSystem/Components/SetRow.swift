@@ -9,16 +9,32 @@ import SwiftUI
 /// is nothing to type), free text for anything custom. The case itself
 /// never changes here — a set planned as "Lourd" stays qualitative even
 /// after editing; there's no auto-upgrade to a number.
+///
+/// `frame(width: 96)` (the label column) and `.textFieldStyle(.roundedBorder)`
+/// (native corner radius, independent of `CASRadius`) are accepted
+/// exceptions — no token covers a fixed layout column width or a native
+/// control style's internal radius.
 struct SetRow: View {
     let label: String?
     @Binding var load: LoadValue
     @Binding var reps: String
 
+    private var typeScale = CASTypeScale()
+
+    /// Explicit, not the synthesized memberwise init — see
+    /// `PrimaryButton`'s identical `init` for why a `private` stored
+    /// property (`typeScale`) requires this.
+    init(label: String?, load: Binding<LoadValue>, reps: Binding<String>) {
+        self.label = label
+        self._load = load
+        self._reps = reps
+    }
+
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: CASSpacing.s) {
             if let label {
                 Text(label)
-                    .font(CASTypography.caption)
+                    .font(typeScale.caption)
                     .foregroundStyle(CASTheme.Colors.secondaryText)
                     .frame(width: 96, alignment: .leading)
             }
@@ -41,7 +57,7 @@ struct SetRow: View {
             numericField(value: value, unit: unit) { .bodyweightAssisted(value: $0, unit: $1) }
         case .bodyweight:
             Text("Poids de corps")
-                .font(CASTypography.body)
+                .font(typeScale.body)
                 .foregroundStyle(CASTheme.Colors.secondaryText)
                 .frame(maxWidth: .infinity, alignment: .leading)
         case .qualitative(let level):
@@ -65,7 +81,7 @@ struct SetRow: View {
         unit: MassUnit,
         make: @escaping (Double, MassUnit) -> LoadValue
     ) -> some View {
-        HStack(spacing: 4) {
+        HStack(spacing: CASSpacing.xxs) {
             TextField(
                 "Charge",
                 value: Binding(get: { value }, set: { load = make($0, unit) }),
@@ -74,7 +90,7 @@ struct SetRow: View {
             .keyboardType(.decimalPad)
             .textFieldStyle(.roundedBorder)
             Text(unit.rawValue)
-                .font(CASTypography.caption)
+                .font(typeScale.caption)
                 .foregroundStyle(CASTheme.Colors.secondaryText)
         }
     }

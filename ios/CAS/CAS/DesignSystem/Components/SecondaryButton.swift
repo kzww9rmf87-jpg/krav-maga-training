@@ -1,11 +1,10 @@
 import SwiftUI
 
-/// The one obvious action per screen — 01_DESIGN_SYSTEM.md: "every
-/// component should have a single obvious purpose." 03_TYPOGRAPHY.md
-/// classes button labels under Medium (500), not Semibold. 04_SPACING.md
-/// "Buttons — Internal vertical padding: 16 px. Internal horizontal
-/// padding: 24 px."
-struct PrimaryButton: View {
+/// 05_COMPONENTS.md "Secondary Button: Alternative actions... should
+/// never compete visually with the Primary Button." Natural width and
+/// an outline instead of a filled background — unlike `PrimaryButton`,
+/// which is always full-width and filled with `CASTheme.Colors.primary`.
+struct SecondaryButton: View {
     let title: String
     var action: () -> Void
 
@@ -25,18 +24,20 @@ struct PrimaryButton: View {
         Button(action: action) {
             Text(title)
                 .font(typeScale.body.weight(.medium))
-                .frame(maxWidth: .infinity)
                 .padding(.vertical, CASSpacing.m)
                 .padding(.horizontal, CASSpacing.l)
         }
         .foregroundStyle(CASTheme.Colors.primaryText)
-        .background(CASTheme.Colors.primary, in: RoundedRectangle(cornerRadius: CASTheme.Metrics.controlCornerRadius, style: .continuous))
+        .background(
+            RoundedRectangle(cornerRadius: CASTheme.Metrics.controlCornerRadius, style: .continuous)
+                .stroke(CASTheme.Colors.border, lineWidth: 1)
+        )
         .buttonStyle(.plain)
         .frame(minHeight: CASSpacing.minimumTouchTarget)
     }
 }
 
 #Preview {
-    PrimaryButton(title: "Commencer la séance") {}
+    SecondaryButton(title: "Modifier mon profil") {}
         .padding()
 }

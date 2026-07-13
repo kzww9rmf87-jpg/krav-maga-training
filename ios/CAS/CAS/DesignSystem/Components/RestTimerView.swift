@@ -5,12 +5,26 @@ import SwiftUI
 /// preview (item 3) so the athlete can set up equipment during rest, but it
 /// stays a small, secondary block below the countdown — never competing
 /// with it.
+///
+/// `frame(maxWidth: 220)` (keeping the skip button from stretching
+/// edge-to-edge) is an accepted exception — no token covers a fixed
+/// layout max-width.
 struct RestTimerView: View {
     let timer: RestTimerService
     let nextStep: ExecutionStep?
     var onSkip: () -> Void
 
     @Environment(\.scenePhase) private var scenePhase
+    private var typeScale = CASTypeScale()
+
+    /// Explicit, not the synthesized memberwise init — see
+    /// `PrimaryButton`'s identical `init` for why a `private` stored
+    /// property (`typeScale`) requires this.
+    init(timer: RestTimerService, nextStep: ExecutionStep?, onSkip: @escaping () -> Void) {
+        self.timer = timer
+        self.nextStep = nextStep
+        self.onSkip = onSkip
+    }
 
     private var formattedTime: String {
         let minutes = timer.remainingSeconds / 60
@@ -19,12 +33,13 @@ struct RestTimerView: View {
     }
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: CASSpacing.l) {
             Text("Repos")
-                .font(CASTypography.sectionTitle)
+                .font(typeScale.heading2)
                 .foregroundStyle(CASTheme.Colors.secondaryText)
             Text(formattedTime)
-                .font(CASTypography.restTimer)
+                .font(typeScale.display)
+                .fontDesign(.rounded)
                 .monospacedDigit()
                 .foregroundStyle(CASTheme.Colors.primaryText)
             PrimaryButton(title: timer.isRunning ? "Passer" : "Continuer", action: onSkip)
@@ -32,7 +47,7 @@ struct RestTimerView: View {
 
             if let nextStep {
                 nextStepPreview(nextStep)
-                    .padding(.top, 12)
+                    .padding(.top, CASSpacing.s)
             }
         }
         // The internal display loop only runs while this view is alive
@@ -48,17 +63,17 @@ struct RestTimerView: View {
 
     @ViewBuilder
     private func nextStepPreview(_ step: ExecutionStep) -> some View {
-        VStack(spacing: 4) {
+        VStack(spacing: CASSpacing.xxs) {
             Text("Ensuite")
-                .font(CASTypography.caption)
+                .font(typeScale.caption)
                 .foregroundStyle(CASTheme.Colors.secondaryText)
             Text(step.exerciseName)
-                .font(CASTypography.body.weight(.semibold))
+                .font(typeScale.body.weight(.semibold))
                 .foregroundStyle(CASTheme.Colors.secondaryText)
             switch step.instruction {
             case .setRow(let load, let reps):
                 Text("\(load.displayText) × \(reps)")
-                    .font(CASTypography.caption)
+                    .font(typeScale.caption)
                     .foregroundStyle(CASTheme.Colors.secondaryText)
             case .freeText:
                 EmptyView()
