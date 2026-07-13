@@ -36,16 +36,25 @@ struct HistoryView: View {
 private struct HistoryRow: View {
     let log: SessionLog
 
+    private var typeScale = CASTypeScale()
+
+    /// Explicit, not the synthesized memberwise init: a `private`
+    /// stored property (`typeScale`) would otherwise make the
+    /// compiler-generated initializer inaccessible from `HistoryView.body`.
+    init(log: SessionLog) {
+        self.log = log
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: CASSpacing.xxs) {
             Text(log.sessionTitle)
-                .font(CASTypography.body.weight(.semibold))
+                .font(typeScale.body.weight(.semibold))
                 .foregroundStyle(CASTheme.Colors.primaryText)
             Text(log.date.formatted(date: .abbreviated, time: .shortened))
-                .font(CASTypography.caption)
+                .font(typeScale.caption)
                 .foregroundStyle(CASTheme.Colors.secondaryText)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, CASSpacing.xxs)
     }
 }
 

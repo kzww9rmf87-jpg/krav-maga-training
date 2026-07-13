@@ -3,6 +3,16 @@ import SwiftUI
 struct SessionLogDetailView: View {
     let log: SessionLog
 
+    private var typeScale = CASTypeScale()
+
+    /// Explicit, not the synthesized memberwise init: a `private`
+    /// stored property (`typeScale`) would otherwise make the
+    /// compiler-generated initializer inaccessible from
+    /// `HistoryView.swift`, which instantiates this type.
+    init(log: SessionLog) {
+        self.log = log
+    }
+
     var body: some View {
         List {
             Section {
@@ -20,14 +30,14 @@ struct SessionLogDetailView: View {
             if !log.sets.isEmpty {
                 Section("Séries") {
                     ForEach(log.sets) { set in
-                        VStack(alignment: .leading, spacing: 2) {
+                        VStack(alignment: .leading, spacing: CASSpacing.xxs) {
                             Text(set.exerciseName)
-                                .font(CASTypography.body.weight(.semibold))
+                                .font(typeScale.body.weight(.semibold))
                             Text("\(set.actualLoadValue.displayText) × \(set.actualReps)")
-                                .font(CASTypography.caption)
+                                .font(typeScale.caption)
                                 .foregroundStyle(CASTheme.Colors.secondaryText)
                         }
-                        .padding(.vertical, 2)
+                        .padding(.vertical, CASSpacing.xxs)
                     }
                 }
             }

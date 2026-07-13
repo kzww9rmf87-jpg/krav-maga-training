@@ -4,6 +4,21 @@ struct SessionSummaryView: View {
     @State var viewModel: SessionSummaryViewModel
     var onDone: () -> Void
 
+    private var typeScale = CASTypeScale()
+
+    /// Explicit, not the synthesized memberwise init: a `private`
+    /// stored property (`typeScale`) would otherwise make the
+    /// compiler-generated initializer inaccessible from
+    /// `SessionExecutionView.swift` (out of scope, not modified here),
+    /// which instantiates this type. `self._viewModel = State(...)` is
+    /// the standard SwiftUI mechanism for seeding a `@State` property
+    /// from a custom initializer — no behavior change from what the
+    /// synthesized init already did.
+    init(viewModel: SessionSummaryViewModel, onDone: @escaping () -> Void) {
+        self._viewModel = State(initialValue: viewModel)
+        self.onDone = onDone
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -28,14 +43,14 @@ struct SessionSummaryView: View {
                 if !viewModel.recap.progressionSuggestions.isEmpty {
                     Section("Pour la prochaine fois") {
                         ForEach(viewModel.recap.progressionSuggestions, id: \.exerciseName) { item in
-                            VStack(alignment: .leading, spacing: 2) {
+                            VStack(alignment: .leading, spacing: CASSpacing.xxs) {
                                 Text(item.exerciseName)
-                                    .font(CASTypography.body.weight(.semibold))
+                                    .font(typeScale.body.weight(.semibold))
                                 Text(item.suggestion.displayText)
-                                    .font(CASTypography.caption)
+                                    .font(typeScale.caption)
                                     .foregroundStyle(CASTheme.Colors.secondaryText)
                             }
-                            .padding(.vertical, 2)
+                            .padding(.vertical, CASSpacing.xxs)
                         }
                     }
                 }
