@@ -1,0 +1,560 @@
+# SETTINGS SCREEN
+
+Version 1.0
+
+---
+
+# Purpose
+
+The Settings Screen allows the athlete to personalize CAS while preserving a consistent training experience.
+
+Settings exist to adapt the application to the athlete.
+
+Not the opposite.
+
+Every option should solve a real need.
+
+If a setting exists only because it might be useful someday, it should not exist.
+
+---
+
+# Core Principle
+
+Simplicity over customization.
+
+The athlete should spend very little time inside Settings.
+
+Training remains the primary activity.
+
+---
+
+# Primary Questions
+
+The Settings Screen answers:
+
+- How does CAS work for me?
+- What information does CAS use?
+- How do I control my training experience?
+
+---
+
+# Information Hierarchy
+
+The Settings Screen follows this order:
+
+1. Athlete Profile
+2. Training Preferences
+3. Recovery & Notifications
+4. Audio & Accessibility
+5. Privacy & Data
+6. About CAS
+
+---
+
+# Athlete Profile
+
+The athlete profile is the foundation of every recommendation.
+
+Display:
+
+Name
+
+Age
+
+Height
+
+Weight
+
+Primary sport
+
+Experience level
+
+Training objective
+
+Dominant side
+
+Available equipment
+
+Preferred training duration
+
+Preferred training days
+
+Editing the profile should immediately influence future recommendations.
+
+---
+
+# Training Preferences
+
+Examples:
+
+Preferred units
+
+Metric
+
+Imperial
+
+Default RPE display
+
+Rest timer enabled
+
+Automatic progression suggestions
+
+Automatic exercise substitutions
+
+Training reminders
+
+Each preference should include a concise explanation.
+
+---
+
+# Recovery Preferences
+
+Possible options:
+
+Recovery reminders
+
+Sleep reminders
+
+Hydration reminders
+
+Deload notifications
+
+Recovery recommendations
+
+Recovery settings should remain optional.
+
+---
+
+# Voice Guidance
+
+Voice guidance can be enabled or disabled.
+
+Possible options:
+
+Announce next exercise
+
+Announce load
+
+Announce repetitions
+
+Announce rest countdown
+
+Announce session completion
+
+Volume adjustment
+
+Voice speed
+
+Language
+
+Voice guidance should always remain concise.
+
+---
+
+# Haptics
+
+Allow independent control of:
+
+Set validation
+
+Rest countdown
+
+Session completion
+
+Warnings
+
+The athlete may disable all haptics.
+
+---
+
+# Notifications
+
+Notifications should remain useful.
+
+Examples:
+
+Today's training
+
+Recovery reminder
+
+Upcoming session
+
+Training block completed
+
+Missed session reminder
+
+Never send motivational spam.
+
+---
+
+# Accessibility
+
+Settings should include:
+
+Dynamic Type compatibility
+
+Reduced Motion support
+
+High contrast mode
+
+VoiceOver optimization
+
+Large touch targets
+
+These settings complement, but never replace, system accessibility settings.
+
+---
+
+# Appearance
+
+CAS uses a single official Dark Theme.
+
+No Light Theme.
+
+No color themes.
+
+No decorative skins.
+
+The visual identity remains consistent.
+
+---
+
+# Units
+
+Allow:
+
+Kilograms
+
+Pounds
+
+Meters
+
+Feet
+
+Celsius
+
+Fahrenheit
+
+The athlete should never see mixed units.
+
+---
+
+# Language
+
+Supported languages should be selectable.
+
+Changing language should not require restarting the application.
+
+---
+
+# Privacy
+
+Clearly explain:
+
+What data is stored.
+
+What data remains local.
+
+What data is synchronized.
+
+What data is shared.
+
+Privacy information should remain understandable by non-technical users.
+
+---
+
+# Data Management
+
+Possible actions:
+
+Export training data
+
+Import data
+
+Backup
+
+Restore
+
+Delete local data
+
+Delete account
+
+Every destructive action requires confirmation.
+
+---
+
+# Explainability
+
+The athlete may choose the level of explanation provided by CAS.
+
+Suggested modes:
+
+Minimal
+
+Standard
+
+Detailed
+
+Examples:
+
+Minimal
+
+"Increase load next session."
+
+Standard
+
+"Increase load because the previous three sessions were completed successfully."
+
+Detailed
+
+Complete explanation of the decision model and contributing factors.
+
+This setting should never affect the recommendation itself.
+
+Only its explanation.
+
+---
+
+# AI Features
+
+If AI-assisted features are available, they should be grouped here.
+
+Examples:
+
+Automatic coaching insights
+
+Training summaries
+
+Natural language explanations
+
+Voice coaching
+
+Future experimental features
+
+Experimental features should always be clearly identified.
+
+---
+
+# Connected Devices
+
+Future integrations may include:
+
+Apple Health
+
+Apple Watch
+
+Garmin
+
+Polar
+
+WHOOP
+
+Heart-rate sensors
+
+Power meters
+
+Connection status should remain simple.
+
+---
+
+# About CAS
+
+Display:
+
+Application version
+
+Training Engine version
+
+Database version
+
+Explainability Engine version
+
+Copyright
+
+Licenses
+
+Privacy policy
+
+Terms of use
+
+Support
+
+This section remains informational.
+
+---
+
+# Layout
+
+Recommended order:
+
+Profile
+
+↓
+
+Training
+
+↓
+
+Recovery
+
+↓
+
+Voice & Accessibility
+
+↓
+
+Privacy
+
+↓
+
+About
+
+Each section should remain compact.
+
+Avoid very long scrolling.
+
+---
+
+# Typography
+
+Section titles:
+
+Heading 2
+
+Option labels:
+
+Body
+
+Descriptions:
+
+Caption
+
+Values:
+
+Body Medium
+
+---
+
+# Color Usage
+
+Background:
+
+Graphite Black
+
+Interactive controls:
+
+Primary Text
+
+Selected state:
+
+Performance Orange
+
+Success:
+
+Recovery Green
+
+Warnings:
+
+Warning Amber
+
+Critical:
+
+Critical Red
+
+Settings should feel calm.
+
+Not colorful.
+
+---
+
+# Motion
+
+Allowed:
+
+Standard navigation transitions
+
+Toggle animations
+
+Selection feedback
+
+Not allowed:
+
+Decorative transitions
+
+Animated backgrounds
+
+Repeated motion
+
+Respect Reduced Motion.
+
+---
+
+# Accessibility
+
+Every setting must be reachable using:
+
+VoiceOver
+
+Dynamic Type
+
+Keyboard navigation (future)
+
+Large touch targets
+
+No setting should depend only on color.
+
+---
+
+# Error Handling
+
+If a setting cannot be applied:
+
+Explain why.
+
+Offer recovery.
+
+Never silently ignore the user's choice.
+
+---
+
+# Success Criteria
+
+The athlete should:
+
+Understand every setting.
+
+Need very little documentation.
+
+Be able to personalize CAS in less than two minutes.
+
+---
+
+# Do
+
+Keep settings minimal.
+
+Explain advanced options.
+
+Respect platform conventions.
+
+Preserve consistency.
+
+---
+
+# Do Not
+
+Expose internal implementation.
+
+Multiply cosmetic options.
+
+Allow conflicting settings.
+
+Add options "just in case."
+
+---
+
+# Final Principle
+
+Settings exist to support training.
+
+They should never become the athlete's primary destination.

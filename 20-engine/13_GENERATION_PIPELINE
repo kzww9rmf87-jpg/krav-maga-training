@@ -1,0 +1,679 @@
+# GENERATION PIPELINE
+
+Version 1.0
+
+---
+
+# Purpose
+
+The Generation Pipeline defines how CAS transforms athlete information into a complete training session.
+
+It does not describe individual decision engines.
+
+It defines the order in which they collaborate.
+
+The pipeline is the reasoning workflow of the Combat Athlete System.
+
+---
+
+# Mission
+
+Transform:
+
+Athlete
+
+↓
+
+Knowledge
+
+↓
+
+Current Context
+
+↓
+
+Scientific Principles
+
+↓
+
+Training Session
+
+Every recommendation produced by CAS follows this same process.
+
+---
+
+# Core Principle
+
+Every decision depends on previous decisions.
+
+The order matters.
+
+Changing the sequence changes the final recommendation.
+
+The pipeline therefore remains deterministic.
+
+---
+
+# Philosophy
+
+CAS does not generate exercises first.
+
+CAS first determines:
+
+What should be achieved.
+
+Only then does it decide:
+
+How to achieve it.
+
+Objectives always precede implementation.
+
+---
+
+# Pipeline Overview
+
+The complete pipeline consists of thirteen stages.
+
+1.
+
+Athlete Profile
+
+↓
+
+2.
+
+Current Context
+
+↓
+
+3.
+
+Recovery Evaluation
+
+↓
+
+4.
+
+Safety Evaluation
+
+↓
+
+5.
+
+Periodization Context
+
+↓
+
+6.
+
+Training Objective Selection
+
+↓
+
+7.
+
+Capability Prioritization
+
+↓
+
+8.
+
+Exercise Selection
+
+↓
+
+9.
+
+Session Construction
+
+↓
+
+10.
+
+Progression Assignment
+
+↓
+
+11.
+
+Validation
+
+↓
+
+12.
+
+Explainability
+
+↓
+
+13.
+
+Delivery
+
+Each stage produces information required by the next.
+
+---
+
+# Stage 1
+
+Athlete Profile
+
+Purpose
+
+Understand who the athlete is.
+
+Examples
+
+Age
+
+Experience
+
+Combat discipline
+
+Goals
+
+Equipment
+
+Training availability
+
+History
+
+The profile changes slowly.
+
+---
+
+# Stage 2
+
+Current Context
+
+Purpose
+
+Understand today's situation.
+
+Examples
+
+Recovery
+
+Sleep
+
+Stress
+
+Pain
+
+Competition proximity
+
+Previous session
+
+Available time
+
+Travel
+
+Context changes every day.
+
+---
+
+# Stage 3
+
+Recovery Evaluation
+
+Performed by:
+
+Recovery Engine
+
+Outputs
+
+Recovery estimate
+
+Confidence
+
+Recovery constraints
+
+Recovery recommendations
+
+---
+
+# Stage 4
+
+Safety Evaluation
+
+Performed by:
+
+Safety Engine
+
+Outputs
+
+Risk estimation
+
+Contraindications
+
+Exercise limitations
+
+Required modifications
+
+Safety always overrides later decisions.
+
+---
+
+# Stage 5
+
+Periodization Context
+
+Performed by:
+
+Periodization Engine
+
+Outputs
+
+Current phase
+
+Primary adaptation
+
+Secondary adaptations
+
+Long-term priorities
+
+Planning constraints
+
+---
+
+# Stage 6
+
+Training Objective Selection
+
+Performed by:
+
+Decision Engine
+
+Examples
+
+Maximum Strength
+
+Explosive Power
+
+Aerobic Capacity
+
+Technical Conditioning
+
+Recovery Session
+
+Competition Preparation
+
+Only one primary objective should exist.
+
+---
+
+# Stage 7
+
+Capability Prioritization
+
+Performed by:
+
+Capability Selection Engine
+
+Examples
+
+Lower-body power
+
+Upper-body strength
+
+Grip endurance
+
+Rotational power
+
+Anaerobic conditioning
+
+Footwork
+
+Movement quality
+
+Capabilities are prioritized.
+
+Not equally weighted.
+
+---
+
+# Stage 8
+
+Exercise Selection
+
+Performed using:
+
+Exercise Knowledge Base
+
+Selection considers:
+
+Adaptation quality
+
+Equipment
+
+Recovery
+
+Safety
+
+Sport specificity
+
+Progression history
+
+Movement balance
+
+No exercise is selected simply because it is popular.
+
+---
+
+# Stage 9
+
+Session Construction
+
+Performed by:
+
+Session Generation Engine
+
+The engine determines:
+
+Exercise order
+
+Sets
+
+Repetitions
+
+Load
+
+Tempo
+
+Rest
+
+Supersets
+
+Conditioning
+
+Transitions
+
+Warm-up
+
+Cool-down
+
+The session becomes executable.
+
+---
+
+# Stage 10
+
+Progression Assignment
+
+Performed by:
+
+Progression Engine
+
+The engine determines:
+
+Maintain
+
+Increase
+
+Reduce
+
+Modify
+
+Progression applies only after the session structure exists.
+
+---
+
+# Stage 11
+
+Validation
+
+Before delivery,
+
+CAS validates the complete session.
+
+Validation checks include:
+
+Recovery consistency
+
+Safety consistency
+
+Equipment availability
+
+Training duration
+
+Movement balance
+
+Volume
+
+Intensity
+
+Duplicate exercises
+
+Logical transitions
+
+The session must be internally coherent.
+
+---
+
+# Stage 12
+
+Explainability
+
+Performed by:
+
+Explainability Engine
+
+Every important recommendation receives:
+
+Reason
+
+Evidence
+
+Applied principles
+
+Confidence
+
+Alternative possibilities
+
+The athlete understands why.
+
+---
+
+# Stage 13
+
+Delivery
+
+The session is presented.
+
+Examples
+
+Home Screen
+
+Training Screen
+
+Voice Guidance
+
+Apple Watch
+
+Export
+
+Coach Review
+
+The pipeline ends only when the recommendation reaches the athlete.
+
+---
+
+# Feedback Loop
+
+The pipeline continues after the session.
+
+Execution
+
+↓
+
+Observed Results
+
+↓
+
+Adaptation
+
+↓
+
+Learning
+
+↓
+
+Updated Athlete Model
+
+↓
+
+Future Pipeline
+
+Every completed session improves future recommendations.
+
+---
+
+# Failure Handling
+
+The pipeline must never stop because one source of information is missing.
+
+Example
+
+Sleep unavailable
+
+↓
+
+Recovery confidence decreases
+
+↓
+
+Pipeline continues
+
+Graceful degradation is mandatory.
+
+---
+
+# Determinism
+
+Given identical inputs,
+
+CAS should produce identical outputs.
+
+The pipeline should never behave randomly.
+
+Random variation belongs inside explicitly designed variability,
+
+not inside reasoning.
+
+---
+
+# Explainability
+
+Every stage should remain explainable independently.
+
+The athlete may inspect:
+
+Recovery reasoning
+
+↓
+
+Safety reasoning
+
+↓
+
+Progression reasoning
+
+↓
+
+Final recommendation
+
+Transparency is preserved throughout the pipeline.
+
+---
+
+# Human Override
+
+The athlete may modify:
+
+Exercises
+
+Load
+
+Volume
+
+Session timing
+
+Preferences
+
+The pipeline records these modifications.
+
+Future recommendations learn from them.
+
+---
+
+# Learning
+
+Each execution enriches the Athlete Model.
+
+Learning includes:
+
+Recovery behaviour
+
+Adaptation speed
+
+Exercise preferences
+
+Compliance
+
+Pain patterns
+
+Performance response
+
+The pipeline becomes increasingly individualized.
+
+---
+
+# Future Expansion
+
+Future stages may include:
+
+Nutrition Engine
+
+Competition Engine
+
+Psychological Readiness Engine
+
+Environmental Adaptation Engine
+
+Coach Collaboration Engine
+
+The pipeline remains modular.
+
+---
+
+# Success Criteria
+
+The pipeline succeeds when:
+
+Every stage has a clear responsibility.
+
+Every decision is reproducible.
+
+Every recommendation is explainable.
+
+Every recommendation remains scientifically coherent.
+
+Every completed session improves future decisions.
+
+---
+
+# Final Principle
+
+The Generation Pipeline is not a sequence of algorithms.
+
+It is the reasoning process of a professional strength and conditioning coach,
+
+formalized,
+
+modular,
+
+and explainable.
+
+Every recommendation delivered by CAS is the consequence of this reasoning,
+
+never the result of chance.

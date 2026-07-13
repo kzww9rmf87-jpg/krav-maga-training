@@ -1,0 +1,621 @@
+# MOVEMENT PATTERNS
+
+Version 1.0
+
+---
+
+# Purpose
+
+Movement Patterns define the fundamental language of human movement inside the Combat Athlete System.
+
+Exercises are implementations.
+
+Movement patterns are the underlying concepts.
+
+CAS reasons using movement patterns before selecting exercises.
+
+---
+
+# Philosophy
+
+An athlete does not need a Back Squat.
+
+An athlete needs the adaptations produced by the Squat pattern.
+
+Different exercises may satisfy the same movement requirement.
+
+Movement patterns therefore remain stable,
+
+while exercise selection may change.
+
+---
+
+# Scientific Role
+
+Movement patterns connect:
+
+Biomechanics
+
+↓
+
+Physical Capabilities
+
+↓
+
+Exercise Selection
+
+↓
+
+Sport Transfer
+
+↓
+
+Session Generation
+
+Every engine should reason through movement patterns.
+
+---
+
+# Design Principles
+
+Movement patterns must be:
+
+Universal
+
+Scientifically meaningful
+
+Independent of equipment
+
+Independent of exercise popularity
+
+Applicable across all combat sports
+
+Stable over time
+
+---
+
+# Primary Movement Patterns
+
+CAS recognizes the following primary movement patterns.
+
+---
+
+## Squat
+
+Primary Objective
+
+Vertical force production through knee and hip extension.
+
+Examples
+
+Back Squat
+
+Front Squat
+
+Goblet Squat
+
+Belt Squat
+
+Hack Squat
+
+Combat Transfer
+
+Lower-body strength.
+
+Level changes.
+
+Takedown resistance.
+
+Base stability.
+
+---
+
+## Hinge
+
+Primary Objective
+
+Posterior chain force production.
+
+Examples
+
+Deadlift
+
+Romanian Deadlift
+
+Good Morning
+
+Hip Thrust
+
+Kettlebell Swing
+
+Combat Transfer
+
+Hip extension.
+
+Explosive striking.
+
+Lifting.
+
+Clinch.
+
+Throwing.
+
+---
+
+## Horizontal Push
+
+Examples
+
+Bench Press
+
+Push-Up
+
+Weighted Push-Up
+
+Landmine Press
+
+Combat Transfer
+
+Punching power.
+
+Framing.
+
+Distance management.
+
+---
+
+## Horizontal Pull
+
+Examples
+
+Barbell Row
+
+Chest Supported Row
+
+Ring Row
+
+Cable Row
+
+Combat Transfer
+
+Clinch.
+
+Grip fighting.
+
+Postural control.
+
+---
+
+## Vertical Push
+
+Examples
+
+Overhead Press
+
+Push Press
+
+Handstand Push-Up
+
+Combat Transfer
+
+Shoulder strength.
+
+Overhead stability.
+
+Force transfer.
+
+---
+
+## Vertical Pull
+
+Examples
+
+Pull-Up
+
+Chin-Up
+
+Lat Pulldown
+
+Climbing Rope
+
+Combat Transfer
+
+Grip.
+
+Clinch.
+
+Pulling.
+
+Body control.
+
+---
+
+## Carry
+
+Examples
+
+Farmer Carry
+
+Suitcase Carry
+
+Overhead Carry
+
+Front Rack Carry
+
+Combat Transfer
+
+Core stability.
+
+Grip endurance.
+
+Whole-body tension.
+
+---
+
+## Rotation
+
+Examples
+
+Medicine Ball Throw
+
+Cable Rotation
+
+Landmine Rotation
+
+Combat Transfer
+
+Punching.
+
+Elbows.
+
+Throws.
+
+Power transfer.
+
+---
+
+## Anti-Rotation
+
+Examples
+
+Pallof Press
+
+Offset Carry
+
+Anti-Rotation Hold
+
+Combat Transfer
+
+Body stabilization.
+
+Energy transfer.
+
+Force absorption.
+
+---
+
+## Locomotion
+
+Examples
+
+Running
+
+Shuffling
+
+Skipping
+
+Bounding
+
+Combat Transfer
+
+Footwork.
+
+Movement efficiency.
+
+Ring control.
+
+---
+
+## Jump
+
+Examples
+
+Box Jump
+
+Broad Jump
+
+Countermovement Jump
+
+Combat Transfer
+
+Explosiveness.
+
+Reactive force.
+
+Lower-body power.
+
+---
+
+## Sprint
+
+Examples
+
+Acceleration Sprint
+
+Hill Sprint
+
+Resisted Sprint
+
+Combat Transfer
+
+Acceleration.
+
+Closing distance.
+
+Explosive movement.
+
+---
+
+## Throw
+
+Examples
+
+Medicine Ball Chest Throw
+
+Rotational Throw
+
+Overhead Throw
+
+Combat Transfer
+
+Whole-body power.
+
+Explosive coordination.
+
+---
+
+## Strike
+
+Examples
+
+Heavy Bag Punches
+
+Focus Mitts
+
+Shadow Boxing
+
+Combat Transfer
+
+Punch speed.
+
+Punch power.
+
+Accuracy.
+
+---
+
+## Kick
+
+Examples
+
+Heavy Bag Kicks
+
+Pad Work
+
+Shadow Kicking
+
+Combat Transfer
+
+Lower-body striking.
+
+Hip explosiveness.
+
+Balance.
+
+---
+
+## Sprawl
+
+Examples
+
+Technical Sprawl
+
+Reactive Sprawl
+
+Combat Transfer
+
+Takedown defense.
+
+Explosive hip extension.
+
+Ground transition.
+
+---
+
+## Ground Transition
+
+Examples
+
+Technical Stand-Up
+
+Hip Escape
+
+Bridge
+
+Sit-Out
+
+Combat Transfer
+
+Ground mobility.
+
+BJJ.
+
+MMA.
+
+Self-defense.
+
+---
+
+# Pattern Relationships
+
+Movement patterns are connected.
+
+Example
+
+Squat
+
+↓
+
+Jump
+
+↓
+
+Sprint
+
+Improving one pattern may influence another.
+
+Relationships are stored explicitly.
+
+---
+
+# Pattern Balance
+
+CAS evaluates balance across patterns.
+
+Examples
+
+Too much Horizontal Push
+
+↓
+
+Increase Horizontal Pull
+
+Too much Hinge
+
+↓
+
+Reduce posterior-chain loading
+
+Movement balance reduces injury risk.
+
+---
+
+# Pattern Priority
+
+Not every pattern receives equal emphasis.
+
+Priority depends on:
+
+Sport
+
+Training phase
+
+Athlete profile
+
+Recovery
+
+Current objectives
+
+---
+
+# Combat Sport Profiles
+
+Every combat sport emphasizes patterns differently.
+
+Example
+
+Boxing
+
+Horizontal Push
+
+Rotation
+
+Footwork
+
+Carry
+
+Example
+
+Brazilian Jiu-Jitsu
+
+Horizontal Pull
+
+Carry
+
+Ground Transition
+
+Bridge
+
+Example
+
+Krav Maga
+
+Balanced development across all primary patterns.
+
+---
+
+# Exercise Independence
+
+Movement patterns survive exercise replacement.
+
+Example
+
+Back Squat unavailable.
+
+↓
+
+Front Squat selected.
+
+↓
+
+Movement objective unchanged.
+
+The athlete still trains the Squat pattern.
+
+---
+
+# Explainability
+
+Movement patterns improve explanations.
+
+Example
+
+Today's exercise changed,
+
+but today's movement objective remained identical.
+
+---
+
+# Learning
+
+CAS learns which exercises best develop each pattern for each athlete.
+
+Movement patterns remain constant.
+
+Exercise selection becomes increasingly individualized.
+
+---
+
+# Future Expansion
+
+Future versions may include:
+
+Movement quality scoring.
+
+Computer vision.
+
+Real-time movement detection.
+
+Automatic pattern recognition.
+
+---
+
+# Final Principle
+
+Exercises change.
+
+Movement patterns remain.
+
+The Combat Athlete System develops movement first,
+
+and selects exercises second.

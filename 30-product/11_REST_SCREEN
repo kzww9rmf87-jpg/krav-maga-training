@@ -1,0 +1,523 @@
+# REST SCREEN
+
+Version 1.0
+
+---
+
+# Purpose
+
+The Rest Screen exists to maximize the quality of the next effort.
+
+Rest is not inactivity.
+
+Rest is preparation.
+
+The athlete should recover physically while preparing mentally for the next set.
+
+The screen should eliminate uncertainty.
+
+---
+
+# Core Principle
+
+During rest, the athlete should always know:
+
+- how much time remains;
+- what comes next;
+- what will be required;
+- when to move.
+
+Nothing else matters.
+
+---
+
+# Primary Question
+
+The Rest Screen answers one question:
+
+"When do I start again?"
+
+---
+
+# Information Hierarchy
+
+The Rest Screen follows this order:
+
+1. Remaining rest time
+2. Next exercise
+3. Next prescription
+4. Previous set summary
+5. Session progress
+6. Secondary actions
+
+---
+
+# Countdown
+
+The countdown is the dominant element.
+
+It occupies the visual center of the screen.
+
+Typography:
+
+Display
+
+Large.
+
+Highly readable.
+
+Visible from several meters away.
+
+---
+
+# Countdown Behaviour
+
+The countdown updates every second.
+
+Transitions remain smooth.
+
+No blinking.
+
+No flashing.
+
+No jumping digits.
+
+Time should feel continuous.
+
+---
+
+# Final Countdown
+
+The last five seconds receive subtle emphasis.
+
+Recommended sequence:
+
+5
+
+4
+
+3
+
+2
+
+1
+
+GO
+
+The emphasis may include:
+
+- subtle haptic feedback;
+- optional voice guidance;
+- slight typography emphasis.
+
+Never flashing colors.
+
+Never alarm-style behaviour.
+
+---
+
+# Rest Duration
+
+The prescribed duration should remain visible.
+
+Example:
+
+Rest
+
+02:00
+
+The athlete immediately understands:
+
+Current remaining time
+
+↓
+
+Original prescribed duration
+
+---
+
+# Next Exercise
+
+The next exercise is always visible.
+
+Recommended content:
+
+Exercise name
+
+Load
+
+Repetitions
+
+Tempo (if prescribed)
+
+Round or set number
+
+Example:
+
+NEXT
+
+Military Press
+
+42.5 kg
+
+6 reps
+
+---
+
+# Equipment Preparation
+
+When useful, CAS reminds the athlete what equipment should already be prepared.
+
+Examples:
+
+Prepare:
+
+• 42.5 kg
+
+• Bench
+
+• Resistance band
+
+These reminders remain concise.
+
+---
+
+# Previous Set Summary
+
+The athlete receives immediate confirmation.
+
+Example:
+
+Completed
+
+80 kg × 5
+
+RPE 8
+
+Everything recorded successfully.
+
+The athlete should never wonder whether the set was saved.
+
+---
+
+# Session Progress
+
+A discreet progress indicator remains visible.
+
+Example:
+
+Session
+
+58 %
+
+The athlete knows how far they are from completing the workout.
+
+---
+
+# Voice Guidance
+
+Optional.
+
+Recommended announcements:
+
+30 seconds remaining.
+
+10 seconds remaining.
+
+Next exercise.
+
+Target load.
+
+Target repetitions.
+
+Begin.
+
+Voice guidance remains concise.
+
+No motivational speeches.
+
+---
+
+# Haptic Feedback
+
+Recommended:
+
+Last five seconds.
+
+Rest complete.
+
+Skipped rest.
+
+Never use continuous vibration.
+
+---
+
+# Skip Rest
+
+Skip Rest is available.
+
+It remains visually secondary.
+
+The athlete may resume immediately.
+
+No confirmation dialog unless clinically necessary.
+
+---
+
+# Extend Rest
+
+The athlete may extend rest.
+
+Recommended increments:
+
++15 s
+
++30 s
+
++60 s
+
+CAS records this behaviour for future coaching.
+
+---
+
+# Automatic Adaptation
+
+Future versions may recommend longer or shorter rest based on:
+
+Heart rate.
+
+Velocity loss.
+
+Fatigue.
+
+RPE.
+
+Readiness.
+
+The recommendation should always explain why.
+
+---
+
+# Phone Lock
+
+The countdown continues while the phone is locked.
+
+Returning to the application always displays the correct remaining time.
+
+No timer drift.
+
+No restart.
+
+---
+
+# Background Execution
+
+Rest timing survives:
+
+Phone lock.
+
+Incoming call.
+
+Notification.
+
+Temporary backgrounding.
+
+The athlete never loses timing.
+
+---
+
+# Layout
+
+Recommended order:
+
+Countdown
+
+↓
+
+Next Exercise
+
+↓
+
+Next Prescription
+
+↓
+
+Previous Set Summary
+
+↓
+
+Session Progress
+
+↓
+
+Secondary Actions
+
+---
+
+# Typography
+
+Countdown:
+
+Display
+
+Next Exercise:
+
+Heading 2
+
+Load:
+
+Heading 2
+
+Repetitions:
+
+Heading 2
+
+Summary:
+
+Body
+
+Metadata:
+
+Caption
+
+---
+
+# Colors
+
+Background:
+
+Graphite Black
+
+Primary information:
+
+Primary Text
+
+Countdown:
+
+Performance Orange
+
+Completion:
+
+Recovery Green
+
+Warnings:
+
+Amber
+
+Critical:
+
+Red
+
+Orange should emphasize urgency,
+
+not stress.
+
+---
+
+# Motion
+
+Allowed:
+
+Smooth countdown.
+
+Subtle transition to GO.
+
+Progress updates.
+
+Button press feedback.
+
+Not allowed:
+
+Flashing countdown.
+
+Pulse animation.
+
+Bounce.
+
+Glow.
+
+Confetti.
+
+---
+
+# Accessibility
+
+The countdown must remain readable:
+
+In bright sunlight.
+
+With increased Dynamic Type.
+
+At several meters.
+
+Touch targets:
+
+Minimum 44 pt.
+
+Preferred 48 pt.
+
+---
+
+# Error Handling
+
+If timing is interrupted:
+
+Explain immediately.
+
+Restore the remaining time when possible.
+
+Never silently restart the timer.
+
+---
+
+# Offline Behaviour
+
+The Rest Screen remains fully functional offline.
+
+Countdowns never depend on network connectivity.
+
+---
+
+# Combat Sports
+
+For combat rounds:
+
+Round
+
+2 / 6
+
+Rest
+
+01:00
+
+Next
+
+Power combinations
+
+Heavy bag
+
+The terminology adapts to combat training.
+
+---
+
+# Success Criteria
+
+The athlete should never ask:
+
+"How long is left?"
+
+"What comes next?"
+
+"What weight do I use?"
+
+The Rest Screen has already answered those questions.
+
+---
+
+# Final Principle
+
+Recovery is part of training.
+
+The Rest Screen prepares the next performance.
+
+Not the next interaction.

@@ -1,0 +1,1071 @@
+# TRAINING SCREEN
+
+Version 1.0
+
+---
+
+# Purpose
+
+The Training Screen is the operational core of the Combat Athlete System.
+
+It guides the athlete through one exercise, one set and one decision at a time.
+
+The athlete should never need to remember:
+
+- the next exercise;
+- the target load;
+- the target repetitions;
+- the prescribed tempo;
+- the required rest period;
+- the current position inside the session.
+
+CAS carries the cognitive load.
+
+The athlete performs.
+
+---
+
+# Core Principle
+
+One exercise.
+
+One target.
+
+One action.
+
+Everything unrelated disappears.
+
+The Training Screen should feel like an experienced coach standing beside the athlete.
+
+Calm.
+
+Precise.
+
+Present.
+
+---
+
+# Primary Question
+
+The Training Screen must always answer:
+
+What do I do now?
+
+It should also make the following information immediately available:
+
+- what comes next;
+- how much of the session is complete;
+- what was prescribed;
+- what was actually performed.
+
+---
+
+# Information Hierarchy
+
+The screen follows this hierarchy:
+
+1. Session progress
+2. Current exercise
+3. Current set
+4. Target load
+5. Target repetitions or duration
+6. Execution parameters
+7. Primary action
+8. Next exercise preview
+9. Secondary controls
+
+Nothing should compete with the current exercise.
+
+---
+
+# Screen Header
+
+The header provides orientation.
+
+Recommended content:
+
+- session title;
+- session progress;
+- elapsed session time when useful;
+- pause or exit control.
+
+The header remains compact.
+
+It must not reduce the space available for the current exercise.
+
+---
+
+# Session Progress
+
+The athlete should always know how much of the session is complete.
+
+Progress should be shown as:
+
+- a horizontal progress bar;
+- a percentage;
+- or both when space allows.
+
+Example:
+
+Session
+
+42 %
+
+The progress indicator should update after each validated set or completed work interval.
+
+It should behave like an energy bar:
+
+clear;
+
+continuous;
+
+easy to understand.
+
+It must represent meaningful completion.
+
+Not elapsed time alone.
+
+---
+
+# Current Exercise
+
+The current exercise is the dominant content.
+
+Recommended information:
+
+- exercise name;
+- exercise category when useful;
+- current set;
+- total number of sets;
+- primary target;
+- technical cue when necessary.
+
+Example:
+
+Tractions lestées
+
+Série 3 sur 5
+
++20 kg
+
+5 répétitions
+
+The athlete should understand the prescription within three seconds.
+
+---
+
+# Exercise Name
+
+The exercise name should use strong hierarchy.
+
+Recommended style:
+
+Heading 1 or Heading 2 depending on available space.
+
+Avoid abbreviations unless universally understood by the target athlete.
+
+Good:
+
+Développé couché
+
+Tractions lestées
+
+Low kick au sac
+
+Avoid:
+
+DC
+
+TL
+
+LK Bag
+
+unless the athlete has explicitly enabled compact terminology.
+
+---
+
+# Set Position
+
+The current set position must remain visible.
+
+Example:
+
+Série 3 sur 5
+
+For interval work:
+
+Round 4 sur 8
+
+For timed work:
+
+Bloc 2 sur 4
+
+Use terminology adapted to the exercise type.
+
+---
+
+# Load
+
+Load is one of the most important values.
+
+It should be large, clear and visually stronger than surrounding text.
+
+Examples:
+
+80 kg
+
++20 kg
+
+Élastique moyen
+
+Poids du corps
+
+The unit must remain visible.
+
+Never display a number without context.
+
+---
+
+# Repetitions
+
+Repetitions should be visually paired with load.
+
+Examples:
+
+5 répétitions
+
+8 par côté
+
+Maximum technique
+
+The athlete must never confuse:
+
+- total repetitions;
+- repetitions per side;
+- repetitions per arm;
+- repetitions remaining.
+
+---
+
+# Duration
+
+For timed exercises, duration replaces repetitions as the primary target.
+
+Examples:
+
+30 s
+
+2 min
+
+5 × 3 min
+
+The timer should become visually dominant only when timing is active.
+
+---
+
+# Tempo
+
+Tempo is displayed only when prescribed.
+
+Example:
+
+3–1–X–1
+
+A short explanation may be available through secondary disclosure.
+
+Do not permanently overload the main screen with tempo education.
+
+---
+
+# RPE and RIR
+
+RPE or RIR should appear only when relevant to the exercise prescription.
+
+Examples:
+
+RPE 8
+
+2 répétitions en réserve
+
+Never show both RPE and RIR unless there is a clear reason.
+
+The terminology should remain consistent throughout the application.
+
+---
+
+# Technique Notes
+
+Technique notes should remain short.
+
+One cue at a time.
+
+Good:
+
+Poitrine haute.
+
+Accélère dès le départ.
+
+Garde les coudes sous la barre.
+
+Avoid long paragraphs.
+
+Detailed instructions may be accessible through a secondary action.
+
+---
+
+# Exercise Media
+
+Video or animation may be available as optional support.
+
+It should never autoplay during training.
+
+It should never dominate the screen.
+
+Recommended use:
+
+- technique reminder;
+- unfamiliar exercise;
+- corrective cue;
+- rehabilitation variation.
+
+The athlete should be able to train without opening media.
+
+---
+
+# Primary Action
+
+Only one Primary Button should dominate the screen.
+
+Possible labels:
+
+- Valider la série
+- Démarrer
+- Terminer le round
+- Continuer
+- Passer au repos
+- Reprendre
+
+The label should describe the immediate action.
+
+Avoid generic labels such as:
+
+OK
+
+Suivant
+
+Confirmer
+
+when a more precise verb is available.
+
+---
+
+# Set Validation
+
+After completing a set, the athlete should be able to record:
+
+- actual load;
+- actual repetitions;
+- perceived effort;
+- pain or limitation when relevant.
+
+The default values should match the prescription.
+
+The athlete should edit only when reality differs.
+
+Minimize typing.
+
+Prefer:
+
+- step controls;
+- quick selectors;
+- previously used values;
+- large touch targets.
+
+---
+
+# Automatic Defaults
+
+CAS should prefill the expected performance.
+
+Example:
+
+Prescription:
+
+80 kg × 5
+
+Default recorded result:
+
+80 kg × 5
+
+The athlete validates with one action when the prescription was completed as planned.
+
+This reduces interaction during training.
+
+---
+
+# Previous Performance
+
+Previous performance may appear as discreet supporting information.
+
+Example:
+
+Dernière fois
+
+77,5 kg × 5
+
+It must remain secondary.
+
+The athlete should not need to open history to remember the previous load.
+
+---
+
+# Next Exercise Preview
+
+The next exercise should always be announced before the current transition.
+
+Recommended content:
+
+- next exercise name;
+- expected load;
+- repetitions or duration;
+- equipment preparation when useful.
+
+Example:
+
+Ensuite
+
+Développé militaire
+
+42,5 kg × 6
+
+This preview is especially important during rest periods.
+
+The athlete should be able to prepare equipment in advance.
+
+---
+
+# Voice Guidance
+
+Voice guidance may announce:
+
+- current exercise;
+- target load;
+- target repetitions;
+- next exercise;
+- rest duration;
+- final countdown;
+- session progress milestones.
+
+Example:
+
+Prochain exercice : développé militaire.
+
+Charge prévue : quarante-deux kilos et demi.
+
+Six répétitions.
+
+Voice guidance remains optional.
+
+It should be concise.
+
+Never motivational.
+
+Never theatrical.
+
+---
+
+# Session Progression
+
+The session advances through explicit states:
+
+1. Exercise ready
+2. Work in progress
+3. Set completed
+4. Rest
+5. Next exercise ready
+6. Session completed
+
+Transitions must remain predictable.
+
+The athlete should never wonder whether a set has been saved.
+
+---
+
+# Session State Persistence
+
+The active session must survive:
+
+- screen locking;
+- application backgrounding;
+- accidental navigation;
+- temporary interruption.
+
+The athlete should be able to resume exactly where they stopped.
+
+The current exercise, set, timer and recorded data must be preserved.
+
+---
+
+# Screen Lock
+
+The rest timer and session state must continue when the iPhone locks.
+
+When the athlete returns:
+
+- the timer reflects real elapsed time;
+- the next action is immediately visible;
+- no progress is lost.
+
+CAS should not assume the screen remains active during the entire workout.
+
+---
+
+# Pause
+
+Pause is available but secondary.
+
+Pausing should stop:
+
+- active work intervals when appropriate;
+- session timing if the product definition requires it.
+
+Pausing should not erase:
+
+- current set;
+- exercise state;
+- recorded performance;
+- rest progress.
+
+The pause state must be visually unambiguous.
+
+---
+
+# Skip
+
+Skipping an exercise or set is a secondary action.
+
+CAS should ask for a reason only when that information will improve future recommendations.
+
+Possible reasons:
+
+- equipment unavailable;
+- pain;
+- time constraint;
+- excessive fatigue;
+- exercise not understood.
+
+Avoid unnecessary confirmation dialogs.
+
+---
+
+# Modify Prescription
+
+The athlete may adjust:
+
+- load;
+- repetitions;
+- exercise variation;
+- rest duration.
+
+Adjustments should remain easy but not visually dominant.
+
+CAS should distinguish:
+
+- prescribed value;
+- completed value.
+
+This information may improve future recommendations.
+
+---
+
+# Pain and Safety
+
+A pain or safety action should remain accessible.
+
+Possible labels:
+
+- Signaler une douleur
+- Adapter l’exercice
+- Arrêter l’exercice
+
+CAS should never encourage the athlete to push through significant pain.
+
+The tone remains calm and non-alarming.
+
+---
+
+# Exercise Types
+
+The Training Screen must support several exercise families.
+
+---
+
+# Strength Exercise
+
+Primary information:
+
+- exercise;
+- load;
+- repetitions;
+- sets;
+- rest;
+- RPE or RIR when prescribed.
+
+---
+
+# Bodyweight Exercise
+
+Primary information:
+
+- exercise;
+- repetitions;
+- variation;
+- added load or assistance;
+- rest.
+
+Examples:
+
+Poids du corps
+
++10 kg
+
+Élastique léger
+
+---
+
+# Timed Exercise
+
+Primary information:
+
+- exercise;
+- duration;
+- intensity;
+- work-to-rest ratio;
+- rounds.
+
+---
+
+# Interval Exercise
+
+Primary information:
+
+- work duration;
+- rest duration;
+- round number;
+- total rounds;
+- next phase.
+
+---
+
+# Bag Work
+
+Primary information:
+
+- round duration;
+- objective;
+- strike family;
+- intensity;
+- rest;
+- round number.
+
+Example:
+
+Sac lourd
+
+Round 3 sur 6
+
+3 min
+
+Puissance maximale
+
+Poings et low kicks
+
+Technical instructions must remain short and specific.
+
+---
+
+# Combat Conditioning
+
+Primary information:
+
+- work interval;
+- movement sequence;
+- target intensity;
+- recovery;
+- number of rounds.
+
+Avoid presenting complex combinations as dense paragraphs.
+
+Break sequences into readable steps.
+
+---
+
+# Mobility and Recovery
+
+Primary information:
+
+- movement;
+- duration;
+- side;
+- breathing or range cue.
+
+The interface should become visually calmer.
+
+No aggressive performance language.
+
+---
+
+# Supersets and Circuits
+
+The screen should clearly show:
+
+- current movement;
+- position in the sequence;
+- remaining movements;
+- rest location.
+
+Example:
+
+Circuit 2 sur 4
+
+Exercice 1 sur 3
+
+The athlete should not confuse exercise progress with circuit progress.
+
+---
+
+# Progress Indicators
+
+When several levels exist, distinguish them clearly:
+
+- session progress;
+- exercise progress;
+- set or round progress.
+
+Do not display three large progress bars simultaneously.
+
+Only the most relevant level should dominate.
+
+---
+
+# Layout
+
+Recommended vertical structure:
+
+Compact session header
+
+Session progress
+
+Current exercise
+
+Primary prescription
+
+Technique cue
+
+Primary action
+
+Previous performance
+
+Next exercise preview
+
+Secondary controls
+
+The primary action should remain reachable without excessive scrolling.
+
+---
+
+# One-Handed Use
+
+The Training Screen should support one-handed interaction when possible.
+
+Primary controls should remain in the lower half of the screen.
+
+Avoid placing frequent actions exclusively in the top navigation area.
+
+---
+
+# Touch Targets
+
+Minimum touch area:
+
+44 × 44 pt
+
+Preferred during training:
+
+48 × 48 pt
+
+Controls must remain usable with:
+
+- sweaty hands;
+- gloves removed quickly;
+- fatigue;
+- reduced precision.
+
+---
+
+# Typography
+
+Recommended hierarchy:
+
+Session title:
+
+caption or body
+
+Exercise name:
+
+heading1 or heading2
+
+Set position:
+
+caption or body
+
+Load:
+
+display or heading1
+
+Repetitions:
+
+heading1 or heading2
+
+Technique cue:
+
+body
+
+Previous performance:
+
+caption
+
+Next exercise:
+
+heading3 or bodyLarge
+
+Primary button:
+
+body with Medium weight
+
+Timers:
+
+display
+
+Numbers must remain easy to compare.
+
+---
+
+# Color Usage
+
+Background:
+
+Graphite Black
+
+Exercise surface:
+
+Charcoal or Steel Gray
+
+Primary action:
+
+Performance Orange
+
+Completion:
+
+Recovery Green
+
+Warning:
+
+Warning Amber
+
+Pain or critical state:
+
+Critical Red
+
+Do not use orange for every active element.
+
+Do not use green for ordinary navigation.
+
+---
+
+# Icons
+
+Icons remain optional.
+
+Possible uses:
+
+- timer;
+- load;
+- repetitions;
+- pause;
+- audio;
+- pain;
+- completion.
+
+Icons never replace essential labels.
+
+Avoid decorative exercise illustrations.
+
+---
+
+# Motion
+
+Motion explains state changes.
+
+Allowed:
+
+- progress update;
+- transition from work to rest;
+- subtle validation feedback;
+- timer state transition;
+- restrained button press feedback.
+
+Not allowed:
+
+- bouncing values;
+- repeated pulsing;
+- flashing countdown;
+- dramatic exercise transitions;
+- celebratory effects after every set.
+
+Respect Reduced Motion.
+
+---
+
+# Haptics
+
+Recommended haptic moments:
+
+- work interval starts;
+- set validated;
+- final rest countdown;
+- rest completed;
+- session completed;
+- critical warning.
+
+Avoid haptics for ordinary scrolling or navigation.
+
+Haptics should reinforce meaningful state changes.
+
+---
+
+# Sound
+
+CAS remains silent by default unless voice or sound guidance is enabled.
+
+Optional sounds may signal:
+
+- start;
+- final countdown;
+- rest complete;
+- session complete.
+
+Sounds must remain short and functional.
+
+---
+
+# Accessibility
+
+The screen must support:
+
+- Dynamic Type;
+- VoiceOver;
+- Reduced Motion;
+- high contrast;
+- large touch targets;
+- logical focus order.
+
+VoiceOver should announce:
+
+- exercise name;
+- current set;
+- target load;
+- target repetitions;
+- current state;
+- primary action.
+
+Important information must not rely on color alone.
+
+---
+
+# Error States
+
+Possible errors:
+
+- session cannot be saved;
+- timer interrupted;
+- data unavailable;
+- recommendation missing.
+
+The screen must explain:
+
+- what happened;
+- whether training can continue;
+- what the athlete should do.
+
+Never discard completed work silently.
+
+---
+
+# Offline Behaviour
+
+The Training Screen should remain functional without a network connection when the session has already been generated.
+
+The athlete must be able to:
+
+- view the session;
+- complete exercises;
+- record results;
+- run timers;
+- finish the session.
+
+Synchronization may occur later.
+
+---
+
+# Do
+
+- show one exercise at a time;
+- prefill prescribed values;
+- keep the primary action obvious;
+- announce the next exercise;
+- preserve progress when the screen locks;
+- make timers reliable;
+- keep technique cues short;
+- distinguish prescribed and completed values;
+- support combat-specific intervals and bag work.
+
+---
+
+# Do Not
+
+- display the entire session as the primary training interface;
+- show unrelated statistics during a set;
+- require repeated typing;
+- hide the next exercise;
+- stop timers when the phone locks;
+- use dramatic animations;
+- overload the screen with technical explanations;
+- make the athlete remember loads or repetitions;
+- depend on a permanent network connection.
+
+---
+
+# Success Criteria
+
+The Training Screen is successful when:
+
+- the athlete knows what to do within three seconds;
+- the current target is readable at arm's length;
+- the next exercise is known before transition;
+- a completed set can be recorded with one action when performed as prescribed;
+- the session survives screen locking and interruptions;
+- progress is always clear;
+- the athlete spends more attention on execution than on the application.
+
+---
+
+# Final Principle
+
+CAS remembers the plan.
+
+CAS tracks the session.
+
+CAS announces what comes next.
+
+The athlete only has to perform.

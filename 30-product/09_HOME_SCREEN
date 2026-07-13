@@ -1,0 +1,788 @@
+# HOME SCREEN
+
+Version 1.0
+
+---
+
+# Purpose
+
+The Home Screen is the operational entry point of the Combat Athlete System.
+
+It answers one primary question:
+
+What should I do today?
+
+The athlete should understand the answer within three seconds.
+
+The Home Screen is not a dashboard.
+
+It is not a collection of statistics.
+
+It is not a social feed.
+
+It is a training briefing.
+
+---
+
+# Core Principle
+
+One priority.
+
+One decision.
+
+One primary action.
+
+Everything else is secondary.
+
+The Home Screen succeeds when the athlete immediately understands:
+
+- today's objective;
+- today's session status;
+- the next action to take.
+
+---
+
+# Primary Mental Model
+
+The Home Screen should feel like a mission briefing.
+
+Not military theatre.
+
+Not aggressive branding.
+
+Not roleplay.
+
+The feeling should come from clarity, precision and purpose.
+
+The athlete opens CAS to receive a clear training recommendation.
+
+The interface should communicate:
+
+This is what matters today.
+
+This is why it matters.
+
+This is what happens next.
+
+---
+
+# Information Hierarchy
+
+The Home Screen follows this order:
+
+1. Context
+2. Today's Mission
+3. Primary Action
+4. Readiness
+5. Weekly Progress
+6. Latest Relevant Information
+7. Secondary Navigation
+
+The order must remain stable.
+
+---
+
+# Screen Header
+
+The header provides context only.
+
+Recommended content:
+
+- greeting;
+- current date;
+- optional access to settings.
+
+Example:
+
+Bonjour Arnault
+
+Lundi 13 juillet
+
+The greeting remains discreet.
+
+The date remains secondary.
+
+The settings action should not compete with the primary content.
+
+---
+
+# Today's Mission
+
+Today's Mission is the dominant element of the Home Screen.
+
+It should occupy the largest visual area.
+
+It answers:
+
+- what type of session is planned;
+- what the main objective is;
+- how long it should take;
+- whether the athlete is ready to begin.
+
+Recommended content:
+
+- section label;
+- session title;
+- primary objective;
+- estimated duration;
+- short explanation;
+- primary action.
+
+Example:
+
+MISSION DU JOUR
+
+Force maximale
+
+Développer la production de force du haut du corps.
+
+65 min
+
+Commencer la séance
+
+---
+
+# Mission Card
+
+The Mission Card is the primary card of the Home Screen.
+
+It should use:
+
+- card background;
+- strong typography;
+- restrained use of Performance Orange;
+- generous spacing;
+- one primary button.
+
+The card must never become visually noisy.
+
+Avoid:
+
+- several competing metrics;
+- decorative illustrations;
+- large gradients;
+- oversized icons;
+- motivational slogans;
+- secondary actions inside the primary card.
+
+---
+
+# Primary Action
+
+Only one Primary Button should appear on the Home Screen.
+
+Possible labels:
+
+- Commencer la séance
+- Reprendre la séance
+- Voir la séance
+- Terminer le bilan
+- Préparer demain
+
+The label depends on the current session state.
+
+The action should always represent the most logical next step.
+
+---
+
+# Readiness
+
+Readiness is secondary to Today's Mission.
+
+It should help the athlete interpret the recommendation.
+
+It should not compete with the Mission Card.
+
+Recommended content:
+
+- readiness score or readiness state;
+- short interpretation;
+- one or two decisive factors.
+
+Example:
+
+PRÊT
+
+82 %
+
+Bonne récupération
+
+Sommeil correct
+
+Fatigue faible
+
+Do not show every available recovery metric.
+
+Show only what changes today's decision.
+
+---
+
+# Readiness Language
+
+Prefer clear interpretations over raw data.
+
+Good:
+
+- Bonne récupération
+- Fatigue modérée
+- Charge réduite recommandée
+- Séance intense possible
+
+Avoid:
+
+- excessive physiological detail;
+- unexplained scores;
+- vague motivational language;
+- alarming language unless genuinely necessary.
+
+---
+
+# Weekly Progress
+
+Weekly Progress provides orientation.
+
+It should answer:
+
+How is the training week progressing?
+
+Recommended content:
+
+- seven-day sequence;
+- completed sessions;
+- current day;
+- remaining planned sessions.
+
+Example:
+
+L  M  M  J  V  S  D
+
+●  ●  ○  ○  ○  ○  ○
+
+Keep this representation simple.
+
+Do not turn it into a complex chart.
+
+---
+
+# Latest Relevant Information
+
+Only one secondary card should appear by default.
+
+Its content should be chosen by relevance.
+
+Possible examples:
+
+- last completed session;
+- recent personal record;
+- recovery warning;
+- upcoming combat training;
+- important progression note;
+- incomplete session review.
+
+Example:
+
+DERNIÈRE SÉANCE
+
+Force
+
+Tractions lestées +2,5 kg
+
+Séance terminée
+
+The Home Screen should not become a history feed.
+
+---
+
+# Secondary Navigation
+
+Secondary navigation should remain visually quiet.
+
+Possible actions:
+
+- Voir le programme
+- Voir l'historique
+- Voir la progression
+- Modifier le profil
+
+These actions must never compete with the primary button.
+
+Use TextButton or SecondaryButton depending on importance.
+
+---
+
+# States
+
+The Home Screen must adapt to the athlete's current situation.
+
+Each state has one dominant message and one primary action.
+
+---
+
+# State 1 — Planned Session
+
+Condition:
+
+A session is planned and has not started.
+
+Primary content:
+
+- session title;
+- objective;
+- duration;
+- readiness interpretation.
+
+Primary action:
+
+Commencer la séance
+
+---
+
+# State 2 — Session In Progress
+
+Condition:
+
+A session has started but is not complete.
+
+Primary content:
+
+- current session;
+- progress;
+- current or next exercise;
+- elapsed time if useful.
+
+Primary action:
+
+Reprendre la séance
+
+The Home Screen should immediately restore continuity.
+
+---
+
+# State 3 — Session Completed
+
+Condition:
+
+Today's session is complete.
+
+Primary content:
+
+- completion confirmation;
+- brief summary;
+- most relevant result.
+
+Primary action:
+
+Voir le bilan
+
+Possible secondary action:
+
+Voir la prochaine séance
+
+Do not continue to present the completed session as if it still needs to be started.
+
+---
+
+# State 4 — Rest Day
+
+Condition:
+
+No training session is planned.
+
+Primary content:
+
+- recovery objective;
+- explanation;
+- optional mobility or recovery recommendation.
+
+Primary action:
+
+Voir la récupération
+
+Possible label:
+
+JOUR DE RÉCUPÉRATION
+
+The Home Screen should make rest feel intentional.
+
+Never imply failure or inactivity.
+
+---
+
+# State 5 — No Session Available
+
+Condition:
+
+No session can currently be generated or retrieved.
+
+Primary content:
+
+- calm explanation;
+- reason when known;
+- next step.
+
+Primary action examples:
+
+- Compléter mon profil
+- Réessayer
+- Voir le programme
+
+Never display an empty screen.
+
+Never expose technical implementation details.
+
+---
+
+# State 6 — Profile Incomplete
+
+Condition:
+
+The athlete profile lacks required information.
+
+Primary content:
+
+- why the information matters;
+- what remains to be completed.
+
+Primary action:
+
+Compléter mon profil
+
+The tone remains helpful.
+
+Never accusatory.
+
+---
+
+# State 7 — Recommendation Adjusted
+
+Condition:
+
+CAS has modified the planned session due to fatigue, recovery or schedule.
+
+Primary content:
+
+- original objective;
+- adjusted recommendation;
+- concise explanation.
+
+Example:
+
+SÉANCE AJUSTÉE
+
+Volume réduit de 20 %
+
+Fatigue élevée détectée
+
+Primary action:
+
+Voir la séance adaptée
+
+The explanation should be brief and actionable.
+
+---
+
+# State 8 — Training Block Completed
+
+Condition:
+
+The athlete has completed a training block.
+
+Primary content:
+
+- block completion;
+- meaningful progress summary;
+- next decision.
+
+Primary action:
+
+Voir le bilan du bloc
+
+Possible secondary action:
+
+Préparer le prochain bloc
+
+---
+
+# Layout
+
+The Home Screen should use a single vertical flow.
+
+Recommended order:
+
+Header
+
+Today's Mission Card
+
+Readiness
+
+Weekly Progress
+
+Latest Relevant Information
+
+Secondary Navigation
+
+Avoid multi-column layouts on iPhone.
+
+Avoid dense grids.
+
+Avoid horizontal carousels for essential information.
+
+---
+
+# Spacing
+
+Use the official spacing tokens.
+
+Recommended screen rhythm:
+
+- screen horizontal margin: CASSpacing.l;
+- gap between major sections: CASSpacing.xl;
+- gap between related elements: CASSpacing.s or CASSpacing.m;
+- card padding: CASComponentMetrics.cardPadding.
+
+No arbitrary spacing values.
+
+---
+
+# Typography
+
+Recommended hierarchy:
+
+Header greeting:
+
+body or bodyLarge
+
+Date:
+
+caption
+
+Section label:
+
+smallCaption or caption with Medium weight
+
+Mission title:
+
+heading1 or heading2 depending on available space
+
+Mission description:
+
+body
+
+Duration:
+
+bodyLarge or heading3
+
+Readiness value:
+
+heading2 or display only when justified
+
+Secondary card title:
+
+heading3
+
+Metadata:
+
+caption
+
+Do not use all caps extensively.
+
+Short labels such as MISSION DU JOUR may use uppercase only if readability remains excellent.
+
+---
+
+# Color Usage
+
+Background:
+
+Graphite Black
+
+Primary surfaces:
+
+Charcoal or Steel Gray
+
+Primary action:
+
+Performance Orange
+
+Readiness or success:
+
+Recovery Green
+
+Warning:
+
+Warning Amber
+
+Critical issue:
+
+Critical Red
+
+Accent colors remain rare.
+
+The Mission Card should not become a large orange surface.
+
+Orange should guide the eye toward the primary action.
+
+---
+
+# Icons
+
+Icons are optional.
+
+Use them only when they improve comprehension.
+
+Possible uses:
+
+- settings;
+- duration;
+- recovery;
+- progress;
+- completed status.
+
+Avoid decorative combat imagery.
+
+No gloves.
+
+No flames.
+
+No lightning bolts.
+
+No skulls.
+
+No aggressive symbols.
+
+---
+
+# Motion
+
+The Home Screen should feel immediate.
+
+Allowed:
+
+- subtle appearance transition;
+- smooth update of progress;
+- brief state transition;
+- restrained button feedback.
+
+Not allowed:
+
+- dramatic card entrance;
+- bounce;
+- glow;
+- repeated pulsing;
+- confetti;
+- automatic animation loops.
+
+Respect Reduced Motion.
+
+---
+
+# Accessibility
+
+The Home Screen must remain usable:
+
+- in bright sunlight;
+- in dark gyms;
+- under fatigue;
+- with sweaty hands;
+- at increased Dynamic Type sizes.
+
+Requirements:
+
+- large touch targets;
+- high contrast;
+- no information conveyed by color alone;
+- concise labels;
+- logical VoiceOver order;
+- primary action reachable without unnecessary scrolling on standard iPhone sizes when possible.
+
+---
+
+# Empty and Error States
+
+Every empty or error state must explain:
+
+- what happened;
+- what the athlete can do;
+- what happens next.
+
+Good:
+
+Aucune séance disponible pour le moment.
+
+Complétez votre profil pour recevoir une recommandation adaptée.
+
+Bad:
+
+Erreur 404.
+
+Session unavailable.
+
+Unknown error.
+
+---
+
+# Content Rules
+
+Text should remain short.
+
+Prefer:
+
+- one clear title;
+- one short explanation;
+- one primary action.
+
+Avoid:
+
+- long paragraphs;
+- excessive coaching commentary;
+- motivational clichés;
+- technical jargon;
+- unexplained scores.
+
+---
+
+# Do
+
+- make today's action obvious;
+- keep the primary card dominant;
+- explain adjustments briefly;
+- show only relevant recovery information;
+- treat rest as intentional;
+- preserve continuity when a session is in progress;
+- keep secondary information subordinate.
+
+---
+
+# Do Not
+
+- create a dashboard of unrelated metrics;
+- show calories, macros and body weight by default;
+- place several primary buttons on the screen;
+- overload the Mission Card;
+- use orange decoratively;
+- use aggressive fitness imagery;
+- show complex charts on the Home Screen;
+- make the athlete search for the next action.
+
+---
+
+# Success Criteria
+
+The Home Screen is successful when:
+
+- the athlete understands today's objective within three seconds;
+- the primary action is obvious;
+- the session state is unambiguous;
+- the screen feels calm and professional;
+- secondary information does not distract;
+- the athlete can begin or resume training with minimal interaction.
+
+---
+
+# Final Principle
+
+The Home Screen is not a dashboard.
+
+It is a decision.
+
+The athlete opens CAS and immediately knows what to do next.

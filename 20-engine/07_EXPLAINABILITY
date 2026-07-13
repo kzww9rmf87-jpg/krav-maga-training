@@ -1,0 +1,587 @@
+# EXPLAINABILITY
+
+Version 1.0
+
+---
+
+# Purpose
+
+The Explainability Engine ensures that every recommendation made by CAS can be understood by the athlete.
+
+CAS never asks an athlete to trust a black box.
+
+Every meaningful recommendation should be accompanied by an explanation that is:
+
+clear,
+
+honest,
+
+evidence-informed,
+
+and proportional to the athlete's needs.
+
+Explainability is not an additional feature.
+
+It is a fundamental property of the Combat Athlete System.
+
+---
+
+# Core Principle
+
+Every decision must answer four questions.
+
+1.
+
+What decision was made?
+
+2.
+
+Why was this decision made?
+
+3.
+
+What information was used?
+
+4.
+
+What would have produced a different decision?
+
+If CAS cannot answer these questions,
+
+the recommendation should be considered incomplete.
+
+---
+
+# Philosophy
+
+CAS is an expert system.
+
+Not an oracle.
+
+It does not claim certainty.
+
+It explains reasoning.
+
+The athlete should understand:
+
+what CAS knows,
+
+what CAS assumes,
+
+what CAS does not know.
+
+---
+
+# Trust
+
+Trust is earned through transparency.
+
+CAS should never hide uncertainty.
+
+When evidence is incomplete,
+
+the explanation should acknowledge it.
+
+Example:
+
+Recovery appears lower than usual.
+
+This recommendation is based primarily on your recent training load.
+
+Sleep data was unavailable.
+
+---
+
+# Levels of Explanation
+
+The athlete may choose how much information they want.
+
+---
+
+# Level 1
+
+Minimal
+
+One sentence.
+
+Example:
+
+Increase the load next session.
+
+---
+
+# Level 2
+
+Standard
+
+Decision plus short justification.
+
+Example:
+
+Increase the load.
+
+You successfully completed the prescribed repetitions during the last three sessions.
+
+---
+
+# Level 3
+
+Detailed
+
+Decision
+
+↓
+
+Evidence
+
+↓
+
+Applied rules
+
+↓
+
+Alternative possibilities
+
+↓
+
+Confidence level
+
+Example:
+
+Decision
+
+Increase Bench Press from 80 kg to 82.5 kg.
+
+Evidence
+
+Three consecutive successful sessions.
+
+Average RPE:
+
+7.6
+
+No pain reported.
+
+Recovery normal.
+
+Applied Rule
+
+Progressive overload rule.
+
+Alternative
+
+If average RPE had exceeded 9,
+
+the load would have remained unchanged.
+
+Confidence
+
+High.
+
+---
+
+# Decision Structure
+
+Every recommendation follows the same structure.
+
+Observation
+
+↓
+
+Interpretation
+
+↓
+
+Decision
+
+↓
+
+Expected Outcome
+
+↓
+
+Confidence
+
+---
+
+# Observation
+
+Raw data.
+
+Examples:
+
+Completed repetitions.
+
+Training load.
+
+Recovery score.
+
+Sleep duration.
+
+Heart rate.
+
+Body mass.
+
+Pain reports.
+
+Subjective fatigue.
+
+CAS distinguishes observations from conclusions.
+
+---
+
+# Interpretation
+
+Interpretation transforms observations into knowledge.
+
+Example:
+
+Observation
+
+Three successful sessions.
+
+Interpretation
+
+Current stimulus is well tolerated.
+
+---
+
+# Decision
+
+Only after interpretation.
+
+Example
+
+Increase load by 2.5 kg.
+
+---
+
+# Expected Outcome
+
+CAS explains what it expects.
+
+Example
+
+The new load should remain achievable while maintaining technical quality.
+
+---
+
+# Confidence
+
+Every recommendation carries a confidence estimate.
+
+Examples
+
+Very High
+
+High
+
+Moderate
+
+Low
+
+Unknown
+
+Confidence depends on data quality.
+
+Not on optimism.
+
+---
+
+# Sources of Evidence
+
+CAS should identify which information influenced a decision.
+
+Possible sources:
+
+Training history.
+
+Recovery.
+
+Performance.
+
+Athlete profile.
+
+Equipment.
+
+Periodization.
+
+Scientific knowledge.
+
+Coach-defined constraints.
+
+Unavailable data should also be reported.
+
+---
+
+# Scientific Foundation
+
+Whenever appropriate,
+
+CAS may reference the scientific principle involved.
+
+Examples:
+
+Progressive overload.
+
+Specificity.
+
+Fatigue management.
+
+Recovery adaptation.
+
+Motor learning.
+
+The objective is education.
+
+Not citation.
+
+---
+
+# Counterfactual Reasoning
+
+Whenever possible,
+
+CAS explains what would have changed the recommendation.
+
+Example
+
+Had your recovery score been lower,
+
+the planned volume would have been reduced.
+
+Counterfactual explanations improve understanding.
+
+---
+
+# Uncertainty
+
+CAS distinguishes between:
+
+Known.
+
+Estimated.
+
+Predicted.
+
+Unknown.
+
+These categories should never be mixed.
+
+---
+
+# Recommendation Types
+
+Explainability applies to every recommendation.
+
+Examples:
+
+Exercise selection.
+
+Load progression.
+
+Volume.
+
+Intensity.
+
+Frequency.
+
+Recovery.
+
+Deload.
+
+Exercise substitution.
+
+Warm-up.
+
+Combat conditioning.
+
+---
+
+# Safety Decisions
+
+Safety recommendations require the highest level of explanation.
+
+Example
+
+Deadlifts have been replaced.
+
+Reason:
+
+Lower back pain was reported during the previous session.
+
+Alternative exercises maintain the same movement pattern while reducing spinal loading.
+
+---
+
+# Recovery Decisions
+
+Example
+
+Today's conditioning volume has been reduced.
+
+Reason
+
+Recovery indicators suggest accumulated fatigue.
+
+Expected benefit
+
+Maintain adaptation while reducing injury risk.
+
+---
+
+# Exercise Selection
+
+Example
+
+Trap Bar Deadlift selected.
+
+Reason
+
+Matches the desired strength adaptation while reducing technical complexity.
+
+---
+
+# Session Generation
+
+Example
+
+Heavy Bag Intervals selected.
+
+Reason
+
+Today's objective focuses on anaerobic power specific to striking sports.
+
+---
+
+# Periodization
+
+Example
+
+Deload week introduced.
+
+Reason
+
+Training stress has accumulated over four consecutive weeks.
+
+Expected benefit
+
+Improve long-term progression.
+
+---
+
+# Learning
+
+CAS should explain when recommendations change because it has learned something.
+
+Example
+
+Grip endurance appears to be improving faster than expected.
+
+Future sessions will include a greater emphasis on maximal pulling strength.
+
+---
+
+# Human Override
+
+The athlete may ignore a recommendation.
+
+CAS records this.
+
+Future explanations may include:
+
+Recommendation declined by athlete.
+
+No negative judgement should ever be expressed.
+
+---
+
+# Coaching Language
+
+Explainability remains factual.
+
+Professional.
+
+Respectful.
+
+Never manipulative.
+
+Never authoritarian.
+
+Never vague.
+
+---
+
+# Accessibility
+
+Every explanation should remain understandable by a motivated athlete.
+
+Avoid unnecessary jargon.
+
+Technical concepts should be explained when introduced.
+
+---
+
+# Limits
+
+CAS should explicitly acknowledge its limits.
+
+Examples
+
+Current recommendation is based on limited recovery data.
+
+No sleep information was available.
+
+Heart rate monitor disconnected.
+
+Confidence is therefore reduced.
+
+Transparency is always preferable to false certainty.
+
+---
+
+# Future Evolution
+
+Future versions may include:
+
+Interactive explanations.
+
+Decision trees.
+
+Scientific references.
+
+Visual reasoning graphs.
+
+Coach review mode.
+
+Comparison of alternative decisions.
+
+---
+
+# Success Criteria
+
+The athlete should be able to answer:
+
+Why am I doing this exercise?
+
+Why this load?
+
+Why this volume?
+
+Why today?
+
+Why not something else?
+
+If the athlete understands the reasoning,
+
+Explainability has succeeded.
+
+---
+
+# Final Principle
+
+CAS does not ask for blind trust.
+
+CAS explains.
+
+The athlete decides.

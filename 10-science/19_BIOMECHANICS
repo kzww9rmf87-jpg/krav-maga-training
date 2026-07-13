@@ -1,0 +1,1414 @@
+# BIOMECHANICS
+
+Version 1.0
+
+---
+
+# Purpose
+
+The Biomechanics model describes how forces act on the human body and how the body produces, absorbs and transfers those forces during movement.
+
+It provides the mechanical foundation required to understand exercise technique, athletic performance and combat-specific actions.
+
+Biomechanics does not determine training decisions by itself.
+
+It provides knowledge that allows CAS to make those decisions more accurately.
+
+---
+
+# Definition
+
+Biomechanics is the study of movement and the forces that produce or modify movement.
+
+CAS uses biomechanics to understand:
+
+- how movement is produced;
+- where force originates;
+- how force is transmitted;
+- how joints and tissues are loaded;
+- why one exercise differs mechanically from another;
+- how physical preparation may transfer to combat performance.
+
+---
+
+# Core Principle
+
+Movement is the result of force interacting with the body.
+
+Every exercise and every combat action can be described through:
+
+Force.
+
+Direction.
+
+Magnitude.
+
+Velocity.
+
+Acceleration.
+
+Position.
+
+Time.
+
+The quality of movement depends not only on how much force is produced,
+
+but on where,
+
+when,
+
+and in which direction it is applied.
+
+---
+
+# Scientific Role
+
+The Biomechanics model informs:
+
+Exercise Ontology.
+
+Exercise Classification.
+
+Movement Patterns.
+
+Capability Mapping.
+
+Strength.
+
+Power.
+
+Speed.
+
+Mobility.
+
+Stability.
+
+Safety Engine.
+
+Exercise Knowledge Engine.
+
+Session Generation Engine.
+
+Explainability Engine.
+
+---
+
+# Internal and External Forces
+
+CAS distinguishes between external and internal forces.
+
+External Forces
+
+Examples:
+
+Gravity.
+
+Ground reaction force.
+
+Opponent resistance.
+
+Equipment resistance.
+
+Impact.
+
+Friction.
+
+Air resistance.
+
+Internal Forces
+
+Examples:
+
+Muscle force.
+
+Tendon force.
+
+Ligament tension.
+
+Joint reaction force.
+
+Bone compression.
+
+Training decisions should consider both.
+
+---
+
+# Force
+
+Force can:
+
+Accelerate the body.
+
+Decelerate the body.
+
+Change direction.
+
+Stabilize a position.
+
+Deform tissue.
+
+Produce impact.
+
+Force must always be interpreted with direction and context.
+
+---
+
+# Force Vectors
+
+Every force has:
+
+Magnitude.
+
+Direction.
+
+Point of application.
+
+An exercise becomes mechanically specific partly because of its force vector.
+
+Examples:
+
+Vertical force.
+
+Horizontal force.
+
+Rotational force.
+
+Lateral force.
+
+Diagonal force.
+
+Combat performance requires force production in multiple directions.
+
+---
+
+# Ground Reaction Force
+
+When the athlete applies force into the ground,
+
+the ground applies an equal and opposite force to the athlete.
+
+Ground reaction force contributes to:
+
+Sprinting.
+
+Jumping.
+
+Punching.
+
+Kicking.
+
+Throwing.
+
+Level changes.
+
+Footwork.
+
+Effective combat movement begins with interaction with the ground.
+
+---
+
+# Kinetic Chain
+
+Force often travels through a sequence of body segments.
+
+Example:
+
+Ground
+
+↓
+
+Foot
+
+↓
+
+Leg
+
+↓
+
+Hip
+
+↓
+
+Trunk
+
+↓
+
+Shoulder
+
+↓
+
+Arm
+
+↓
+
+Fist
+
+An inefficient link reduces total force transfer.
+
+CAS should evaluate movements as coordinated chains,
+
+not isolated muscles.
+
+---
+
+# Proximal-to-Distal Sequencing
+
+Many explosive actions follow a proximal-to-distal sequence.
+
+Larger body segments initiate movement.
+
+Smaller distal segments complete it.
+
+Examples:
+
+Punching.
+
+Kicking.
+
+Throwing.
+
+Medicine ball throws.
+
+Poor timing between segments reduces speed and impact.
+
+---
+
+# Linear Motion
+
+Linear motion occurs when the body or an object moves along a path.
+
+Descriptors include:
+
+Position.
+
+Distance.
+
+Displacement.
+
+Velocity.
+
+Acceleration.
+
+Examples:
+
+Sprint.
+
+Sled push.
+
+Linear punch.
+
+Forward level change.
+
+---
+
+# Angular Motion
+
+Angular motion occurs around an axis.
+
+Descriptors include:
+
+Angular displacement.
+
+Angular velocity.
+
+Angular acceleration.
+
+Torque.
+
+Examples:
+
+Hip rotation.
+
+Shoulder rotation.
+
+Roundhouse kick.
+
+Hook punch.
+
+Throwing.
+
+Most combat actions combine linear and angular motion.
+
+---
+
+# Torque
+
+Torque is the rotational effect of force around a joint or axis.
+
+Torque depends on:
+
+Force magnitude.
+
+Moment arm.
+
+Angle of force application.
+
+Joint position.
+
+Higher external torque generally requires greater internal muscular torque.
+
+---
+
+# Moment Arm
+
+The moment arm is the perpendicular distance between the force line and the axis of rotation.
+
+Changes in joint position alter moment arms.
+
+This explains why an exercise may feel harder at specific joint angles.
+
+Exercise difficulty is not determined by load alone.
+
+---
+
+# Levers
+
+The human body operates through lever systems.
+
+Bones act as levers.
+
+Joints act as axes.
+
+Muscles produce force.
+
+Most human movement favors speed and range of motion rather than mechanical efficiency.
+
+This has important consequences for training and injury risk.
+
+---
+
+# Work
+
+Mechanical work occurs when force produces displacement.
+
+Work depends on:
+
+Force.
+
+Displacement.
+
+Direction.
+
+Training volume may approximate work,
+
+but volume alone does not fully describe mechanical demand.
+
+---
+
+# Power
+
+Mechanical power describes how rapidly work is performed.
+
+Power depends on both force and velocity.
+
+Biomechanics connects:
+
+Maximum Strength.
+
+Movement Velocity.
+
+Rate of Force Development.
+
+Explosive Performance.
+
+---
+
+# Impulse
+
+Impulse is force applied over time.
+
+Impulse influences changes in momentum.
+
+A high force applied too briefly may produce less total effect than a lower force applied for longer.
+
+Combat actions require context-specific impulse.
+
+Examples:
+
+Punch impact.
+
+Takedown entry.
+
+Jump takeoff.
+
+Blocking.
+
+---
+
+# Momentum
+
+Momentum depends on mass and velocity.
+
+In combat,
+
+momentum influences:
+
+Impact.
+
+Body collision.
+
+Takedowns.
+
+Throws.
+
+Movement control.
+
+Effective athletes manipulate both their own momentum and that of the opponent.
+
+---
+
+# Impact
+
+Impact occurs when force is applied over a very short duration.
+
+Impact characteristics depend on:
+
+Velocity.
+
+Effective mass.
+
+Contact area.
+
+Tissue stiffness.
+
+Alignment.
+
+Timing.
+
+Impact performance should not be reduced to muscular strength alone.
+
+---
+
+# Effective Mass
+
+Effective mass describes how much of the athlete's body mass contributes meaningfully to an impact.
+
+Good kinetic-chain organization increases effective mass.
+
+Poor coordination causes force leakage.
+
+This is particularly relevant to:
+
+Punches.
+
+Kicks.
+
+Elbows.
+
+Knees.
+
+Shoulder strikes.
+
+---
+
+# Force Absorption
+
+Combat athletes must produce and absorb force.
+
+Force absorption depends on:
+
+Eccentric strength.
+
+Joint alignment.
+
+Muscle activation.
+
+Movement strategy.
+
+Surface.
+
+Contact time.
+
+Examples:
+
+Landing.
+
+Blocking.
+
+Receiving contact.
+
+Decelerating.
+
+Sprawling.
+
+---
+
+# Deceleration
+
+Deceleration is an active physical capacity.
+
+It requires:
+
+Eccentric force.
+
+Coordination.
+
+Stability.
+
+Anticipation.
+
+Deceleration supports:
+
+Direction changes.
+
+Defensive movement.
+
+Strike recovery.
+
+Landing.
+
+Injury prevention.
+
+---
+
+# Center of Mass
+
+The center of mass influences:
+
+Balance.
+
+Stability.
+
+Acceleration.
+
+Direction changes.
+
+Takedowns.
+
+Throws.
+
+Lowering or shifting the center of mass changes mechanical possibilities.
+
+---
+
+# Base of Support
+
+The base of support is the area beneath the athlete that supports body position.
+
+A wider base generally improves stability.
+
+A narrower base may improve mobility.
+
+Combat requires continuous adjustment between these demands.
+
+---
+
+# Balance and Postural Control
+
+Postural control depends on the relationship between:
+
+Center of mass.
+
+Base of support.
+
+External forces.
+
+Sensory information.
+
+Muscular response.
+
+Static balance alone does not represent combat stability.
+
+---
+
+# Joint Actions
+
+Every exercise should identify relevant joint actions.
+
+Examples:
+
+Flexion.
+
+Extension.
+
+Abduction.
+
+Adduction.
+
+Internal rotation.
+
+External rotation.
+
+Pronation.
+
+Supination.
+
+Plantar flexion.
+
+Dorsiflexion.
+
+Joint actions should be described in functional context.
+
+---
+
+# Planes of Motion
+
+CAS recognizes three primary anatomical planes.
+
+Sagittal Plane
+
+Flexion and extension dominant.
+
+Frontal Plane
+
+Lateral movement dominant.
+
+Transverse Plane
+
+Rotation dominant.
+
+Combat actions are usually multiplanar.
+
+Training should not remain exclusively sagittal.
+
+---
+
+# Axes of Rotation
+
+Movement occurs around axes.
+
+Frontal Axis.
+
+Sagittal Axis.
+
+Longitudinal Axis.
+
+Understanding axes helps describe rotation and joint loading.
+
+---
+
+# Range of Motion
+
+Range of motion influences:
+
+Mechanical work.
+
+Muscle length.
+
+Joint torque.
+
+Technical demands.
+
+Adaptation.
+
+More range is not automatically better.
+
+The optimal range depends on:
+
+Objective.
+
+Athlete mobility.
+
+Safety.
+
+Sport transfer.
+
+Exercise variation.
+
+---
+
+# Open and Closed Kinetic Chains
+
+Open Kinetic Chain
+
+The distal segment moves freely.
+
+Examples:
+
+Leg extension.
+
+Open-chain kicking drill.
+
+Closed Kinetic Chain
+
+The distal segment is fixed or supported.
+
+Examples:
+
+Squat.
+
+Push-up.
+
+Most exercises exist on a continuum rather than in absolute categories.
+
+---
+
+# Bilateral and Unilateral Movement
+
+Bilateral movement uses both sides together.
+
+Unilateral movement emphasizes one side.
+
+Combat athletes require both.
+
+Unilateral training may improve:
+
+Balance.
+
+Coordination.
+
+Force asymmetry.
+
+Sport-specific stance control.
+
+Bilateral training may allow greater absolute loading.
+
+---
+
+# Concentric Actions
+
+Concentric muscle action occurs when muscle force produces shortening.
+
+Examples:
+
+Rising from a squat.
+
+Accelerating a punch.
+
+Jump takeoff.
+
+---
+
+# Eccentric Actions
+
+Eccentric muscle action occurs when muscle force resists lengthening.
+
+Examples:
+
+Landing.
+
+Deceleration.
+
+Strike recovery.
+
+Lowering a load.
+
+Eccentric capacity is essential for force absorption.
+
+---
+
+# Isometric Actions
+
+Isometric muscle action produces force without visible joint movement.
+
+Examples:
+
+Clinch control.
+
+Grip fighting.
+
+Maintaining guard.
+
+Positional control.
+
+Isometric strength is joint-angle specific.
+
+---
+
+# Stretch-Shortening Cycle
+
+The stretch-shortening cycle combines:
+
+Rapid eccentric loading.
+
+Brief transition.
+
+Concentric action.
+
+It contributes to:
+
+Jumping.
+
+Sprinting.
+
+Reactive footwork.
+
+Punching.
+
+Kicking.
+
+Effective use depends on stiffness, timing and coordination.
+
+---
+
+# Muscle-Tendon Unit
+
+Muscles and tendons work together.
+
+Muscles produce active force.
+
+Tendons transmit and store elastic energy.
+
+The mechanical behavior of the muscle-tendon unit influences:
+
+Power.
+
+Efficiency.
+
+Reactive strength.
+
+Movement economy.
+
+---
+
+# Force-Length Relationship
+
+Muscle force capacity changes with muscle length.
+
+Very shortened or excessively lengthened positions may reduce active force production.
+
+Exercise selection and range of motion influence this relationship.
+
+---
+
+# Force-Velocity Relationship
+
+Concentric force capacity generally decreases as movement velocity increases.
+
+Eccentric force capacity behaves differently.
+
+This relationship informs:
+
+Strength training.
+
+Power training.
+
+Velocity-specific exercise selection.
+
+Load prescription.
+
+---
+
+# Length-Tension and Joint Position
+
+Joint position changes:
+
+Muscle length.
+
+Moment arm.
+
+Leverage.
+
+Force potential.
+
+Exercise variations should therefore not be treated as mechanically identical.
+
+---
+
+# Mechanical Specificity
+
+Transfer improves when training shares important mechanical features with performance.
+
+Relevant features include:
+
+Force direction.
+
+Velocity.
+
+Range of motion.
+
+Contraction type.
+
+Movement sequence.
+
+Posture.
+
+Time available for force production.
+
+Mechanical similarity alone does not guarantee transfer,
+
+but it informs exercise selection.
+
+---
+
+# Biomechanical Transfer to Combat
+
+CAS evaluates transfer through:
+
+Movement pattern similarity.
+
+Force-vector similarity.
+
+Velocity similarity.
+
+Contraction similarity.
+
+Kinetic-chain similarity.
+
+Postural similarity.
+
+Temporal similarity.
+
+Transfer should be justified,
+
+not assumed.
+
+---
+
+# Striking Biomechanics
+
+Effective striking may depend on:
+
+Ground reaction force.
+
+Lower-body drive.
+
+Hip rotation.
+
+Trunk rotation.
+
+Scapular control.
+
+Segment sequencing.
+
+Effective mass.
+
+Rapid limb recovery.
+
+Different strikes use different mechanical strategies.
+
+---
+
+# Kicking Biomechanics
+
+Kicking may depend on:
+
+Support-leg stability.
+
+Hip mobility.
+
+Pelvic rotation.
+
+Angular velocity.
+
+Segment sequencing.
+
+Balance.
+
+Rapid retraction.
+
+Impact mechanics.
+
+---
+
+# Grappling Biomechanics
+
+Grappling may depend on:
+
+Base of support.
+
+Center-of-mass manipulation.
+
+Leverage.
+
+Grip.
+
+Isometric force.
+
+Rotational force.
+
+Friction.
+
+Opponent momentum.
+
+Relative position often matters more than absolute strength.
+
+---
+
+# Throwing Biomechanics
+
+Throws involve:
+
+Off-balancing.
+
+Position.
+
+Leverage.
+
+Rotation.
+
+Force direction.
+
+Timing.
+
+Momentum manipulation.
+
+Physical preparation should support these mechanisms without pretending to replace technical practice.
+
+---
+
+# Footwork Biomechanics
+
+Footwork involves:
+
+Force application.
+
+Deceleration.
+
+Reacceleration.
+
+Center-of-mass control.
+
+Stance width.
+
+Ground contact.
+
+Postural recovery.
+
+Efficient footwork minimizes unnecessary motion.
+
+---
+
+# Exercise Comparison
+
+CAS compares exercises mechanically.
+
+Example:
+
+Back Squat
+
+and
+
+Belt Squat
+
+Both train the Squat pattern.
+
+However,
+
+they differ in:
+
+Axial loading.
+
+Trunk demand.
+
+Equipment.
+
+Stability.
+
+Fatigue profile.
+
+Exercise substitution must preserve the required adaptation,
+
+not merely the movement name.
+
+---
+
+# Mechanical Load
+
+Mechanical load includes more than external weight.
+
+It may involve:
+
+Joint torque.
+
+Impact.
+
+Velocity.
+
+Range of motion.
+
+Eccentric demand.
+
+Time under tension.
+
+Stability requirement.
+
+External load alone is an incomplete descriptor.
+
+---
+
+# Tissue Stress
+
+Different tissues respond differently to loading.
+
+Muscle.
+
+Tendon.
+
+Ligament.
+
+Bone.
+
+Cartilage.
+
+Exercise selection should consider both adaptation and tissue stress.
+
+---
+
+# Technique
+
+Technique is the movement strategy used to solve a task.
+
+There may be more than one acceptable strategy.
+
+CAS should distinguish:
+
+Safe variation.
+
+Individual variation.
+
+Performance variation.
+
+Technical error.
+
+Technique should not be judged solely by visual conformity.
+
+---
+
+# Individual Morphology
+
+Biomechanics varies with:
+
+Limb lengths.
+
+Joint structure.
+
+Body proportions.
+
+Mass distribution.
+
+Mobility.
+
+Previous injury.
+
+A mechanically appropriate exercise for one athlete may be inappropriate for another.
+
+---
+
+# Asymmetry
+
+Human movement is not perfectly symmetrical.
+
+CAS distinguishes:
+
+Normal functional asymmetry.
+
+Sport-specific asymmetry.
+
+Potentially limiting asymmetry.
+
+Painful asymmetry.
+
+Asymmetry alone should not automatically trigger correction.
+
+---
+
+# Fatigue and Biomechanics
+
+Fatigue may alter:
+
+Joint position.
+
+Force direction.
+
+Movement velocity.
+
+Coordination.
+
+Range of motion.
+
+Stability.
+
+Technical breakdown is often a biomechanical expression of fatigue.
+
+---
+
+# Safety
+
+Biomechanical analysis supports safety by identifying:
+
+High joint torque.
+
+Poor force distribution.
+
+Uncontrolled deceleration.
+
+Inadequate stability.
+
+Excessive range.
+
+Unsafe equipment interaction.
+
+Biomechanics informs risk.
+
+It does not predict injury with certainty.
+
+---
+
+# Assessment
+
+Possible biomechanical assessment includes:
+
+Video analysis.
+
+Force plates.
+
+Velocity measurement.
+
+Jump testing.
+
+Movement observation.
+
+Range-of-motion testing.
+
+Balance testing.
+
+Wearable sensors.
+
+Assessment methods should match the decision being made.
+
+---
+
+# Data Quality
+
+Biomechanical conclusions depend on measurement quality.
+
+CAS distinguishes:
+
+Directly measured.
+
+Reliably estimated.
+
+Subjectively observed.
+
+Unknown.
+
+Low-quality data should reduce confidence.
+
+---
+
+# Explainability
+
+Biomechanical reasoning should remain understandable.
+
+Example:
+
+The landmine press was selected because its diagonal force direction and reduced overhead mobility requirement better match your current shoulder capacity.
+
+Avoid unnecessary technical jargon in athlete-facing explanations.
+
+---
+
+# Interaction With CAS Engines
+
+The Biomechanics model provides knowledge to:
+
+Exercise Knowledge Engine.
+
+Capability Selection Engine.
+
+Safety Engine.
+
+Progression Engine.
+
+Decision Engine.
+
+Session Generation Engine.
+
+Explainability Engine.
+
+It does not make final decisions.
+
+---
+
+# Scientific Foundation
+
+The model integrates knowledge from:
+
+Mechanics.
+
+Anatomy.
+
+Kinesiology.
+
+Motor Control.
+
+Strength and Conditioning.
+
+Sports Medicine.
+
+Combat Sports Science.
+
+Scientific uncertainty should always be acknowledged.
+
+---
+
+# Limitations
+
+Biomechanics describes mechanical relationships.
+
+It cannot fully explain:
+
+Tactical intelligence.
+
+Psychological state.
+
+Skill.
+
+Pain.
+
+Adaptation.
+
+Competition outcome.
+
+Mechanical efficiency is only one component of performance.
+
+---
+
+# Future Expansion
+
+Future versions may include:
+
+Computer vision.
+
+Three-dimensional motion capture.
+
+Force-plate integration.
+
+Wearable inertial sensors.
+
+Strike velocity measurement.
+
+Impact estimation.
+
+Automated joint-angle analysis.
+
+Real-time technique feedback.
+
+All future capabilities must remain explainable.
+
+---
+
+# Success Criteria
+
+The Biomechanics model succeeds when:
+
+Exercises are compared accurately.
+
+Mechanical demands are explicit.
+
+Transfer claims are justified.
+
+Movement recommendations respect individual morphology.
+
+Safety decisions become more coherent.
+
+Athletes understand how movement produces performance.
+
+---
+
+# Final Principle
+
+Biomechanics does not ask only:
+
+What movement occurred?
+
+It asks:
+
+What forces produced it?
+
+How were those forces transmitted?
+
+What structures absorbed them?
+
+And why does that matter for this athlete?

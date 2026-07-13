@@ -1,0 +1,610 @@
+# STATISTICS SCREEN
+
+Version 1.0
+
+---
+
+# Purpose
+
+The Statistics Screen transforms training data into actionable insight.
+
+It does not exist to display numbers.
+
+It exists to improve future decisions.
+
+Every chart, every metric and every trend must answer one question:
+
+"What should I do differently?"
+
+If a statistic does not influence future behaviour, it should not appear.
+
+---
+
+# Core Principle
+
+Insight over information.
+
+Decision over curiosity.
+
+Progress over decoration.
+
+---
+
+# Primary Questions
+
+The Statistics Screen answers:
+
+- Am I progressing?
+- Where am I improving?
+- Where am I stagnating?
+- What should change next?
+
+---
+
+# Information Hierarchy
+
+The screen follows this order:
+
+1. Overall Progress
+2. Key Performance Indicators
+3. Long-Term Trends
+4. Strengths
+5. Weaknesses
+6. Recommendations
+7. Detailed Analysis
+
+---
+
+# Overall Progress
+
+The first section provides a concise overview.
+
+Examples:
+
+Current Training Block
+
+Week 4 of 8
+
+Consistency
+
+92%
+
+Sessions completed
+
+14 / 15
+
+Readiness Trend
+
+Stable
+
+The athlete should understand their current situation in less than five seconds.
+
+---
+
+# Key Performance Indicators
+
+Display only the metrics that matter.
+
+Examples:
+
+Maximum Strength
+
+Explosive Power
+
+Aerobic Capacity
+
+Anaerobic Capacity
+
+Work Capacity
+
+Training Volume
+
+Training Frequency
+
+Recovery
+
+Avoid vanity metrics.
+
+---
+
+# Personal Records
+
+Display meaningful records only.
+
+Examples:
+
+Heaviest Squat
+
+Best Pull-Up
+
+Fastest Sprint
+
+Longest Heavy Bag Round
+
+Highest Weekly Volume
+
+Each record should indicate:
+
+Date
+
+Previous record
+
+Current record
+
+Improvement
+
+---
+
+# Progress Trends
+
+Show trends over time.
+
+Recommended periods:
+
+7 days
+
+30 days
+
+90 days
+
+Current block
+
+One year
+
+The default view should remain simple.
+
+Additional history is available on demand.
+
+---
+
+# Graph Philosophy
+
+Every graph must answer a practical question.
+
+Examples:
+
+Is my squat improving?
+
+Has my recovery declined?
+
+Am I accumulating too much fatigue?
+
+If a graph exists only because data is available, remove it.
+
+---
+
+# Strength Analysis
+
+Possible metrics:
+
+Estimated 1RM
+
+Top Sets
+
+Volume Load
+
+Velocity (future)
+
+RPE distribution
+
+Progression consistency
+
+---
+
+# Combat Performance
+
+Combat-specific statistics may include:
+
+Bag rounds completed
+
+Strike volume
+
+Round duration
+
+Explosive intervals
+
+Technical sessions
+
+Sparring frequency
+
+Reaction training
+
+These metrics remain specific to combat athletes.
+
+---
+
+# Recovery Analysis
+
+Recommended metrics:
+
+Average sleep duration
+
+Readiness trend
+
+Resting heart rate
+
+Recovery score
+
+Fatigue trend
+
+Training monotony
+
+Do not overwhelm the athlete.
+
+Highlight only meaningful changes.
+
+---
+
+# Consistency
+
+Consistency is more valuable than isolated performances.
+
+Recommended display:
+
+Training calendar
+
+Completed sessions
+
+Missed sessions
+
+Current streak
+
+Longest streak
+
+Consistency should remain encouraging rather than punitive.
+
+---
+
+# Muscle Group Distribution
+
+Display weekly distribution.
+
+Example:
+
+Upper Body
+
+Lower Body
+
+Pull
+
+Push
+
+Core
+
+Conditioning
+
+Mobility
+
+The athlete quickly identifies imbalance.
+
+---
+
+# Exercise Progression
+
+Each exercise should have its own history.
+
+Example:
+
+Weighted Pull-Up
+
+Previous
+
++17.5 kg
+
+Current
+
++20 kg
+
+Trend
+
+Increasing
+
+Future prediction (optional)
+
+---
+
+# Recommendations
+
+CAS may provide one concise recommendation.
+
+Examples:
+
+Increase lower body volume.
+
+Recovery is limiting progression.
+
+Explosive work is progressing well.
+
+Maintain current training load.
+
+Only recommendations supported by data should appear.
+
+---
+
+# Training Load
+
+Display:
+
+Acute Load
+
+Chronic Load
+
+Acute : Chronic Ratio (future)
+
+Explain these concepts simply.
+
+Never assume sports science knowledge.
+
+---
+
+# Comparisons
+
+Allow comparison between:
+
+Current block
+
+Previous block
+
+Current month
+
+Previous month
+
+Current year
+
+Previous year
+
+Comparisons must remain meaningful.
+
+---
+
+# Filters
+
+Possible filters:
+
+Training Block
+
+Exercise
+
+Physical Quality
+
+Combat Discipline
+
+Time Period
+
+Filters should remain simple.
+
+---
+
+# Layout
+
+Recommended order:
+
+Overall Progress
+
+↓
+
+Performance Indicators
+
+↓
+
+Charts
+
+↓
+
+Recommendations
+
+↓
+
+Detailed History
+
+---
+
+# Typography
+
+Section titles:
+
+Heading 2
+
+Metric names:
+
+Heading 3
+
+Large values:
+
+Display only when justified
+
+Descriptions:
+
+Body
+
+Metadata:
+
+Caption
+
+---
+
+# Charts
+
+Charts should remain minimal.
+
+Preferred:
+
+Line charts
+
+Bar charts
+
+Simple distributions
+
+Avoid:
+
+Radar charts
+
+3D charts
+
+Decorative gauges
+
+Pie charts with many categories
+
+Complex dashboards
+
+---
+
+# Color Usage
+
+Background:
+
+Graphite Black
+
+Positive trend:
+
+Recovery Green
+
+Neutral:
+
+Steel Gray
+
+Attention:
+
+Warning Amber
+
+Negative trend:
+
+Critical Red
+
+Use color only to reinforce meaning.
+
+Never rely solely on color.
+
+---
+
+# Motion
+
+Allowed:
+
+Smooth chart updates
+
+Progressive loading
+
+Selection feedback
+
+Not allowed:
+
+Animated graphs
+
+Constant movement
+
+Decorative transitions
+
+Motion should never interfere with interpretation.
+
+---
+
+# Accessibility
+
+Support:
+
+Dynamic Type
+
+VoiceOver
+
+High Contrast
+
+Reduced Motion
+
+Charts should always have textual summaries.
+
+Never communicate information only through graphics.
+
+---
+
+# Empty States
+
+If insufficient data exists:
+
+Explain why.
+
+Example:
+
+Not enough sessions yet.
+
+Complete at least five sessions to unlock trend analysis.
+
+---
+
+# Offline Behaviour
+
+Previously synchronized statistics remain available.
+
+Recent sessions synchronize automatically when connectivity returns.
+
+---
+
+# Future Capabilities
+
+Future versions may include:
+
+AI-generated progression analysis
+
+Predictive performance modelling
+
+Competition preparation tracking
+
+Injury risk estimation
+
+Velocity-based training analysis
+
+Fatigue prediction
+
+These capabilities should always remain explainable.
+
+---
+
+# Success Criteria
+
+The athlete leaves this screen understanding:
+
+Where progress exists.
+
+Where progress is slowing.
+
+What should happen next.
+
+---
+
+# Do
+
+Show meaningful trends.
+
+Explain changes.
+
+Highlight actionable insights.
+
+Keep visualizations simple.
+
+Support long-term progression.
+
+---
+
+# Do Not
+
+Create a dashboard of random metrics.
+
+Display every available graph.
+
+Use decorative visualizations.
+
+Reward meaningless achievements.
+
+Encourage comparison with other athletes.
+
+---
+
+# Final Principle
+
+Statistics exist to improve decisions.
+
+Not to impress the athlete.
+
+Every graph should help answer:
+
+"What should I change in my training?"

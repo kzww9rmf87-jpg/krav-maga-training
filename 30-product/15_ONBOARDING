@@ -1,0 +1,589 @@
+# ONBOARDING
+
+Version 1.0
+
+---
+
+# Purpose
+
+The onboarding experience introduces the athlete to CAS.
+
+Its objective is not only to collect data.
+
+Its objective is to establish trust.
+
+The athlete should understand:
+
+- what CAS does;
+- why CAS asks each question;
+- how the collected information improves recommendations.
+
+Every screen should answer one simple question.
+
+---
+
+# Core Principle
+
+Ask only what matters.
+
+Every question must improve future recommendations.
+
+If a piece of information is not used by the decision engine, it should not be requested.
+
+---
+
+# First Impression
+
+The first launch should feel calm.
+
+Professional.
+
+Competent.
+
+Avoid marketing language.
+
+Avoid exaggerated promises.
+
+The athlete should feel they are configuring a professional training system.
+
+---
+
+# Welcome Screen
+
+Display:
+
+CAS logo
+
+Short introduction
+
+Primary button
+
+Example:
+
+Welcome to CAS.
+
+Your personal combat performance system.
+
+Together we will build training adapted to your objectives, your recovery and your progression.
+
+Primary Action:
+
+Get Started
+
+---
+
+# Estimated Time
+
+Tell the athlete how long onboarding will take.
+
+Example:
+
+Approximately 5 minutes.
+
+If optional sections exist, mention them.
+
+---
+
+# Progress
+
+Display onboarding progress.
+
+Example:
+
+Step 2 of 8
+
+or
+
+25%
+
+The athlete should always know how much remains.
+
+---
+
+# Data Collection Philosophy
+
+Questions should follow a logical order.
+
+Identity
+
+↓
+
+Objectives
+
+↓
+
+Training
+
+↓
+
+Recovery
+
+↓
+
+Equipment
+
+↓
+
+Confirmation
+
+Each screen should ask only one topic.
+
+Never present a long form.
+
+---
+
+# Athlete Identity
+
+Collect:
+
+First name
+
+Age
+
+Sex (when relevant for recommendations)
+
+Height
+
+Weight
+
+Dominant side
+
+Preferred language
+
+Explain why each element matters when appropriate.
+
+---
+
+# Combat Discipline
+
+Select one or more sports.
+
+Examples:
+
+Boxing
+
+Kickboxing
+
+Muay Thai
+
+MMA
+
+Brazilian Jiu-Jitsu
+
+Judo
+
+Wrestling
+
+Krav Maga
+
+Karate
+
+Taekwondo
+
+Self Defence
+
+Other
+
+Multiple disciplines should be supported.
+
+---
+
+# Experience
+
+Examples:
+
+Beginner
+
+Intermediate
+
+Advanced
+
+Competitive
+
+Elite
+
+Avoid numerical levels.
+
+---
+
+# Primary Objective
+
+Examples:
+
+Increase strength
+
+Improve explosiveness
+
+Improve endurance
+
+Build muscle
+
+Lose fat
+
+Prepare competition
+
+General performance
+
+Injury return
+
+The objective should directly influence future programming.
+
+---
+
+# Training Availability
+
+Collect:
+
+Preferred training days
+
+Available session duration
+
+Sessions per week
+
+Home / Gym / Mixed
+
+Morning / Afternoon / Evening preference
+
+CAS should adapt planning accordingly.
+
+---
+
+# Available Equipment
+
+Examples:
+
+Barbell
+
+Rack
+
+Bench
+
+Dumbbells
+
+Kettlebells
+
+Resistance bands
+
+Heavy bag
+
+Pull-up bar
+
+Medicine ball
+
+No equipment
+
+Recommendations should respect equipment availability.
+
+---
+
+# Injury History
+
+Collect only relevant information.
+
+Examples:
+
+Current injury
+
+Previous surgery
+
+Chronic pain
+
+Movement limitations
+
+Explain why this information is requested.
+
+The athlete should understand that safety takes priority.
+
+---
+
+# Recovery Profile
+
+Collect:
+
+Average sleep
+
+Perceived stress
+
+Daily activity
+
+Occupation
+
+Recovery limitations
+
+Avoid excessive medical questioning.
+
+---
+
+# Optional Integrations
+
+Offer:
+
+Apple Health
+
+Apple Watch
+
+Garmin
+
+Polar
+
+WHOOP
+
+Future integrations
+
+These remain optional.
+
+The athlete may continue without connecting anything.
+
+---
+
+# Explainability
+
+Before generating the first program, explain how CAS works.
+
+Example:
+
+CAS does not generate random workouts.
+
+Every recommendation is based on your profile, objectives, available equipment and future training history.
+
+Future versions may also adapt recommendations according to recovery and performance.
+
+This explanation builds confidence.
+
+---
+
+# Confirmation
+
+Display a summary.
+
+Allow edits before continuing.
+
+The athlete should verify:
+
+Profile
+
+Objectives
+
+Training
+
+Equipment
+
+Recovery
+
+---
+
+# First Recommendation
+
+The first recommendation should feel personal.
+
+Example:
+
+Based on your objectives, CAS recommends beginning with a strength-focused introductory block.
+
+Avoid generic messages.
+
+---
+
+# Empty Data
+
+If the athlete skips optional information:
+
+Explain the impact.
+
+Example:
+
+Adding your available equipment will improve exercise selection.
+
+Avoid guilt.
+
+---
+
+# Layout
+
+Each onboarding screen should contain:
+
+Title
+
+↓
+
+Short explanation
+
+↓
+
+One topic
+
+↓
+
+Primary action
+
+↓
+
+Progress indicator
+
+Avoid multiple unrelated questions.
+
+---
+
+# Typography
+
+Screen title:
+
+Heading 1
+
+Explanation:
+
+Body
+
+Question:
+
+Heading 2
+
+Help text:
+
+Caption
+
+Primary button:
+
+Body Medium
+
+---
+
+# Color Usage
+
+Background:
+
+Graphite Black
+
+Primary action:
+
+Performance Orange
+
+Validation:
+
+Recovery Green
+
+Warnings:
+
+Warning Amber
+
+Errors:
+
+Critical Red
+
+The interface remains calm.
+
+---
+
+# Motion
+
+Allowed:
+
+Screen transitions
+
+Progress updates
+
+Selection feedback
+
+Not allowed:
+
+Decorative animations
+
+Confetti
+
+Long transitions
+
+Respect Reduced Motion.
+
+---
+
+# Accessibility
+
+Support:
+
+Dynamic Type
+
+VoiceOver
+
+Large touch targets
+
+Logical navigation
+
+Every question should be answerable without relying solely on touch gestures.
+
+---
+
+# Privacy
+
+Clearly explain:
+
+What data is stored.
+
+Why it is stored.
+
+How it is used.
+
+How it can be deleted.
+
+Transparency is mandatory.
+
+---
+
+# Error Handling
+
+If onboarding cannot continue:
+
+Explain why.
+
+Preserve entered information.
+
+Never force the athlete to restart.
+
+---
+
+# Success Criteria
+
+The athlete should finish onboarding:
+
+Understanding how CAS works.
+
+Trusting the recommendation process.
+
+Feeling that the generated program is personal.
+
+Not random.
+
+---
+
+# Do
+
+Ask only relevant questions.
+
+Explain why information matters.
+
+Build trust.
+
+Keep each screen focused.
+
+---
+
+# Do Not
+
+Create long forms.
+
+Ask unused questions.
+
+Promise unrealistic results.
+
+Use marketing clichés.
+
+Overwhelm the athlete.
+
+---
+
+# Final Principle
+
+Onboarding is the beginning of the coaching relationship.
+
+The athlete should leave with confidence.
+
+Not with fatigue.

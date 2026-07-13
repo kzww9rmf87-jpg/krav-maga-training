@@ -1,0 +1,501 @@
+# RECOVERY ENGINE
+
+Version 1.0
+
+---
+
+# Purpose
+
+The Recovery Engine estimates the athlete's current capacity to benefit from training.
+
+Recovery is not simply the absence of fatigue.
+
+It is the athlete's readiness to successfully adapt to the next training stimulus.
+
+The Recovery Engine continuously evaluates this readiness.
+
+---
+
+# Mission
+
+The objective is not to maximize training.
+
+The objective is to maximize adaptation.
+
+More training does not necessarily produce more progress.
+
+Better recovery often does.
+
+---
+
+# Core Principle
+
+Recovery determines what the athlete can profitably do today.
+
+Not what they are physically capable of surviving.
+
+CAS distinguishes between:
+
+Possible
+
+Optimal
+
+The Recovery Engine always seeks the optimal stimulus.
+
+---
+
+# Philosophy
+
+Recovery is dynamic.
+
+It changes every day.
+
+Every recommendation must begin with an estimation of the athlete's current recovery state.
+
+No recommendation should ignore recovery.
+
+---
+
+# Decision Hierarchy
+
+Recovery is evaluated before:
+
+Exercise selection.
+
+Load progression.
+
+Training volume.
+
+Training intensity.
+
+Session duration.
+
+If recovery is compromised,
+
+all subsequent decisions adapt.
+
+---
+
+# Recovery Domains
+
+Recovery is multidimensional.
+
+CAS evaluates:
+
+Physiological recovery
+
+Neuromuscular recovery
+
+Psychological recovery
+
+Structural recovery
+
+Lifestyle recovery
+
+Sport-specific recovery
+
+Each domain contributes independently.
+
+---
+
+# Available Signals
+
+The Recovery Engine may use:
+
+Sleep duration
+
+Sleep quality
+
+Heart rate
+
+Heart-rate variability
+
+Resting heart rate
+
+Body mass
+
+Training load
+
+RPE history
+
+Pain reports
+
+Subjective fatigue
+
+Stress level
+
+Muscle soreness
+
+Previous session completion
+
+Session density
+
+Illness reports
+
+Manual athlete feedback
+
+Wearable devices
+
+Connected health platforms
+
+The engine should remain functional even when only a subset of these signals is available.
+
+---
+
+# Missing Data
+
+Recovery estimation must tolerate incomplete information.
+
+Missing signals reduce confidence.
+
+They should never stop the engine.
+
+Example:
+
+Sleep unavailable.
+
+Recovery estimate based primarily on training history and subjective fatigue.
+
+---
+
+# Data Quality
+
+Every signal has a quality level.
+
+Reliable
+
+Estimated
+
+Missing
+
+Conflicting
+
+Confidence depends on both quantity and quality.
+
+---
+
+# Acute vs Chronic Recovery
+
+CAS distinguishes:
+
+Current fatigue
+
+↓
+
+Long-term accumulated fatigue
+
+These should never be confused.
+
+Poor recovery today does not necessarily imply chronic overload.
+
+---
+
+# Recovery Categories
+
+The engine classifies readiness into five states.
+
+Excellent
+
+Good
+
+Moderate
+
+Reduced
+
+Poor
+
+These categories describe decision quality.
+
+Not athlete value.
+
+---
+
+# Decision Impact
+
+Recovery influences:
+
+Training volume
+
+Training intensity
+
+Exercise complexity
+
+Explosive work
+
+Rest intervals
+
+Conditioning
+
+Technical practice
+
+Session duration
+
+Recovery never directly determines motivation.
+
+---
+
+# Excellent Recovery
+
+Characteristics:
+
+Low accumulated fatigue.
+
+Normal recovery indicators.
+
+Successful recent sessions.
+
+Possible decisions:
+
+Maintain plan.
+
+Increase stimulus if progression criteria are met.
+
+Introduce demanding work.
+
+---
+
+# Good Recovery
+
+Characteristics:
+
+Minor fatigue.
+
+Normal adaptation.
+
+Decision:
+
+Follow planned session.
+
+---
+
+# Moderate Recovery
+
+Characteristics:
+
+Signs of accumulated fatigue.
+
+Decision examples:
+
+Reduce accessory volume.
+
+Extend rest intervals.
+
+Prioritize technical quality.
+
+Avoid unnecessary progression.
+
+---
+
+# Reduced Recovery
+
+Characteristics:
+
+Recovery compromised.
+
+Possible decisions:
+
+Reduce volume.
+
+Reduce intensity.
+
+Replace explosive work.
+
+Increase recovery emphasis.
+
+---
+
+# Poor Recovery
+
+Characteristics:
+
+High fatigue.
+
+Poor recovery indicators.
+
+Pain.
+
+Illness.
+
+Decision examples:
+
+Recovery session.
+
+Mobility.
+
+Technical practice.
+
+Rest day.
+
+The objective becomes preserving long-term adaptation.
+
+---
+
+# Recovery Trend
+
+Recovery should never be interpreted in isolation.
+
+The engine evaluates:
+
+Today
+
+↓
+
+Last 7 days
+
+↓
+
+Current training block
+
+↓
+
+Long-term baseline
+
+Trends matter more than isolated values.
+
+---
+
+# Athlete Baseline
+
+Recovery is individualized.
+
+Each athlete develops their own baseline.
+
+CAS compares the athlete to themselves.
+
+Never to population averages.
+
+---
+
+# Interaction With Other Engines
+
+Recovery Engine provides inputs to:
+
+Decision Engine
+
+Progression Engine
+
+Session Generation Engine
+
+Safety Engine
+
+Explainability Engine
+
+It does not make final decisions.
+
+It informs them.
+
+---
+
+# Safety
+
+Recovery estimation contributes to injury prevention.
+
+High fatigue alone does not imply danger.
+
+But fatigue combined with:
+
+Pain
+
+Repeated failure
+
+Poor sleep
+
+High training density
+
+may justify conservative decisions.
+
+---
+
+# Explainability
+
+Every recovery-based recommendation should explain:
+
+Current recovery estimate.
+
+Signals considered.
+
+Confidence level.
+
+Expected benefit.
+
+Example:
+
+Today's volume has been reduced because recovery appears below your normal baseline after three consecutive high-load sessions.
+
+---
+
+# Learning
+
+The Recovery Engine continuously improves.
+
+It learns:
+
+How the athlete responds.
+
+How quickly they recover.
+
+Which indicators best predict performance.
+
+Recovery models become increasingly individualized.
+
+---
+
+# Limitations
+
+Recovery cannot be measured perfectly.
+
+CAS estimates recovery.
+
+It never claims certainty.
+
+Recommendations remain probabilistic.
+
+---
+
+# Future Capabilities
+
+Future versions may integrate:
+
+Blood biomarkers
+
+Velocity loss
+
+Reaction time testing
+
+Cognitive fatigue
+
+Hormonal markers
+
+Competition schedule
+
+Travel fatigue
+
+Environmental conditions
+
+---
+
+# Success Criteria
+
+The Recovery Engine succeeds when:
+
+The athlete adapts consistently.
+
+Unnecessary fatigue decreases.
+
+Performance improves over time.
+
+Training interruptions become less frequent.
+
+The athlete understands why recovery influenced today's plan.
+
+---
+
+# Final Principle
+
+Recovery is not the opposite of training.
+
+Recovery determines the quality of training.
+
+The best session is not the hardest one.
+
+It is the one the athlete can successfully adapt to.

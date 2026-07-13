@@ -1,0 +1,749 @@
+# EMPTY STATES
+
+Version 1.0
+
+---
+
+# Purpose
+
+Every empty state should guide the athlete.
+
+An empty screen is not an error.
+
+It is an opportunity to explain what happens next.
+
+The athlete should never wonder:
+
+"What am I supposed to do now?"
+
+---
+
+# Core Principle
+
+Explain.
+
+Guide.
+
+Reassure.
+
+Never leave the athlete without direction.
+
+---
+
+# Philosophy
+
+Empty states are part of the coaching experience.
+
+CAS should behave like an experienced coach.
+
+If information is unavailable,
+
+the athlete receives:
+
+- an explanation;
+- the reason when known;
+- the next recommended action.
+
+---
+
+# Primary Rule
+
+Every empty state answers three questions:
+
+What happened?
+
+Why?
+
+What should I do next?
+
+---
+
+# Tone
+
+Calm.
+
+Professional.
+
+Respectful.
+
+Never humorous.
+
+Never sarcastic.
+
+Never alarming.
+
+---
+
+# Visual Hierarchy
+
+Every empty state contains:
+
+Illustration or icon (optional)
+
+↓
+
+Short title
+
+↓
+
+One concise explanation
+
+↓
+
+One primary action
+
+↓
+
+Optional secondary action
+
+Nothing more.
+
+---
+
+# Empty Home
+
+Condition:
+
+No training session available.
+
+Title:
+
+No session scheduled.
+
+Explanation:
+
+Complete your athlete profile or generate your first training block.
+
+Primary Action:
+
+Create my first training block
+
+Secondary Action:
+
+Complete my profile
+
+---
+
+# Empty Program
+
+Condition:
+
+No training block exists.
+
+Title:
+
+No active training block.
+
+Explanation:
+
+CAS needs a training objective before creating your program.
+
+Primary Action:
+
+Create a training block
+
+---
+
+# Empty History
+
+Condition:
+
+No completed sessions.
+
+Title:
+
+No training history yet.
+
+Explanation:
+
+Your completed sessions will appear here.
+
+Primary Action:
+
+Start your first session
+
+---
+
+# Empty Statistics
+
+Condition:
+
+Insufficient data.
+
+Title:
+
+Not enough data yet.
+
+Explanation:
+
+Complete a few sessions before meaningful trends become available.
+
+Primary Action:
+
+Start today's training
+
+---
+
+# Empty Recovery
+
+Condition:
+
+No recovery information available.
+
+Title:
+
+Recovery data unavailable.
+
+Explanation:
+
+Recovery recommendations become more accurate as more data is collected.
+
+Primary Action:
+
+Continue training
+
+---
+
+# Empty Personal Records
+
+Condition:
+
+No record available.
+
+Title:
+
+No personal records yet.
+
+Explanation:
+
+CAS will automatically track your progress.
+
+Primary Action:
+
+Start training
+
+---
+
+# Empty Notifications
+
+Condition:
+
+No notifications.
+
+Title:
+
+You're up to date.
+
+Explanation:
+
+No important updates require your attention.
+
+Primary Action:
+
+Return Home
+
+---
+
+# Empty Search
+
+Condition:
+
+No matching results.
+
+Title:
+
+No results found.
+
+Explanation:
+
+Try another keyword or remove filters.
+
+Primary Action:
+
+Clear filters
+
+---
+
+# Empty Exercise Library
+
+Condition:
+
+No exercise matches current filters.
+
+Title:
+
+No matching exercise.
+
+Explanation:
+
+Try expanding your equipment or movement filters.
+
+Primary Action:
+
+Reset filters
+
+---
+
+# Empty Favorites
+
+Condition:
+
+No favorites saved.
+
+Title:
+
+No favorite exercises.
+
+Explanation:
+
+Mark exercises as favorites for quicker access.
+
+Primary Action:
+
+Browse exercises
+
+---
+
+# Offline State
+
+Condition:
+
+No internet connection.
+
+Title:
+
+You're offline.
+
+Explanation:
+
+Training remains available.
+
+Synchronization will resume automatically.
+
+Primary Action:
+
+Continue training
+
+Secondary Action:
+
+Retry synchronization
+
+---
+
+# Synchronization Pending
+
+Condition:
+
+Local data awaiting upload.
+
+Title:
+
+Synchronization pending.
+
+Explanation:
+
+Your completed session is safely stored locally.
+
+Primary Action:
+
+Continue
+
+---
+
+# Server Unavailable
+
+Condition:
+
+Server temporarily unavailable.
+
+Title:
+
+Service temporarily unavailable.
+
+Explanation:
+
+Your local data is safe.
+
+Try again later.
+
+Primary Action:
+
+Retry
+
+Secondary Action:
+
+Continue offline
+
+---
+
+# Athlete Profile Incomplete
+
+Condition:
+
+Required profile information missing.
+
+Title:
+
+Complete your profile.
+
+Explanation:
+
+A complete profile allows CAS to generate more accurate recommendations.
+
+Primary Action:
+
+Complete profile
+
+---
+
+# Permissions Missing
+
+Condition:
+
+Health or notification permissions denied.
+
+Title:
+
+Permissions required.
+
+Explanation:
+
+Some features are unavailable until permission is granted.
+
+Primary Action:
+
+Open Settings
+
+Secondary Action:
+
+Continue without permission
+
+---
+
+# Camera Unavailable
+
+Condition:
+
+Camera access denied.
+
+Title:
+
+Camera unavailable.
+
+Explanation:
+
+Enable camera access in your device settings.
+
+Primary Action:
+
+Open Settings
+
+---
+
+# Microphone Unavailable
+
+Condition:
+
+Voice coaching unavailable.
+
+Title:
+
+Microphone unavailable.
+
+Explanation:
+
+Enable microphone access to use voice features.
+
+Primary Action:
+
+Open Settings
+
+---
+
+# Apple Health Not Connected
+
+Condition:
+
+Apple Health unavailable.
+
+Title:
+
+Apple Health not connected.
+
+Explanation:
+
+Connecting Apple Health improves recovery recommendations.
+
+Primary Action:
+
+Connect Apple Health
+
+Secondary Action:
+
+Later
+
+---
+
+# Wearable Not Connected
+
+Condition:
+
+No wearable connected.
+
+Title:
+
+No wearable connected.
+
+Explanation:
+
+CAS works without external devices.
+
+Connecting one provides additional recovery insights.
+
+Primary Action:
+
+Connect device
+
+Secondary Action:
+
+Continue
+
+---
+
+# AI Recommendation Unavailable
+
+Condition:
+
+Recommendation cannot be generated.
+
+Title:
+
+Recommendation unavailable.
+
+Explanation:
+
+CAS cannot generate a reliable recommendation with the current information.
+
+Primary Action:
+
+Update athlete profile
+
+Secondary Action:
+
+Retry
+
+---
+
+# Maintenance
+
+Condition:
+
+Scheduled maintenance.
+
+Title:
+
+Maintenance in progress.
+
+Explanation:
+
+Some online services are temporarily unavailable.
+
+Training remains available offline.
+
+Primary Action:
+
+Continue offline
+
+---
+
+# Generic Error
+
+Condition:
+
+Unexpected error.
+
+Title:
+
+Something went wrong.
+
+Explanation:
+
+The problem may be temporary.
+
+Your training data has not been lost.
+
+Primary Action:
+
+Retry
+
+Secondary Action:
+
+Return Home
+
+---
+
+# Icons
+
+Icons remain optional.
+
+Use only when they improve understanding.
+
+Recommended:
+
+History
+
+Cloud
+
+Connection
+
+Warning
+
+Training
+
+Profile
+
+Avoid decorative illustrations.
+
+---
+
+# Motion
+
+Allowed:
+
+Subtle appearance.
+
+Fade-in.
+
+Native transitions.
+
+Not allowed:
+
+Animated mascots.
+
+Repeated animations.
+
+Decorative motion.
+
+Respect Reduced Motion.
+
+---
+
+# Color Usage
+
+Background:
+
+Graphite Black
+
+Primary action:
+
+Performance Orange
+
+Neutral:
+
+Steel Gray
+
+Success:
+
+Recovery Green
+
+Warning:
+
+Warning Amber
+
+Critical:
+
+Critical Red
+
+Use color only to reinforce meaning.
+
+Never as the sole information channel.
+
+---
+
+# Accessibility
+
+Support:
+
+Dynamic Type
+
+VoiceOver
+
+High Contrast
+
+Reduced Motion
+
+Every empty state must remain understandable without images.
+
+---
+
+# Content Rules
+
+Titles:
+
+Maximum 6 words.
+
+Descriptions:
+
+Maximum 2 sentences.
+
+Primary Action:
+
+One clear verb.
+
+Avoid technical language.
+
+Avoid implementation details.
+
+---
+
+# Do
+
+Explain clearly.
+
+Offer the next logical action.
+
+Remain reassuring.
+
+Support offline usage.
+
+Keep messages concise.
+
+---
+
+# Do Not
+
+Display blank screens.
+
+Use error codes as primary content.
+
+Expose technical exceptions.
+
+Blame the athlete.
+
+Use marketing language.
+
+Create dead ends.
+
+---
+
+# Success Criteria
+
+Every empty state should:
+
+Explain the situation.
+
+Reduce uncertainty.
+
+Guide the athlete.
+
+Provide an obvious next action.
+
+---
+
+# Final Principle
+
+Every empty state is part of the coaching experience.
+
+When CAS has nothing to show,
+
+it should still know how to help.

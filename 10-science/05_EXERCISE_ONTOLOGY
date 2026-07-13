@@ -1,0 +1,585 @@
+# EXERCISE ONTOLOGY
+
+Version 1.0
+
+---
+
+# Purpose
+
+The Exercise Ontology defines what an exercise is inside the Combat Athlete System.
+
+It does not describe individual exercises.
+
+It defines the universal structure shared by every exercise stored in the Exercise Knowledge Base.
+
+Every exercise must follow this ontology.
+
+This ensures consistency, explainability and interoperability across all CAS engines.
+
+---
+
+# Definition
+
+An exercise is not merely a movement.
+
+An exercise is a structured intervention designed to produce one or more specific adaptations.
+
+Every exercise possesses intrinsic properties that remain constant,
+
+and contextual properties that depend on the athlete.
+
+CAS distinguishes between these two categories.
+
+---
+
+# Scientific Role
+
+The ontology provides the common language used by:
+
+Exercise Knowledge Engine
+
+Decision Engine
+
+Capability Selection Engine
+
+Session Generation Engine
+
+Recovery Engine
+
+Safety Engine
+
+Explainability Engine
+
+Without a common ontology,
+
+these engines cannot reason consistently.
+
+---
+
+# Exercise Identity
+
+Every exercise possesses a unique identity.
+
+Mandatory attributes include:
+
+Exercise ID
+
+Official Name
+
+Alternative Names
+
+Category
+
+Description
+
+Movement Pattern
+
+Exercise Family
+
+---
+
+# Classification
+
+Exercises are classified by multiple dimensions.
+
+Examples include:
+
+Movement Pattern
+
+Primary Physical Capability
+
+Secondary Physical Capabilities
+
+Sport Specificity
+
+Equipment
+
+Technical Complexity
+
+Energy System
+
+No single classification is sufficient.
+
+---
+
+# Movement Pattern
+
+Every exercise belongs to one or more movement patterns.
+
+Examples:
+
+Squat
+
+Hinge
+
+Horizontal Push
+
+Horizontal Pull
+
+Vertical Push
+
+Vertical Pull
+
+Carry
+
+Rotation
+
+Anti-Rotation
+
+Locomotion
+
+Jump
+
+Sprint
+
+Throw
+
+Strike
+
+Kick
+
+Sprawl
+
+Bridge
+
+Ground Transition
+
+Movement patterns form one of the primary organizational structures of the Knowledge Base.
+
+---
+
+# Physical Capabilities
+
+Every exercise develops one or more physical capabilities.
+
+Examples:
+
+Maximum Strength
+
+Explosive Strength
+
+Power
+
+Speed
+
+Acceleration
+
+Agility
+
+Muscular Endurance
+
+Aerobic Capacity
+
+Anaerobic Capacity
+
+Mobility
+
+Stability
+
+Coordination
+
+Reaction
+
+Grip Strength
+
+Rotational Power
+
+Each capability is assigned a contribution level.
+
+Primary
+
+Secondary
+
+Tertiary
+
+---
+
+# Physiological Adaptations
+
+Every exercise produces physiological adaptations.
+
+Examples:
+
+Neural Adaptation
+
+Muscle Hypertrophy
+
+Tendon Adaptation
+
+Bone Adaptation
+
+Metabolic Adaptation
+
+Cardiovascular Adaptation
+
+Motor Learning
+
+The ontology distinguishes intended adaptations from secondary effects.
+
+---
+
+# Muscular Involvement
+
+Each exercise defines:
+
+Primary Muscles
+
+Secondary Muscles
+
+Stabilizers
+
+Synergists
+
+Limiting Muscles
+
+Muscles are never the sole basis for exercise selection.
+
+---
+
+# Biomechanics
+
+Every exercise includes biomechanical descriptors.
+
+Examples:
+
+Planes of Motion
+
+Joint Actions
+
+Range of Motion
+
+Force Direction
+
+Force Curve
+
+Bilateral / Unilateral
+
+Open / Closed Chain
+
+Elastic Contribution
+
+Stretch-Shortening Cycle
+
+Ground Reaction Force
+
+---
+
+# Neuromuscular Profile
+
+Examples:
+
+Maximum Force
+
+Rate of Force Development
+
+Velocity
+
+Coordination
+
+Balance
+
+Precision
+
+Motor Complexity
+
+Explosiveness
+
+---
+
+# Energy Systems
+
+Primary Energy System
+
+Secondary Energy System
+
+Examples:
+
+ATP-PC
+
+Anaerobic Glycolysis
+
+Oxidative System
+
+Most exercises involve multiple systems.
+
+---
+
+# Technical Complexity
+
+Every exercise receives a technical complexity score.
+
+Factors include:
+
+Coordination
+
+Learning Time
+
+Mobility Requirements
+
+Balance Requirements
+
+Precision
+
+Technical Demand
+
+The score is athlete-dependent.
+
+---
+
+# Fatigue Profile
+
+Each exercise produces several types of fatigue.
+
+Neurological
+
+Muscular
+
+Cardiovascular
+
+Local
+
+Systemic
+
+Mechanical
+
+Psychological
+
+Each fatigue profile has:
+
+Magnitude
+
+Recovery Time
+
+Interaction With Other Exercises
+
+---
+
+# Recovery Cost
+
+Recovery includes:
+
+Estimated Recovery Time
+
+Typical DOMS
+
+Central Fatigue
+
+Peripheral Fatigue
+
+Joint Stress
+
+Connective Tissue Stress
+
+Recovery Cost influences session generation.
+
+---
+
+# Injury Considerations
+
+Each exercise documents:
+
+Contraindications
+
+Relative Contraindications
+
+Risk Factors
+
+Typical Technical Errors
+
+Warning Signs
+
+Safer Alternatives
+
+Safety recommendations remain contextual.
+
+---
+
+# Equipment
+
+Required Equipment
+
+Optional Equipment
+
+Minimal Equipment
+
+Training Environment
+
+Space Requirements
+
+Partner Required
+
+Spotter Recommended
+
+---
+
+# Athlete Requirements
+
+Exercises define minimum prerequisites.
+
+Examples:
+
+Experience
+
+Mobility
+
+Strength
+
+Balance
+
+Coordination
+
+Movement Competency
+
+These are recommendations,
+
+not rigid rules.
+
+---
+
+# Progressions
+
+Every exercise includes:
+
+Simplifications
+
+Progressions
+
+Regressions
+
+Variations
+
+Advanced Variations
+
+Explosive Variations
+
+Technical Variations
+
+Competition Variations
+
+---
+
+# Substitutions
+
+Every exercise maintains relationships with similar exercises.
+
+Examples:
+
+Equivalent
+
+Regression
+
+Progression
+
+Safer Alternative
+
+Equipment Alternative
+
+Sport-Specific Alternative
+
+The Decision Engine relies heavily on these relationships.
+
+---
+
+# Combat Sports Transfer
+
+Every exercise defines transfer to combat performance.
+
+Examples:
+
+Boxing
+
+Kickboxing
+
+Muay Thai
+
+MMA
+
+Brazilian Jiu-Jitsu
+
+Wrestling
+
+Judo
+
+Krav Maga
+
+Transfer is described qualitatively,
+
+not assumed.
+
+---
+
+# Evidence
+
+Scientific evidence is documented.
+
+Fields include:
+
+Evidence Level
+
+Scientific Consensus
+
+Research Quality
+
+Practical Consensus
+
+Expert Agreement
+
+Scientific References
+
+CAS distinguishes evidence from opinion.
+
+---
+
+# Explainability
+
+Every property stored in the ontology may later be used by the Explainability Engine.
+
+Example:
+
+Trap Bar Deadlift selected because it preserves the desired force adaptation while reducing lumbar loading compared with the conventional deadlift.
+
+Explainability depends directly on ontology quality.
+
+---
+
+# Evolution
+
+The ontology is expected to evolve continuously.
+
+New properties may be introduced.
+
+Existing properties may be refined.
+
+Backward compatibility should be preserved whenever possible.
+
+---
+
+# Guiding Principles
+
+The ontology should be:
+
+Scientifically grounded.
+
+Internally consistent.
+
+Technology independent.
+
+Extensible.
+
+Explainable.
+
+Compatible with every CAS engine.
+
+No property should exist unless it can improve decision quality.
+
+---
+
+# Final Principle
+
+Exercises are not stored as names.
+
+They are stored as knowledge.
+
+The richer the ontology,
+
+the more intelligent the Combat Athlete System becomes.

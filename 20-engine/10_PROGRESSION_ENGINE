@@ -1,0 +1,603 @@
+# PROGRESSION ENGINE
+
+Version 1.0
+
+---
+
+# Purpose
+
+The Progression Engine determines how training evolves over time.
+
+Its objective is not to increase load as quickly as possible.
+
+Its objective is to maximize long-term adaptation.
+
+Progression is earned.
+
+Not scheduled.
+
+---
+
+# Mission
+
+Every progression should improve performance while preserving recovery, movement quality and long-term consistency.
+
+The engine continuously answers one question:
+
+Is the athlete ready for a greater stimulus?
+
+---
+
+# Core Principle
+
+Adaptation drives progression.
+
+Completion alone does not.
+
+The athlete progresses because adaptation has occurred.
+
+Not because another week has passed.
+
+---
+
+# Philosophy
+
+Progression is individualized.
+
+Two athletes completing the same session may receive different progressions.
+
+CAS evaluates adaptation,
+
+not merely execution.
+
+---
+
+# Progressive Overload
+
+CAS applies progressive overload conservatively.
+
+Possible progression variables include:
+
+Load
+
+Volume
+
+Intensity
+
+Density
+
+Exercise complexity
+
+Velocity
+
+Range of motion
+
+Tempo
+
+Rest duration
+
+Exercise variation
+
+Load is only one possible progression.
+
+---
+
+# Progression Hierarchy
+
+When progression is appropriate,
+
+CAS evaluates possible options in the following order:
+
+Movement quality
+
+↓
+
+Training consistency
+
+↓
+
+Recovery
+
+↓
+
+Load
+
+↓
+
+Volume
+
+↓
+
+Exercise complexity
+
+↓
+
+Training density
+
+Progression should never sacrifice technical quality.
+
+---
+
+# Inputs
+
+The Progression Engine may consider:
+
+Completed repetitions
+
+Completed sets
+
+Load achieved
+
+RPE
+
+RIR
+
+Movement quality
+
+Recovery estimate
+
+Pain reports
+
+Training consistency
+
+Previous progression history
+
+Fatigue trend
+
+Athlete objective
+
+Training phase
+
+Competition schedule
+
+Available equipment
+
+Explainability confidence
+
+---
+
+# Progression Criteria
+
+Progression should occur only when sufficient evidence exists.
+
+Typical indicators include:
+
+Repeated successful completion.
+
+Stable recovery.
+
+Acceptable effort.
+
+No significant pain.
+
+Technical consistency.
+
+Adequate compliance.
+
+No single variable should dominate.
+
+---
+
+# Progression Categories
+
+Possible outcomes:
+
+Increase stimulus
+
+Maintain stimulus
+
+Reduce stimulus
+
+Modify stimulus
+
+Replace stimulus
+
+Progression is not always an increase.
+
+---
+
+# Increase Stimulus
+
+Possible methods:
+
+Increase load.
+
+Increase repetitions.
+
+Increase sets.
+
+Reduce assistance.
+
+Increase movement complexity.
+
+Reduce rest.
+
+Increase velocity demands.
+
+Only one primary variable should change at a time.
+
+---
+
+# Maintain Stimulus
+
+Maintenance is often the correct decision.
+
+Reasons include:
+
+Consolidating adaptation.
+
+Improving movement quality.
+
+Managing fatigue.
+
+Preparing future progression.
+
+Maintenance is not stagnation.
+
+---
+
+# Reduce Stimulus
+
+Reasons include:
+
+Poor recovery.
+
+Repeated technical breakdown.
+
+Pain.
+
+Accumulated fatigue.
+
+Illness.
+
+Competition proximity.
+
+Reducing stimulus protects long-term progress.
+
+---
+
+# Modify Stimulus
+
+Sometimes progression changes quality rather than quantity.
+
+Examples:
+
+Front Squat
+
+↓
+
+Paused Front Squat
+
+Heavy Bag
+
+↓
+
+Reactive Heavy Bag
+
+Pull-up
+
+↓
+
+Explosive Pull-up
+
+The objective changes while maintaining appropriate challenge.
+
+---
+
+# Deload
+
+Deload is a progression strategy.
+
+Not a failure.
+
+Possible triggers:
+
+Accumulated fatigue.
+
+Reduced performance.
+
+High monotony.
+
+End of training block.
+
+Competition preparation.
+
+Deload should preserve movement quality while reducing stress.
+
+---
+
+# Plateau Detection
+
+CAS continuously evaluates progression.
+
+Possible plateau indicators:
+
+Stable performance.
+
+Repeated failures.
+
+No adaptation.
+
+Declining readiness.
+
+Plateaus should trigger investigation,
+
+not automatic load increases.
+
+---
+
+# Failure Analysis
+
+Not every failed repetition requires regression.
+
+CAS evaluates:
+
+Technical error.
+
+Fatigue.
+
+Recovery.
+
+Programming.
+
+External stress.
+
+Equipment issues.
+
+Failure must be interpreted before action.
+
+---
+
+# Exercise-Specific Progression
+
+Every exercise progresses differently.
+
+Examples:
+
+Maximal Strength
+
+Small load increments.
+
+Power
+
+Velocity before load.
+
+Hypertrophy
+
+Volume before intensity.
+
+Mobility
+
+Range of motion.
+
+Conditioning
+
+Work density.
+
+Heavy Bag
+
+Technical quality before intensity.
+
+The engine adapts progression to exercise purpose.
+
+---
+
+# Combat Sports
+
+Combat athletes require progression beyond strength.
+
+Examples:
+
+Strike speed.
+
+Strike power.
+
+Reaction time.
+
+Footwork.
+
+Explosive transitions.
+
+Round density.
+
+Grip endurance.
+
+Decision-making under fatigue.
+
+Progression must remain sport-specific.
+
+---
+
+# Regression
+
+Regression is sometimes appropriate.
+
+Examples:
+
+Pain.
+
+Poor technique.
+
+Extended interruption.
+
+Injury.
+
+Regression protects future adaptation.
+
+It should never be presented as failure.
+
+---
+
+# Individual Baselines
+
+Every athlete progresses differently.
+
+CAS compares the athlete against:
+
+Their own history.
+
+Their own recovery.
+
+Their own response.
+
+Never against population averages.
+
+---
+
+# Explainability
+
+Every progression decision should explain:
+
+What changed.
+
+Why.
+
+Evidence used.
+
+Confidence.
+
+Example:
+
+Bench Press increased by 2.5 kg.
+
+Reason:
+
+Three consecutive successful sessions.
+
+Average RPE remained below target.
+
+Recovery remained stable.
+
+Confidence:
+
+High.
+
+---
+
+# Learning
+
+The Progression Engine continuously learns.
+
+It identifies:
+
+Fast responders.
+
+Slow responders.
+
+Recovery patterns.
+
+Preferred progression rates.
+
+Exercise-specific adaptations.
+
+Future decisions become increasingly individualized.
+
+---
+
+# Interaction With Other Engines
+
+The Progression Engine receives information from:
+
+Recovery Engine.
+
+Decision Engine.
+
+Safety Engine.
+
+Exercise Knowledge Base.
+
+It provides updated progression targets to:
+
+Capability Selection Engine.
+
+Session Generation Engine.
+
+Explainability Engine.
+
+---
+
+# Safety
+
+Progression never overrides safety.
+
+If safety recommendations conflict with progression,
+
+safety always wins.
+
+---
+
+# Confidence
+
+Every progression carries a confidence estimate.
+
+Very High
+
+High
+
+Moderate
+
+Low
+
+Unknown
+
+Confidence depends on evidence quality.
+
+---
+
+# Limitations
+
+Progression cannot be perfectly predicted.
+
+CAS estimates the probability that additional stimulus will improve adaptation.
+
+It never guarantees results.
+
+---
+
+# Future Capabilities
+
+Future versions may include:
+
+Velocity-based progression.
+
+Bar path analysis.
+
+Strike velocity tracking.
+
+Machine learning adaptation models.
+
+Competition-specific progression.
+
+Real-time wearable integration.
+
+---
+
+# Success Criteria
+
+The engine succeeds when:
+
+Performance improves.
+
+Recovery remains sustainable.
+
+Injury risk decreases.
+
+Athletes remain consistent.
+
+Progressions become increasingly individualized.
+
+Athletes understand why progression occurred.
+
+---
+
+# Final Principle
+
+Progression is not about doing more.
+
+Progression is about becoming better.
+
+Every increase in stimulus should be justified by evidence,
+
+supported by recovery,
+
+and aligned with the athlete's long-term development.

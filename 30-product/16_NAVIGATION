@@ -1,0 +1,539 @@
+# NAVIGATION
+
+Version 1.0
+
+---
+
+# Purpose
+
+Navigation exists to support training.
+
+It should never become the athlete's objective.
+
+The athlete should always know:
+
+- where they are;
+- where they can go;
+- how to return.
+
+Navigation should require as little thought as possible.
+
+---
+
+# Core Principle
+
+The shortest path between intention and action.
+
+Every tap should feel obvious.
+
+Every destination should have a clear purpose.
+
+---
+
+# Mental Model
+
+CAS is not a collection of pages.
+
+It is a training journey.
+
+The navigation follows the athlete's workflow.
+
+Not the application's internal architecture.
+
+---
+
+# Primary Navigation
+
+The application uses five permanent sections.
+
+Home
+
+↓
+
+Program
+
+↓
+
+Training
+
+↓
+
+Progress
+
+↓
+
+Settings
+
+The navigation bar remains visible except during active training when full focus is required.
+
+---
+
+# Home
+
+Purpose:
+
+Answer one question:
+
+"What should I do today?"
+
+The Home screen is always the default entry point.
+
+---
+
+# Program
+
+Purpose:
+
+Allow the athlete to explore the current training plan.
+
+The athlete may:
+
+View upcoming sessions.
+
+Review the current block.
+
+Understand future progression.
+
+This section is planning-oriented.
+
+Not execution-oriented.
+
+---
+
+# Training
+
+Purpose:
+
+Execute today's workout.
+
+During an active session this section becomes the operational center of the application.
+
+No unnecessary navigation should interrupt training.
+
+---
+
+# Progress
+
+Purpose:
+
+Understand long-term evolution.
+
+Contains:
+
+Statistics
+
+History
+
+Records
+
+Recommendations
+
+This section supports reflection.
+
+Not execution.
+
+---
+
+# Settings
+
+Purpose:
+
+Configure CAS.
+
+This section should remain secondary.
+
+The athlete should rarely need to visit it.
+
+---
+
+# Navigation Hierarchy
+
+Level 1
+
+Bottom Navigation
+
+↓
+
+Level 2
+
+Screen
+
+↓
+
+Level 3
+
+Detail
+
+↓
+
+Level 4
+
+Modal
+
+The athlete should never become lost.
+
+---
+
+# Navigation Depth
+
+Avoid deep navigation trees.
+
+Recommended maximum:
+
+Three levels.
+
+If a fourth level becomes necessary,
+
+the information architecture should be reconsidered.
+
+---
+
+# Screen Titles
+
+Every screen has a clear title.
+
+Titles describe destinations.
+
+Not actions.
+
+Good:
+
+History
+
+Settings
+
+Program
+
+Bad:
+
+Click here
+
+Let's train
+
+Your awesome progress
+
+---
+
+# Back Navigation
+
+Always use platform conventions.
+
+The athlete should immediately recognize how to return.
+
+Avoid custom back buttons.
+
+---
+
+# Modals
+
+Use modals only for temporary tasks.
+
+Examples:
+
+Edit profile
+
+Session notes
+
+Exercise details
+
+Filters
+
+The athlete should always know how to dismiss the modal.
+
+---
+
+# Full Screen Experience
+
+Only the active training session may temporarily hide navigation.
+
+The athlete must remain focused.
+
+The interface should minimize accidental exits.
+
+---
+
+# Session Protection
+
+Leaving an active session should require confirmation.
+
+Example:
+
+Return later?
+
+Your progress is already saved.
+
+Primary action:
+
+Continue Session
+
+Secondary action:
+
+Leave Session
+
+Never silently abandon training.
+
+---
+
+# Deep Linking
+
+Future versions should support direct navigation.
+
+Examples:
+
+Specific exercise
+
+Training block
+
+History entry
+
+Statistics view
+
+Notification destination
+
+Navigation remains predictable.
+
+---
+
+# Search
+
+Search should exist only where useful.
+
+Possible locations:
+
+Exercise library
+
+History
+
+Statistics
+
+Do not add search simply because it is common.
+
+---
+
+# Tabs
+
+Avoid nested tab bars.
+
+One primary navigation system is sufficient.
+
+Secondary categorization should use segmented controls when appropriate.
+
+---
+
+# Gestures
+
+Support native gestures.
+
+Examples:
+
+Swipe back.
+
+Scroll.
+
+Pull to refresh.
+
+Avoid hidden gesture-only interactions.
+
+Every important action should remain discoverable.
+
+---
+
+# Orientation Changes
+
+Navigation should remain coherent in portrait and landscape.
+
+The athlete should never lose context after rotating the device.
+
+---
+
+# Empty Navigation
+
+If a section contains no data,
+
+explain why.
+
+Provide the next logical action.
+
+Never display empty pages.
+
+---
+
+# Notifications
+
+Notifications should always open the relevant destination.
+
+Examples:
+
+Today's workout
+
+↓
+
+Today's Mission
+
+Recovery reminder
+
+↓
+
+Recovery screen
+
+Session completed
+
+↓
+
+Session Summary
+
+Avoid opening Home for every notification.
+
+---
+
+# Error Recovery
+
+If navigation fails,
+
+explain clearly.
+
+Offer recovery.
+
+Never leave the athlete on a broken screen.
+
+---
+
+# Accessibility
+
+Support:
+
+VoiceOver
+
+Dynamic Type
+
+Large touch targets
+
+Logical focus order
+
+Keyboard navigation (future)
+
+Navigation should never rely solely on gestures.
+
+---
+
+# Motion
+
+Navigation transitions should feel natural.
+
+Allowed:
+
+Native transitions.
+
+Subtle modal presentation.
+
+Context-preserving animation.
+
+Not allowed:
+
+Complex page transitions.
+
+Rotating screens.
+
+3D effects.
+
+Decorative motion.
+
+Respect Reduced Motion.
+
+---
+
+# Color Usage
+
+Navigation remains visually discreet.
+
+The active destination is highlighted.
+
+Inactive destinations remain secondary.
+
+Avoid excessive accent colors.
+
+Navigation should support content,
+
+never dominate it.
+
+---
+
+# Consistency
+
+Every destination should always appear in the same place.
+
+Never move navigation items dynamically.
+
+Predictability builds confidence.
+
+---
+
+# Future Expansion
+
+Future modules may include:
+
+Nutrition
+
+Competition Preparation
+
+Rehabilitation
+
+Coach Portal
+
+Team Management
+
+These modules should integrate without breaking the primary navigation model.
+
+---
+
+# Success Criteria
+
+The athlete should:
+
+Always know where they are.
+
+Always know what to do next.
+
+Never feel lost.
+
+Never search for common actions.
+
+Reach any major destination within three taps.
+
+---
+
+# Do
+
+Follow platform conventions.
+
+Keep navigation shallow.
+
+Protect active training.
+
+Maintain consistency.
+
+Support future expansion.
+
+---
+
+# Do Not
+
+Hide important actions.
+
+Multiply navigation systems.
+
+Create deep menu hierarchies.
+
+Interrupt training unnecessarily.
+
+Move navigation items dynamically.
+
+---
+
+# Final Principle
+
+Navigation should disappear.
+
+The athlete remembers the training.
+
+Not how they reached it.

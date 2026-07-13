@@ -1,0 +1,799 @@
+# EXERCISE MODEL
+
+Version 1.0
+
+---
+
+# Purpose
+
+This document defines the universal model used by the Combat Athlete System (CAS) to describe, classify and reason about every exercise.
+
+Within CAS, an exercise is not simply a movement.
+
+It is a structured object containing biomechanical, physiological, neurological and practical information.
+
+Every exercise in the knowledge base inherits this model.
+
+---
+
+# Philosophy
+
+Exercises are tools.
+
+They are never objectives.
+
+CAS never selects an exercise because it is popular.
+
+CAS selects an exercise because it solves a specific performance problem.
+
+Every recommendation must therefore be explainable.
+
+---
+
+# Definition
+
+An exercise is a structured intervention designed to produce one or more specific adaptations.
+
+Each exercise possesses measurable characteristics that determine:
+
+Its purpose.
+
+Its benefits.
+
+Its limitations.
+
+Its risks.
+
+Its transfer to combat performance.
+
+---
+
+# Exercise Classification
+
+CAS classifies every exercise using multiple independent dimensions.
+
+An exercise never belongs to only one category.
+
+Instead, it possesses a complete performance profile.
+
+---
+
+# Primary Classification
+
+Examples include:
+
+Strength.
+
+Power.
+
+Speed.
+
+Endurance.
+
+Mobility.
+
+Stability.
+
+Recovery.
+
+Combat-Specific.
+
+Assessment.
+
+These categories facilitate navigation only.
+
+They do not determine exercise selection.
+
+---
+
+# Movement Pattern
+
+Every exercise is assigned one or more movement patterns.
+
+Examples:
+
+Squat.
+
+Hinge.
+
+Horizontal Push.
+
+Vertical Push.
+
+Horizontal Pull.
+
+Vertical Pull.
+
+Carry.
+
+Rotation.
+
+Anti-Rotation.
+
+Locomotion.
+
+Sprint.
+
+Jump.
+
+Landing.
+
+Throw.
+
+Punch.
+
+Kick.
+
+Sprawl.
+
+Bridge.
+
+Ground Transition.
+
+Crawl.
+
+Isometric Hold.
+
+Loaded Rotation.
+
+Movement patterns form one of the primary inputs for the Decision Engine.
+
+---
+
+# Capability Mapping
+
+Each exercise contributes to one or more human capabilities.
+
+Examples:
+
+Maximum Strength.
+
+Relative Strength.
+
+Explosive Power.
+
+Rate of Force Development.
+
+Acceleration.
+
+Maximum Velocity.
+
+Power Endurance.
+
+Aerobic Capacity.
+
+Mobility.
+
+Dynamic Stability.
+
+Reactive Strength.
+
+Coordination.
+
+Movement Economy.
+
+Recovery.
+
+Each capability receives a weighted contribution score.
+
+---
+
+# Biomechanical Profile
+
+Each exercise describes:
+
+Primary Force Vector.
+
+Secondary Force Vector.
+
+Joint Actions.
+
+Kinetic Chain.
+
+Ground Reaction Force.
+
+Rate of Force Development.
+
+Effective Mass.
+
+Momentum.
+
+Impulse.
+
+Mechanical Advantage.
+
+Movement Efficiency.
+
+Biomechanics determine transfer potential.
+
+---
+
+# Physiological Profile
+
+Each exercise identifies:
+
+Primary Energy System.
+
+Secondary Energy System.
+
+Typical Duration.
+
+Typical Intensity.
+
+Neuromuscular Demand.
+
+Metabolic Cost.
+
+Cardiovascular Demand.
+
+Recovery Requirements.
+
+---
+
+# Neurological Profile
+
+Each exercise specifies:
+
+Motor Complexity.
+
+Coordination Demand.
+
+Reaction Requirement.
+
+Decision Requirement.
+
+Balance Requirement.
+
+Skill Requirement.
+
+Learning Curve.
+
+Automaticity Potential.
+
+---
+
+# Muscular Profile
+
+Every exercise identifies:
+
+Primary Muscles.
+
+Secondary Muscles.
+
+Stabilizers.
+
+Grip Demand.
+
+Core Demand.
+
+Neck Demand.
+
+Unilateral or Bilateral Loading.
+
+---
+
+# Joint Profile
+
+Each exercise specifies:
+
+Primary Joints.
+
+Secondary Joints.
+
+Planes of Motion.
+
+Range of Motion.
+
+Joint Loading.
+
+Joint Stress.
+
+Joint Stability Requirements.
+
+---
+
+# Contraction Profile
+
+Exercises identify:
+
+Concentric Demand.
+
+Eccentric Demand.
+
+Isometric Demand.
+
+Stretch-Shortening Cycle Usage.
+
+Ballistic Characteristics.
+
+Elastic Contribution.
+
+---
+
+# Velocity Profile
+
+Movement velocity includes:
+
+Slow.
+
+Controlled.
+
+Moderate.
+
+Fast.
+
+Explosive.
+
+Reactive.
+
+Maximum Velocity.
+
+Velocity strongly influences adaptation.
+
+---
+
+# Loading Profile
+
+Each exercise defines:
+
+External Load.
+
+Internal Load.
+
+Loading Methods.
+
+Intensity Range.
+
+Volume Range.
+
+Frequency Range.
+
+Progression Options.
+
+Regression Options.
+
+---
+
+# Fatigue Profile
+
+CAS estimates:
+
+Neuromuscular Fatigue.
+
+Mechanical Fatigue.
+
+Metabolic Fatigue.
+
+Central Fatigue.
+
+Peripheral Fatigue.
+
+Psychological Fatigue.
+
+Overall Fatigue Cost.
+
+Fatigue influences exercise selection.
+
+---
+
+# Recovery Profile
+
+Recovery includes:
+
+Typical Recovery Time.
+
+Local Recovery.
+
+Systemic Recovery.
+
+Recommended Frequency.
+
+Interaction With Other Sessions.
+
+Readiness Requirements.
+
+---
+
+# Equipment Requirements
+
+Each exercise specifies:
+
+Bodyweight.
+
+Barbell.
+
+Dumbbells.
+
+Kettlebells.
+
+Resistance Bands.
+
+Medicine Ball.
+
+Cable Machine.
+
+Machines.
+
+Suspension Trainer.
+
+Sandbag.
+
+Sled.
+
+Heavy Bag.
+
+Pull-Up Bar.
+
+Specialized Equipment.
+
+Minimal Space Required.
+
+---
+
+# Skill Requirement
+
+CAS classifies technical difficulty.
+
+Beginner.
+
+Intermediate.
+
+Advanced.
+
+Expert.
+
+Exercises exceeding the athlete's technical ability are never selected.
+
+---
+
+# Safety Profile
+
+Each exercise defines:
+
+Overall Risk.
+
+Technical Risk.
+
+Joint Risk.
+
+Fatigue Sensitivity.
+
+Spotter Requirement.
+
+Failure Consequences.
+
+Safe Alternatives.
+
+Safety always overrides performance optimization.
+
+---
+
+# Contraindications
+
+Exercises may be contraindicated because of:
+
+Acute Injury.
+
+Chronic Injury.
+
+Pain.
+
+Limited Mobility.
+
+Equipment Constraints.
+
+Training Age.
+
+Medical Restrictions.
+
+Recovery Status.
+
+---
+
+# Transfer to Combat Sports
+
+Each exercise receives sport-specific transfer scores.
+
+Examples:
+
+Boxing.
+
+Kickboxing.
+
+Muay Thai.
+
+Savate.
+
+Wrestling.
+
+Brazilian Jiu-Jitsu.
+
+Judo.
+
+Sambo.
+
+Mixed Martial Arts.
+
+Krav Maga.
+
+Transfer depends upon:
+
+Movement Similarity.
+
+Velocity Similarity.
+
+Force Similarity.
+
+Coordination Similarity.
+
+Energy System Similarity.
+
+Decision Similarity.
+
+Environmental Similarity.
+
+Transfer is never assumed.
+
+It is justified.
+
+---
+
+# Athlete Suitability
+
+CAS evaluates compatibility with:
+
+Age.
+
+Sex.
+
+Competitive Level.
+
+Training Age.
+
+Body Mass.
+
+Anthropometry.
+
+Mobility Profile.
+
+Strength Profile.
+
+Injury History.
+
+Available Equipment.
+
+Training Time.
+
+Goals.
+
+---
+
+# Progressions
+
+Every exercise may define:
+
+Load Progressions.
+
+Volume Progressions.
+
+Complexity Progressions.
+
+Velocity Progressions.
+
+Stability Progressions.
+
+Sport-Specific Progressions.
+
+---
+
+# Regressions
+
+Possible regressions include:
+
+Reduced Load.
+
+Reduced Range of Motion.
+
+Assisted Variation.
+
+Machine Variation.
+
+Simplified Technique.
+
+Lower Velocity.
+
+Lower Complexity.
+
+---
+
+# Variations
+
+Each exercise may possess:
+
+Biomechanical Variations.
+
+Equipment Variations.
+
+Grip Variations.
+
+Stance Variations.
+
+Tempo Variations.
+
+Sport-Specific Variations.
+
+---
+
+# Coaching Cues
+
+Each exercise contains concise coaching cues.
+
+Examples:
+
+Brace.
+
+Drive through the floor.
+
+Stay tall.
+
+Rotate through the hips.
+
+Control the eccentric.
+
+Explode with intent.
+
+Coaching cues improve execution quality.
+
+---
+
+# Common Errors
+
+Typical errors include:
+
+Loss of Position.
+
+Incomplete Range of Motion.
+
+Poor Bracing.
+
+Excessive Lumbar Flexion.
+
+Knee Valgus.
+
+Poor Force Direction.
+
+Loss of Balance.
+
+Incorrect Tempo.
+
+CAS may use these errors when generating coaching feedback.
+
+---
+
+# Performance Indicators
+
+Each exercise may be monitored through:
+
+Load.
+
+Velocity.
+
+Power Output.
+
+Repetitions.
+
+Time Under Tension.
+
+Heart Rate.
+
+Rate of Perceived Exertion.
+
+Movement Quality.
+
+Technical Consistency.
+
+Recovery Metrics.
+
+---
+
+# Explainability
+
+Every exercise selected by CAS must answer:
+
+Why this exercise?
+
+Why now?
+
+Why this load?
+
+Why this volume?
+
+Why this progression?
+
+Why instead of another exercise?
+
+Explainability is mandatory.
+
+---
+
+# Interaction With CAS
+
+The Exercise Model interacts directly with:
+
+Capability Mapping.
+
+Exercise Ontology.
+
+Exercise Knowledge Base.
+
+Decision Engine.
+
+Capability Selection Engine.
+
+Recovery Engine.
+
+Safety Engine.
+
+Session Generation Engine.
+
+Progression Engine.
+
+Explainability Engine.
+
+No exercise is selected independently.
+
+Selection always results from the interaction between athlete characteristics, sport demands, current readiness and desired adaptations.
+
+---
+
+# Future Expansion
+
+Future versions may include:
+
+Velocity-Based Training.
+
+Wearable Sensor Integration.
+
+EMG Profiles.
+
+3D Motion Capture.
+
+AI Technique Analysis.
+
+Automatic Fatigue Estimation.
+
+Exercise Recommendation Confidence Scores.
+
+Real-Time Exercise Adaptation.
+
+---
+
+# Success Criteria
+
+The Exercise Model succeeds when:
+
+Every exercise can be described consistently.
+
+Every exercise can be compared objectively.
+
+Every recommendation is explainable.
+
+Exercise selection remains individualized.
+
+Scientific consistency is maintained.
+
+---
+
+# Final Principle
+
+Exercises are not the goal.
+
+Adaptation is the goal.
+
+CAS selects the exercise that creates the greatest probability of producing the desired adaptation,
+
+for the right athlete,
+
+at the right time,
+
+with the lowest acceptable risk.

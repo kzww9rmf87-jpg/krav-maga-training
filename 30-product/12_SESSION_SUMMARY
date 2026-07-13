@@ -1,0 +1,512 @@
+# SESSION SUMMARY
+
+Version 1.0
+
+---
+
+# Purpose
+
+The Session Summary closes the training session.
+
+It confirms what was completed.
+
+It highlights what matters.
+
+It prepares the next decision.
+
+The athlete should leave the session with a clear understanding of:
+
+- what was accomplished;
+- what improved;
+- what should happen next.
+
+---
+
+# Core Principle
+
+Do not celebrate completion.
+
+Explain progress.
+
+The Session Summary should reinforce learning.
+
+Not provide entertainment.
+
+---
+
+# Primary Question
+
+The screen answers:
+
+"What did this session change?"
+
+---
+
+# Information Hierarchy
+
+The Session Summary follows this order:
+
+1. Completion confirmation
+2. Session result
+3. Key achievements
+4. Performance highlights
+5. Recovery recommendation
+6. Next action
+
+---
+
+# Completion
+
+The session completion message should remain calm.
+
+Examples:
+
+Session completed.
+
+Workout completed.
+
+Strength session completed.
+
+Avoid:
+
+Amazing!
+
+You're unstoppable!
+
+Great job!
+
+The tone remains professional.
+
+---
+
+# Session Overview
+
+Display:
+
+Session type
+
+Duration
+
+Completion percentage
+
+Example:
+
+Maximum Strength
+
+67 min
+
+100 %
+
+The athlete immediately understands what has been achieved.
+
+---
+
+# Key Metrics
+
+Only show metrics that influence future decisions.
+
+Recommended:
+
+Training volume
+
+Completed sets
+
+Completed repetitions
+
+Average RPE
+
+Work duration
+
+Rest duration
+
+Do not display every available metric.
+
+---
+
+# Personal Records
+
+If a meaningful record was achieved, highlight it.
+
+Examples:
+
+New 5RM
+
+Heaviest squat
+
+Longest bag round
+
+Fastest interval
+
+Maximum pull-ups
+
+Only display genuine improvements.
+
+Avoid artificial achievements.
+
+---
+
+# Progress Explanation
+
+Every highlighted result should answer:
+
+Why is this important?
+
+Example:
+
+Bench Press
+
++2.5 kg
+
+Highest successful load this block.
+
+The athlete understands the significance.
+
+---
+
+# Missed Targets
+
+When a prescription was not completed:
+
+Remain factual.
+
+Examples:
+
+Target:
+
+5 reps
+
+Completed:
+
+4 reps
+
+Suggested adjustment:
+
+Maintain current load next session.
+
+Never imply failure.
+
+Never use negative language.
+
+---
+
+# Recovery Recommendation
+
+Provide a concise recommendation.
+
+Examples:
+
+Recovery appears normal.
+
+Prioritize sleep tonight.
+
+Hydrate well.
+
+Reduce upper body volume tomorrow.
+
+Avoid generic advice.
+
+Recommendations should depend on actual data.
+
+---
+
+# Readiness Projection
+
+Optionally display tomorrow's expected readiness.
+
+Example:
+
+Expected readiness:
+
+Good
+
+or
+
+Recovery in progress
+
+The forecast should remain probabilistic.
+
+Avoid false certainty.
+
+---
+
+# Session Timeline
+
+A simplified timeline may appear.
+
+Example:
+
+Warm-up
+
+Strength
+
+Accessory
+
+Conditioning
+
+Recovery
+
+Completed
+
+Avoid detailed minute-by-minute timelines.
+
+---
+
+# Notes
+
+If the athlete entered notes:
+
+Display them.
+
+If not:
+
+Do not create empty placeholders.
+
+---
+
+# Pain Reports
+
+If pain was reported:
+
+Summarize:
+
+Location
+
+Severity
+
+Exercise involved
+
+Suggested follow-up
+
+Pain information should never disappear silently.
+
+---
+
+# Coach Feedback
+
+CAS may generate one concise observation.
+
+Examples:
+
+Volume increased successfully.
+
+Technique remained stable.
+
+Recovery slightly below target.
+
+Limit to one or two observations.
+
+Never overwhelm the athlete.
+
+---
+
+# Next Session
+
+The athlete should immediately know what happens next.
+
+Examples:
+
+Tomorrow
+
+Aerobic conditioning
+
+or
+
+Next planned session
+
+Lower body strength
+
+The next step should feel continuous.
+
+---
+
+# Primary Action
+
+Only one primary action.
+
+Possible labels:
+
+Finish
+
+Return Home
+
+View Next Session
+
+The label depends on context.
+
+---
+
+# Secondary Actions
+
+Optional:
+
+View history
+
+Add notes
+
+Share session
+
+View statistics
+
+These remain visually secondary.
+
+---
+
+# Layout
+
+Recommended order:
+
+Completion
+
+↓
+
+Session overview
+
+↓
+
+Key achievements
+
+↓
+
+Recovery recommendation
+
+↓
+
+Next session
+
+↓
+
+Primary action
+
+---
+
+# Typography
+
+Completion:
+
+Heading 2
+
+Session type:
+
+Heading 2
+
+Key metrics:
+
+Heading 3
+
+Values:
+
+Display only when justified
+
+Descriptions:
+
+Body
+
+Metadata:
+
+Caption
+
+---
+
+# Color Usage
+
+Background:
+
+Graphite Black
+
+Completion:
+
+Recovery Green
+
+Primary action:
+
+Performance Orange
+
+Warnings:
+
+Amber
+
+Critical:
+
+Red
+
+Green indicates completion.
+
+Not celebration.
+
+---
+
+# Motion
+
+Allowed:
+
+Subtle appearance.
+
+Smooth progress reveal.
+
+Button feedback.
+
+Not allowed:
+
+Fireworks.
+
+Confetti.
+
+Medals.
+
+Animated trophies.
+
+---
+
+# Accessibility
+
+Support:
+
+Dynamic Type
+
+VoiceOver
+
+Reduced Motion
+
+High contrast
+
+Logical reading order
+
+---
+
+# Offline Behaviour
+
+The summary remains fully available offline.
+
+Synchronization occurs later if necessary.
+
+---
+
+# Error States
+
+If synchronization fails:
+
+Explain clearly.
+
+Session remains saved locally.
+
+The athlete should never fear losing completed work.
+
+---
+
+# Success Criteria
+
+The athlete should finish the session knowing:
+
+What improved.
+
+What remains to improve.
+
+What happens next.
+
+---
+
+# Final Principle
+
+Training does not end when the last repetition is completed.
+
+Learning begins when the session is understood.

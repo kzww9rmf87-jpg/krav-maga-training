@@ -1,0 +1,595 @@
+# FATIGUE AND RECOVERY
+
+Version 1.0
+
+---
+
+# Purpose
+
+The Fatigue and Recovery model describes how training stress accumulates, how recovery occurs, and how both influence future performance.
+
+Fatigue is not the opposite of fitness.
+
+Fatigue is a temporary consequence of training.
+
+Recovery is the biological process that transforms fatigue into adaptation.
+
+Understanding both is essential for intelligent programming.
+
+---
+
+# Philosophy
+
+Training creates fatigue.
+
+Recovery transforms fatigue into adaptation.
+
+Adaptation increases performance.
+
+Without fatigue there is little adaptation.
+
+Without recovery there is no adaptation.
+
+CAS seeks the optimal balance.
+
+---
+
+# The Adaptation Cycle
+
+Training
+
+↓
+
+Fatigue
+
+↓
+
+Recovery
+
+↓
+
+Adaptation
+
+↓
+
+Higher Capacity
+
+↓
+
+New Training Stimulus
+
+This cycle repeats continuously throughout an athlete's career.
+
+---
+
+# Definition of Fatigue
+
+Fatigue is a temporary reduction in the ability to produce physical or mental performance.
+
+Fatigue is multidimensional.
+
+It cannot be represented by a single number.
+
+---
+
+# Dimensions of Fatigue
+
+CAS distinguishes:
+
+Neurological Fatigue
+
+Muscular Fatigue
+
+Cardiovascular Fatigue
+
+Metabolic Fatigue
+
+Psychological Fatigue
+
+Structural Fatigue
+
+Technical Fatigue
+
+Each dimension follows different recovery timelines.
+
+---
+
+# Neurological Fatigue
+
+Characteristics
+
+Reduced motor unit recruitment.
+
+Reduced rate of force development.
+
+Slower reaction time.
+
+Reduced coordination.
+
+Typical Causes
+
+Heavy strength training.
+
+Explosive work.
+
+Maximal efforts.
+
+Olympic lifting.
+
+Heavy sparring.
+
+Typical Recovery
+
+24–72 hours.
+
+---
+
+# Muscular Fatigue
+
+Characteristics
+
+Reduced force production.
+
+Muscle soreness.
+
+Temporary weakness.
+
+Typical Causes
+
+High volume.
+
+Mechanical tension.
+
+Eccentric loading.
+
+Typical Recovery
+
+24–96 hours.
+
+---
+
+# Cardiovascular Fatigue
+
+Characteristics
+
+Elevated heart rate.
+
+Reduced aerobic efficiency.
+
+Slower recovery between efforts.
+
+Typical Causes
+
+Long conditioning sessions.
+
+High-intensity intervals.
+
+Repeated rounds.
+
+Typical Recovery
+
+Several hours to 48 hours.
+
+---
+
+# Metabolic Fatigue
+
+Characteristics
+
+Reduced energy availability.
+
+Accumulation of metabolic by-products.
+
+Reduced work capacity.
+
+Typical Causes
+
+Repeated high-intensity efforts.
+
+Combat conditioning.
+
+Circuit training.
+
+Typical Recovery
+
+Hours to one day.
+
+---
+
+# Psychological Fatigue
+
+Characteristics
+
+Reduced motivation.
+
+Reduced concentration.
+
+Decision fatigue.
+
+Emotional exhaustion.
+
+Typical Causes
+
+Competition.
+
+Life stress.
+
+Sleep deprivation.
+
+Training monotony.
+
+Psychological fatigue strongly influences training quality.
+
+---
+
+# Structural Fatigue
+
+Characteristics
+
+Stress on tendons.
+
+Ligaments.
+
+Joints.
+
+Connective tissue.
+
+Recovery is considerably slower than muscular recovery.
+
+---
+
+# Technical Fatigue
+
+Characteristics
+
+Reduced movement quality.
+
+Poor timing.
+
+Reduced precision.
+
+Technical fatigue often appears before complete physical fatigue.
+
+---
+
+# Acute Fatigue
+
+Temporary.
+
+Expected.
+
+Necessary for adaptation.
+
+Usually resolves with adequate recovery.
+
+---
+
+# Accumulated Fatigue
+
+Develops across multiple sessions.
+
+May improve adaptation when managed correctly.
+
+Requires intelligent planning.
+
+---
+
+# Functional Overreaching
+
+Temporary reduction in performance.
+
+Followed by improved performance after recovery.
+
+May be intentionally programmed.
+
+---
+
+# Non-Functional Overreaching
+
+Performance declines.
+
+Recovery becomes prolonged.
+
+Adaptation decreases.
+
+Programming should change.
+
+---
+
+# Overtraining Syndrome
+
+Persistent maladaptation.
+
+Reduced performance.
+
+Persistent fatigue.
+
+Psychological symptoms.
+
+Requires medical evaluation.
+
+CAS should never attempt diagnosis.
+
+---
+
+# Recovery
+
+Recovery restores the athlete's capacity to adapt.
+
+Recovery is active.
+
+Not passive.
+
+---
+
+# Recovery Systems
+
+Sleep
+
+Nutrition
+
+Hydration
+
+Active Recovery
+
+Stress Management
+
+Mobility
+
+Time
+
+No single intervention replaces the others.
+
+---
+
+# Sleep
+
+Sleep is the primary recovery mechanism.
+
+It influences:
+
+Neural recovery.
+
+Hormonal regulation.
+
+Motor learning.
+
+Immune function.
+
+Psychological recovery.
+
+Sleep quality is more important than sleep duration alone.
+
+---
+
+# Nutrition
+
+Supports:
+
+Glycogen restoration.
+
+Protein synthesis.
+
+Hydration.
+
+Immune function.
+
+Adaptation.
+
+Nutrition modifies recovery.
+
+It cannot compensate for inadequate sleep.
+
+---
+
+# Active Recovery
+
+Examples
+
+Walking.
+
+Mobility.
+
+Cycling.
+
+Swimming.
+
+Light technical practice.
+
+The objective is recovery,
+
+not additional fatigue.
+
+---
+
+# Recovery Capacity
+
+Recovery capacity differs between athletes.
+
+Influencing factors include:
+
+Age.
+
+Training history.
+
+Sleep.
+
+Nutrition.
+
+Stress.
+
+Workload.
+
+Genetics.
+
+Competition schedule.
+
+CAS individualizes recovery expectations.
+
+---
+
+# Monitoring Recovery
+
+Possible indicators include:
+
+Sleep quality.
+
+Heart-rate variability.
+
+Resting heart rate.
+
+Body mass.
+
+Subjective fatigue.
+
+Muscle soreness.
+
+Performance.
+
+Mood.
+
+Pain.
+
+No single indicator is sufficient.
+
+---
+
+# Fatigue vs Readiness
+
+High fatigue does not always imply poor readiness.
+
+Low fatigue does not always imply high readiness.
+
+The relationship is probabilistic.
+
+CAS evaluates multiple signals simultaneously.
+
+---
+
+# Recovery Debt
+
+Recovery debt accumulates when recovery repeatedly fails to match training stress.
+
+Consequences include:
+
+Reduced adaptation.
+
+Increased injury risk.
+
+Reduced motivation.
+
+Reduced performance.
+
+Programming should prevent chronic recovery debt.
+
+---
+
+# Combat Sports Considerations
+
+Combat athletes accumulate fatigue from:
+
+Strength training.
+
+Conditioning.
+
+Technical practice.
+
+Sparring.
+
+Competition.
+
+Travel.
+
+Weight management.
+
+Recovery must consider all training stress,
+
+not only physical preparation.
+
+---
+
+# Explainability
+
+Example
+
+Today's explosive work has been replaced with technical practice.
+
+Reason
+
+Neurological fatigue remains elevated after yesterday's maximal strength session.
+
+Expected Benefit
+
+Maintain technical progress while allowing neural recovery.
+
+---
+
+# Scientific Foundation
+
+The model is continuously updated according to current evidence.
+
+Scientific uncertainty should always be acknowledged.
+
+Recommendations remain evidence-informed.
+
+---
+
+# Interaction With Other Systems
+
+Provides knowledge to:
+
+Recovery Engine
+
+Safety Engine
+
+Progression Engine
+
+Decision Engine
+
+Periodization Engine
+
+Explainability Engine
+
+---
+
+# Future Expansion
+
+Future versions may include:
+
+Biomarkers.
+
+Continuous wearable monitoring.
+
+Reaction-time testing.
+
+Neuromuscular readiness assessment.
+
+AI-based fatigue prediction.
+
+---
+
+# Success Criteria
+
+The model succeeds when:
+
+Fatigue is managed appropriately.
+
+Recovery supports adaptation.
+
+Overload remains productive.
+
+Performance improves sustainably.
+
+Athletes understand the relationship between fatigue and progress.
+
+---
+
+# Final Principle
+
+Fatigue is not the enemy.
+
+Unmanaged fatigue is.
+
+Recovery is not rest alone.
+
+Recovery is the process that transforms training into performance.

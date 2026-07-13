@@ -1,0 +1,641 @@
+# DECISION ENGINE
+
+Version 1.0
+
+---
+
+# Purpose
+
+The Decision Engine is the central reasoning system of CAS.
+
+It does not generate exercises.
+
+It does not calculate recovery.
+
+It does not estimate progression.
+
+Its role is to integrate every expert engine into one coherent decision.
+
+The Decision Engine is the conductor.
+
+The specialist engines are the orchestra.
+
+---
+
+# Mission
+
+The Decision Engine determines:
+
+What should happen next.
+
+Every recommendation delivered by CAS ultimately originates here.
+
+---
+
+# Core Principle
+
+No single engine is allowed to make the final decision.
+
+Every recommendation is evaluated in context.
+
+Recovery.
+
+Safety.
+
+Progression.
+
+Goals.
+
+Periodization.
+
+Exercise knowledge.
+
+Competition schedule.
+
+Athlete history.
+
+All contribute.
+
+None dominates unconditionally.
+
+---
+
+# Decision Philosophy
+
+CAS reasons before it recommends.
+
+Every recommendation follows the same process.
+
+Collect information.
+
+↓
+
+Interpret information.
+
+↓
+
+Resolve conflicts.
+
+↓
+
+Select the best option.
+
+↓
+
+Explain the decision.
+
+---
+
+# Responsibilities
+
+The Decision Engine is responsible for:
+
+Choosing today's training strategy.
+
+Selecting the appropriate stimulus.
+
+Balancing progression and recovery.
+
+Managing conflicting recommendations.
+
+Prioritizing athlete safety.
+
+Producing the final recommendation.
+
+Delegating implementation to downstream engines.
+
+---
+
+# Inputs
+
+The Decision Engine receives information from:
+
+Recovery Engine
+
+Progression Engine
+
+Safety Engine
+
+Periodization Engine
+
+Exercise Knowledge Base
+
+Capability Selection Engine
+
+Athlete Profile
+
+Training History
+
+Competition Calendar
+
+Equipment Availability
+
+Recovery Signals
+
+Manual Athlete Feedback
+
+Explainability Metadata
+
+---
+
+# Outputs
+
+The Decision Engine produces:
+
+Training Objective
+
+Session Type
+
+Training Priorities
+
+Volume Target
+
+Intensity Target
+
+Recovery Emphasis
+
+Exercise Constraints
+
+Progression Strategy
+
+Decision Confidence
+
+Decision Explanation
+
+These outputs become inputs for the Session Generation Engine.
+
+---
+
+# Decision Hierarchy
+
+When objectives conflict, the following hierarchy always applies.
+
+Safety
+
+↓
+
+Health
+
+↓
+
+Recovery
+
+↓
+
+Long-Term Adaptation
+
+↓
+
+Performance
+
+↓
+
+Convenience
+
+This hierarchy is immutable.
+
+No module may override it.
+
+---
+
+# Decision Cycle
+
+Every recommendation follows six stages.
+
+Stage 1
+
+Collect observations.
+
+Stage 2
+
+Interpret observations.
+
+Stage 3
+
+Generate candidate strategies.
+
+Stage 4
+
+Evaluate candidates.
+
+Stage 5
+
+Select the optimal strategy.
+
+Stage 6
+
+Generate explanation.
+
+---
+
+# Candidate Strategies
+
+The engine never evaluates a single option.
+
+Instead it generates several possible approaches.
+
+Example:
+
+Strategy A
+
+Heavy Strength Session
+
+Strategy B
+
+Reduced Volume Session
+
+Strategy C
+
+Technical Session
+
+Strategy D
+
+Recovery Session
+
+Each strategy is evaluated.
+
+The best one is selected.
+
+---
+
+# Strategy Evaluation
+
+Each candidate receives scores for:
+
+Safety
+
+Recovery
+
+Specificity
+
+Expected Adaptation
+
+Long-Term Benefit
+
+Confidence
+
+Athlete Preference
+
+Competition Relevance
+
+No single score determines the outcome.
+
+---
+
+# Decision Confidence
+
+Every decision carries confidence.
+
+Very High
+
+High
+
+Moderate
+
+Low
+
+Unknown
+
+Confidence reflects information quality.
+
+Not expected performance.
+
+---
+
+# Conflict Resolution
+
+Different engines may disagree.
+
+Example
+
+Recovery Engine
+
+Reduce volume.
+
+Progression Engine
+
+Increase load.
+
+Safety Engine
+
+Maintain current load.
+
+The Decision Engine resolves these conflicts.
+
+Conflict resolution must always be explainable.
+
+---
+
+# Athlete Goals
+
+Goals influence priorities.
+
+Examples
+
+Strength
+
+Explosiveness
+
+Power Endurance
+
+Competition Preparation
+
+Weight Management
+
+General Performance
+
+Different goals produce different optimal decisions.
+
+---
+
+# Training Phase
+
+The Decision Engine adapts according to:
+
+Preparation Phase
+
+Development Phase
+
+Competition Phase
+
+Peak
+
+Deload
+
+Transition
+
+The same recovery state may produce different decisions depending on the current phase.
+
+---
+
+# Sport Specificity
+
+Combat athletes require different decisions than endurance athletes.
+
+Examples
+
+Heavy Bag
+
+Sparring
+
+Footwork
+
+Grip
+
+Power
+
+Explosive Striking
+
+Reactive Movement
+
+Decision priorities remain sport-specific.
+
+---
+
+# Constraints
+
+The Decision Engine considers:
+
+Time available.
+
+Equipment.
+
+Location.
+
+Injury.
+
+Travel.
+
+Recovery.
+
+Schedule.
+
+Environmental conditions.
+
+Constraints reduce the decision space.
+
+They do not reduce decision quality.
+
+---
+
+# Decision Stability
+
+Recommendations should not fluctuate unnecessarily.
+
+Small variations in input should rarely produce large variations in output.
+
+Consistency builds trust.
+
+---
+
+# Adaptation
+
+The Decision Engine learns.
+
+It continuously updates:
+
+Athlete response.
+
+Recovery behaviour.
+
+Progression tolerance.
+
+Exercise preferences.
+
+Compliance.
+
+Future recommendations become increasingly individualized.
+
+---
+
+# Explainability
+
+Every decision must be explainable.
+
+The engine stores:
+
+Decision.
+
+Evidence.
+
+Applied rules.
+
+Alternative strategies.
+
+Confidence.
+
+Expected outcome.
+
+The Explainability Engine converts this into athlete-friendly language.
+
+---
+
+# Human Override
+
+The athlete may reject recommendations.
+
+The Decision Engine records:
+
+Recommendation.
+
+Athlete decision.
+
+Reason (when available).
+
+Future recommendations may adapt.
+
+The athlete always retains final authority.
+
+---
+
+# Safety Override
+
+Safety recommendations cannot be ignored internally.
+
+If the Safety Engine detects unacceptable risk,
+
+the Decision Engine must select a safer strategy.
+
+Safety always overrides performance.
+
+---
+
+# Conservative Behaviour
+
+When uncertainty increases,
+
+the Decision Engine becomes more conservative.
+
+Unknown information never justifies more aggressive programming.
+
+---
+
+# Failure Handling
+
+Unexpected outcomes trigger reassessment.
+
+Examples
+
+Repeated missed repetitions.
+
+Unexpected fatigue.
+
+Pain.
+
+Illness.
+
+Rapid performance decline.
+
+The engine investigates before recommending progression.
+
+---
+
+# Learning Loop
+
+Every completed session updates the system.
+
+Observation
+
+↓
+
+Decision
+
+↓
+
+Execution
+
+↓
+
+Outcome
+
+↓
+
+Learning
+
+↓
+
+Improved Future Decision
+
+The engine continuously refines its internal model.
+
+---
+
+# Interaction With Other Engines
+
+Receives:
+
+Recovery Engine
+
+Progression Engine
+
+Safety Engine
+
+Periodization Engine
+
+Exercise Knowledge Base
+
+Produces:
+
+Capability Selection
+
+Session Generation
+
+Explainability
+
+Coach Feedback
+
+Statistics
+
+---
+
+# Future Capabilities
+
+Future versions may include:
+
+Bayesian decision models.
+
+Probabilistic planning.
+
+Competition simulation.
+
+Real-time adaptation.
+
+Reinforcement learning.
+
+Coach collaboration.
+
+These additions must remain compatible with explainability.
+
+---
+
+# Success Criteria
+
+The Decision Engine succeeds when:
+
+Recommendations are coherent.
+
+Recommendations remain explainable.
+
+Safety is preserved.
+
+Adaptation improves.
+
+Athletes trust the reasoning.
+
+Conflicts between engines are resolved consistently.
+
+---
+
+# Final Principle
+
+The Decision Engine does not ask:
+
+"What can the athlete do?"
+
+It asks:
+
+"What is the best decision for this athlete,
+
+today,
+
+given everything currently known?"
