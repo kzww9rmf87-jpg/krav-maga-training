@@ -1165,6 +1165,7 @@ export const MODULE_PRESCRIPTION_CONTRACTS = {
         "accessory",
         "robustness",
       ], 3),
+      authorization("controlled_mobility_sets", ["corrective", "accessory"], 4),
     ],
     forbiddenMethods: [
       "power_repetition_sets",

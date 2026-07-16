@@ -469,11 +469,7 @@ export const NUMERICAL_PRESCRIPTION_PROFILES = [
       seconds: integerRange(60, 120, 180),
       sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
     },
-    tempo: {
-      type: "global_intent",
-      globalIntent: "controlled",
-      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
-    },
+    tempo: null,
     minimumDose: { ...emptyDose(), sets: 2, distanceMeters: 15 },
     maximumDose: { ...emptyDose(), sets: 4, distanceMeters: 40 },
     requiresExerciseSpecificLoadRule: true,
