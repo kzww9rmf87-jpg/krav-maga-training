@@ -8,6 +8,11 @@
  * It only defines the contracts used by the deterministic engine.
  */
 
+// `EngineSessionPrescriptionOutcome` is a type-only import: `prescribeEngineSession.ts`
+// imports back from this file (also type-only), so this reference is a
+// type-level cycle only — erased at compile time, no runtime dependency.
+import type { EngineSessionPrescriptionOutcome } from "./prescription/prescribeEngineSession";
+
 // -----------------------------------------------------------------------------
 // Generic primitives
 // -----------------------------------------------------------------------------
@@ -893,6 +898,19 @@ export type EngineRunResult =
       conflicts: DetectedConflict[];
       conflictResolutions: ConflictResolution[];
       decisionTrace: DecisionTrace;
+      /**
+       * Whether the final (post-substitution, post-reconstruction)
+       * `sessionDraft` could also be prescribed — see
+       * `prescription/prescribeEngineSession.ts`. Present only when
+       * `runEngine` was called with a `prescriptionSources` argument
+       * (opting into prescription); a historical two-argument call never
+       * gains this field, keeping `decisionTrace.entries` and every other
+       * property byte-for-byte identical to before prescription existed.
+       * `sessionDraft` itself never depends on this field's status — an
+       * `"unavailable"` or `"failed"` prescription never removes or alters
+       * the pre-prescription draft above.
+       */
+      prescription?: EngineSessionPrescriptionOutcome;
     };
 
 // -----------------------------------------------------------------------------

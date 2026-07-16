@@ -25,5 +25,9 @@ export * from "./validatePrescription";
 export * from "./prescribeExercise";
 export * from "./prescribeSession";
 
-// Decision Trace adapter (not yet wired into decisionTrace.ts or runEngine)
+// Decision Trace adapter
 export * from "./prescriptionDecisionTrace";
+
+// Engine integration (session draft → prescription input, and orchestration)
+export * from "./buildPrescriptionInput";
+export * from "./prescribeEngineSession";

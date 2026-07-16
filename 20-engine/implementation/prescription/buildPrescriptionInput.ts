@@ -1,0 +1,102 @@
+/**
+ * Combat Athlete System — Engine → Prescription Input Adapter
+ * Version 0.1
+ *
+ * Converts one engine-generated session draft (`InitialSessionDraft` — the
+ * stable, post-substitution, post-reconstruction session; see `index.ts`'s
+ * `runEngine`) into `SessionExercisePrescriptionInput` entries for
+ * `prescribeSession`.
+ *
+ * `ExerciseDefinition` (the engine's exercise knowledge base entry) and
+ * `EngineInput` carry none of the fields a prescription requires: no
+ * `ExerciseRole`, no `ExercisePrescriptionCapabilities`, no instruction or
+ * stop-condition definitions, no athlete references, no load-rounding
+ * profile. This adapter never invents them. Every one of those fields
+ * must come from `prescriptionSources` — a per-exercise-id lookup supplied
+ * by the caller (real data once the engine input schema carries it, a
+ * documented contract, or a clearly-identified test fixture today). A
+ * missing entry produces a structured gap, never a fabricated default.
+ */
+
+import type { CapabilityModule, Identifier, InitialSessionDraft } from "../types";
+import type { PrescribeExerciseInput } from "./prescribeExercise";
+import type { SessionExercisePrescriptionInput } from "./prescribeSession";
+
+/**
+ * Everything `PrescribeExerciseInput` needs beyond the exercise/module
+ * identifiers the engine already knows from the session draft itself.
+ */
+export type ExercisePrescriptionSource = Omit<PrescribeExerciseInput, "exerciseId" | "moduleId">;
+
+export interface PrescriptionSourceGap {
+  exerciseId: Identifier;
+  moduleId: CapabilityModule;
+  /** Mirrors the module's own `"primary"` role — never a new inference (see below). */
+  required: boolean;
+  reason: string;
+}
+
+export interface DraftPrescriptionInputs {
+  /** One entry per selected exercise whose prescription source data was found. */
+  exercises: readonly SessionExercisePrescriptionInput[];
+  /** One entry per selected exercise whose prescription source data was missing. */
+  gaps: readonly PrescriptionSourceGap[];
+}
+
+/**
+ * Walks every module in `draft.modules` that has a selected exercise
+ * (skipping empty secondary/support modules — there is nothing to
+ * prescribe there, not a missing-data case) and looks up its prescription
+ * source data by exercise id.
+ *
+ * `order`/`blockId` come directly from the module's own already-assigned
+ * `order`/`module`. `required` is `true` exactly for `"primary"`-role
+ * modules — this restates, rather than invents, an invariant
+ * `sessionGenerator.ts` already enforces: a `"primary"` module without a
+ * selected exercise blocks the draft before it can exist, so every
+ * `"primary"`-module exercise reaching this function is already
+ * effectively required for the session to be genuinely complete.
+ */
+export function buildDraftPrescriptionInputs(
+  draft: InitialSessionDraft,
+  prescriptionSources: ReadonlyMap<Identifier, ExercisePrescriptionSource>,
+): DraftPrescriptionInputs {
+  const exercises: SessionExercisePrescriptionInput[] = [];
+  const gaps: PrescriptionSourceGap[] = [];
+
+  for (const generatedModule of draft.modules) {
+    const selectedCandidate = generatedModule.exerciseSelection.candidates.find(
+      (candidate) => candidate.selected,
+    );
+
+    if (selectedCandidate === undefined) {
+      continue;
+    }
+
+    const exerciseId = selectedCandidate.scoredExercise.exercise.id;
+    const moduleId = generatedModule.selectedModule.module;
+    const required = generatedModule.selectedModule.role === "primary";
+    const source = prescriptionSources.get(exerciseId);
+
+    if (source === undefined) {
+      gaps.push({
+        exerciseId,
+        moduleId,
+        required,
+        reason: `No prescription source data (role, capabilities, instructions, stop conditions, athlete references, load profile) is available for exercise "${exerciseId}".`,
+      });
+      continue;
+    }
+
+    exercises.push({
+      ...source,
+      exerciseId,
+      moduleId,
+      order: generatedModule.order,
+      required,
+      blockId: moduleId,
+    });
+  }
+
+  return { exercises, gaps };
+}
