@@ -826,6 +826,7 @@ export type DecisionStage =
   | "eligibility_filtering"
   | "exercise_scoring"
   | "session_assembly"
+  | "prescription_generation"
   | "conflict_detection"
   | "conflict_resolution"
   | "duration_validation"
@@ -842,6 +843,12 @@ export interface DecisionTraceEntry {
   affectedExerciseIds?: Identifier[];
   affectedModules?: CapabilityModule[];
   confidence?: ConfidenceLevel;
+  /**
+   * Source rule identifiers backing this entry's decision (e.g. a
+   * prescription resolver's `sourceRuleIds`). Optional and additive: no
+   * existing `DecisionTraceEntry` producer sets it today.
+   */
+  sourceRuleIds?: readonly Identifier[];
 }
 
 export interface DecisionTrace {

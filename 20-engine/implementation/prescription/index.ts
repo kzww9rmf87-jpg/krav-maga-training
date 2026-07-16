@@ -24,3 +24,6 @@ export * from "./resolveStopConditions";
 export * from "./validatePrescription";
 export * from "./prescribeExercise";
 export * from "./prescribeSession";
+
+// Decision Trace adapter (not yet wired into decisionTrace.ts or runEngine)
+export * from "./prescriptionDecisionTrace";
