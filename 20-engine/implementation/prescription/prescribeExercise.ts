@@ -150,20 +150,36 @@ export interface ExercisePrescription {
   status: "complete";
 }
 
+/**
+ * The full per-stage resolver trace for one exercise, in pipeline order.
+ * Every field is exactly the result object its own resolver already
+ * returns — nothing here is summarized, recomputed or reshaped.
+ *
+ * Named explicitly (rather than left as an inline object type) so a future
+ * task can reference it when connecting the prescription layer to
+ * `decisionTrace.ts` / `21_DECISION_TRACE.md`, without duplicating or
+ * restating its shape. That connection is not made here: `decisionTrace.ts`
+ * is not modified, and this trace is not wired into `runEngine`.
+ */
+export interface ExercisePrescriptionTrace {
+  method: MethodResolutionResult;
+  compatibility: CompatibilityValidationResult;
+  volume: VolumeResolutionResult;
+  intensity: IntensityResolutionResult;
+  rest: RestResolutionResult;
+  tempo: TempoResolutionResult;
+  instructions: InstructionResolutionResult;
+  stopConditions: StopConditionResolutionResult;
+  validation: PrescriptionValidationResult;
+}
+
+/** Only the stages actually reached before failure are present. */
+export type ExercisePrescriptionFailureTrace = Partial<ExercisePrescriptionTrace>;
+
 export interface PrescribeExerciseSuccess {
   ok: true;
   prescription: ExercisePrescription;
-  trace: {
-    method: MethodResolutionResult;
-    compatibility: CompatibilityValidationResult;
-    volume: VolumeResolutionResult;
-    intensity: IntensityResolutionResult;
-    rest: RestResolutionResult;
-    tempo: TempoResolutionResult;
-    instructions: InstructionResolutionResult;
-    stopConditions: StopConditionResolutionResult;
-    validation: PrescriptionValidationResult;
-  };
+  trace: ExercisePrescriptionTrace;
 }
 
 export interface PrescribeExerciseFailure {
@@ -173,17 +189,7 @@ export interface PrescribeExerciseFailure {
   role: ExerciseRole;
   failureStage: ExercisePrescriptionFailureStage;
   message: string;
-  trace: {
-    method?: MethodResolutionResult;
-    compatibility?: CompatibilityValidationResult;
-    volume?: VolumeResolutionResult;
-    intensity?: IntensityResolutionResult;
-    rest?: RestResolutionResult;
-    tempo?: TempoResolutionResult;
-    instructions?: InstructionResolutionResult;
-    stopConditions?: StopConditionResolutionResult;
-    validation?: PrescriptionValidationResult;
-  };
+  trace: ExercisePrescriptionFailureTrace;
 }
 
 export type PrescribeExerciseResult =

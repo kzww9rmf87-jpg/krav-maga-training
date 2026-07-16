@@ -73,6 +73,13 @@ export interface SessionPrescription {
 export interface PrescribeSessionSuccess {
   ok: true;
   session: SessionPrescription;
+  /**
+   * One `PrescribeExerciseResult` per exercise, in session order — each
+   * already carries its own `ExercisePrescriptionTrace` /
+   * `ExercisePrescriptionFailureTrace` (see `prescribeExercise.ts`). This
+   * array is the session-level trace aggregate a future `decisionTrace.ts`
+   * connector would iterate; it is not consumed further here.
+   */
   exerciseResults: readonly PrescribeExerciseResult[];
   omittedOptionalExerciseIds: readonly Identifier[];
 }
