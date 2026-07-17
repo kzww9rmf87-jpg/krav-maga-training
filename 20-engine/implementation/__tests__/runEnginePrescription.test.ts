@@ -12,6 +12,7 @@ import { describe, expect, test } from "vitest";
 import { runEngine } from "../index";
 import type { ExercisePrescriptionSource } from "../prescription/buildPrescriptionInput";
 import type { PrescribeExerciseInput } from "../prescription/prescribeExercise";
+import { getExercisePrescriptionSource } from "../prescription/exercisePrescriptionRegistry";
 
 import { NEXT_COMBAT_SESSION_AT, makeAthleteProfile, makeExercise, makeRequest, makeValidInput } from "./fixtures";
 import { makeCapabilities, makeOneRepMaxReference, makePrescribeExerciseInput } from "./prescription/fixtures";
@@ -293,5 +294,38 @@ describe("runEngine prescription integration", () => {
     ]);
     expect(blockedResult.outcome).toBe("blocked");
     expect("prescription" in blockedResult).toBe(false);
+  });
+
+  test("17. + 18. a pilot exercise from the real prescription registry prescribes end to end through runEngine, with prescription_generation traced", () => {
+    const input = makeValidInput();
+    // Matches the registry's "bench_press" entry (module "strength", role
+    // "primary") — the engine's own module selection resolves the same
+    // module from the default "maximum_strength" primary objective.
+    const exercise = makeExercise({ id: "bench_press" });
+
+    const sourceResult = getExercisePrescriptionSource("bench_press", {
+      rangeContext: "normal",
+      athleteReferences: [makeOneRepMaxReference({ value: 100 })],
+      availableEquipmentCapabilities: ["barbell", "bench", "rack", "weight_plates"],
+    });
+    if (!sourceResult.ok) {
+      throw new Error(`Fixture setup failed: ${sourceResult.message}`);
+    }
+
+    const prescriptionSources = new Map<string, ExercisePrescriptionSource>([["bench_press", sourceResult.source]]);
+
+    const result = runEngine(input, [exercise], prescriptionSources);
+
+    if (result.outcome !== "draft") {
+      throw new Error(`Expected outcome "draft" but received "${result.outcome}".`);
+    }
+    if (result.prescription?.status !== "prescribed") {
+      throw new Error(`Expected prescription status "prescribed", got: ${JSON.stringify(result.prescription)}`);
+    }
+
+    expect(result.prescription.session.exercises[0]?.prescription.methodId).toBe("straight_sets_repetitions");
+    expect(
+      result.decisionTrace.entries.some((entry) => entry.stage === "prescription_generation"),
+    ).toBe(true);
   });
 });

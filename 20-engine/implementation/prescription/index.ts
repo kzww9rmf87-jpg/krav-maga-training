@@ -31,3 +31,9 @@ export * from "./prescriptionDecisionTrace";
 // Engine integration (session draft → prescription input, and orchestration)
 export * from "./buildPrescriptionInput";
 export * from "./prescribeEngineSession";
+
+// Pilot exercise prescription registry (vertical slice)
+export * from "./instructionRegistry";
+export * from "./stopConditionRegistry";
+export * from "./exercisePrescriptionRegistry";
+export * from "./buildEngineSessionPrescriptionSources";
