@@ -13,7 +13,10 @@ import {
   getDurationEstimationProfile,
 } from "../../prescription/durationEstimationProfiles";
 import { isValidSourceRuleId } from "../../prescription/sourceRuleIdentifiers";
-import { EXERCISE_PRESCRIPTION_REGISTRY } from "../../prescription/exercisePrescriptionRegistry";
+import {
+  EXERCISE_PRESCRIPTION_REGISTRY,
+  type PrescriptionExecutionContext,
+} from "../../prescription/exercisePrescriptionRegistry";
 import { validatePilotRegistry, validateRegistryEntry } from "../../prescription/registryValidators";
 
 describe("registryVocabulary — equipment capabilities", () => {
@@ -48,6 +51,109 @@ describe("registryVocabulary — equipment capabilities", () => {
   test("11. no ad hoc equipment identifier remains in the pilot registry", () => {
     const issues = validatePilotRegistry().filter((issue) => issue.code === "UNKNOWN_EQUIPMENT_CAPABILITY");
     expect(issues).toEqual([]);
+  });
+
+  // -----------------------------------------------------------------------------
+  // medicine_ball / wall — added for the Ballistics family re-audit.
+  // -----------------------------------------------------------------------------
+
+  test("medicine_ball is recognized as a valid canonical equipment capability", () => {
+    expect(isEquipmentCapabilityId("medicine_ball")).toBe(true);
+    expect(EQUIPMENT_CAPABILITY_IDS).toContain("medicine_ball");
+    expect(findUnknownEquipmentCapabilities(["medicine_ball"])).toEqual([]);
+  });
+
+  test("wall is recognized as a valid canonical equipment capability", () => {
+    expect(isEquipmentCapabilityId("wall")).toBe(true);
+    expect(EQUIPMENT_CAPABILITY_IDS).toContain("wall");
+    expect(findUnknownEquipmentCapabilities(["wall"])).toEqual([]);
+  });
+
+  test("slam_ball and medicine_ball remain distinct identifiers with no automatic substitution", () => {
+    expect(EQUIPMENT_CAPABILITY_IDS.filter((id) => id === "slam_ball" || id === "medicine_ball")).toEqual([
+      "slam_ball",
+      "medicine_ball",
+    ]);
+
+    // A context supplying only medicine_ball does not satisfy a slam_ball requirement, and vice versa.
+    expect(findUnknownEquipmentCapabilities(["medicine_ball"])).toEqual([]);
+    expect(
+      EXERCISE_PRESCRIPTION_REGISTRY.med_ball_slam.capabilities.requiredEquipmentCapabilities.includes(
+        "medicine_ball",
+      ),
+    ).toBe(false);
+    expect(
+      EXERCISE_PRESCRIPTION_REGISTRY.med_ball_slam.capabilities.requiredEquipmentCapabilities.includes("slam_ball"),
+    ).toBe(true);
+
+    // The two ids never share a substitution/equivalence group — each `EQUIPMENT_CAPABILITY_GROUPS`
+    // entry is purely informational categorization, never an equivalence set (unlike
+    // `loaded_carry_implement`/`cable_or_band_resistance`, which are themselves single ids
+    // representing "any one of several" — slam_ball and medicine_ball are each their own id).
+    expect(getEquipmentCapabilityGroups("slam_ball")).toEqual(getEquipmentCapabilityGroups("medicine_ball"));
+  });
+
+  test("every previously-existing equipment identifier is still present and valid after the addition", () => {
+    const PREVIOUSLY_EXISTING_IDS = [
+      "barbell",
+      "bench",
+      "rack",
+      "plates",
+      "pull_up_bar",
+      "cable_machine",
+      "resistance_band",
+      "dumbbell",
+      "kettlebell",
+      "open_space",
+      "trap_bar",
+      "plyometric_box",
+      "loaded_carry_implement",
+      "cable_or_band_resistance",
+      "safe_landing_surface",
+      "rigid_anchor_support",
+      "pinch_grip_implement",
+      "knee_protection_pad",
+      "slam_ball",
+    ] as const;
+
+    for (const id of PREVIOUSLY_EXISTING_IDS) {
+      expect(isEquipmentCapabilityId(id)).toBe(true);
+    }
+    expect(EQUIPMENT_CAPABILITY_IDS.length).toBe(PREVIOUSLY_EXISTING_IDS.length + 2);
+  });
+
+  test("an unknown equipment identifier is still rejected after the addition", () => {
+    expect(isEquipmentCapabilityId("made_up_ballistics_equipment")).toBe(false);
+    expect(findUnknownEquipmentCapabilities(["medicine_ball", "wall", "made_up_ballistics_equipment"])).toEqual([
+      "made_up_ballistics_equipment",
+    ]);
+  });
+
+  test("no existing prescription references medicine_ball or wall, and none changes behavior", () => {
+    for (const entry of Object.values(EXERCISE_PRESCRIPTION_REGISTRY)) {
+      expect(entry.capabilities.requiredEquipmentCapabilities.includes("medicine_ball")).toBe(false);
+      expect(entry.capabilities.requiredEquipmentCapabilities.includes("wall")).toBe(false);
+    }
+    // med_ball_slam's own requirement is unchanged by this addition.
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.med_ball_slam.capabilities.requiredEquipmentCapabilities).toEqual([
+      "slam_ball",
+      "safe_landing_surface",
+    ]);
+  });
+
+  test("prescription execution contexts and capability lists correctly accept medicine_ball and wall", () => {
+    const context: PrescriptionExecutionContext = {
+      rangeContext: "normal",
+      athleteReferences: [],
+      availableEquipmentCapabilities: ["medicine_ball", "wall"],
+    };
+    expect(findUnknownEquipmentCapabilities(context.availableEquipmentCapabilities)).toEqual([]);
+
+    const hypotheticalRequirement: readonly string[] = ["medicine_ball", "wall"];
+    expect(findUnknownEquipmentCapabilities(hypotheticalRequirement)).toEqual([]);
+    for (const id of hypotheticalRequirement) {
+      expect(context.availableEquipmentCapabilities.includes(id)).toBe(true);
+    }
   });
 });
 

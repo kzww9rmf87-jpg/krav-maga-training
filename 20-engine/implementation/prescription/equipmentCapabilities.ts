@@ -60,6 +60,15 @@ export const EQUIPMENT_CAPABILITY_IDS = [
   "cable_or_band_resistance",
   // Environmental / spatial capabilities (not a physical item)
   "safe_landing_surface",
+  // Added during the family-by-family registry extension (Force / Power /
+  // Core / Carries / Grip / Plyometrics / Ballistics) — each grounded in a
+  // real "Equipment Requirements" section, none duplicating an existing id.
+  "rigid_anchor_support", // Dragon Flag: "Secure overhead or behind-head hand anchor"
+  "pinch_grip_implement", // Pinch Carry: "Weight Plates or Pinch Blocks" — distinct grip geometry from loaded_carry_implement
+  "knee_protection_pad", // Knee Jump: "Dense Knee Pad or Folded Exercise Mat"
+  "slam_ball", // Med Ball Slam: "Slam Ball or Non-Rebounding Medicine Ball" — non-rebounding is safety-relevant, distinct from a regular medicine ball
+  "medicine_ball", // Standard (rebounding-capable) medicine ball used for passes and throws — aligned with `EquipmentType`/`LoadingMode`'s existing "medicine_ball" value, but never mirrored here until now. Deliberately distinct from `slam_ball`: no automatic substitution between the two.
+  "wall", // A resistant vertical surface authorized to receive a thrown implement — aligned with `EquipmentType`'s existing "wall" value. Never implied by `open_space`; must be declared explicitly.
 ] as const;
 
 export type EquipmentCapabilityId = (typeof EQUIPMENT_CAPABILITY_IDS)[number];
@@ -70,10 +79,15 @@ export type EquipmentCapabilityId = (typeof EQUIPMENT_CAPABILITY_IDS)[number];
 
 export const EQUIPMENT_CAPABILITY_GROUPS = {
   barbell_strength: ["barbell", "bench", "rack", "plates", "trap_bar"],
-  bodyweight_apparatus: ["pull_up_bar"],
-  carry_implements: ["loaded_carry_implement", "dumbbell", "kettlebell"],
+  bodyweight_apparatus: ["pull_up_bar", "rigid_anchor_support"],
+  carry_implements: ["loaded_carry_implement", "dumbbell", "kettlebell", "pinch_grip_implement"],
   resistance_apparatus: ["cable_machine", "resistance_band", "cable_or_band_resistance"],
-  plyometric_environment: ["plyometric_box", "safe_landing_surface", "open_space"],
+  plyometric_environment: ["plyometric_box", "safe_landing_surface", "open_space", "knee_protection_pad"],
+  // Grouped by physical/environmental category only — group membership is
+  // informational (`getEquipmentCapabilityGroups`) and never used to imply
+  // equivalence or substitution between members. `slam_ball` and
+  // `medicine_ball` remain two separate, individually-required ids.
+  ballistic_implements: ["slam_ball", "medicine_ball", "wall"],
 } as const satisfies Record<string, readonly EquipmentCapabilityId[]>;
 
 export type EquipmentCapabilityGroup = keyof typeof EQUIPMENT_CAPABILITY_GROUPS;
