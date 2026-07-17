@@ -80,6 +80,37 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   unresolvedProfile("farmer_carry", "sets_distance", ["50-exercises/66_CARRIES/10_FARMER_CARRY.md"]),
   unresolvedProfile("pallof_press", "sets_duration", ["50-exercises/62_CORE/11_PALLOF_PRESS.md"]),
   unresolvedProfile("box_jump", "sets_reps", ["50-exercises/63_PLYOMETRICS/10_BOX_JUMP.md"]),
+
+  // Force
+  unresolvedProfile("front_squat", "sets_reps", ["50-exercises/02_FRONT_SQUAT"]),
+  unresolvedProfile("romanian_deadlift", "sets_reps", ["50-exercises/04_ROMANIAN_DEADLIFT"]),
+  unresolvedProfile("overhead_press", "sets_reps", ["50-exercises/08_OVERHEAD_PRESS"]),
+  unresolvedProfile("bulgarian_split_squat", "sets_reps", ["50-exercises/06_BULGARIAN_SPLIT_SQUAT"]),
+
+  // Power
+  unresolvedProfile("push_press", "sets_reps", ["50-exercises/64_POWER/10_PUSH_PRESS.md"]),
+  unresolvedProfile("hang_high_pull", "sets_reps", ["50-exercises/64_POWER/11_HANG_HIGH_PULL.md"]),
+  unresolvedProfile("jump_shrug", "sets_reps", ["50-exercises/64_POWER/13_JUMP_SHRUG.md"]),
+
+  // Core
+  unresolvedProfile("hollow_body_hold", "sets_duration", ["50-exercises/62_CORE/13_HOLLOW_BODY_HOLD.md"]),
+  unresolvedProfile("dragon_flag", "sets_duration", ["50-exercises/62_CORE/15_DRAGON_FLAG.md"]),
+
+  // Carries / Grip
+  unresolvedProfile("front_rack_carry", "sets_distance", ["50-exercises/66_CARRIES/11_FRONT_RACK_CARRY.md"]),
+  unresolvedProfile("sandbag_carry", "sets_distance", ["50-exercises/66_CARRIES/12_SANDBAG_CARRY.md"]),
+  unresolvedProfile("zercher_carry", "sets_distance", ["50-exercises/66_CARRIES/13_ZERCHER_CARRY.md"]),
+  unresolvedProfile("suitcase_carry", "sets_distance", ["50-exercises/62_CORE/17_SUITCASE_CARRY.md"]),
+  unresolvedProfile("overhead_carry", "sets_distance", ["50-exercises/62_CORE/18_OVERHEAD_CARRY.md"]),
+  unresolvedProfile("pinch_carry", "sets_distance", ["50-exercises/65_GRIP/12_PINCH_CARRY.md"]),
+
+  // Plyometrics
+  unresolvedProfile("depth_jump", "sets_reps", ["50-exercises/63_PLYOMETRICS/11_DEPTH_JUMP.md"]),
+  unresolvedProfile("broad_jump", "sets_reps", ["50-exercises/63_PLYOMETRICS/12_BROAD_JUMP.md"]),
+  unresolvedProfile("knee_jump", "sets_reps", ["50-exercises/63_PLYOMETRICS/13_KNEE_JUMP.md"]),
+  unresolvedProfile("lateral_bound", "sets_reps", ["50-exercises/63_PLYOMETRICS/14_LATERAL_BOUND.md"]),
+  unresolvedProfile("single_leg_hop", "sets_reps", ["50-exercises/63_PLYOMETRICS/15_SINGLE_LEG_HOP.md"]),
+  unresolvedProfile("split_squat_jump", "sets_reps", ["50-exercises/63_PLYOMETRICS/16_SPLIT_SQUAT_JUMP.md"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(
