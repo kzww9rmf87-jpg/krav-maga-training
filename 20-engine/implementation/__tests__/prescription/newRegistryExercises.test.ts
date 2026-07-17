@@ -412,28 +412,34 @@ describe("new registry exercises — runEngine integration", () => {
 });
 
 // -----------------------------------------------------------------------------
-// 7. An unknown exercise (med_ball_slam — deliberately not yet integrated) stays unavailable
+// 7. An unknown exercise stays unavailable
+//
+// med_ball_slam was integrated in a later session (see
+// ballisticExercises.test.ts for its full coverage) — this block now uses
+// med_ball_chest_pass, which remains genuinely unintegrated: no canonical
+// equipment capability id represents a standard medicine ball, see the
+// integrability report.
 // -----------------------------------------------------------------------------
 
-describe("new registry exercises — an unintegrated exercise (med_ball_slam) stays unavailable", () => {
+describe("new registry exercises — an unintegrated exercise (med_ball_chest_pass) stays unavailable", () => {
   test("getExercisePrescriptionSource reports EXERCISE_NOT_IN_REGISTRY without throwing", () => {
-    expect(isPilotExerciseId("med_ball_slam")).toBe(false);
+    expect(isPilotExerciseId("med_ball_chest_pass")).toBe(false);
 
-    const result = getExercisePrescriptionSource("med_ball_slam", {
+    const result = getExercisePrescriptionSource("med_ball_chest_pass", {
       rangeContext: "normal",
       athleteReferences: [],
-      availableEquipmentCapabilities: ["slam_ball"],
+      availableEquipmentCapabilities: [],
     });
 
     if (result.ok) {
-      throw new Error("Expected med_ball_slam to be reported as not in the registry.");
+      throw new Error("Expected med_ball_chest_pass to be reported as not in the registry.");
     }
     expect(result.failureCode).toBe("EXERCISE_NOT_IN_REGISTRY");
   });
 
-  test("runEngine keeps a med_ball_slam candidate's prescription unavailable, never fabricated", () => {
+  test("runEngine keeps a med_ball_chest_pass candidate's prescription unavailable, never fabricated", () => {
     const input = makeValidInput();
-    const exercise = makeExercise({ id: "med_ball_slam" });
+    const exercise = makeExercise({ id: "med_ball_chest_pass" });
 
     const result = runEngine(input, [exercise], new Map());
 
@@ -443,7 +449,7 @@ describe("new registry exercises — an unintegrated exercise (med_ball_slam) st
     if (result.prescription?.status !== "unavailable") {
       throw new Error(`Expected prescription status "unavailable", got: ${JSON.stringify(result.prescription)}`);
     }
-    expect(result.prescription.missingSourceData.some((gap) => gap.exerciseId === "med_ball_slam")).toBe(true);
+    expect(result.prescription.missingSourceData.some((gap) => gap.exerciseId === "med_ball_chest_pass")).toBe(true);
   });
 });
 

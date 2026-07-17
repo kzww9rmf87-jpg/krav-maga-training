@@ -130,6 +130,15 @@ export const PILOT_EXERCISE_IDS = [
   "lateral_bound",
   "single_leg_hop",
   "split_squat_jump",
+  // Ballistics
+  // Only Medicine-Ball Slam is integrated here. The other six Ballistics
+  // chapters (Chest Pass, Overhead Throw, Rotational Throw, Scoop Toss,
+  // Shot-Put Throw, Reverse Throw) all require a standard, rebounding-capable
+  // medicine ball, and no canonical equipment capability id for that exists
+  // in `equipmentCapabilities.ts` today — only "slam_ball" does, documented
+  // there specifically as a non-rebounding implement for this exercise. See
+  // the integrability report for the full family-by-family audit.
+  "med_ball_slam",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -3240,6 +3249,156 @@ const splitSquatJumpEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Medicine-Ball Slam
+// (The only integrated Ballistics exercise — see PILOT_EXERCISE_IDS comment
+// and the integrability report for why the other six Ballistics chapters are
+// not integrated: they require a standard, rebounding-capable medicine ball,
+// and no such equipment capability id exists in equipmentCapabilities.ts.
+// "slam_ball" was added to that file's canonical vocabulary during a prior
+// registry extension specifically for this exercise's own documented
+// implement — "Slam Ball or Non-Rebounding Medicine Ball" — and is reused
+// here unchanged, not newly created.)
+// Source: 50-exercises/67_BALLISTICS/14_MED_BALL_SLAM.md
+//   - Primary Classification: "Downward Ballistic Power"; Primary
+//     Adaptation: "Rapid Downward Force Projection"
+//   - Exercise Identity: "Equipment: Slam Ball or Non-Rebounding Medicine
+//     Ball, Suitable Floor Surface"; "Unilateral or Bilateral: Bilateral"
+//   - Key Technical Cues: "Reach tall, then slam hard.", "Accelerate all
+//     the way down.", "Drive through the ball.", "Keep the ribs
+//     controlled.", "Use the trunk, not only the arms.", "Throw the ball
+//     in front of the body.", "Finish balanced.", "Reset before
+//     repeating."
+//   - No "Technical Failure Criteria" section (this chapter uses Common
+//     Errors + Ineligibility Criteria + Contraindications + Safety Rules
+//     instead — same pattern already used for the Carries family in this
+//     registry).
+//   - Common Errors (verbatim, abridged): "Using a Ball That Is Too
+//     Heavy... Arm-Only Slam... Releasing Too Close to the Feet...
+//     Collapsing Into Deep Flexion... Chasing the Rebound... Turning the
+//     Exercise Into Conditioning: The athlete performs rapid
+//     high-repetition sets with falling speed."
+//   - Coaching Priorities: "...Preserve maximal intent. Stop before speed
+//     declines."
+//   - Safety Rules: "Use a slam ball or appropriate non-rebounding
+//     medicine ball. Verify the floor surface. Keep the throwing area
+//     clear. Do not slam directly onto the feet. Avoid unpredictable
+//     rebounds. ... Terminate immediately if sharp pain, dizziness,
+//     numbness or sudden weakness occurs."
+// Method: power_repetition_sets / power / primary
+//   (power_primary_repetition_sets_v0_1 — matches
+//   34_NUMERICAL_PRESCRIPTION_TABLES.md's explicit note that medicine-ball
+//   throws use `movement_intent: maximal_acceleration` under this exact
+//   profile and that "the engine must not infer a medicine-ball mass from
+//   this generic profile" — no ball mass is claimed here, matching the
+//   same no-invented-load approach already used for Box Jump, Push Press
+//   and every Plyometrics entry.)
+// -----------------------------------------------------------------------------
+
+const SOURCE_MED_BALL_SLAM = "50-exercises/67_BALLISTICS/14_MED_BALL_SLAM.md";
+
+const medBallSlamStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "med_ball_slam_technical_failure",
+    description:
+      "Stop the set if the athlete uses only the arms instead of the trunk and hips, releases the ball too close to the feet, or collapses into excessive flexion after release.",
+    sourceRuleIds: [SOURCE_MED_BALL_SLAM],
+  }),
+  velocityLossCondition({
+    conditionId: "med_ball_slam_velocity_loss",
+    description: "Stop the set before slam speed declines.",
+    sourceRuleIds: [SOURCE_MED_BALL_SLAM],
+  }),
+  fatigueLimitCondition({
+    conditionId: "med_ball_slam_fatigue_limit",
+    description:
+      "Stop the set before it turns into a high-repetition conditioning effort with falling speed; reduce repetitions and restore full intent instead.",
+    sourceRuleIds: [SOURCE_MED_BALL_SLAM],
+  }),
+  impactLimitCondition({
+    conditionId: "med_ball_slam_impact_limit",
+    description: "Stop the set if the ball is released too close to the feet or rebounds unpredictably.",
+    sourceRuleIds: [SOURCE_MED_BALL_SLAM],
+  }),
+  balanceLossCondition({
+    conditionId: "med_ball_slam_balance_loss",
+    description: "Stop the set if the athlete collapses into excessive flexion or loses posture after release.",
+    sourceRuleIds: [SOURCE_MED_BALL_SLAM],
+  }),
+  painCondition({
+    conditionId: "med_ball_slam_pain",
+    description: "Terminate immediately if sharp pain, dizziness, numbness or sudden weakness occurs.",
+    sourceRuleIds: [SOURCE_MED_BALL_SLAM],
+  }),
+  completionCondition({
+    conditionId: "med_ball_slam_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const medBallSlamInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "med_ball_slam_setup",
+    "setup",
+    "Use a slam ball or appropriate non-rebounding medicine ball on a suitable, clear floor surface.",
+    "high",
+    true,
+    SOURCE_MED_BALL_SLAM,
+  ),
+  makeInstruction(
+    "med_ball_slam_execution",
+    "execution",
+    "Reach tall, then slam hard, accelerating all the way down and driving through the ball. Keep the ribs controlled, use the trunk rather than only the arms, throw the ball in front of the body and finish balanced.",
+    "high",
+    true,
+    SOURCE_MED_BALL_SLAM,
+  ),
+];
+
+const medBallSlamEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "med_ball_slam",
+  moduleId: "power",
+  role: "primary",
+  explicitMethodId: "power_repetition_sets",
+  capabilities: {
+    exerciseId: "med_ball_slam",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["power_repetition_sets"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["movement_intent"],
+    preferredIntensityTypes: ["movement_intent"],
+    supportedLoadingModes: ["medicine_ball"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "global_movement_intent", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["slam_ball", "safe_landing_surface"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["med_ball_slam_setup", "med_ball_slam_execution"],
+    requiredStopConditionIds: [
+      "med_ball_slam_technical_failure",
+      "med_ball_slam_velocity_loss",
+      "med_ball_slam_fatigue_limit",
+      "med_ball_slam_impact_limit",
+      "med_ball_slam_balance_loss",
+      "med_ball_slam_pain",
+      "med_ball_slam_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_med_ball_slam",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_MED_BALL_SLAM, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["movement_intent"],
+  preferredIntensityType: "movement_intent",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: medBallSlamInstructions,
+  stopConditionDefinitions: medBallSlamStopConditions,
+  sourceRuleIds: [SOURCE_MED_BALL_SLAM, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -3282,6 +3441,8 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   lateral_bound: lateralBoundEntry,
   single_leg_hop: singleLegHopEntry,
   split_squat_jump: splitSquatJumpEntry,
+
+  med_ball_slam: medBallSlamEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>
