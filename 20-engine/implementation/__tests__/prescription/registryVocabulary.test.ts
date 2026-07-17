@@ -15,6 +15,7 @@ import {
 import { isValidSourceRuleId } from "../../prescription/sourceRuleIdentifiers";
 import {
   EXERCISE_PRESCRIPTION_REGISTRY,
+  getExercisePrescriptionSource,
   type PrescriptionExecutionContext,
 } from "../../prescription/exercisePrescriptionRegistry";
 import { validatePilotRegistry, validateRegistryEntry } from "../../prescription/registryValidators";
@@ -69,14 +70,18 @@ describe("registryVocabulary — equipment capabilities", () => {
     expect(findUnknownEquipmentCapabilities(["wall"])).toEqual([]);
   });
 
-  test("slam_ball and medicine_ball remain distinct identifiers with no automatic substitution", () => {
+  test("slam_ball and medicine_ball are distinct identifiers with no automatic conversion or substitution", () => {
+    // 1. The two identifiers are different.
+    expect("slam_ball").not.toBe("medicine_ball");
     expect(EQUIPMENT_CAPABILITY_IDS.filter((id) => id === "slam_ball" || id === "medicine_ball")).toEqual([
       "slam_ball",
       "medicine_ball",
     ]);
 
-    // A context supplying only medicine_ball does not satisfy a slam_ball requirement, and vice versa.
+    // 2. No automatic conversion: each id is validated and reported independently —
+    // supplying one never causes the other to be treated as present.
     expect(findUnknownEquipmentCapabilities(["medicine_ball"])).toEqual([]);
+    expect(findUnknownEquipmentCapabilities(["slam_ball"])).toEqual([]);
     expect(
       EXERCISE_PRESCRIPTION_REGISTRY.med_ball_slam.capabilities.requiredEquipmentCapabilities.includes(
         "medicine_ball",
@@ -86,11 +91,22 @@ describe("registryVocabulary — equipment capabilities", () => {
       EXERCISE_PRESCRIPTION_REGISTRY.med_ball_slam.capabilities.requiredEquipmentCapabilities.includes("slam_ball"),
     ).toBe(true);
 
-    // The two ids never share a substitution/equivalence group — each `EQUIPMENT_CAPABILITY_GROUPS`
-    // entry is purely informational categorization, never an equivalence set (unlike
-    // `loaded_carry_implement`/`cable_or_band_resistance`, which are themselves single ids
-    // representing "any one of several" — slam_ball and medicine_ball are each their own id).
-    expect(getEquipmentCapabilityGroups("slam_ball")).toEqual(getEquipmentCapabilityGroups("medicine_ball"));
+    // 3. No substitution mechanism exists: `EQUIPMENT_CAPABILITY_GROUPS` co-membership
+    // (checked separately above, in "equipment groupings are deterministic") is purely
+    // informational and is never consulted by equipment validation — proven functionally
+    // here by showing that supplying medicine_ball (but not slam_ball) as available
+    // equipment still fails med_ball_slam's requirement, exactly like supplying nothing.
+    const context: PrescriptionExecutionContext = {
+      rangeContext: "normal",
+      athleteReferences: [],
+      availableEquipmentCapabilities: ["medicine_ball", "safe_landing_surface"], // medicine_ball, not slam_ball
+    };
+    const result = getExercisePrescriptionSource("med_ball_slam", context);
+    if (result.ok) {
+      throw new Error("Expected medicine_ball to NOT satisfy med_ball_slam's slam_ball requirement.");
+    }
+    expect(result.failureCode).toBe("REQUIRED_EQUIPMENT_MISSING");
+    expect(result.message).toContain("slam_ball");
   });
 
   test("every previously-existing equipment identifier is still present and valid after the addition", () => {

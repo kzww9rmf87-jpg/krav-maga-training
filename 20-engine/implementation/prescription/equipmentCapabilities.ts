@@ -86,8 +86,14 @@ export const EQUIPMENT_CAPABILITY_GROUPS = {
   // Grouped by physical/environmental category only — group membership is
   // informational (`getEquipmentCapabilityGroups`) and never used to imply
   // equivalence or substitution between members. `slam_ball` and
-  // `medicine_ball` remain two separate, individually-required ids.
-  ballistic_implements: ["slam_ball", "medicine_ball", "wall"],
+  // `medicine_ball` are both physical implements but remain two separate,
+  // individually-required ids within this group.
+  ballistic_implements: ["slam_ball", "medicine_ball"],
+  // `wall` is an environmental/spatial capability (a receiving surface),
+  // not a physical implement — kept in its own group rather than folded
+  // into `ballistic_implements`, matching the file's own distinction
+  // between implements and environmental capabilities (see file header).
+  throwing_environment: ["wall"],
 } as const satisfies Record<string, readonly EquipmentCapabilityId[]>;
 
 export type EquipmentCapabilityGroup = keyof typeof EQUIPMENT_CAPABILITY_GROUPS;
