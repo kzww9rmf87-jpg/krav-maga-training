@@ -2,19 +2,23 @@
  * Combat Athlete System — Ballistics Family Integration Tests
  *
  * Covers the outcome of the Ballistics (`50-exercises/67_BALLISTICS/`)
- * integrability audit: of the 7 documented medicine-ball exercises, only
- * `med_ball_slam` was integrated into `EXERCISE_PRESCRIPTION_REGISTRY`.
+ * integrability audit and its subsequent corrective review: of the 7
+ * documented medicine-ball exercises, 5 are now integrated into
+ * `EXERCISE_PRESCRIPTION_REGISTRY`:
  *
- * The other six chapters (Chest Pass, Overhead Throw, Rotational Throw,
- * Scoop Toss, Shot-Put Throw, Reverse Throw) all require a standard,
- * rebounding-capable medicine ball as their primary implement, and no
- * canonical equipment capability id represents that in
- * `equipmentCapabilities.ts` today — only `"slam_ball"` exists there,
- * documented specifically as a *non-rebounding* implement for the Slam.
- * Integrating those six would have required inventing new equipment
- * vocabulary, which this task's integration step explicitly forbids. This
- * file asserts both halves of that outcome: `med_ball_slam` prescribes
- * completely end to end, and the other six remain honestly unavailable.
+ * - `med_ball_slam` (uses `slam_ball` + `safe_landing_surface`);
+ * - `med_ball_chest_pass` — WALL VARIANT ONLY (`medicine_ball` + `wall`);
+ * - `med_ball_overhead_throw` — open-space variant (`medicine_ball` + `open_space`);
+ * - `med_ball_shot_put_throw` — open-space variant (`medicine_ball` + `open_space`);
+ * - `med_ball_reverse_throw` (`medicine_ball` + `open_space`, its only documented option).
+ *
+ * Two chapters remain excluded: `med_ball_rotational_throw` and
+ * `med_ball_scoop_toss` are both documented with laterality "Unilateral
+ * Emphasis with Bilateral Support", which does not map onto
+ * `ExerciseLaterality` without an unmade CAS design decision — see the
+ * integrability report. This file asserts both halves of that outcome: the
+ * five integrated exercises prescribe completely end to end, and the two
+ * excluded ones remain honestly unavailable.
  */
 
 import { describe, expect, test } from "vitest";
@@ -29,6 +33,7 @@ import { prescribeExercise } from "../../prescription/prescribeExercise";
 import { prescribeSession, type SessionExercisePrescriptionInput } from "../../prescription/prescribeSession";
 import { DURATION_ESTIMATION_PROFILES, getDurationEstimationProfile } from "../../prescription/durationEstimationProfiles";
 import { getTrainingMethodContract } from "../../prescription/contracts";
+import { findUnknownEquipmentCapabilities } from "../../prescription/equipmentCapabilities";
 import type { ExercisePrescriptionSource } from "../../prescription/buildPrescriptionInput";
 
 import { runEngine } from "../../index";
@@ -40,16 +45,18 @@ const VALID_CONTEXT: PrescriptionExecutionContext = {
   availableEquipmentCapabilities: ["slam_ball", "safe_landing_surface"],
 };
 
-// The six Ballistics chapters that were audited and explicitly not
-// integrated — see the integrability report for the equipment-vocabulary
-// reason common to all six.
-const NON_INTEGRATED_BALLISTIC_IDS = [
-  "med_ball_chest_pass",
-  "med_ball_overhead_throw",
-  "med_ball_rotational_throw",
-  "med_ball_scoop_toss",
-  "med_ball_shot_put_throw",
-  "med_ball_reverse_throw",
+// The two Ballistics chapters still excluded — laterality mapping ambiguity,
+// independent of the equipment-vocabulary question already resolved for the
+// other five.
+const NON_INTEGRATED_BALLISTIC_IDS = ["med_ball_rotational_throw", "med_ball_scoop_toss"] as const;
+
+// The four exercises integrated in this session, with the equipment set and
+// laterality actually chosen for their prescribed variant.
+const NEW_THROW_VARIANTS = [
+  { id: "med_ball_chest_pass", equipment: ["medicine_ball", "wall"], laterality: "bilateral" },
+  { id: "med_ball_overhead_throw", equipment: ["medicine_ball", "open_space"], laterality: "bilateral" },
+  { id: "med_ball_shot_put_throw", equipment: ["medicine_ball", "open_space"], laterality: "unilateral" },
+  { id: "med_ball_reverse_throw", equipment: ["medicine_ball", "open_space"], laterality: "bilateral" },
 ] as const;
 
 // -----------------------------------------------------------------------------
@@ -399,10 +406,293 @@ describe("ballistics — runEngine integration", () => {
 });
 
 // -----------------------------------------------------------------------------
-// 8. The six non-integrated Ballistics exercises stay unavailable
+// 8. NEW — the four throw-variant entries: presence, unique identifier, vocabulary
 // -----------------------------------------------------------------------------
 
-describe("ballistics — the six non-integrated exercises stay unavailable", () => {
+describe("ballistics — new throw variants: presence, identity and vocabulary", () => {
+  for (const { id } of NEW_THROW_VARIANTS) {
+    test(`${id} is present in the registry under its own key`, () => {
+      const entry = EXERCISE_PRESCRIPTION_REGISTRY[id];
+      expect(entry).toBeDefined();
+      expect(entry.exerciseId).toBe(id);
+      expect(entry.capabilities.exerciseId).toBe(id);
+    });
+
+    test(`${id} is a unique identifier (no collision with any other registry entry)`, () => {
+      const allIds = Object.keys(EXERCISE_PRESCRIPTION_REGISTRY);
+      expect(allIds.filter((registeredId) => registeredId === id)).toHaveLength(1);
+    });
+
+    test(`${id}'s required equipment is drawn entirely from the canonical vocabulary`, () => {
+      const entry = EXERCISE_PRESCRIPTION_REGISTRY[id];
+      expect(findUnknownEquipmentCapabilities(entry.capabilities.requiredEquipmentCapabilities)).toEqual([]);
+    });
+  }
+
+  test("the registry now contains exactly 33 active exercises", () => {
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(33);
+  });
+});
+
+// -----------------------------------------------------------------------------
+// 9. NEW — exact equipment requirements per chosen variant
+// -----------------------------------------------------------------------------
+
+describe("ballistics — new throw variants: exact equipment per variant", () => {
+  for (const { id, equipment } of NEW_THROW_VARIANTS) {
+    test(`${id} requires exactly [${equipment.join(", ")}]`, () => {
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities.requiredEquipmentCapabilities).toEqual(equipment);
+    });
+
+    test(`${id} does not depend on slam_ball`, () => {
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities.requiredEquipmentCapabilities).not.toContain(
+        "slam_ball",
+      );
+    });
+  }
+
+  test("med_ball_chest_pass requires both medicine_ball and wall — neither alone suffices", () => {
+    const bothOk = getExercisePrescriptionSource("med_ball_chest_pass", {
+      rangeContext: "normal",
+      athleteReferences: [],
+      availableEquipmentCapabilities: ["medicine_ball", "wall"],
+    });
+    if (!bothOk.ok) {
+      throw new Error(`Expected med_ball_chest_pass to succeed with both: ${bothOk.message}`);
+    }
+
+    const medicineBallOnly = getExercisePrescriptionSource("med_ball_chest_pass", {
+      rangeContext: "normal",
+      athleteReferences: [],
+      availableEquipmentCapabilities: ["medicine_ball"],
+    });
+    if (medicineBallOnly.ok) {
+      throw new Error("Expected medicine_ball alone to be insufficient for med_ball_chest_pass.");
+    }
+    expect(medicineBallOnly.failureCode).toBe("REQUIRED_EQUIPMENT_MISSING");
+    expect(medicineBallOnly.message).toContain("wall");
+
+    const wallOnly = getExercisePrescriptionSource("med_ball_chest_pass", {
+      rangeContext: "normal",
+      athleteReferences: [],
+      availableEquipmentCapabilities: ["wall"],
+    });
+    if (wallOnly.ok) {
+      throw new Error("Expected wall alone to be insufficient for med_ball_chest_pass.");
+    }
+    expect(wallOnly.failureCode).toBe("REQUIRED_EQUIPMENT_MISSING");
+    expect(wallOnly.message).toContain("medicine_ball");
+  });
+
+  test("med_ball_overhead_throw, med_ball_shot_put_throw and med_ball_reverse_throw use open_space, not wall", () => {
+    for (const id of ["med_ball_overhead_throw", "med_ball_shot_put_throw", "med_ball_reverse_throw"] as const) {
+      const entry = EXERCISE_PRESCRIPTION_REGISTRY[id];
+      expect(entry.capabilities.requiredEquipmentCapabilities).toContain("open_space");
+      expect(entry.capabilities.requiredEquipmentCapabilities).not.toContain("wall");
+
+      // wall alone does not satisfy the open-space variant actually registered.
+      const wallOnly = getExercisePrescriptionSource(id, {
+        rangeContext: "normal",
+        athleteReferences: [],
+        availableEquipmentCapabilities: ["medicine_ball", "wall"],
+      });
+      if (wallOnly.ok) {
+        throw new Error(`Expected wall alone (without open_space) to be insufficient for ${id}.`);
+      }
+      expect(wallOnly.failureCode).toBe("REQUIRED_EQUIPMENT_MISSING");
+      expect(wallOnly.message).toContain("open_space");
+    }
+  });
+});
+
+// -----------------------------------------------------------------------------
+// 10. NEW — loading mode and laterality
+// -----------------------------------------------------------------------------
+
+describe("ballistics — new throw variants: loading mode and laterality", () => {
+  for (const { id, laterality } of NEW_THROW_VARIANTS) {
+    test(`${id} uses the medicine_ball loading mode`, () => {
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities.supportedLoadingModes).toEqual(["medicine_ball"]);
+    });
+
+    test(`${id} has laterality "${laterality}", matching its chapter exactly`, () => {
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities.laterality).toBe(laterality);
+    });
+  }
+
+  test("med_ball_shot_put_throw's volume is interpreted per side, matching its unilateral laterality", () => {
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.med_ball_shot_put_throw.capabilities.volumeInterpretations).toEqual([
+      "repetitions_per_side",
+    ]);
+  });
+
+  test("the three bilateral throws interpret volume as total repetitions", () => {
+    for (const id of ["med_ball_chest_pass", "med_ball_overhead_throw", "med_ball_reverse_throw"] as const) {
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities.volumeInterpretations).toEqual(["total_repetitions"]);
+    }
+  });
+});
+
+// -----------------------------------------------------------------------------
+// 11. NEW — complete prescription and valid-context behavior for all four
+// -----------------------------------------------------------------------------
+
+describe("ballistics — new throw variants prescribe completely with a valid context", () => {
+  for (const { id, equipment } of NEW_THROW_VARIANTS) {
+    test(`${id} prescribes completely end to end via getExercisePrescriptionSource + prescribeExercise`, () => {
+      const sourceResult = getExercisePrescriptionSource(id, {
+        rangeContext: "normal",
+        athleteReferences: [],
+        availableEquipmentCapabilities: equipment,
+      });
+      if (!sourceResult.ok) {
+        throw new Error(`Expected "${id}" to prescribe successfully: ${sourceResult.message}`);
+      }
+
+      expect(sourceResult.moduleId).toBe("power");
+      expect(sourceResult.source.role).toBe("primary");
+      expect(sourceResult.source.explicitMethodId).toBe("power_repetition_sets");
+      expect(sourceResult.source.athleteReferences).toEqual([]);
+
+      const result = prescribeExercise({ exerciseId: id, moduleId: sourceResult.moduleId, ...sourceResult.source });
+      if (!result.ok) {
+        throw new Error(`Expected "${id}" prescription to succeed at ${result.failureStage}: ${result.message}`);
+      }
+
+      expect(result.prescription.status).toBe("complete");
+      expect(result.prescription.methodId).toBe("power_repetition_sets");
+      // power_primary_repetition_sets_v0_1, normal range context — same
+      // documented profile already used by med_ball_slam and every other
+      // Power/Plyometrics entry. No ball mass is invented.
+      expect(result.prescription.volume.sets).toBe(4);
+      expect(result.prescription.volume.reps?.value).toBe(3);
+      expect(result.prescription.intensity.primaryMetric.type).toBe("movement_intent");
+      expect(result.prescription.intensity.calculation).toBeNull();
+      expect(result.prescription.intensity.primaryMetric.target).toEqual({
+        type: "category",
+        value: "maximal_acceleration",
+      });
+    });
+  }
+});
+
+// -----------------------------------------------------------------------------
+// 12. NEW — safe rejection when a required equipment capability is missing
+// -----------------------------------------------------------------------------
+
+describe("ballistics — new throw variants fail safely when equipment is missing", () => {
+  for (const { id, equipment } of NEW_THROW_VARIANTS) {
+    test(`${id} rejects an empty context with REQUIRED_EQUIPMENT_MISSING, never an exception`, () => {
+      const result = getExercisePrescriptionSource(id, {
+        rangeContext: "normal",
+        athleteReferences: [],
+        availableEquipmentCapabilities: [],
+      });
+      if (result.ok) {
+        throw new Error(`Expected "${id}" to fail safely with no equipment.`);
+      }
+      expect(result.failureCode).toBe("REQUIRED_EQUIPMENT_MISSING");
+      for (const capability of equipment) {
+        expect(result.message).toContain(capability);
+      }
+    });
+
+    test(`${id} rejects a context missing only medicine_ball`, () => {
+      const withoutMedicineBall = equipment.filter((capability) => capability !== "medicine_ball");
+      const result = getExercisePrescriptionSource(id, {
+        rangeContext: "normal",
+        athleteReferences: [],
+        availableEquipmentCapabilities: withoutMedicineBall,
+      });
+      if (result.ok) {
+        throw new Error(`Expected "${id}" to fail safely without medicine_ball.`);
+      }
+      expect(result.failureCode).toBe("REQUIRED_EQUIPMENT_MISSING");
+      expect(result.message).toContain("medicine_ball");
+    });
+  }
+});
+
+// -----------------------------------------------------------------------------
+// 13. NEW — determinism and non-mutation for all four
+// -----------------------------------------------------------------------------
+
+describe("ballistics — new throw variants: determinism and non-mutation", () => {
+  for (const { id, equipment } of NEW_THROW_VARIANTS) {
+    test(`${id}: identical calls produce identical results and never mutate the context`, () => {
+      const context: PrescriptionExecutionContext = {
+        rangeContext: "normal",
+        athleteReferences: [],
+        availableEquipmentCapabilities: equipment,
+      };
+      const snapshot = JSON.parse(JSON.stringify(context));
+
+      const resultA = getExercisePrescriptionSource(id, context);
+      const resultB = getExercisePrescriptionSource(id, context);
+
+      expect(resultA).toEqual(resultB);
+      expect(context).toEqual(snapshot);
+    });
+  }
+
+  test("integrating the four new throws never mutated the registry beyond their own new keys", () => {
+    // Every previously-existing key (29 original + med_ball_slam) keeps its
+    // exact prior shape; only the four new keys are additions.
+    const PREVIOUSLY_EXISTING_IDS = Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).filter(
+      (id) => !NEW_THROW_VARIANTS.some((variant) => variant.id === id),
+    );
+    expect(PREVIOUSLY_EXISTING_IDS).toHaveLength(29);
+    for (const id of PREVIOUSLY_EXISTING_IDS) {
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id as keyof typeof EXERCISE_PRESCRIPTION_REGISTRY].capabilities.requiredEquipmentCapabilities).not.toContain(
+        "wall",
+      );
+    }
+  });
+});
+
+// -----------------------------------------------------------------------------
+// 14. NEW — runEngine integration for a throw variant
+// -----------------------------------------------------------------------------
+
+describe("ballistics — new throw variants: runEngine integration", () => {
+  test("med_ball_chest_pass (wall variant) prescribes through runEngine end to end", () => {
+    const input = makeValidInput({
+      request: makeRequest({ primaryObjective: { adaptationDomain: "power" } }),
+    });
+    const exercise = makeExercise({ id: "med_ball_chest_pass", module: "power", primaryAdaptation: "power" });
+
+    const sourceResult = getExercisePrescriptionSource("med_ball_chest_pass", {
+      rangeContext: "normal",
+      athleteReferences: [],
+      availableEquipmentCapabilities: ["medicine_ball", "wall"],
+    });
+    if (!sourceResult.ok) {
+      throw new Error(`Fixture setup failed: ${sourceResult.message}`);
+    }
+
+    const prescriptionSources = new Map<string, ExercisePrescriptionSource>([
+      ["med_ball_chest_pass", sourceResult.source],
+    ]);
+
+    const result = runEngine(input, [exercise], prescriptionSources);
+
+    if (result.outcome !== "draft") {
+      throw new Error(`Expected outcome "draft" but received "${result.outcome}".`);
+    }
+    if (result.prescription?.status !== "prescribed") {
+      throw new Error(`Expected prescription status "prescribed", got: ${JSON.stringify(result.prescription)}`);
+    }
+
+    expect(result.prescription.session.exercises).toHaveLength(1);
+    expect(result.prescription.session.exercises[0]?.prescription.exerciseId).toBe("med_ball_chest_pass");
+  });
+});
+
+// -----------------------------------------------------------------------------
+// 15. The two remaining non-integrated Ballistics exercises stay unavailable
+// -----------------------------------------------------------------------------
+
+describe("ballistics — the two remaining non-integrated exercises stay unavailable", () => {
   for (const id of NON_INTEGRATED_BALLISTIC_IDS) {
     test(`${id} is not a registered pilot exercise id`, () => {
       expect(isPilotExerciseId(id)).toBe(false);
@@ -412,7 +702,7 @@ describe("ballistics — the six non-integrated exercises stay unavailable", () 
       const result = getExercisePrescriptionSource(id, {
         rangeContext: "normal",
         athleteReferences: [],
-        availableEquipmentCapabilities: [],
+        availableEquipmentCapabilities: ["medicine_ball", "wall", "open_space"],
       });
 
       if (result.ok) {

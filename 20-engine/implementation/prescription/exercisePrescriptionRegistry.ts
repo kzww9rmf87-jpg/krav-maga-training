@@ -131,14 +131,20 @@ export const PILOT_EXERCISE_IDS = [
   "single_leg_hop",
   "split_squat_jump",
   // Ballistics
-  // Only Medicine-Ball Slam is integrated here. The other six Ballistics
-  // chapters (Chest Pass, Overhead Throw, Rotational Throw, Scoop Toss,
-  // Shot-Put Throw, Reverse Throw) all require a standard, rebounding-capable
-  // medicine ball, and no canonical equipment capability id for that exists
-  // in `equipmentCapabilities.ts` today — only "slam_ball" does, documented
-  // there specifically as a non-rebounding implement for this exercise. See
-  // the integrability report for the full family-by-family audit.
+  // "medicine_ball" and "wall" were added to equipmentCapabilities.ts,
+  // unblocking five of the seven Ballistics chapters. Two remain excluded:
+  // med_ball_rotational_throw and med_ball_scoop_toss are both documented
+  // with laterality "Unilateral Emphasis with Bilateral Support", which
+  // does not map onto ExerciseLaterality (bilateral | unilateral |
+  // alternating | asymmetrical | not_applicable) without an unmade CAS
+  // design decision — see the integrability report. Each entry below that
+  // represents a single documented variant out of several ("Wall or
+  // Partner", "Open Space or Wall") says so explicitly in its own comment.
   "med_ball_slam",
+  "med_ball_chest_pass",
+  "med_ball_overhead_throw",
+  "med_ball_shot_put_throw",
+  "med_ball_reverse_throw",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -3399,6 +3405,564 @@ const medBallSlamEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Medicine-Ball Chest Pass — WALL VARIANT ONLY
+// (This chapter documents "Equipment: Medicine Ball, Wall or Partner" — two
+// alternative receiving surfaces for the same throw. requiredEquipmentCapabilities
+// describes the prescribed variant, not every documented alternative; no OR
+// primitive exists in this layer's types (see equipmentCapabilities.ts header).
+// This entry represents the wall variant only. No "partner" capability exists
+// and none is created here — the partner variant is simply not registered.)
+// Source: 50-exercises/67_BALLISTICS/10_MED_BALL_CHEST_PASS.md
+//   - Primary Classification: "Horizontal Ballistic Power"; Exercise
+//     Identity: "Complexity: Low"; "Unilateral or Bilateral: Bilateral"
+//   - Starting Position: "...the medicine ball held close to the chest,
+//     both hands placed symmetrically... The distance from the wall or
+//     partner must allow safe release and reception."
+//   - Key Technical Cues: "Throw through the target.", "Accelerate through
+//     release.", "Keep the ribs stacked.", "Do not guide the ball.",
+//     "Keep the release straight.", "Finish in balance.", "Reset before
+//     the next repetition."
+//   - No "Technical Failure Criteria" section — uses Common Errors +
+//     Ineligibility Criteria + Safety Rules instead, same pattern already
+//     used for Med Ball Slam and the Carries family.
+//   - Common Errors (verbatim, abridged): "Guiding the Ball... Arms
+//     Dominating the Movement... Catching a Fast Rebound Without
+//     Preparation: The athlete receives the ball unexpectedly. Risk:
+//     wrist, elbow or shoulder injury."
+//   - Coaching Priorities: "...Preserve repetition quality. Stop before
+//     velocity declines."
+//   - Regression Criteria: "...or fatigue reduces output."
+//   - Safety Rules: "...Do not catch unpredictable rebounds. Maintain
+//     safe wall distance. ... Terminate immediately if sharp pain,
+//     numbness or sudden weakness occurs."
+// Method: power_repetition_sets / power / primary (matches Med Ball Slam
+//   and every other Power/Plyometrics entry; movement_intent only — no
+//   ball mass is claimed, per 34_NUMERICAL_PRESCRIPTION_TABLES.md's
+//   explicit instruction not to infer one from the generic profile).
+// -----------------------------------------------------------------------------
+
+const SOURCE_MED_BALL_CHEST_PASS = "50-exercises/67_BALLISTICS/10_MED_BALL_CHEST_PASS.md";
+
+const medBallChestPassStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "med_ball_chest_pass_technical_failure",
+    description:
+      "Stop the set if the ball is guided rather than released decisively, the arms dominate the movement when whole-body integration is intended, or the athlete leans backward and flares the ribs.",
+    sourceRuleIds: [SOURCE_MED_BALL_CHEST_PASS],
+  }),
+  velocityLossCondition({
+    conditionId: "med_ball_chest_pass_velocity_loss",
+    description: "Stop before velocity declines.",
+    sourceRuleIds: [SOURCE_MED_BALL_CHEST_PASS],
+  }),
+  fatigueLimitCondition({
+    conditionId: "med_ball_chest_pass_fatigue_limit",
+    description: "Regress or stop the set when fatigue reduces output.",
+    sourceRuleIds: [SOURCE_MED_BALL_CHEST_PASS],
+  }),
+  impactLimitCondition({
+    conditionId: "med_ball_chest_pass_impact_limit",
+    description: "Stop the set if the athlete must catch a fast, unpredictable rebound without preparation.",
+    sourceRuleIds: [SOURCE_MED_BALL_CHEST_PASS],
+  }),
+  balanceLossCondition({
+    conditionId: "med_ball_chest_pass_balance_loss",
+    description: "Stop the set if the throw turns into a jump or uncontrolled lunge and balance is lost.",
+    sourceRuleIds: [SOURCE_MED_BALL_CHEST_PASS],
+  }),
+  painCondition({
+    conditionId: "med_ball_chest_pass_pain",
+    description: "Terminate immediately if sharp pain, numbness or sudden weakness occurs.",
+    sourceRuleIds: [SOURCE_MED_BALL_CHEST_PASS],
+  }),
+  completionCondition({
+    conditionId: "med_ball_chest_pass_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const medBallChestPassInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "med_ball_chest_pass_setup",
+    "setup",
+    "Set up at a wall, at a distance that allows safe release and reception, with the medicine ball held close to the chest, both hands placed symmetrically and a stable stance established. This entry covers the wall variant only, not the partner variant.",
+    "high",
+    true,
+    SOURCE_MED_BALL_CHEST_PASS,
+  ),
+  makeInstruction(
+    "med_ball_chest_pass_execution",
+    "execution",
+    "Throw through the target, accelerate through release, keep the ribs stacked, do not guide the ball, keep the release straight and finish in balance.",
+    "high",
+    true,
+    SOURCE_MED_BALL_CHEST_PASS,
+  ),
+];
+
+const medBallChestPassEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "med_ball_chest_pass",
+  moduleId: "power",
+  role: "primary",
+  explicitMethodId: "power_repetition_sets",
+  capabilities: {
+    exerciseId: "med_ball_chest_pass",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["power_repetition_sets"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["movement_intent"],
+    preferredIntensityTypes: ["movement_intent"],
+    supportedLoadingModes: ["medicine_ball"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "global_movement_intent", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["medicine_ball", "wall"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["med_ball_chest_pass_setup", "med_ball_chest_pass_execution"],
+    requiredStopConditionIds: [
+      "med_ball_chest_pass_technical_failure",
+      "med_ball_chest_pass_velocity_loss",
+      "med_ball_chest_pass_fatigue_limit",
+      "med_ball_chest_pass_impact_limit",
+      "med_ball_chest_pass_balance_loss",
+      "med_ball_chest_pass_pain",
+      "med_ball_chest_pass_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_med_ball_chest_pass",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_MED_BALL_CHEST_PASS, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["movement_intent"],
+  preferredIntensityType: "movement_intent",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: medBallChestPassInstructions,
+  stopConditionDefinitions: medBallChestPassStopConditions,
+  sourceRuleIds: [
+    SOURCE_MED_BALL_CHEST_PASS,
+    SOURCE_METHOD_CATALOGUE,
+    SOURCE_MODULE_PROFILES,
+    SOURCE_NUMERICAL_TABLES,
+  ],
+};
+
+// -----------------------------------------------------------------------------
+// Medicine-Ball Overhead Throw — OPEN SPACE VARIANT
+// (This chapter documents "Equipment: Medicine Ball, Open Space or Wall".
+// "open_space" was already canonical before this extension and fully,
+// independently satisfies the documented alternative — no OR primitive is
+// needed. "wall" is not required by this entry because the instructions
+// below describe an open-space throw, not a wall-directed one.)
+// Source: 50-exercises/67_BALLISTICS/11_MED_BALL_OVERHEAD_THROW.md
+//   - Primary Classification: "Overhead Ballistic Power"; Exercise
+//     Identity: "Complexity: Low to Moderate"; "Unilateral or Bilateral:
+//     Bilateral"
+//   - Starting Position: "...feet in a stable stance, knees and hips
+//     slightly flexed... eyes directed toward the intended target area.
+//     The throwing lane must be clear."
+//   - Key Technical Cues: "Drive through the floor.", "Extend from the
+//     hips.", "Throw through the fingertips.", "Accelerate through
+//     release.", "Keep the ribs controlled.", "Do not arch excessively.",
+//     "Finish tall and balanced.", "Reset before repeating."
+//   - Common Errors (verbatim, abridged): "Excessive Lumbar Extension...
+//     Arm-Dominant Throw... Inconsistent Release Angle: The ball travels
+//     unpredictably. Risk: unsafe projection... Loss of Balance: The
+//     athlete steps uncontrollably or falls backward after release."
+//   - Coaching Priorities: "...Finish in balance. Stop before velocity
+//     declines."
+//   - Regression Criteria: "...or fatigue reduces output."
+//   - Safety Rules: "...Terminate immediately if sharp pain, dizziness,
+//     numbness or sudden weakness occurs."
+// Method: power_repetition_sets / power / primary
+// -----------------------------------------------------------------------------
+
+const SOURCE_MED_BALL_OVERHEAD_THROW = "50-exercises/67_BALLISTICS/11_MED_BALL_OVERHEAD_THROW.md";
+
+const medBallOverheadThrowStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "med_ball_overhead_throw_technical_failure",
+    description:
+      "Stop the set if the athlete arches the lower back instead of transferring force through the whole body, relies mainly on the shoulders and elbows, or begins the arm action before the hips and knees extend.",
+    sourceRuleIds: [SOURCE_MED_BALL_OVERHEAD_THROW],
+  }),
+  velocityLossCondition({
+    conditionId: "med_ball_overhead_throw_velocity_loss",
+    description: "Stop before velocity declines.",
+    sourceRuleIds: [SOURCE_MED_BALL_OVERHEAD_THROW],
+  }),
+  fatigueLimitCondition({
+    conditionId: "med_ball_overhead_throw_fatigue_limit",
+    description: "Regress or stop the set when fatigue reduces output.",
+    sourceRuleIds: [SOURCE_MED_BALL_OVERHEAD_THROW],
+  }),
+  impactLimitCondition({
+    conditionId: "med_ball_overhead_throw_impact_limit",
+    description: "Stop the set if the ball travels unpredictably, creating an unsafe projection.",
+    sourceRuleIds: [SOURCE_MED_BALL_OVERHEAD_THROW],
+  }),
+  balanceLossCondition({
+    conditionId: "med_ball_overhead_throw_balance_loss",
+    description: "Stop the set if the athlete steps uncontrollably or falls backward after release.",
+    sourceRuleIds: [SOURCE_MED_BALL_OVERHEAD_THROW],
+  }),
+  painCondition({
+    conditionId: "med_ball_overhead_throw_pain",
+    description: "Terminate immediately if sharp pain, dizziness, numbness or sudden weakness occurs.",
+    sourceRuleIds: [SOURCE_MED_BALL_OVERHEAD_THROW],
+  }),
+  completionCondition({
+    conditionId: "med_ball_overhead_throw_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const medBallOverheadThrowInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "med_ball_overhead_throw_setup",
+    "setup",
+    "Set up in a clear open space with the medicine ball held securely, feet in a stable stance, knees and hips slightly flexed, and eyes directed toward the intended target area. This entry covers the open-space variant, not a wall-directed throw.",
+    "high",
+    true,
+    SOURCE_MED_BALL_OVERHEAD_THROW,
+  ),
+  makeInstruction(
+    "med_ball_overhead_throw_execution",
+    "execution",
+    "Drive through the floor, extend from the hips, throw through the fingertips, accelerate through release, keep the ribs controlled, avoid arching excessively and finish tall and balanced.",
+    "high",
+    true,
+    SOURCE_MED_BALL_OVERHEAD_THROW,
+  ),
+];
+
+const medBallOverheadThrowEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "med_ball_overhead_throw",
+  moduleId: "power",
+  role: "primary",
+  explicitMethodId: "power_repetition_sets",
+  capabilities: {
+    exerciseId: "med_ball_overhead_throw",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["power_repetition_sets"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["movement_intent"],
+    preferredIntensityTypes: ["movement_intent"],
+    supportedLoadingModes: ["medicine_ball"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "global_movement_intent", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["medicine_ball", "open_space"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["med_ball_overhead_throw_setup", "med_ball_overhead_throw_execution"],
+    requiredStopConditionIds: [
+      "med_ball_overhead_throw_technical_failure",
+      "med_ball_overhead_throw_velocity_loss",
+      "med_ball_overhead_throw_fatigue_limit",
+      "med_ball_overhead_throw_impact_limit",
+      "med_ball_overhead_throw_balance_loss",
+      "med_ball_overhead_throw_pain",
+      "med_ball_overhead_throw_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_med_ball_overhead_throw",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_MED_BALL_OVERHEAD_THROW, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["movement_intent"],
+  preferredIntensityType: "movement_intent",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: medBallOverheadThrowInstructions,
+  stopConditionDefinitions: medBallOverheadThrowStopConditions,
+  sourceRuleIds: [
+    SOURCE_MED_BALL_OVERHEAD_THROW,
+    SOURCE_METHOD_CATALOGUE,
+    SOURCE_MODULE_PROFILES,
+    SOURCE_NUMERICAL_TABLES,
+  ],
+};
+
+// -----------------------------------------------------------------------------
+// Medicine-Ball Shot-Put Throw — OPEN SPACE VARIANT
+// (This chapter documents "Equipment: Medicine Ball, Wall or Open Space".
+// "open_space" was already canonical before this extension and fully,
+// independently satisfies the documented alternative.)
+// Source: 50-exercises/67_BALLISTICS/15_MED_BALL_SHOT_PUT_THROW.md
+//   - Primary Classification: "Unilateral Horizontal Ballistic Power";
+//     Exercise Identity: "Complexity: Moderate"; "Unilateral or
+//     Bilateral: Unilateral"
+//   - Starting Position: "...feet in a staggered stance, knees and hips
+//     slightly flexed... eyes focused on the target."
+//   - Key Technical Cues: "Drive from the rear leg.", "Throw through the
+//     target.", "Sequence hip, trunk and arm.", "Keep the ball close
+//     before release.", "Do not push slowly.", "Keep the vector
+//     forward.", "Finish balanced.", "Reset before repeating."
+//   - Common Errors (verbatim, abridged): "Arm-Dominant Throw...
+//     Excessive Lumbar Rotation... Inconsistent Release Direction: The
+//     ball travels upward, sideways or across the body. Risk: poor
+//     standardization, unsafe rebound... Losing Balance After Release:
+//     The athlete falls forward or rotates excessively."
+//   - Coaching Priorities: "...Reset fully. Stop before velocity
+//     declines."
+//   - Regression Criteria: "...or fatigue reduces output."
+//   - Safety Rules: "...Terminate immediately if sharp pain, dizziness,
+//     numbness or sudden weakness occurs."
+//   - Prescription Variables: repetitions documented "per side".
+// Method: power_repetition_sets / power / primary
+//   Laterality kept as documented: "unilateral" (repetitions per side) —
+//   an unambiguous value, unlike Rotational Throw/Scoop Toss's hybrid
+//   "Unilateral Emphasis with Bilateral Support", which remains excluded.
+// -----------------------------------------------------------------------------
+
+const SOURCE_MED_BALL_SHOT_PUT_THROW = "50-exercises/67_BALLISTICS/15_MED_BALL_SHOT_PUT_THROW.md";
+
+const medBallShotPutThrowStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "med_ball_shot_put_throw_technical_failure",
+    description:
+      "Stop the set if the athlete pushes the ball using mainly the arm, rotates mainly through the lower back, or the front knee moves inward and front-side support is lost.",
+    sourceRuleIds: [SOURCE_MED_BALL_SHOT_PUT_THROW],
+  }),
+  velocityLossCondition({
+    conditionId: "med_ball_shot_put_throw_velocity_loss",
+    description: "Stop before velocity declines.",
+    sourceRuleIds: [SOURCE_MED_BALL_SHOT_PUT_THROW],
+  }),
+  fatigueLimitCondition({
+    conditionId: "med_ball_shot_put_throw_fatigue_limit",
+    description: "Regress or stop the set when fatigue reduces output.",
+    sourceRuleIds: [SOURCE_MED_BALL_SHOT_PUT_THROW],
+  }),
+  impactLimitCondition({
+    conditionId: "med_ball_shot_put_throw_impact_limit",
+    description: "Stop the set if the ball travels upward, sideways or across the body, creating an unsafe rebound.",
+    sourceRuleIds: [SOURCE_MED_BALL_SHOT_PUT_THROW],
+  }),
+  balanceLossCondition({
+    conditionId: "med_ball_shot_put_throw_balance_loss",
+    description: "Stop the set if the athlete falls forward or rotates excessively after release.",
+    sourceRuleIds: [SOURCE_MED_BALL_SHOT_PUT_THROW],
+  }),
+  painCondition({
+    conditionId: "med_ball_shot_put_throw_pain",
+    description: "Terminate immediately if sharp pain, dizziness, numbness or sudden weakness occurs.",
+    sourceRuleIds: [SOURCE_MED_BALL_SHOT_PUT_THROW],
+  }),
+  completionCondition({
+    conditionId: "med_ball_shot_put_throw_completion",
+    description: "Stop once the prescribed sets and repetitions per side are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const medBallShotPutThrowInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "med_ball_shot_put_throw_setup",
+    "setup",
+    "Set up in a clear open space with the medicine ball held near the rear shoulder or chest, feet in a staggered stance, knees and hips slightly flexed, and eyes focused on the target. This entry covers the open-space variant, not a wall-directed throw.",
+    "high",
+    true,
+    SOURCE_MED_BALL_SHOT_PUT_THROW,
+  ),
+  makeInstruction(
+    "med_ball_shot_put_throw_execution",
+    "execution",
+    "Drive from the rear leg, throw through the target, sequence hip, trunk and arm, keep the ball close before release, do not push slowly, keep the vector forward and finish balanced.",
+    "high",
+    true,
+    SOURCE_MED_BALL_SHOT_PUT_THROW,
+  ),
+];
+
+const medBallShotPutThrowEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "med_ball_shot_put_throw",
+  moduleId: "power",
+  role: "primary",
+  explicitMethodId: "power_repetition_sets",
+  capabilities: {
+    exerciseId: "med_ball_shot_put_throw",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["power_repetition_sets"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["movement_intent"],
+    preferredIntensityTypes: ["movement_intent"],
+    supportedLoadingModes: ["medicine_ball"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "unilateral",
+    volumeInterpretations: ["repetitions_per_side"],
+    capabilityTags: ["countable_repetitions", "global_movement_intent", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["medicine_ball", "open_space"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["med_ball_shot_put_throw_setup", "med_ball_shot_put_throw_execution"],
+    requiredStopConditionIds: [
+      "med_ball_shot_put_throw_technical_failure",
+      "med_ball_shot_put_throw_velocity_loss",
+      "med_ball_shot_put_throw_fatigue_limit",
+      "med_ball_shot_put_throw_impact_limit",
+      "med_ball_shot_put_throw_balance_loss",
+      "med_ball_shot_put_throw_pain",
+      "med_ball_shot_put_throw_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_med_ball_shot_put_throw",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_MED_BALL_SHOT_PUT_THROW, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["movement_intent"],
+  preferredIntensityType: "movement_intent",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: medBallShotPutThrowInstructions,
+  stopConditionDefinitions: medBallShotPutThrowStopConditions,
+  sourceRuleIds: [
+    SOURCE_MED_BALL_SHOT_PUT_THROW,
+    SOURCE_METHOD_CATALOGUE,
+    SOURCE_MODULE_PROFILES,
+    SOURCE_NUMERICAL_TABLES,
+  ],
+};
+
+// -----------------------------------------------------------------------------
+// Medicine-Ball Reverse Throw — OPEN SPACE (the only documented option; no
+// wall alternative exists in this chapter, so there is no variant ambiguity
+// to resolve).
+// Source: 50-exercises/67_BALLISTICS/16_MED_BALL_REVERSE_THROW.md
+//   - Primary Classification: "Posterior-Chain Ballistic Power"; Exercise
+//     Identity: "Equipment: Medicine Ball, Open Space"; "Complexity:
+//     Moderate"; "Unilateral or Bilateral: Bilateral"
+//   - Starting Position: "...the back facing the throwing area... the
+//     landing area checked before every set."
+//   - Key Technical Cues: "Check behind you.", "Load briefly.", "Drive
+//     through the floor.", "Extend hips first.", "Throw up and back.",
+//     "Accelerate through release.", "Finish tall.", "Stay balanced."
+//   - Common Errors (verbatim, abridged): "Arm-Dominant Throw... Excessive
+//     Lumbar Hyperextension... Inconsistent Release Angle: The ball
+//     travels too vertically, too low or sideways. Risk: poor
+//     standardization, unsafe landing... Falling Backward: The athlete
+//     loses control after release. Risk: fall..."
+//   - Coaching Priorities: "Clear the throwing area. ... Stop before
+//     velocity declines."
+//   - Regression Criteria: "...or fatigue reduces output."
+//   - Safety Rules: "Fully clear the area behind the athlete. Recheck the
+//     area before every set. ... Terminate immediately if sharp pain,
+//     dizziness, numbness or sudden weakness occurs."
+// Method: power_repetition_sets / power / primary
+// -----------------------------------------------------------------------------
+
+const SOURCE_MED_BALL_REVERSE_THROW = "50-exercises/67_BALLISTICS/16_MED_BALL_REVERSE_THROW.md";
+
+const medBallReverseThrowStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "med_ball_reverse_throw_technical_failure",
+    description:
+      "Stop the set if the athlete lifts the ball mainly with the shoulders and arms, arches the lower back aggressively at release, or begins lifting the ball before lower-body extension.",
+    sourceRuleIds: [SOURCE_MED_BALL_REVERSE_THROW],
+  }),
+  velocityLossCondition({
+    conditionId: "med_ball_reverse_throw_velocity_loss",
+    description: "Stop before velocity declines.",
+    sourceRuleIds: [SOURCE_MED_BALL_REVERSE_THROW],
+  }),
+  fatigueLimitCondition({
+    conditionId: "med_ball_reverse_throw_fatigue_limit",
+    description: "Regress or stop the set when fatigue reduces output.",
+    sourceRuleIds: [SOURCE_MED_BALL_REVERSE_THROW],
+  }),
+  impactLimitCondition({
+    conditionId: "med_ball_reverse_throw_impact_limit",
+    description: "Stop the set if the ball travels too vertically, too low or sideways, creating an unsafe landing.",
+    sourceRuleIds: [SOURCE_MED_BALL_REVERSE_THROW],
+  }),
+  balanceLossCondition({
+    conditionId: "med_ball_reverse_throw_balance_loss",
+    description: "Stop the set if the athlete loses control and falls backward after release.",
+    sourceRuleIds: [SOURCE_MED_BALL_REVERSE_THROW],
+  }),
+  painCondition({
+    conditionId: "med_ball_reverse_throw_pain",
+    description: "Terminate immediately if sharp pain, dizziness, numbness or sudden weakness occurs.",
+    sourceRuleIds: [SOURCE_MED_BALL_REVERSE_THROW],
+  }),
+  completionCondition({
+    conditionId: "med_ball_reverse_throw_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const medBallReverseThrowInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "med_ball_reverse_throw_setup",
+    "setup",
+    "Fully clear and check the open area behind the athlete before every set, with the medicine ball held securely with both hands and a stable stance established, back facing the throwing area.",
+    "high",
+    true,
+    SOURCE_MED_BALL_REVERSE_THROW,
+  ),
+  makeInstruction(
+    "med_ball_reverse_throw_execution",
+    "execution",
+    "Check behind you, load briefly, drive through the floor, extend hips first, throw up and back, accelerate through release, finish tall and stay balanced.",
+    "high",
+    true,
+    SOURCE_MED_BALL_REVERSE_THROW,
+  ),
+];
+
+const medBallReverseThrowEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "med_ball_reverse_throw",
+  moduleId: "power",
+  role: "primary",
+  explicitMethodId: "power_repetition_sets",
+  capabilities: {
+    exerciseId: "med_ball_reverse_throw",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["power_repetition_sets"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["movement_intent"],
+    preferredIntensityTypes: ["movement_intent"],
+    supportedLoadingModes: ["medicine_ball"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "global_movement_intent", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["medicine_ball", "open_space"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["med_ball_reverse_throw_setup", "med_ball_reverse_throw_execution"],
+    requiredStopConditionIds: [
+      "med_ball_reverse_throw_technical_failure",
+      "med_ball_reverse_throw_velocity_loss",
+      "med_ball_reverse_throw_fatigue_limit",
+      "med_ball_reverse_throw_impact_limit",
+      "med_ball_reverse_throw_balance_loss",
+      "med_ball_reverse_throw_pain",
+      "med_ball_reverse_throw_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_med_ball_reverse_throw",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_MED_BALL_REVERSE_THROW, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["movement_intent"],
+  preferredIntensityType: "movement_intent",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: medBallReverseThrowInstructions,
+  stopConditionDefinitions: medBallReverseThrowStopConditions,
+  sourceRuleIds: [
+    SOURCE_MED_BALL_REVERSE_THROW,
+    SOURCE_METHOD_CATALOGUE,
+    SOURCE_MODULE_PROFILES,
+    SOURCE_NUMERICAL_TABLES,
+  ],
+};
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -3443,6 +4007,10 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   split_squat_jump: splitSquatJumpEntry,
 
   med_ball_slam: medBallSlamEntry,
+  med_ball_chest_pass: medBallChestPassEntry,
+  med_ball_overhead_throw: medBallOverheadThrowEntry,
+  med_ball_shot_put_throw: medBallShotPutThrowEntry,
+  med_ball_reverse_throw: medBallReverseThrowEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>
