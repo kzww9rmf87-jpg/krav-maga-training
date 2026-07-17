@@ -21,7 +21,7 @@ describe("pilot exercise prescription — prescribeExercise", () => {
   test("15. Bench Press (strength) prescribes completely end to end via prescribeExercise", () => {
     const sourceResult = getExercisePrescriptionSource(
       "bench_press",
-      ONE_REP_MAX_CONTEXT(["barbell", "bench", "rack", "weight_plates"]),
+      ONE_REP_MAX_CONTEXT(["barbell", "bench", "rack", "plates"]),
     );
     if (!sourceResult.ok) {
       throw new Error(`Fixture setup failed: ${sourceResult.message}`);
@@ -44,7 +44,7 @@ describe("pilot exercise prescription — prescribeExercise", () => {
   });
 
   test("Box Jump (power) prescribes completely end to end via movement_intent, no fabricated load", () => {
-    const sourceResult = getExercisePrescriptionSource("box_jump", NO_REFERENCE_CONTEXT(["plyometric_box"]));
+    const sourceResult = getExercisePrescriptionSource("box_jump", NO_REFERENCE_CONTEXT(["plyometric_box", "safe_landing_surface"]));
     if (!sourceResult.ok) {
       throw new Error(`Fixture setup failed: ${sourceResult.message}`);
     }
@@ -65,7 +65,7 @@ describe("pilot exercise prescription — prescribeExercise", () => {
   });
 
   test("Farmer Carry (grip/carry) prescribes completely end to end", () => {
-    const sourceResult = getExercisePrescriptionSource("farmer_carry", NO_REFERENCE_CONTEXT(["farmer_carry_implements"]));
+    const sourceResult = getExercisePrescriptionSource("farmer_carry", NO_REFERENCE_CONTEXT(["loaded_carry_implement"]));
     if (!sourceResult.ok) {
       throw new Error(`Fixture setup failed: ${sourceResult.message}`);
     }
@@ -84,7 +84,7 @@ describe("pilot exercise prescription — prescribeExercise", () => {
   test("Pallof Press (core) prescribes completely end to end", () => {
     const sourceResult = getExercisePrescriptionSource(
       "pallof_press",
-      NO_REFERENCE_CONTEXT(["cable_machine_or_resistance_band"]),
+      NO_REFERENCE_CONTEXT(["cable_or_band_resistance"]),
     );
     if (!sourceResult.ok) {
       throw new Error(`Fixture setup failed: ${sourceResult.message}`);
@@ -103,7 +103,7 @@ describe("pilot exercise prescription — prescribeExercise", () => {
   test("19. determinism: identical pilot exercise input produces identical prescriptions", () => {
     const sourceResult = getExercisePrescriptionSource(
       "bench_press",
-      ONE_REP_MAX_CONTEXT(["barbell", "bench", "rack", "weight_plates"]),
+      ONE_REP_MAX_CONTEXT(["barbell", "bench", "rack", "plates"]),
     );
     if (!sourceResult.ok) {
       throw new Error(`Fixture setup failed: ${sourceResult.message}`);
@@ -116,7 +116,7 @@ describe("pilot exercise prescription — prescribeExercise", () => {
   test("20. prescribeExercise does not mutate the source built from the registry", () => {
     const sourceResult = getExercisePrescriptionSource(
       "bench_press",
-      ONE_REP_MAX_CONTEXT(["barbell", "bench", "rack", "weight_plates"]),
+      ONE_REP_MAX_CONTEXT(["barbell", "bench", "rack", "plates"]),
     );
     if (!sourceResult.ok) {
       throw new Error(`Fixture setup failed: ${sourceResult.message}`);
@@ -134,12 +134,12 @@ describe("pilot exercise prescription — prescribeSession", () => {
   test("16. a session combining Bench Press, Farmer Carry and Pallof Press prescribes completely", () => {
     const benchSource = getExercisePrescriptionSource(
       "bench_press",
-      ONE_REP_MAX_CONTEXT(["barbell", "bench", "rack", "weight_plates"]),
+      ONE_REP_MAX_CONTEXT(["barbell", "bench", "rack", "plates"]),
     );
-    const carrySource = getExercisePrescriptionSource("farmer_carry", NO_REFERENCE_CONTEXT(["farmer_carry_implements"]));
+    const carrySource = getExercisePrescriptionSource("farmer_carry", NO_REFERENCE_CONTEXT(["loaded_carry_implement"]));
     const pallofSource = getExercisePrescriptionSource(
       "pallof_press",
-      NO_REFERENCE_CONTEXT(["cable_machine_or_resistance_band"]),
+      NO_REFERENCE_CONTEXT(["cable_or_band_resistance"]),
     );
 
     if (!benchSource.ok || !carrySource.ok || !pallofSource.ok) {

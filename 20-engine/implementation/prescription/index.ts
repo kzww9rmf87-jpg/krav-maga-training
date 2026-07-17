@@ -32,8 +32,16 @@ export * from "./prescriptionDecisionTrace";
 export * from "./buildPrescriptionInput";
 export * from "./prescribeEngineSession";
 
+// Canonical registry vocabularies (equipment, athlete references, duration
+// profiles, source-rule identifier convention) and cross-entry validators
+export * from "./equipmentCapabilities";
+export * from "./athleteReferenceCatalog";
+export * from "./durationEstimationProfiles";
+export * from "./sourceRuleIdentifiers";
+
 // Pilot exercise prescription registry (vertical slice)
 export * from "./instructionRegistry";
 export * from "./stopConditionRegistry";
 export * from "./exercisePrescriptionRegistry";
 export * from "./buildEngineSessionPrescriptionSources";
+export * from "./registryValidators";

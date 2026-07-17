@@ -306,7 +306,7 @@ describe("runEngine prescription integration", () => {
     const sourceResult = getExercisePrescriptionSource("bench_press", {
       rangeContext: "normal",
       athleteReferences: [makeOneRepMaxReference({ value: 100 })],
-      availableEquipmentCapabilities: ["barbell", "bench", "rack", "weight_plates"],
+      availableEquipmentCapabilities: ["barbell", "bench", "rack", "plates"],
     });
     if (!sourceResult.ok) {
       throw new Error(`Fixture setup failed: ${sourceResult.message}`);

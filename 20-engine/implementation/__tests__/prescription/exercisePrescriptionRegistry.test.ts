@@ -29,7 +29,7 @@ const ONE_REP_MAX_CONTEXT = (equipment: readonly string[]): PrescriptionExecutio
 
 describe("exercisePrescriptionRegistry — registry integrity", () => {
   test("1. deterministic: identical calls produce identical results", () => {
-    const context = ONE_REP_MAX_CONTEXT(["barbell", "bench", "rack", "weight_plates"]);
+    const context = ONE_REP_MAX_CONTEXT(["barbell", "bench", "rack", "plates"]);
 
     const resultA = getExercisePrescriptionSource("bench_press", context);
     const resultB = getExercisePrescriptionSource("bench_press", context);
@@ -113,7 +113,7 @@ describe("exercisePrescriptionRegistry — registry integrity", () => {
 
 describe("exercisePrescriptionRegistry — getExercisePrescriptionSource", () => {
   test("4. returns a complete source for a strength exercise given a valid one-rep-max reference", () => {
-    const context = ONE_REP_MAX_CONTEXT(["barbell", "bench", "rack", "weight_plates"]);
+    const context = ONE_REP_MAX_CONTEXT(["barbell", "bench", "rack", "plates"]);
     const result = getExercisePrescriptionSource("bench_press", context);
 
     if (!result.ok) {
@@ -127,7 +127,7 @@ describe("exercisePrescriptionRegistry — getExercisePrescriptionSource", () =>
   });
 
   test("5. returns a complete source for the power exercise (Box Jump) with no athlete reference required", () => {
-    const context = NO_ATHLETE_REFERENCE_CONTEXT(["plyometric_box"]);
+    const context = NO_ATHLETE_REFERENCE_CONTEXT(["plyometric_box", "safe_landing_surface"]);
     const result = getExercisePrescriptionSource("box_jump", context);
 
     if (!result.ok) {
@@ -140,7 +140,7 @@ describe("exercisePrescriptionRegistry — getExercisePrescriptionSource", () =>
   });
 
   test("6. returns a complete source for Farmer Carry", () => {
-    const context = NO_ATHLETE_REFERENCE_CONTEXT(["farmer_carry_implements"]);
+    const context = NO_ATHLETE_REFERENCE_CONTEXT(["loaded_carry_implement"]);
     const result = getExercisePrescriptionSource("farmer_carry", context);
 
     if (!result.ok) {
@@ -152,7 +152,7 @@ describe("exercisePrescriptionRegistry — getExercisePrescriptionSource", () =>
   });
 
   test("7. returns a complete source for Pallof Press", () => {
-    const context = NO_ATHLETE_REFERENCE_CONTEXT(["cable_machine_or_resistance_band"]);
+    const context = NO_ATHLETE_REFERENCE_CONTEXT(["cable_or_band_resistance"]);
     const result = getExercisePrescriptionSource("pallof_press", context);
 
     if (!result.ok) {
@@ -176,7 +176,7 @@ describe("exercisePrescriptionRegistry — getExercisePrescriptionSource", () =>
   });
 
   test("9. a missing required athlete reference produces a structured failure, never a fabricated load", () => {
-    const context = NO_ATHLETE_REFERENCE_CONTEXT(["barbell", "bench", "rack", "weight_plates"]);
+    const context = NO_ATHLETE_REFERENCE_CONTEXT(["barbell", "bench", "rack", "plates"]);
     const result = getExercisePrescriptionSource("bench_press", context);
 
     if (result.ok) {
@@ -188,7 +188,7 @@ describe("exercisePrescriptionRegistry — getExercisePrescriptionSource", () =>
   });
 
   test("10. missing required equipment produces a structured failure", () => {
-    const context = ONE_REP_MAX_CONTEXT(["barbell"]); // missing bench, rack, weight_plates
+    const context = ONE_REP_MAX_CONTEXT(["barbell"]); // missing bench, rack, plates
     const result = getExercisePrescriptionSource("bench_press", context);
 
     if (result.ok) {
@@ -199,7 +199,7 @@ describe("exercisePrescriptionRegistry — getExercisePrescriptionSource", () =>
   });
 
   test("20. does not mutate the supplied context", () => {
-    const context = ONE_REP_MAX_CONTEXT(["barbell", "bench", "rack", "weight_plates"]);
+    const context = ONE_REP_MAX_CONTEXT(["barbell", "bench", "rack", "plates"]);
     const snapshot = JSON.parse(JSON.stringify(context));
 
     getExercisePrescriptionSource("bench_press", context);
