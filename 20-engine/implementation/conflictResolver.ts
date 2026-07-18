@@ -13,13 +13,18 @@
  * candidate, never substitutes an exercise, and never removes an exercise
  * or a module. `resolveSessionConflicts` does not exist yet.
  *
- * `17_CONFLICT_RULES.md` — the document meant to define severity,
- * probability and resolution rules — is unfinished (it stops mid-sentence
- * under "Microcycle Level" and never reaches those definitions). The
- * severity/probability values used below are therefore V0.1 POLICY
- * CONVENTIONS, fixed per conflict category, not a value derived from that
- * document. They are expected to be revisited once the document is
- * completed.
+ * `17_CONFLICT_RULES.md` is the complete specification for conflict
+ * detection, classification and resolution, including the full severity
+ * scale, probability model, Conflict Score formula, Interaction Cost and
+ * resolution methods (Rules 67-80). This file implements only a
+ * deterministic V0.1 subset of that specification — the four categories
+ * below. The severity/probability values used here are V0.1
+ * IMPLEMENTATION CONVENTIONS: consistent with the general spirit of the
+ * document's severity tiers (Rule 67) and probability model (Rule 68), but
+ * not yet an exhaustive implementation of Rules 67-80 — no numeric
+ * Conflict Score, Interaction Cost or resolution logic is computed here.
+ * They are expected to be revisited as more of the specification is
+ * implemented.
  *
  * Operational protection hierarchy retained for V0.1 (documentation only —
  * no automatic logic is derived from it in this file; it exists to guide
