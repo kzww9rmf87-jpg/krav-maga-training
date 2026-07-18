@@ -16,6 +16,7 @@ import { isValidSourceRuleId } from "../../prescription/sourceRuleIdentifiers";
 import {
   EXERCISE_PRESCRIPTION_REGISTRY,
   getExercisePrescriptionSource,
+  PILOT_EXERCISE_IDS,
   type PrescriptionExecutionContext,
 } from "../../prescription/exercisePrescriptionRegistry";
 import { validatePilotRegistry, validateRegistryEntry } from "../../prescription/registryValidators";
@@ -302,5 +303,174 @@ describe("registryVocabulary — full registry validation", () => {
     validatePilotRegistry();
 
     expect(EXERCISE_PRESCRIPTION_REGISTRY).toEqual(snapshot);
+  });
+});
+
+// -----------------------------------------------------------------------------
+// Carry loading modes corrected to match documented equipment.
+//
+// pinch_carry, sandbag_carry and zercher_carry previously all declared
+// supportedLoadingModes: ["dumbbell", "kettlebell"] — a value that matched
+// none of their own source documentation ("Weight Plates or Pinch Blocks",
+// "Sandbag", and "Barbell, Sandbag, Axle or Similar Implement" respectively).
+// requiredEquipmentCapabilities, laterality and every other field are
+// untouched by this correction.
+// -----------------------------------------------------------------------------
+
+describe("registryVocabulary — carry loading modes corrected to match documentation", () => {
+  // Mirrors the `LoadingMode` union in validateCompatibility.ts. Kept as an
+  // explicit local list (rather than importing the type) so this test fails
+  // loudly if a corrected value ever stops being a real, documented mode —
+  // "axle" is deliberately absent from CAS's LoadingMode vocabulary.
+  const KNOWN_LOADING_MODES = [
+    "bodyweight",
+    "added_external_load",
+    "assisted_bodyweight",
+    "barbell",
+    "dumbbell",
+    "kettlebell",
+    "cable",
+    "machine",
+    "resistance_band",
+    "medicine_ball",
+    "sandbag",
+    "sled",
+    "plate",
+    "rope",
+    "partner_resistance",
+    "impact_equipment",
+    "ergometer",
+    "locomotion_only",
+  ] as const;
+
+  test("1. pinch_carry.supportedLoadingModes is exactly [\"plate\"]", () => {
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.pinch_carry.capabilities.supportedLoadingModes).toEqual(["plate"]);
+  });
+
+  test("2. sandbag_carry.supportedLoadingModes is exactly [\"sandbag\"]", () => {
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.sandbag_carry.capabilities.supportedLoadingModes).toEqual(["sandbag"]);
+  });
+
+  test("3. zercher_carry.supportedLoadingModes is exactly [\"barbell\", \"sandbag\"]", () => {
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.zercher_carry.capabilities.supportedLoadingModes).toEqual([
+      "barbell",
+      "sandbag",
+    ]);
+  });
+
+  test("4. none of the three corrected entries reference dumbbell or kettlebell anymore", () => {
+    for (const id of ["pinch_carry", "sandbag_carry", "zercher_carry"] as const) {
+      const modes = EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities.supportedLoadingModes;
+      expect(modes.includes("dumbbell")).toBe(false);
+      expect(modes.includes("kettlebell")).toBe(false);
+    }
+  });
+
+  test("5. requiredEquipmentCapabilities is unchanged for the three corrected entries", () => {
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.pinch_carry.capabilities.requiredEquipmentCapabilities).toEqual([
+      "pinch_grip_implement",
+    ]);
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.sandbag_carry.capabilities.requiredEquipmentCapabilities).toEqual([
+      "loaded_carry_implement",
+    ]);
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.zercher_carry.capabilities.requiredEquipmentCapabilities).toEqual([
+      "loaded_carry_implement",
+    ]);
+  });
+
+  test("6. no other pilot registry entry's supportedLoadingModes changed", () => {
+    const EXPECTED_LOADING_MODES: Record<string, readonly string[]> = {
+      bench_press: ["barbell", "added_external_load"],
+      back_squat: ["barbell", "added_external_load"],
+      trap_bar_deadlift: ["barbell", "added_external_load"],
+      pull_up: ["bodyweight"],
+      farmer_carry: ["dumbbell", "kettlebell"],
+      pallof_press: ["cable", "resistance_band"],
+      box_jump: ["bodyweight"],
+      front_squat: ["barbell", "added_external_load"],
+      romanian_deadlift: ["barbell", "added_external_load"],
+      overhead_press: ["barbell", "added_external_load"],
+      bulgarian_split_squat: ["bodyweight", "added_external_load"],
+      push_press: ["barbell", "added_external_load"],
+      hang_high_pull: ["barbell", "added_external_load"],
+      jump_shrug: ["barbell", "added_external_load"],
+      hollow_body_hold: ["bodyweight"],
+      dragon_flag: ["bodyweight"],
+      front_rack_carry: ["dumbbell", "kettlebell"],
+      suitcase_carry: ["dumbbell", "kettlebell"],
+      overhead_carry: ["dumbbell", "kettlebell"],
+      depth_jump: ["bodyweight"],
+      broad_jump: ["bodyweight"],
+      knee_jump: ["bodyweight"],
+      lateral_bound: ["bodyweight"],
+      single_leg_hop: ["bodyweight"],
+      split_squat_jump: ["bodyweight"],
+      med_ball_slam: ["medicine_ball"],
+      med_ball_chest_pass: ["medicine_ball"],
+      med_ball_overhead_throw: ["medicine_ball"],
+      med_ball_shot_put_throw: ["medicine_ball"],
+      med_ball_reverse_throw: ["medicine_ball"],
+      med_ball_rotational_throw: ["medicine_ball"],
+      med_ball_scoop_toss: ["medicine_ball"],
+    };
+    const CORRECTED_IDS = ["pinch_carry", "sandbag_carry", "zercher_carry"];
+
+    for (const id of PILOT_EXERCISE_IDS) {
+      if (CORRECTED_IDS.includes(id)) {
+        continue;
+      }
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities.supportedLoadingModes).toEqual(
+        EXPECTED_LOADING_MODES[id],
+      );
+    }
+    // Every pilot id was accounted for above, either corrected or checked unchanged.
+    expect(PILOT_EXERCISE_IDS.length).toBe(CORRECTED_IDS.length + Object.keys(EXPECTED_LOADING_MODES).length);
+  });
+
+  test("7. the registry still contains exactly 35 active exercises", () => {
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(35);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(35);
+  });
+
+  test("8. every retained value (plate, sandbag, barbell) is a known, documented LoadingMode", () => {
+    expect(KNOWN_LOADING_MODES).toContain("plate");
+    expect(KNOWN_LOADING_MODES).toContain("sandbag");
+    expect(KNOWN_LOADING_MODES).toContain("barbell");
+  });
+
+  test("9. axle is not a known LoadingMode and was not added anywhere", () => {
+    expect(KNOWN_LOADING_MODES.includes("axle" as (typeof KNOWN_LOADING_MODES)[number])).toBe(false);
+    for (const id of ["pinch_carry", "sandbag_carry", "zercher_carry"] as const) {
+      expect(
+        EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities.supportedLoadingModes.includes(
+          "axle" as unknown as (typeof KNOWN_LOADING_MODES)[number],
+        ),
+      ).toBe(false);
+    }
+  });
+
+  test("10. correction does not touch laterality, method, volume structure or duration profile of the three entries", () => {
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.pinch_carry.capabilities.laterality).toBe("bilateral");
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.sandbag_carry.capabilities.laterality).toBe("bilateral");
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.zercher_carry.capabilities.laterality).toBe("bilateral");
+
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.pinch_carry.explicitMethodId).toBe("distance_carry_sets");
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.sandbag_carry.explicitMethodId).toBe("distance_carry_sets");
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.zercher_carry.explicitMethodId).toBe("distance_carry_sets");
+
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.pinch_carry.capabilities.durationEstimationProfileId).toBe(
+      "duration_profile_pinch_carry",
+    );
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.sandbag_carry.capabilities.durationEstimationProfileId).toBe(
+      "duration_profile_sandbag_carry",
+    );
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.zercher_carry.capabilities.durationEstimationProfileId).toBe(
+      "duration_profile_zercher_carry",
+    );
+    // Selection, scoring and numeric prescription itself are proven unaffected
+    // by the existing, unmodified "Carries/Grip family prescribes completely"
+    // tests in newRegistryExercises.test.ts, which exercise pinch_carry,
+    // sandbag_carry and zercher_carry end-to-end and read supportedLoadingModes
+    // nowhere in that path.
   });
 });

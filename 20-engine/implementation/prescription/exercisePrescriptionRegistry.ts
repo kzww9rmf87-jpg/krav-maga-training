@@ -2050,7 +2050,7 @@ const sandbagCarryEntry: ExercisePrescriptionRegistryEntry = {
     supportedVolumeStructures: ["sets_distance"],
     supportedIntensityTypes: ["rpe"],
     preferredIntensityTypes: ["rpe"],
-    supportedLoadingModes: ["dumbbell", "kettlebell"],
+    supportedLoadingModes: ["sandbag"],
     supportedTempoTypes: [],
     laterality: "bilateral",
     volumeInterpretations: ["total_distance"],
@@ -2158,7 +2158,11 @@ const zercherCarryEntry: ExercisePrescriptionRegistryEntry = {
     supportedVolumeStructures: ["sets_distance"],
     supportedIntensityTypes: ["rpe"],
     preferredIntensityTypes: ["rpe"],
-    supportedLoadingModes: ["dumbbell", "kettlebell"],
+    // Equipment: "Barbell, Sandbag, Axle or Similar Implement" (source doc above).
+    // Only the barbell and sandbag variants are represented here — "axle" has
+    // no dedicated LoadingMode value and is intentionally left unrepresented
+    // rather than folded into "barbell".
+    supportedLoadingModes: ["barbell", "sandbag"],
     supportedTempoTypes: [],
     laterality: "bilateral",
     volumeInterpretations: ["total_distance"],
@@ -2502,7 +2506,7 @@ const pinchCarryEntry: ExercisePrescriptionRegistryEntry = {
     supportedVolumeStructures: ["sets_distance"],
     supportedIntensityTypes: ["rpe"],
     preferredIntensityTypes: ["rpe"],
-    supportedLoadingModes: ["dumbbell", "kettlebell"],
+    supportedLoadingModes: ["plate"],
     supportedTempoTypes: [],
     laterality: "bilateral",
     volumeInterpretations: ["total_distance"],
