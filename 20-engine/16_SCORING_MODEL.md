@@ -6,2043 +6,2316 @@ Version 0.1
 
 # Purpose
 
-The Scoring Model defines how the Combat Athlete System evaluates, compares and ranks training options.
+The Scoring Model defines how the Combat Athlete System evaluates, compares and ranks valid training options.
 
-It converts qualitative coaching rules into structured decision criteria.
+It converts qualitative coaching principles into structured, explainable and reproducible decision criteria.
 
-The model may be used to score:
+The model may be used to evaluate:
 
-* exercises,
-* exercise variations,
-* substitutions,
-* Capability Modules,
-* session structures,
-* conditioning modalities,
-* progression options,
-* and recovery adjustments.
+* Capability Modules;
+* exercises;
+* exercise variations;
+* substitutions;
+* progression options;
+* conditioning methods;
+* recovery adjustments;
+* session structures.
 
-The Scoring Model does not replace coaching logic.
+The Scoring Model does not replace the Module Engine doctrine.
 
-It supports coaching logic by making decisions:
+It operates within that doctrine.
 
-* consistent,
-* explainable,
-* reproducible,
-* athlete-specific,
-* and auditable.
+The Module Engine determines:
 
-The fundamental principle is:
+* which adaptation is required;
+* which Capability Module may serve that adaptation;
+* which constraints must be respected;
+* which decisions require explanation.
 
-> A high score does not make an option valid if it violates a mandatory rule.
+The Scoring Model then compares the valid options available within those boundaries.
 
-Scoring ranks valid options.
+Its fundamental principle is:
 
-It does not authorize unsafe or incoherent options.
+> Scoring ranks valid options. It never makes an invalid option valid.
+
+A high score cannot override:
+
+* a contraindication;
+* a safety rule;
+* a blocking conflict;
+* an unavailable resource;
+* an incompatible athlete state;
+* a failed validation rule.
 
 ---
 
-# Core Principle
+# Scope
 
-Every training option is evaluated through three layers:
+The Scoring Model supports four distinct decision levels:
+
+1. Module Priority Scoring
+2. Exercise Selection Scoring
+3. Substitution Scoring
+4. Session Quality Scoring
+
+These decision levels use the same general scoring architecture but do not use identical criteria or weights.
+
+A score calculated for one decision level must not be compared directly with a score calculated for another decision level.
+
+For example:
+
+* an Exercise Selection Score cannot be compared with a Module Priority Score;
+* a Session Quality Score cannot be used to rank individual exercises;
+* a Substitution Score cannot replace the normal Exercise Selection Score outside a substitution context.
+
+---
+
+# Core Decision Layers
+
+Every candidate passes through four layers:
 
 1. Eligibility
-2. Suitability
-3. Priority
-
-## Eligibility
-
-Eligibility determines whether the option may be used at all.
-
-It includes hard constraints such as:
-
-* safety,
-* contraindications,
-* equipment availability,
-* technical feasibility,
-* environmental feasibility,
-* and compatibility with the current session objective.
-
-An ineligible option is excluded before scoring.
-
-## Suitability
-
-Suitability determines how well the option fits:
-
-* the desired adaptation,
-* the athlete,
-* the session,
-* and the current context.
-
-Suitability is expressed through weighted criteria.
-
-## Priority
-
-Priority determines whether the option should be selected now rather than later.
-
-It considers:
-
-* current training phase,
-* weekly priorities,
-* recovery status,
-* recent exposure,
-* adaptation needs,
-* and interference risk.
+2. Mandatory Thresholds
+3. Weighted Suitability
+4. Selection Priority
 
 ---
 
-# Scoring Architecture
+## Layer 1 — Eligibility
 
-The scoring process follows this sequence:
+Eligibility determines whether a candidate may enter the scoring process.
+
+Eligibility is binary:
 
 ```text
-Training Objective
+ELIGIBLE
+INELIGIBLE
+```
+
+An ineligible candidate is excluded before weighted scoring.
+
+It receives:
+
+```text
+Eligibility = INELIGIBLE
+Final Score = NOT APPLICABLE
+Selection Status = EXCLUDED
+```
+
+Eligibility is governed by hard rules.
+
+Typical hard exclusions include:
+
+* medical contraindication;
+* significant or worsening pain;
+* pain that alters technique;
+* neurological symptoms;
+* unsafe environment;
+* unavailable essential equipment;
+* insufficient space;
+* clearly inadequate technical competence;
+* unacceptable risk under current fatigue;
+* direct conflict with the primary adaptation;
+* unresolved blocking conflict;
+* prohibited training exposure;
+* inability to perform the movement safely;
+* missing critical safety information.
+
+An ineligible candidate must not receive a low numerical score.
+
+It must be excluded.
+
+---
+
+## Layer 2 — Mandatory Thresholds
+
+An eligible candidate must reach the minimum acceptable level in every mandatory criterion.
+
+Mandatory criteria protect the integrity of the decision without turning every limitation into a hard exclusion.
+
+Default mandatory criteria for exercise selection are:
+
+* Safety;
+* Primary Adaptation Match;
+* Athlete Compatibility;
+* Technical Feasibility;
+* Pain Compatibility;
+* Equipment Feasibility;
+* Environmental Feasibility.
+
+Default minimum:
+
+```text
+Mandatory Criterion Minimum = 3 out of 5
+```
+
+A candidate scoring below the threshold in any mandatory criterion is rejected unless a dedicated rule defines a valid modification or regression.
+
+Possible result:
+
+```text
+Eligibility = ELIGIBLE
+Mandatory Criteria Passed = FALSE
+Selection Status = REJECTED
+```
+
+The mandatory threshold may be increased for:
+
+* maximum-strength attempts;
+* sprinting;
+* ballistic exercises;
+* high-impact plyometrics;
+* complex Olympic-lifting variations;
+* high-intensity bag work;
+* unsupervised high-risk training;
+* competition-proximity sessions.
+
+A high score in one criterion may never compensate for failure in another mandatory criterion.
+
+---
+
+## Layer 3 — Weighted Suitability
+
+Weighted Suitability measures how well a valid candidate fits:
+
+* the target adaptation;
+* the athlete;
+* the session;
+* the weekly context;
+* long-term progression.
+
+Each relevant criterion receives:
+
+* a score from 0 to 5;
+* a weight from 1 to 5.
+
+The weighted results are normalized to a score from 0 to 100.
+
+---
+
+## Layer 4 — Selection Priority
+
+Selection Priority determines which valid and suitable option should be selected now.
+
+It accounts for contextual factors such as:
+
+* current Training Cycle priority;
+* readiness;
+* recent exposure;
+* upcoming combat practice;
+* competition proximity;
+* exercise continuity;
+* athlete-specific history;
+* time constraints;
+* interference risk.
+
+Priority modifiers may adjust the Base Suitability Score within strict limits.
+
+They must not override eligibility or mandatory thresholds.
+
+---
+
+# Scoring Process
+
+The complete scoring process is:
+
+```text
+Declared Objective
+        ↓
+Required Adaptation Domain
+        ↓
+Required Capability Module
         ↓
 Candidate Generation
         ↓
 Hard Eligibility Filter
         ↓
-Criterion Scoring
+Mandatory Criterion Check
         ↓
-Weight Application
+Decision-Level Scoring Profile
+        ↓
+Weighted Criterion Scoring
+        ↓
+Normalization
         ↓
 Context Modifiers
         ↓
-Penalty Application
+Final Suitability Score
         ↓
-Confidence Adjustment
-        ↓
-Final Score
+Confidence Assessment
         ↓
 Ranking
         ↓
-Selection or Manual Review
+Tie-Breaking
+        ↓
+Selection or Review
+        ↓
+Validation
 ```
 
-No candidate should receive a final score before passing the eligibility filter.
+No candidate may reach ranking before passing:
+
+* eligibility;
+* mandatory thresholds.
+
+No selected candidate may be returned to the athlete before final validation.
 
 ---
 
-# Rule 1 — Scores Support Decisions
+# Contextual Nature of Scores
 
-Scores are decision-support tools.
+A score is not a permanent property of:
 
-They must not be treated as absolute biological truths.
+* an exercise;
+* a module;
+* a progression;
+* a session.
 
-A score represents the quality of an option according to the information currently available.
+It represents the expected suitability of an option for a specific:
 
-Scores may change when:
+* athlete;
+* objective;
+* date;
+* Training Cycle;
+* session;
+* readiness state;
+* equipment context;
+* weekly schedule.
 
-* athlete readiness changes,
-* pain appears,
-* equipment changes,
-* training priorities change,
-* new feedback is recorded,
-* a competition approaches,
-* or the system receives better data.
+The same exercise may receive different scores when:
 
-The score belongs to a context.
+* the athlete changes;
+* readiness changes;
+* pain appears;
+* equipment changes;
+* the primary adaptation changes;
+* training experience develops;
+* competition approaches;
+* recent exposure changes;
+* combat workload changes.
 
-It is not a permanent property of an exercise.
+The system must never state that one exercise is universally superior based only on a contextual score.
 
 ---
 
-# Rule 2 — Scoring Scale
+# Criterion Scale
 
 The default criterion scale is:
 
 | Score | Meaning                 |
-| ----- | ----------------------- |
-| 0     | Completely incompatible |
-| 1     | Very poor fit           |
-| 2     | Poor fit                |
-| 3     | Acceptable fit          |
-| 4     | Strong fit              |
-| 5     | Excellent fit           |
+| ----: | ----------------------- |
+|     0 | Completely incompatible |
+|     1 | Very poor fit           |
+|     2 | Poor fit                |
+|     3 | Acceptable fit          |
+|     4 | Strong fit              |
+|     5 | Excellent fit           |
 
-Half-point values may be used when greater precision is justified.
+Half-point scores may be used when justified:
 
-Examples:
+* 2.5;
+* 3.5;
+* 4.5.
 
-* 2.5
-* 3.5
-* 4.5
+The engine must avoid false precision.
 
-The system should avoid false precision.
+Values with more than one decimal place should only be generated from objective normalized data.
 
-A score such as 4.173 should not be used unless it results from measurable normalized data.
-
----
-
-# Rule 3 — Hard Filters Before Scores
-
-A candidate must be excluded before scoring when it violates a hard rule.
-
-Hard exclusion conditions include:
-
-* significant pain,
-* medical contraindication,
-* unsafe environment,
-* unavailable mandatory equipment,
-* technical level clearly insufficient,
-* excessive risk under current fatigue,
-* conflict with the primary adaptation,
-* unacceptable interference with combat practice,
-* or inability to execute the exercise correctly.
-
-Hard filters return:
+Human-defined criterion scores should normally use:
 
 ```text
-Eligibility = FALSE
-Final Score = NOT APPLICABLE
+0
+0.5
+1
+1.5
+2
+2.5
+3
+3.5
+4
+4.5
+5
 ```
-
-The system must not assign a low score to an option that should be prohibited.
-
-It must exclude it.
 
 ---
 
-# Rule 4 — Mandatory Criteria
+# Criterion Weight Scale
 
-Certain criteria are mandatory.
+The default weight scale is:
 
-A candidate may only proceed if it reaches the minimum threshold in each mandatory criterion.
+| Weight | Meaning             |
+| -----: | ------------------- |
+|      1 | Low influence       |
+|      2 | Secondary influence |
+|      3 | Important           |
+|      4 | High influence      |
+|      5 | Critical influence  |
 
-Default mandatory criteria are:
-
-* Safety
-* Primary Adaptation Match
-* Athlete Compatibility
-* Technical Feasibility
-* Equipment Feasibility
-* Environmental Feasibility
-
-Default minimum threshold:
+Default limits:
 
 ```text
-Minimum Mandatory Criterion Score = 3 out of 5
+Minimum Active Weight = 1
+Maximum Weight = 5
 ```
 
-The threshold may be increased for:
+A criterion may receive a weight of `0` only when it is not relevant to the current decision profile.
 
-* maximum-strength exercises,
-* high-impact plyometrics,
-* sprinting,
-* ballistic exercises,
-* high-intensity combat work,
-* or unsupervised sessions.
+Mandatory criteria may never receive a weight of `0`.
+
+Weights must be defined by the decision profile.
+
+They must not be changed during scoring simply to justify a preferred candidate.
 
 ---
 
-# Rule 5 — Criterion Groups
+# Criterion Families
 
-The model uses six main criterion groups:
+The model uses six criterion families:
 
-1. Adaptation Value
-2. Athlete Compatibility
+1. Adaptation Fit
+2. Athlete Fit
 3. Execution Quality
 4. Fatigue and Recovery
-5. Context Compatibility
-6. Long-Term Development
+5. Context Fit
+6. Long-Term Value
 
-Each group contains several criteria.
+These families organize the criteria.
 
----
-
-# Group 1 — Adaptation Value
-
-Adaptation Value measures how effectively the option supports the intended physiological or technical objective.
-
-Criteria include:
-
-* Primary Adaptation Match
-* Secondary Adaptation Contribution
-* Movement Pattern Match
-* Force Direction Match
-* Contraction Type Match
-* Velocity Profile Match
-* Range of Motion Relevance
-* Combat Transfer
-* Specificity to Training Phase
+They are not scored directly unless a decision profile explicitly defines a family-level score.
 
 ---
 
-# Primary Adaptation Match
+# Family 1 — Adaptation Fit
 
-This criterion measures how directly the option develops the primary target adaptation.
+Adaptation Fit measures how directly the candidate supports the intended physiological objective.
+
+Possible criteria include:
+
+* Primary Adaptation Match;
+* Module Match;
+* Movement Function Match;
+* Force Direction Match;
+* Contraction Profile Match;
+* Velocity Profile Match;
+* Range-of-Motion Relevance;
+* Physical Transfer;
+* Training-Phase Relevance.
+
+---
+
+## Primary Adaptation Match
+
+Primary Adaptation Match measures how directly the candidate supports the declared primary adaptation.
+
+| Score | Interpretation                         |
+| ----: | -------------------------------------- |
+|     5 | Direct and highly effective match      |
+|     4 | Strong match with minor limitations    |
+|     3 | Acceptable match                       |
+|     2 | Partial or indirect match              |
+|     1 | Weak relationship                      |
+|     0 | No meaningful match or direct conflict |
+
+Primary Adaptation Match is mandatory.
+
+Secondary benefits may never compensate for a weak Primary Adaptation Match.
+
+---
+
+## Module Match
+
+Module Match measures whether the candidate correctly implements the selected Capability Module.
 
 Examples:
 
-## Score 5
+* a heavy controlled squat variation may strongly match Strength;
+* a low-load maximal-intent jump may strongly match Power;
+* a prolonged exhaustive jump circuit may not match Power even if jumps are used;
+* controlled loaded carries may match Grip or Robustness depending on the declared purpose and parameters.
 
-The exercise is highly effective and directly aligned with the target.
+An exercise name does not determine Module Match by itself.
 
-## Score 4
+The engine must evaluate:
 
-The exercise strongly supports the target with minor limitations.
-
-## Score 3
-
-The exercise can develop the target but is not the best available option.
-
-## Score 2
-
-The exercise has only a partial effect.
-
-## Score 1
-
-The relationship is weak.
-
-## Score 0
-
-The exercise does not support or directly conflicts with the target.
-
-Primary Adaptation Match is one of the highest-weighted criteria.
+* intent;
+* intensity;
+* volume;
+* velocity;
+* rest;
+* execution;
+* stopping criteria.
 
 ---
 
-# Secondary Adaptation Contribution
+## Movement Function Match
 
-This criterion measures useful additional benefits.
+Movement Function Match measures whether the candidate trains the required human movement function.
 
 Examples include:
 
-* trunk stiffness during loaded carries,
-* grip strength during pulling work,
-* tendon loading during controlled strength exercises,
-* coordination during unilateral work,
-* aerobic contribution during technical bag rounds.
+* horizontal push;
+* vertical push;
+* horizontal pull;
+* vertical pull;
+* squat;
+* hinge;
+* lunge;
+* carry;
+* rotate;
+* resist rotation;
+* accelerate;
+* decelerate;
+* jump;
+* strike;
+* maintain grip;
+* transmit force.
 
-Secondary benefits must not compensate for poor primary adaptation match.
-
----
-
-# Movement Pattern Match
-
-This criterion evaluates whether the candidate matches the required movement function.
-
-Examples:
-
-* vertical pull,
-* horizontal push,
-* squat,
-* hinge,
-* lunge,
-* rotation,
-* anti-rotation,
-* sprint,
-* jump,
-* punch,
-* kick,
-* clinch,
-* ground transition.
-
-A high movement match is especially important for substitutions.
+This criterion is especially important for substitutions.
 
 ---
 
-# Force Direction Match
+## Force Direction Match
 
-This criterion evaluates whether force is applied in a relevant direction.
+Force Direction Match measures whether force is applied in a direction relevant to the intended adaptation or capability.
 
-Directions may include:
+Possible directions include:
 
-* vertical,
-* horizontal,
-* rotational,
-* lateral,
-* diagonal,
-* anterior-posterior,
-* upward,
+* vertical;
+* horizontal;
+* lateral;
+* rotational;
+* diagonal;
+* anterior-posterior;
+* upward;
 * downward.
 
-Force direction receives more weight in:
-
-* power training,
-* sprint preparation,
-* striking development,
-* and combat-specific work.
+Force-direction similarity supports selection but does not prove transfer by itself.
 
 ---
 
-# Contraction Type Match
+## Contraction Profile Match
 
-This criterion evaluates the similarity or relevance of the dominant muscular contraction.
+Contraction Profile Match measures compatibility with the required dominant muscular action.
 
-Possible contraction profiles include:
+Possible profiles include:
 
-* concentric,
-* eccentric,
-* isometric,
-* ballistic,
-* stretch-shortening cycle,
-* yielding isometric,
+* concentric;
+* eccentric;
+* isometric;
+* ballistic;
+* stretch-shortening cycle;
+* yielding isometric;
 * overcoming isometric.
 
-This criterion is particularly important for:
+This criterion is particularly relevant for:
 
-* robustness,
-* rehabilitation,
-* plyometrics,
-* and exercise substitution.
+* Power;
+* Robustness;
+* Movement;
+* rehabilitation-compatible constraints;
+* substitutions.
 
 ---
 
-# Velocity Profile Match
+## Velocity Profile Match
 
-This criterion evaluates whether the option permits the intended movement speed.
+Velocity Profile Match measures whether the candidate can be performed at the movement speed required by the module.
 
-Velocity profiles include:
+Possible profiles include:
 
-* maximal velocity,
-* high velocity,
-* moderate velocity,
-* controlled velocity,
-* slow eccentric,
+* maximal velocity;
+* high velocity;
+* moderate velocity;
+* controlled velocity;
+* slow eccentric;
 * isometric.
 
-Power and speed exercises require a high Velocity Profile Match.
+Power candidates require a high Velocity Profile Match.
 
-A movement performed too slowly cannot receive a high power score only because it uses the same muscles.
-
----
-
-# Range of Motion Relevance
-
-This criterion evaluates whether the range of motion:
-
-* trains the intended positions,
-* is safe for the athlete,
-* provides useful tissue exposure,
-* and matches the adaptation.
-
-A reduced range may score highly when it is strategically selected.
-
-A full range is not automatically superior in every context.
+An exercise does not qualify as Power merely because it uses muscles relevant to explosive movement.
 
 ---
 
-# Combat Transfer
+## Range-of-Motion Relevance
 
-Combat Transfer evaluates the expected contribution to combat performance.
+Range-of-Motion Relevance measures whether the prescribed range:
 
-Transfer may occur through:
+* exposes the intended positions;
+* remains safe;
+* can be controlled;
+* supports the target adaptation;
+* fits the athlete's current capacity.
 
-* greater force production,
-* faster force expression,
-* stronger force transmission,
-* rotational power,
-* unilateral stability,
-* impact tolerance,
-* conditioning,
-* grip strength,
-* movement efficiency,
-* or tissue robustness.
+A full range is not automatically superior.
 
-Visual similarity alone does not justify a high transfer score.
+A partial range may score highly when it is deliberately selected for:
 
----
-
-# Specificity to Training Phase
-
-This criterion evaluates whether the option is appropriate for the current phase.
-
-Examples:
-
-* general preparation,
-* strength accumulation,
-* power conversion,
-* sport-specific preparation,
-* competition preparation,
-* taper,
-* return to training,
-* recovery phase.
-
-An exercise may be highly effective in general but poorly timed within the current phase.
+* overload;
+* tissue tolerance;
+* pain-free exposure;
+* position-specific strength;
+* progression toward a larger range.
 
 ---
 
-# Group 2 — Athlete Compatibility
+## Physical Transfer
 
-Athlete Compatibility measures how well the option fits the individual.
+Physical Transfer measures the expected contribution to target-sport performance through physical qualities.
 
-Criteria include:
+Possible transfer mechanisms include:
 
-* Training Age Compatibility
-* Technical Skill Compatibility
-* Mobility Compatibility
-* Morphological Compatibility
-* Injury History Compatibility
-* Pain Compatibility
-* Confidence
-* Adherence Probability
-* Previous Athlete Response
+* force production;
+* rapid force production;
+* force transmission;
+* deceleration;
+* rotational capacity;
+* unilateral control;
+* grip capacity;
+* impact tolerance;
+* work capacity;
+* movement efficiency.
 
----
+Visual similarity alone must not produce a high Physical Transfer score.
 
-# Training Age Compatibility
+Specific Skill remains external to the physical preparation engine.
 
-This criterion evaluates whether the option fits the athlete’s experience.
-
-A beginner usually benefits from:
-
-* simpler exercises,
-* stable movement patterns,
-* low setup complexity,
-* and easy progression.
-
-An advanced athlete may benefit from:
-
-* more specific loading,
-* higher technical demand,
-* greater variation,
-* or advanced velocity methods.
-
-Complexity alone does not indicate advancement.
+A heavy-bag exercise may score highly for Power or Conditioning when its primary purpose and execution parameters match those modules.
 
 ---
 
-# Technical Skill Compatibility
+## Training-Phase Relevance
 
-This criterion measures whether the athlete can execute the option with sufficient control.
+Training-Phase Relevance measures compatibility with the current phase.
 
-The score considers:
+Possible phases include:
 
-* movement understanding,
-* coordination,
-* consistency,
-* ability under fatigue,
-* and need for supervision.
+* general preparation;
+* accumulation;
+* maximum-strength development;
+* functional hypertrophy;
+* power conversion;
+* conditioning development;
+* competition preparation;
+* taper;
+* return to training;
+* recovery.
 
-A technically effective exercise may score poorly if the athlete cannot yet execute it safely.
-
----
-
-# Mobility Compatibility
-
-This criterion evaluates whether the athlete has the mobility required for the movement.
-
-It should distinguish between:
-
-* mobility limitation,
-* motor-control limitation,
-* fear,
-* pain,
-* and unfamiliarity.
-
-The system should not automatically exclude an exercise when a safe regression exists.
+A valid exercise may receive a lower score when used at the wrong time.
 
 ---
 
-# Morphological Compatibility
+# Family 2 — Athlete Fit
 
-This criterion evaluates the relationship between the exercise and the athlete’s proportions.
+Athlete Fit measures compatibility with the individual athlete.
 
-Relevant factors may include:
+Possible criteria include:
 
-* limb length,
-* torso length,
-* shoulder structure,
-* hip structure,
-* joint orientation,
-* and body mass.
-
-Morphology should guide variation selection rather than create rigid assumptions.
-
----
-
-# Injury History Compatibility
-
-This criterion evaluates whether the option is appropriate given previous injuries or recurring vulnerable areas.
-
-The score should consider:
-
-* recurrence risk,
-* tissue tolerance,
-* current restrictions,
-* and previous response.
-
-Past injury does not automatically prohibit an exercise.
+* Training Age Compatibility;
+* Technical Feasibility;
+* Mobility Compatibility;
+* Morphological Compatibility;
+* Injury-History Compatibility;
+* Pain Compatibility;
+* Athlete Confidence;
+* Adherence Probability;
+* Previous Athlete Response.
 
 ---
 
-# Pain Compatibility
+## Training Age Compatibility
 
-Pain Compatibility evaluates whether the movement is currently symptom-free and tolerated.
+This criterion evaluates whether the option fits the athlete's training experience.
 
-Default interpretation:
+Beginners generally benefit from:
 
-| Score | Pain response                                     |
-| ----- | ------------------------------------------------- |
-| 5     | No pain or symptoms                               |
-| 4     | Minimal, stable and acceptable discomfort         |
-| 3     | Mild discomfort requiring monitoring              |
-| 2     | Clear discomfort affecting confidence or movement |
-| 1     | Significant symptoms                              |
-| 0     | Severe, sharp, neurological or worsening symptoms |
+* simple setup;
+* stable movement patterns;
+* clear technique;
+* repeatable execution;
+* low unnecessary complexity;
+* easy progression.
 
-A score below the mandatory threshold normally excludes the option.
+Advanced athletes may justify:
 
-The system does not diagnose pain.
+* greater specificity;
+* more precise loading;
+* more complex velocity methods;
+* specialized variations;
+* narrower progression targets.
 
----
-
-# Confidence
-
-This criterion evaluates the athlete’s confidence when performing the exercise.
-
-Low confidence may:
-
-* reduce force output,
-* alter technique,
-* increase hesitation,
-* and reduce adherence.
-
-Confidence may improve through regression, coaching and repeated exposure.
+Complexity alone does not indicate advanced training value.
 
 ---
 
-# Adherence Probability
+## Technical Feasibility
 
-This criterion estimates whether the athlete is likely to perform the option consistently.
-
-Factors include:
-
-* preference,
-* setup burden,
-* enjoyment,
-* complexity,
-* time requirement,
-* environment,
-* and previous compliance.
-
-Adherence has a lower weight than safety or adaptation quality, but it remains relevant.
-
----
-
-# Previous Athlete Response
-
-This criterion uses recorded athlete-specific history.
-
-Positive indicators include:
-
-* measurable progression,
-* good technique,
-* low pain,
-* appropriate fatigue,
-* positive feedback,
-* and good recovery.
-
-Negative indicators include:
-
-* repeated pain,
-* poor progression,
-* excessive soreness,
-* technical inconsistency,
-* or repeated substitution requests.
-
-Athlete-specific response should progressively replace generic assumptions.
-
----
-
-# Group 3 — Execution Quality
-
-Execution Quality evaluates how reliably the option can be prescribed and performed.
-
-Criteria include:
-
-* Technical Repeatability
-* Loadability
-* Progression Potential
-* Measurability
-* Setup Reliability
-* Supervision Requirement
-* Error Tolerance
-
----
-
-# Technical Repeatability
-
-This criterion evaluates whether execution can remain consistent across:
-
-* sets,
-* sessions,
-* fatigue levels,
-* and different environments.
-
-Highly repeatable exercises improve progression tracking.
-
----
-
-# Loadability
-
-Loadability measures whether exercise difficulty can be increased or decreased precisely.
-
-Progression tools may include:
-
-* external load,
-* assistance,
-* range of motion,
-* tempo,
-* leverage,
-* velocity,
-* and density.
-
-Loadability is important for strength and hypertrophy.
-
----
-
-# Progression Potential
-
-This criterion measures how long the option can support useful progression.
-
-An exercise scores highly when it offers:
-
-* clear regressions,
-* clear progressions,
-* measurable overload,
-* and sufficient long-term development potential.
-
----
-
-# Measurability
-
-Measurability evaluates whether performance can be tracked objectively or consistently.
-
-Possible metrics include:
-
-* load,
-* repetitions,
-* velocity,
-* distance,
-* time,
-* power,
-* heart rate,
-* work rate,
-* strike count,
-* impact quality,
-* and technical accuracy.
-
-A method may remain valid even when exact measurement is unavailable.
-
----
-
-# Setup Reliability
-
-This criterion evaluates whether the setup can be reproduced safely and efficiently.
-
-Relevant factors include:
-
-* equipment adjustment,
-* anchoring,
-* space,
-* spotting,
-* surface,
-* and transition time.
-
-Unsafe improvised setups receive a score of 0.
-
----
-
-# Supervision Requirement
-
-This criterion measures how dependent the option is on direct coaching or spotting.
-
-High-supervision exercises receive lower scores when the athlete trains alone.
-
-The same exercise may score differently in:
-
-* a supervised facility,
-* a commercial gym,
-* a home gym,
-* or an outdoor environment.
-
----
-
-# Error Tolerance
-
-Error Tolerance evaluates the consequence of imperfect execution.
-
-An exercise with low error tolerance may remain useful, but it requires:
-
-* greater competence,
-* lower fatigue,
-* supervision,
-* and stricter stopping criteria.
-
-Ballistic and high-load exercises often have lower error tolerance.
-
----
-
-# Group 4 — Fatigue and Recovery
-
-This group evaluates the cost of the option.
-
-Criteria include:
-
-* Local Fatigue Cost
-* Systemic Fatigue Cost
-* Eccentric Damage
-* Joint Stress
-* Technical Fatigue
-* Recovery Time
-* Interference Risk
-* Stimulus-to-Fatigue Ratio
-
----
-
-# Local Fatigue Cost
-
-Local Fatigue Cost evaluates fatigue in the primary muscles and tissues used.
-
-A high local cost may be acceptable for hypertrophy but undesirable before combat practice.
-
----
-
-# Systemic Fatigue Cost
-
-Systemic Fatigue Cost evaluates whole-body recovery demand.
-
-Contributors include:
-
-* heavy loading,
-* large muscle mass involvement,
-* high cardiovascular stress,
-* axial loading,
-* and high psychological effort.
-
----
-
-# Eccentric Damage
-
-This criterion evaluates the likelihood of soreness and muscle damage.
-
-High eccentric cost may be useful during certain phases but inappropriate:
-
-* before competition,
-* before technical combat sessions,
-* during high-frequency training,
-* or after a layoff.
-
----
-
-# Joint Stress
-
-Joint Stress evaluates repeated or peak stress on relevant joints.
-
-It must be individualized.
-
-A movement that is tolerated well by one athlete may be inappropriate for another.
-
----
-
-# Technical Fatigue
-
-Technical Fatigue measures how rapidly execution quality deteriorates.
-
-High-skill movements generally tolerate less fatigue.
-
----
-
-# Recovery Time
-
-Recovery Time estimates how long the athlete may need before performing similar work again.
-
-The score should consider:
-
-* total volume,
-* intensity,
-* novelty,
-* training age,
-* sleep,
-* nutrition,
-* and concurrent combat practice.
-
----
-
-# Interference Risk
-
-Interference Risk evaluates whether the option may compromise another important session.
-
-Examples:
-
-* heavy leg eccentric work before kicking practice,
-* high-volume pulling before grappling,
-* intense pressing before striking,
-* sprinting before lower-body power work,
-* exhaustive bag rounds before technical learning.
-
-Lower interference receives a higher suitability score.
-
----
-
-# Stimulus-to-Fatigue Ratio
-
-This criterion evaluates the useful adaptation generated relative to the total recovery cost.
-
-A high score means:
-
-* strong target stimulus,
-* controlled fatigue,
-* good technical repeatability,
-* and limited disruption to the training week.
-
-Stimulus-to-Fatigue Ratio is always athlete- and context-specific.
-
----
-
-# Group 5 — Context Compatibility
-
-Context Compatibility evaluates practical feasibility.
-
-Criteria include:
-
-* Equipment Compatibility
-* Environment Compatibility
-* Time Compatibility
-* Session Order Compatibility
-* Weekly Schedule Compatibility
-* Combat Practice Compatibility
-* Competition Proximity Compatibility
-
----
-
-# Equipment Compatibility
-
-This criterion measures whether the required equipment:
-
-* exists,
-* is available,
-* is functional,
-* supports sufficient loading,
-* and can be used safely.
-
-No equipment availability produces a score of 0 when the equipment is essential.
-
----
-
-# Environment Compatibility
-
-This criterion evaluates:
-
-* available space,
-* floor,
-* ceiling,
-* weather,
-* noise restrictions,
-* crowding,
-* and safety.
-
----
-
-# Time Compatibility
-
-This criterion evaluates whether the option fits the available session duration.
-
-It includes:
-
-* setup time,
-* warm-up requirement,
-* rest intervals,
-* transitions,
-* and total duration.
-
-A time-efficient exercise does not automatically receive a high score if it compromises the adaptation.
-
----
-
-# Session Order Compatibility
-
-This criterion evaluates whether the option fits logically into the current session.
-
-Examples:
-
-* speed work before fatigue,
-* power before high-volume strength,
-* technical work before conditioning,
-* robustness work after primary training,
-* recovery work at the end.
-
----
-
-# Weekly Schedule Compatibility
-
-This criterion evaluates the option in relation to the complete microcycle.
+Technical Feasibility measures whether the athlete can currently execute the candidate with sufficient quality.
 
 It considers:
 
-* previous training,
-* next training,
-* combat sessions,
-* recovery days,
-* work schedule,
-* and competition demands.
+* understanding;
+* coordination;
+* repeatability;
+* control;
+* stability;
+* competence under the expected fatigue level;
+* supervision requirements.
+
+Technical Feasibility is mandatory.
+
+A theoretically effective candidate must be rejected or regressed when the athlete cannot execute it safely.
 
 ---
 
-# Combat Practice Compatibility
+## Mobility Compatibility
 
-This criterion evaluates whether the option supports or disrupts technical combat training.
+Mobility Compatibility measures whether the athlete can access and control the required positions.
 
-Combat practice generally receives priority when it is the athlete’s primary sport.
+The engine should distinguish between:
 
----
+* insufficient active range;
+* insufficient passive range;
+* motor-control limitations;
+* fear;
+* unfamiliarity;
+* pain.
 
-# Competition Proximity Compatibility
-
-This criterion evaluates the option relative to the next competition or performance test.
-
-As competition approaches, the score may decrease for options with:
-
-* high soreness,
-* high injury risk,
-* unfamiliar technique,
-* excessive volume,
-* or long recovery demand.
+A limitation does not automatically exclude the entire exercise family when a safe variation or regression exists.
 
 ---
 
-# Group 6 — Long-Term Development
+## Morphological Compatibility
 
-This group evaluates the role of the option beyond the current session.
+Morphological Compatibility considers individual proportions and structure.
 
-Criteria include:
+Relevant factors may include:
 
-* Strategic Priority
-* Limitation Correction
-* Robustness Contribution
-* Skill Development
-* Variation Need
-* Exercise Continuity
-* Long-Term Transfer
+* limb length;
+* torso length;
+* shoulder structure;
+* hip structure;
+* joint orientation;
+* body mass;
+* center-of-mass distribution.
 
----
+Morphology should guide variation and setup selection.
 
-# Strategic Priority
-
-This criterion evaluates whether the option develops a currently prioritized quality.
-
-Examples:
-
-* force deficit,
-* rate-of-force-development deficit,
-* aerobic limitation,
-* repeated-effort limitation,
-* tissue weakness,
-* movement restriction,
-* striking-power objective.
+It must not create rigid assumptions or universal prohibitions.
 
 ---
 
-# Limitation Correction
+## Injury-History Compatibility
 
-This criterion evaluates whether the option addresses an identified weak point.
+This criterion measures compatibility with previous injury and recurrent vulnerability.
 
-A limitation must be based on:
+It considers:
 
-* assessment,
-* repeated observation,
-* performance data,
-* or athlete feedback.
+* recurrence history;
+* current tissue tolerance;
+* prior response;
+* medical restrictions;
+* exposure history;
+* relevant movement sensitivity.
 
-The system should not invent weaknesses to justify variety.
+A previous injury is not automatically a contraindication.
 
----
-
-# Robustness Contribution
-
-This criterion evaluates whether the option improves tolerance in:
-
-* tendons,
-* muscles,
-* joints,
-* connective tissue,
-* impact positions,
-* and repeated combat movements.
+Current restrictions and actual response take priority.
 
 ---
 
-# Skill Development
+## Pain Compatibility
 
-This criterion evaluates the opportunity to improve a useful motor or technical skill.
+Pain Compatibility measures current symptom response.
 
-Skill development may justify maintaining an exercise even when a simpler option has a slightly better immediate score.
+| Score | Interpretation                                               |
+| ----: | ------------------------------------------------------------ |
+|     5 | No pain or symptoms                                          |
+|     4 | Minimal, stable and acceptable discomfort                    |
+|     3 | Mild discomfort requiring monitoring                         |
+|     2 | Discomfort affecting confidence or execution                 |
+|     1 | Significant symptoms                                         |
+|     0 | Severe, sharp, radiating, neurological or worsening symptoms |
+
+Pain Compatibility is mandatory.
+
+Default behavior:
+
+```text
+Score 3 to 5
+→ Candidate may continue according to context
+
+Score 2
+→ Candidate rejected or modified
+
+Score 0 to 1
+→ Candidate excluded
+```
+
+Pain that alters technique creates a hard exclusion.
+
+The engine does not diagnose pain or injury.
 
 ---
 
-# Variation Need
+## Athlete Confidence
 
-This criterion evaluates whether variation is currently beneficial.
+Athlete Confidence measures the athlete's perceived ability to perform the candidate safely and effectively.
+
+Low confidence may reduce:
+
+* output;
+* technical consistency;
+* adherence;
+* willingness to express maximal intent.
+
+Confidence should normally be improved through:
+
+* regression;
+* instruction;
+* familiarization;
+* controlled exposure.
+
+It must not override objective safety or technical criteria.
+
+---
+
+## Adherence Probability
+
+Adherence Probability estimates whether the athlete is likely to execute the prescription consistently.
+
+It may consider:
+
+* preference;
+* enjoyment;
+* setup burden;
+* time;
+* environment;
+* exercise complexity;
+* previous compliance.
+
+Adherence is relevant but receives lower weight than:
+
+* safety;
+* adaptation match;
+* technical feasibility;
+* recovery compatibility.
+
+---
+
+## Previous Athlete Response
+
+Previous Athlete Response uses athlete-specific history.
+
+Positive indicators include:
+
+* progression;
+* good technical quality;
+* acceptable fatigue;
+* good recovery;
+* no adverse symptoms;
+* positive feedback;
+* reliable completion.
+
+Negative indicators include:
+
+* repeated pain;
+* excessive soreness;
+* poor progression;
+* technical inconsistency;
+* disproportionate fatigue;
+* repeated substitution;
+* poor adherence.
+
+When reliable athlete-specific data exist, they should take priority over generic assumptions.
+
+---
+
+# Family 3 — Execution Quality
+
+Execution Quality measures how reliably the candidate can be prescribed, performed and progressed.
+
+Possible criteria include:
+
+* Technical Repeatability;
+* Loadability;
+* Progression Potential;
+* Measurability;
+* Setup Reliability;
+* Supervision Compatibility;
+* Error Tolerance.
+
+---
+
+## Technical Repeatability
+
+Technical Repeatability measures whether execution can remain consistent across:
+
+* repetitions;
+* sets;
+* sessions;
+* moderate changes in fatigue;
+* different training environments.
+
+High repeatability improves progression tracking and prescription reliability.
+
+---
+
+## Loadability
+
+Loadability measures whether exercise difficulty can be adjusted precisely.
+
+Possible progression tools include:
+
+* external load;
+* assistance;
+* leverage;
+* range of motion;
+* tempo;
+* repetition count;
+* movement velocity;
+* density.
+
+Loadability is especially important for Strength and Functional Hypertrophy.
+
+---
+
+## Progression Potential
+
+Progression Potential measures how well the candidate can support continued development.
+
+A high score requires:
+
+* clear regression options;
+* clear progression options;
+* measurable overload;
+* sufficient long-term usefulness;
+* compatibility with the module's progression model.
+
+---
+
+## Measurability
+
+Measurability evaluates whether performance can be tracked consistently.
+
+Possible metrics include:
+
+* load;
+* repetitions;
+* velocity;
+* distance;
+* time;
+* work completed;
+* heart rate;
+* power;
+* strike count;
+* technical consistency;
+* symptom response.
+
+Lack of sophisticated measurement does not automatically invalidate a useful method.
+
+---
+
+## Setup Reliability
+
+Setup Reliability measures whether the training configuration can be reproduced safely and efficiently.
+
+It considers:
+
+* equipment adjustment;
+* anchoring;
+* surface;
+* space;
+* spotting;
+* transition time;
+* environmental stability.
+
+Unsafe improvised setups are ineligible.
+
+---
+
+## Supervision Compatibility
+
+Supervision Compatibility measures whether the candidate fits the supervision actually available.
+
+A technically demanding or high-risk exercise may score well under direct coaching and poorly when performed alone.
+
+The engine must not assume a coach or spotter is present unless that information is confirmed.
+
+---
+
+## Error Tolerance
+
+Error Tolerance measures the consequences of imperfect execution.
+
+Low error tolerance may require:
+
+* higher technical competence;
+* greater freshness;
+* direct supervision;
+* lower volume;
+* stricter stopping rules.
+
+Low error tolerance is not automatically disqualifying.
+
+It must be compatible with the athlete and context.
+
+---
+
+# Family 4 — Fatigue and Recovery
+
+Fatigue and Recovery criteria measure the cost of a candidate relative to its expected benefit.
+
+The Module Engine recognizes four fatigue dimensions:
+
+* Neural Fatigue;
+* Muscular Fatigue;
+* Connective Tissue Stress;
+* Metabolic Fatigue.
+
+The Scoring Model must remain consistent with these dimensions.
+
+Possible criteria include:
+
+* Neural Cost Compatibility;
+* Muscular Cost Compatibility;
+* Connective-Tissue Cost Compatibility;
+* Metabolic Cost Compatibility;
+* Technical Fatigue Risk;
+* Recovery-Time Compatibility;
+* Interference Risk;
+* Stimulus-to-Fatigue Ratio.
+
+---
+
+## Cost Compatibility
+
+Cost criteria are scored positively.
+
+A high score means the cost is compatible with the current context.
+
+For example:
+
+| Score | Interpretation                      |
+| ----: | ----------------------------------- |
+|     5 | Very low or highly appropriate cost |
+|     4 | Controlled and appropriate cost     |
+|     3 | Acceptable cost                     |
+|     2 | High cost requiring adjustment      |
+|     1 | Excessive cost                      |
+|     0 | Incompatible cost                   |
+
+This positive-direction convention prevents mathematical confusion.
+
+High fatigue cost must not receive a high suitability score.
+
+---
+
+## Neural Cost Compatibility
+
+This criterion measures compatibility between neural demand and:
+
+* current readiness;
+* recent high-intensity exposure;
+* upcoming power work;
+* technical practice;
+* competition proximity.
+
+---
+
+## Muscular Cost Compatibility
+
+This criterion measures compatibility between local muscular fatigue and the broader schedule.
+
+It is especially relevant before:
+
+* striking practice;
+* kicking practice;
+* grappling;
+* repeated training of the same region.
+
+---
+
+## Connective-Tissue Cost Compatibility
+
+This criterion measures compatibility with:
+
+* tendon exposure;
+* joint stress;
+* impact;
+* stretch-shortening-cycle volume;
+* recent tissue loading;
+* injury history.
+
+---
+
+## Metabolic Cost Compatibility
+
+This criterion measures compatibility between metabolic demand and:
+
+* the module objective;
+* the rest of the session;
+* upcoming combat practice;
+* weekly conditioning load;
+* recovery capacity.
+
+---
+
+## Technical Fatigue Risk
+
+Technical Fatigue Risk measures how likely execution quality is to deteriorate during the prescribed dose.
+
+A high suitability score means low or controlled technical breakdown risk.
+
+---
+
+## Recovery-Time Compatibility
+
+Recovery-Time Compatibility measures whether the predicted recovery period fits:
+
+* the next CAS session;
+* combat practice;
+* competition;
+* occupational demands;
+* the current Training Cycle.
+
+---
+
+## Interference Risk
+
+Interference Risk measures the risk that the candidate will compromise another priority adaptation or practice.
+
+A high suitability score means low interference.
+
+Examples of potential interference include:
+
+* heavy eccentric lower-body work before kicking;
+* high-volume pulling before grappling;
+* shoulder fatigue before striking;
+* exhaustive bag work before technical practice;
+* conditioning that compromises strength development;
+* high-impact work before lower-body Power.
+
+---
+
+## Stimulus-to-Fatigue Ratio
+
+Stimulus-to-Fatigue Ratio measures the expected target adaptation relative to total recovery cost.
+
+A high score indicates:
+
+* strong target stimulus;
+* controlled fatigue;
+* acceptable recovery;
+* reliable technical execution;
+* limited disruption to the week.
+
+This criterion is always athlete- and context-specific.
+
+---
+
+# Family 5 — Context Fit
+
+Context Fit measures practical and scheduling compatibility.
+
+Possible criteria include:
+
+* Equipment Compatibility;
+* Environment Compatibility;
+* Time Compatibility;
+* Session-Order Compatibility;
+* Weekly-Schedule Compatibility;
+* Combat-Practice Compatibility;
+* Competition-Proximity Compatibility.
+
+---
+
+## Equipment Compatibility
+
+Equipment Compatibility measures whether the required equipment:
+
+* exists;
+* is available;
+* is functional;
+* permits the required loading;
+* can be used safely.
+
+When essential equipment is unavailable, the candidate is ineligible.
+
+---
+
+## Environment Compatibility
+
+Environment Compatibility considers:
+
+* space;
+* floor;
+* ceiling height;
+* weather;
+* noise restrictions;
+* crowding;
+* surface;
+* safety.
+
+---
+
+## Time Compatibility
+
+Time Compatibility considers:
+
+* setup;
+* preparation;
+* rest intervals;
+* transitions;
+* total execution time.
+
+Time efficiency must not override the required adaptation.
+
+The engine should remove lower-priority work rather than distort essential work into an inappropriate density.
+
+---
+
+## Session-Order Compatibility
+
+Session-Order Compatibility measures whether the candidate fits the selected module's place within the session.
+
+The canonical module order is:
+
+1. Preparation
+2. Movement
+3. Power
+4. Strength
+5. Functional Hypertrophy
+6. Robustness
+7. Grip
+8. Core
+9. Conditioning
+10. Recovery
+
+Only selected modules appear in the session.
+
+Exceptions require explicit justification and a Decision Trace entry.
+
+---
+
+## Weekly-Schedule Compatibility
+
+Weekly-Schedule Compatibility considers:
+
+* previous training;
+* upcoming training;
+* combat practice;
+* recovery days;
+* work schedule;
+* competition demands;
+* accumulated exposure.
+
+---
+
+## Combat-Practice Compatibility
+
+Combat-Practice Compatibility measures whether the candidate supports or disrupts the athlete's technical and tactical practice.
+
+When combat sport is the athlete's primary discipline, specific practice generally takes priority over optional physical-preparation volume.
+
+---
+
+## Competition-Proximity Compatibility
+
+Competition-Proximity Compatibility measures whether the candidate is appropriate at the current distance from competition.
+
+Near competition, suitability decreases for options involving:
+
+* high soreness;
+* unfamiliar technique;
+* high injury risk;
+* long recovery time;
+* excessive volume;
+* unnecessary connective-tissue stress.
+
+---
+
+# Family 6 — Long-Term Value
+
+Long-Term Value measures the candidate's contribution beyond the current session.
+
+Possible criteria include:
+
+* Strategic Priority;
+* Limitation Relevance;
+* Robustness Contribution;
+* Exercise Continuity;
+* Variation Justification;
+* Long-Term Progression Value;
+* Athlete-Specific Learning Value.
+
+---
+
+## Strategic Priority
+
+Strategic Priority measures alignment with the current Training Cycle.
+
+Examples include:
+
+* maximum-strength development;
+* rate-of-force-development improvement;
+* functional hypertrophy;
+* aerobic development;
+* repeated-effort capacity;
+* tissue tolerance;
+* movement restoration;
+* striking-power development.
+
+---
+
+## Limitation Relevance
+
+Limitation Relevance measures whether the candidate addresses an identified limiting factor.
+
+A limitation must be supported by:
+
+* assessment;
+* repeated observation;
+* performance data;
+* athlete feedback;
+* training history.
+
+The system must not invent limitations to justify variety.
+
+---
+
+## Robustness Contribution
+
+Robustness Contribution measures whether the candidate supports tolerance in relevant:
+
+* muscles;
+* tendons;
+* joints;
+* positions;
+* impact exposures;
+* repeated sport demands.
+
+This criterion must not duplicate the primary adaptation when the selected module is already Robustness.
+
+In that case, it may be omitted from the scoring profile.
+
+---
+
+## Exercise Continuity
+
+Exercise Continuity rewards maintaining an effective exercise long enough to:
+
+* learn it;
+* adapt tissues;
+* track progression;
+* determine its effectiveness.
+
+Continuity should receive a high score when:
+
+* progression continues;
+* technique remains stable;
+* symptoms remain acceptable;
+* context remains compatible.
+
+---
+
+## Variation Justification
+
+Variation Justification measures whether changing the current exercise is useful.
 
 Variation may be justified by:
 
-* plateau,
-* overuse,
-* loss of motivation,
-* phase transition,
-* equipment change,
-* or new adaptation needs.
+* plateau;
+* overuse;
+* pain;
+* equipment change;
+* phase transition;
+* loss of adherence;
+* changed adaptation requirements.
 
-Variation should score low when the current exercise remains effective and progressing.
+Variation should score low when the current exercise remains effective.
 
----
-
-# Exercise Continuity
-
-This criterion rewards keeping effective exercises long enough to:
-
-* learn them,
-* adapt tissues,
-* track progress,
-* and determine effectiveness.
-
-Continuity prevents unnecessary exercise rotation.
+Variation is not automatically beneficial.
 
 ---
 
-# Long-Term Transfer
+## Long-Term Progression Value
 
-This criterion evaluates the expected contribution to future performance rather than immediate fatigue or session output.
-
----
-
-# Default Weighting Model
-
-The default weighting model for exercise selection is:
-
-| Criterion                 | Weight |
-| ------------------------- | -----: |
-| Safety                    |      5 |
-| Primary Adaptation Match  |      5 |
-| Athlete Compatibility     |      5 |
-| Technical Feasibility     |      5 |
-| Pain Compatibility        |      5 |
-| Movement Pattern Match    |      4 |
-| Recovery Compatibility    |      4 |
-| Interference Risk         |      4 |
-| Stimulus-to-Fatigue Ratio |      4 |
-| Progression Potential     |      3 |
-| Velocity Profile Match    |      3 |
-| Force Direction Match     |      3 |
-| Loadability               |      3 |
-| Previous Athlete Response |      3 |
-| Equipment Compatibility   |      2 |
-| Environment Compatibility |      2 |
-| Combat Transfer           |      2 |
-| Time Compatibility        |      2 |
-| Athlete Preference        |      1 |
-
-Weights may be changed according to the Capability Module.
+Long-Term Progression Value measures whether the candidate can contribute to sustainable development over multiple sessions or cycles.
 
 ---
 
-# Normalized Scoring Formula
+# Weighted Scoring Formula
 
-The basic weighted score is:
+For every active criterion:
+
+```text
+Criterion Contribution =
+Criterion Score × Criterion Weight
+```
+
+The total weighted score is:
 
 ```text
 Weighted Score =
 Σ(Criterion Score × Criterion Weight)
 ```
 
-The normalized score is:
+The maximum possible score is:
 
 ```text
-Normalized Score =
+Maximum Weighted Score =
+Σ(5 × Criterion Weight)
+```
+
+The Base Suitability Score is:
+
+```text
+Base Suitability Score =
 Weighted Score
-÷ Maximum Possible Weighted Score
+÷ Maximum Weighted Score
 × 100
 ```
 
-The result is expressed from 0 to 100.
-
-Example:
+The Base Suitability Score is limited to:
 
 ```text
-Weighted Score = 210
-Maximum Possible Weighted Score = 250
-
-Normalized Score =
-210 ÷ 250 × 100
-= 84
+0 to 100
 ```
 
 ---
 
-# Final Score Formula
+# Context Modifiers
 
-The complete final score may be calculated as:
+Context modifiers represent temporary factors not fully expressed through the standard criteria.
+
+They should be used sparingly.
+
+Modifiers must not duplicate factors already scored.
+
+Possible positive modifiers include:
+
+| Situation                                           | Modifier |
+| --------------------------------------------------- | -------: |
+| Strong successful athlete-specific history          | +1 to +3 |
+| Exceptional alignment with immediate cycle priority | +1 to +3 |
+| Preserves a highly valuable progression sequence    | +1 to +2 |
+| Major practical advantage without adaptation loss   | +1 to +2 |
+
+Possible negative modifiers include:
+
+| Situation                                       | Modifier |
+| ----------------------------------------------- | -------: |
+| Recent repeated exposure requiring variation    | -1 to -4 |
+| Residual soreness not already fully represented | -1 to -5 |
+| Reduced readiness specific to the candidate     | -1 to -6 |
+| Upcoming combat session                         | -1 to -6 |
+| Competition proximity                           | -1 to -8 |
+| Unusual setup burden                            | -1 to -3 |
+| Previous poor response                          | -1 to -6 |
+
+Default limits:
 
 ```text
-Final Score =
-Base Normalized Score
-+ Context Bonuses
-- Context Penalties
-× Confidence Factor
+Maximum Total Positive Modifier = +5
+Maximum Total Negative Modifier = -15
 ```
 
-To avoid mathematical ambiguity, the engine should implement it as:
+The Final Suitability Score is:
 
 ```text
-Adjusted Score =
-Base Normalized Score
-+ Total Bonuses
-- Total Penalties
-
-Final Score =
-Adjusted Score × Confidence Factor
+Final Suitability Score =
+Base Suitability Score
++ Total Positive Modifiers
+- Total Negative Modifiers
 ```
 
-The final result must be limited to:
+The result is clamped to:
 
 ```text
 Minimum = 0
 Maximum = 100
 ```
 
----
+Modifiers may only be applied when:
 
-# Context Bonuses
+* the candidate remains eligible;
+* mandatory criteria remain passed;
+* the modifier is not already represented by another criterion;
+* the reason is recorded.
 
-Bonuses reward options that are particularly suitable in the current context.
-
-Possible bonuses include:
-
-| Situation                                      | Suggested Bonus |
-| ---------------------------------------------- | --------------: |
-| Successfully used by this athlete before       |        +2 to +5 |
-| Directly addresses current priority            |        +2 to +5 |
-| Requires minimal setup in a short session      |        +1 to +3 |
-| Reduces interference with combat practice      |        +1 to +4 |
-| Maintains useful exercise continuity           |        +1 to +3 |
-| Appropriate competition-phase specificity      |        +1 to +5 |
-| Improves adherence without reducing adaptation |        +1 to +3 |
-
-Bonuses should remain limited.
-
-They must not overpower primary criteria.
+An apparent need for a penalty greater than 15 should trigger a review of eligibility or mandatory thresholds.
 
 ---
 
-# Context Penalties
+# Confidence
 
-Penalties reduce the score when an option carries additional cost.
+Confidence measures the reliability of the scoring result.
 
-Possible penalties include:
+Confidence is not part of the Final Suitability Score.
 
-| Situation                        | Suggested Penalty |
-| -------------------------------- | ----------------: |
-| High novelty                     |          -1 to -5 |
-| Residual soreness in target area |         -2 to -10 |
-| Poor sleep or low readiness      |         -2 to -10 |
-| Combat session within 24 hours   |          -2 to -8 |
-| High setup burden                |          -1 to -4 |
-| Previous poor response           |         -2 to -10 |
-| High interference risk           |         -3 to -12 |
-| Competition proximity            |         -2 to -15 |
-| Repeated recent exposure         |          -1 to -5 |
-| Reduced supervision              |          -1 to -8 |
+It must not be used as a hidden mathematical penalty.
 
-Penalties are applied only when the option remains eligible.
+A candidate may have:
 
-A dangerous option must be excluded rather than heavily penalized.
+* a high score with low confidence;
+* a moderate score with high confidence.
 
----
+These are different situations and must remain visible.
 
-# Confidence Factor
+Confidence levels are:
 
-The Confidence Factor reflects the reliability of the score.
-
-Default values:
-
-| Confidence Level | Factor |
-| ---------------- | -----: |
-| Very High        |   1.00 |
-| High             |   0.97 |
-| Moderate         |   0.92 |
-| Low              |   0.85 |
-| Very Low         |   0.75 |
+| Level     | Meaning                                      |
+| --------- | -------------------------------------------- |
+| Very High | Extensive reliable athlete-specific data     |
+| High      | Good data and stable context                 |
+| Moderate  | Sufficient data with meaningful uncertainty  |
+| Low       | Important information is incomplete          |
+| Very Low  | Major uncertainty limits automatic selection |
 
 Confidence depends on:
 
-* completeness of athlete data,
-* reliability of exercise metadata,
-* quality of readiness data,
-* previous athlete exposure,
-* scientific support,
-* and clarity of the session objective.
-
-Example:
-
-```text
-Adjusted Score = 88
-Confidence Factor = 0.92
-
-Final Score =
-88 × 0.92
-= 80.96
-```
-
-The displayed result may be rounded to 81.
+* athlete-history completeness;
+* exercise-metadata quality;
+* readiness-data quality;
+* pain-data quality;
+* previous athlete exposure;
+* clarity of objective;
+* evidence quality;
+* equipment certainty;
+* schedule certainty.
 
 ---
 
 # Confidence Rules
 
-Confidence should decrease when:
+Confidence decreases when:
 
-* athlete history is incomplete,
-* pain information is unclear,
-* the exercise is novel,
-* the substitution is indirect,
-* equipment details are uncertain,
-* the training objective is ambiguous,
-* or the evidence base is limited.
+* pain status is unclear;
+* readiness data are incomplete;
+* technical level is uncertain;
+* the candidate is novel;
+* the substitution is indirect;
+* equipment details are uncertain;
+* athlete history is missing;
+* the primary objective is ambiguous;
+* evidence is limited.
 
-Confidence should increase when:
+Confidence increases when:
 
-* the athlete has used the option successfully,
-* performance data are available,
-* the adaptation is clearly defined,
-* exercise metadata are complete,
-* and the context is stable.
+* the athlete has used the option successfully;
+* performance data are available;
+* recent readiness data are complete;
+* exercise metadata are complete;
+* the context is stable;
+* the objective is clearly defined;
+* previous response is consistent.
 
-A low-confidence high score may require manual review.
+Default automation behavior:
+
+```text
+Very High or High Confidence
+→ Automatic selection allowed if score threshold is met
+
+Moderate Confidence
+→ Automatic selection allowed for low-risk options
+
+Low Confidence
+→ Conservative option or manual review
+
+Very Low Confidence
+→ No automatic selection for high-risk options
+```
+
+Missing critical safety information may create ineligibility rather than merely low confidence.
+
+---
+
+# Scientific Evidence Classification
+
+Methods may receive an evidence classification:
+
+| Classification | Meaning                                       |
+| -------------- | --------------------------------------------- |
+| Established    | Strong physiological and practical support    |
+| Supported      | Reasonable support with contextual dependence |
+| Emerging       | Promising but uncertain                       |
+| Speculative    | Weak or indirect support                      |
+| Unsupported    | Insufficient basis for automatic selection    |
+
+Evidence classification contributes to Confidence.
+
+It must not be applied as a second numerical multiplier after Confidence.
+
+Evidence strength does not replace athlete-specific response.
+
+An Established method may still be inappropriate for a particular athlete.
+
+An Emerging method may be considered when:
+
+* risk is low;
+* purpose is explicit;
+* uncertainty is recorded;
+* monitoring is possible.
+
+Unsupported methods must not be selected automatically.
 
 ---
 
 # Score Interpretation
 
-Default final-score interpretation:
+Default Final Suitability Score interpretation:
 
-| Final Score | Interpretation                                   |
-| ----------- | ------------------------------------------------ |
-| 90–100      | Exceptional option                               |
-| 80–89       | Strong option                                    |
-| 70–79       | Valid option                                     |
-| 60–69       | Acceptable with limitations                      |
-| 50–59       | Weak option                                      |
-| Below 50    | Reject or use only under exceptional constraints |
+|    Score | Interpretation                 |
+| -------: | ------------------------------ |
+|   90–100 | Exceptional contextual fit     |
+|    80–89 | Strong option                  |
+|    70–79 | Valid option                   |
+|    60–69 | Acceptable with limitations    |
+|    50–59 | Weak option                    |
+| Below 50 | Reject under normal conditions |
 
-These ranges apply only after hard filters have been passed.
+These ranges apply only after:
+
+* eligibility;
+* mandatory thresholds.
+
+A score above 80 does not guarantee automatic selection when confidence is low or session validation fails.
 
 ---
 
 # Selection Thresholds
 
-Default thresholds:
+Default thresholds are:
 
 ```text
 Automatic Selection Threshold = 80
 Valid Candidate Threshold = 70
-Manual Review Range = 60 to 69
+Conditional Candidate Range = 60 to 69
 Default Rejection Threshold = Below 60
 ```
 
-The thresholds may change depending on context.
+Selection behavior:
 
-For example:
+```text
+80 to 100
+→ Selectable automatically when confidence and validation allow
 
-* competition preparation may require a higher selection threshold,
-* travel training may tolerate lower equipment compatibility,
-* emergency substitutions may accept a lower specificity score,
-* recovery sessions may prioritize safety and low fatigue over direct performance transfer.
+70 to 79
+→ Valid alternative or selectable when no stronger option exists
+
+60 to 69
+→ Use only with documented limitation, constraint or review
+
+Below 60
+→ Reject under normal conditions
+```
+
+Thresholds may be raised for:
+
+* competition proximity;
+* high-impact work;
+* ballistic work;
+* maximal loading;
+* unsupervised sessions;
+* low confidence.
+
+Thresholds may be adapted for constrained environments, but mandatory criteria must never be lowered below safe limits.
 
 ---
 
 # Tie-Breaking Rules
 
-When two options receive similar scores, the system uses tie-breakers.
+Candidates are considered approximately tied when their Final Suitability Scores differ by less than:
+
+```text
+Tie Margin = 3 points
+```
 
 Default tie-break order:
 
-1. Higher Safety score
+1. Higher Safety
 2. Higher Primary Adaptation Match
-3. Better Athlete Compatibility
-4. Lower Interference Risk
-5. Better Stimulus-to-Fatigue Ratio
-6. Better Previous Athlete Response
-7. Greater Progression Potential
-8. Better Exercise Continuity
-9. Higher Athlete Preference
-10. Lower Setup Complexity
+3. Higher Technical Feasibility
+4. Higher Athlete Compatibility
+5. Higher Recovery Compatibility
+6. Lower Interference Risk
+7. Better Stimulus-to-Fatigue Ratio
+8. Better Previous Athlete Response
+9. Better Exercise Continuity
+10. Higher Adherence Probability
+11. Lower Setup Burden
 
-Two options are considered approximately tied when their final scores differ by less than 3 points.
+If candidates remain tied after these rules, both may be retained as valid alternatives.
 
----
-
-# Exercise Selection Score
-
-For normal exercise selection:
-
-```text
-Exercise Selection Score =
-Adaptation Value
-+ Athlete Compatibility
-+ Execution Quality
-+ Recovery Compatibility
-+ Context Compatibility
-+ Long-Term Value
-```
-
-Recommended high-priority criteria:
-
-* Safety
-* Adaptation Match
-* Pain Compatibility
-* Technical Feasibility
-* Recovery Compatibility
-* Stimulus-to-Fatigue Ratio
+The engine should not invent false precision to force a single winner.
 
 ---
 
-# Substitution Score
+# Scoring Profiles
 
-For substitution decisions, the weights change.
-
-Recommended substitution criteria:
-
-| Criterion                 | Weight |
-| ------------------------- | -----: |
-| Safety                    |      5 |
-| Primary Adaptation Match  |      5 |
-| Athlete Compatibility     |      5 |
-| Movement Pattern Match    |      4 |
-| Technical Feasibility     |      4 |
-| Force Direction Match     |      3 |
-| Contraction Type Match    |      3 |
-| Velocity Match            |      3 |
-| Fatigue Compatibility     |      3 |
-| Equipment Compatibility   |      3 |
-| Previous Athlete Response |      2 |
-| Combat Transfer           |      2 |
-| Athlete Preference        |      1 |
-
-The substitution score must also report:
-
-* what is preserved,
-* what is changed,
-* and what adaptation may be lost.
+The Scoring Model uses dedicated profiles for each decision level.
 
 ---
 
-# Capability Module Score
+# Profile 1 — Module Priority Score
 
-Capability Modules may be scored according to:
+Module Priority Scoring determines which Capability Modules deserve session resources.
 
-* relevance to the current goal,
-* athlete limitation,
-* training-phase compatibility,
-* readiness,
-* weekly load,
-* combat-practice interference,
-* recovery demand,
-* and recent module exposure.
+It does not determine the exercise.
 
-Example formula:
+Default criteria:
 
-```text
-Module Priority Score =
-Goal Relevance × 5
-+ Limitation Relevance × 5
-+ Phase Compatibility × 4
-+ Readiness Compatibility × 4
-+ Recovery Compatibility × 4
-+ Combat Schedule Compatibility × 4
-+ Long-Term Priority × 3
-- Recent Exposure Penalty
-- Interference Penalty
-```
+| Criterion                       | Weight |
+| ------------------------------- | -----: |
+| Primary Goal Relevance          |      5 |
+| Training Cycle Priority         |      5 |
+| Identified Limitation Relevance |      4 |
+| Athlete Readiness Compatibility |      4 |
+| Recovery Capacity Compatibility |      4 |
+| Combat-Practice Compatibility   |      4 |
+| Recent Exposure Need            |      3 |
+| Long-Term Development Value     |      3 |
+| Available Time Compatibility    |      2 |
 
----
+The Module Priority Score uses the standard normalized formula.
 
-# Session Score
+Recent Exposure Need is scored positively:
 
-A complete session may be evaluated through:
+| Score | Meaning                                      |
+| ----: | -------------------------------------------- |
+|     5 | Module is due and underexposed               |
+|     4 | Appropriate exposure                         |
+|     3 | Neutral                                      |
+|     2 | Recently exposed                             |
+|     1 | Repeated exposure with limited justification |
+|     0 | Clearly excessive exposure                   |
 
-* primary objective clarity,
-* module compatibility,
-* exercise order,
-* total fatigue,
-* session duration,
-* redundancy,
-* athlete readiness,
-* weekly interference,
-* and expected adaptation.
+Module inclusion remains subject to:
 
-Recommended session criteria:
+* conflicts;
+* recovery limits;
+* time budget;
+* session purpose;
+* validation.
 
-| Criterion               | Weight |
-| ----------------------- | -----: |
-| Objective Coherence     |      5 |
-| Safety                  |      5 |
-| Readiness Compatibility |      5 |
-| Module Compatibility    |      4 |
-| Exercise Order          |      4 |
-| Fatigue Control         |      4 |
-| Weekly Integration      |      4 |
-| Duration Feasibility    |      3 |
-| Redundancy Control      |      3 |
-| Athlete Adherence       |      2 |
-
-A session containing individually high-scoring exercises may still receive a low session score if the combination is incoherent.
+A high-priority module may still be postponed when the athlete cannot currently express the intended adaptation.
 
 ---
 
-# Exercise Order Score
+# Profile 2 — Exercise Selection Score
 
-Exercise order may be scored according to whether it protects:
+Exercise Selection Scoring ranks exercises capable of implementing a selected module.
 
-* technical quality,
-* movement velocity,
-* maximum force,
-* safety,
-* and session priority.
+Default criteria:
 
-Default order preference:
+| Criterion                  | Weight |
+| -------------------------- | -----: |
+| Safety                     |      5 |
+| Primary Adaptation Match   |      5 |
+| Module Match               |      5 |
+| Technical Feasibility      |      5 |
+| Pain Compatibility         |      5 |
+| Athlete Compatibility      |      4 |
+| Movement Function Match    |      4 |
+| Recovery Compatibility     |      4 |
+| Interference Compatibility |      4 |
+| Stimulus-to-Fatigue Ratio  |      4 |
+| Progression Potential      |      3 |
+| Previous Athlete Response  |      3 |
+| Exercise Continuity        |      3 |
+| Velocity Profile Match     |      2 |
+| Force Direction Match      |      2 |
+| Loadability                |      2 |
+| Equipment Compatibility    |      2 |
+| Environment Compatibility  |      2 |
+| Time Compatibility         |      2 |
+| Adherence Probability      |      1 |
 
-1. Preparation
-2. Technical Skill
-3. Speed
-4. Plyometrics
-5. Ballistic Power
-6. Maximum Strength
-7. Secondary Strength
-8. Hypertrophy
-9. Robustness
-10. Conditioning
-11. Recovery
+Not every criterion must remain active for every module.
 
-Deviations are allowed when the session objective justifies them.
-
----
-
-# Progression Score
-
-A progression option may be evaluated through:
-
-* adaptation relevance,
-* technical readiness,
-* recent performance,
-* recovery response,
-* load increase,
-* complexity increase,
-* risk increase,
-* and long-term value.
-
-A progression must not be selected only because the athlete completed the previous session.
-
-The system should verify:
-
-* target repetitions achieved,
-* technical quality maintained,
-* pain absent or acceptable,
-* velocity appropriate,
-* recovery satisfactory,
-* and progression size reasonable.
-
----
-
-# Readiness Modifier
-
-Readiness may modify the score of an option.
-
-Readiness inputs may include:
-
-* sleep,
-* soreness,
-* motivation,
-* stress,
-* pain,
-* resting heart rate,
-* subjective energy,
-* recent training load,
-* and combat workload.
-
-Example readiness categories:
-
-| Readiness |             Score Modifier |
-| --------- | -------------------------: |
-| Excellent |                         +3 |
-| Good      |                          0 |
-| Moderate  |                         -3 |
-| Low       |                         -8 |
-| Very Low  | -15 or session replacement |
-
-Readiness should not automatically reduce every exercise equally.
+Module-specific profiles may set irrelevant criteria to `0`.
 
 Examples:
 
-* poor lower-body readiness mainly affects lower-body high-intensity work,
-* poor shoulder readiness affects striking and pressing,
-* general sleep deprivation affects complex and high-risk exercises more heavily.
+* Velocity Profile Match should receive high weight for Power;
+* Loadability should receive high weight for Strength;
+* Energy-system compatibility should replace Loadability for Conditioning;
+* tissue relevance should receive high weight for Robustness.
+
+All profile changes must be predefined and documented.
 
 ---
 
-# Pain Modifier
+# Profile 3 — Substitution Score
 
-Pain should not be managed only through a numerical penalty.
+Substitution Scoring compares alternatives when the original exercise cannot or should not be used.
 
-The model must first apply pain eligibility rules.
+Its first objective is to preserve the primary adaptation.
 
-Possible outcomes:
+Default criteria:
+
+| Criterion                       | Weight |
+| ------------------------------- | -----: |
+| Safety                          |      5 |
+| Primary Adaptation Preservation |      5 |
+| Module Preservation             |      5 |
+| Athlete Compatibility           |      5 |
+| Technical Feasibility           |      4 |
+| Movement Function Preservation  |      4 |
+| Fatigue-Profile Compatibility   |      4 |
+| Force Direction Match           |      3 |
+| Contraction Profile Match       |      3 |
+| Velocity Profile Match          |      3 |
+| Range-of-Motion Relevance       |      3 |
+| Equipment Compatibility         |      3 |
+| Previous Athlete Response       |      2 |
+| Physical Transfer               |      2 |
+| Adherence Probability           |      1 |
+
+Substitution output must identify:
+
+* what is preserved;
+* what changes;
+* what is lost;
+* why the substitute remains acceptable.
+
+A substitute that changes the primary adaptation is not a true substitution.
+
+It is a program modification and must be recorded as such.
+
+---
+
+# Profile 4 — Session Quality Score
+
+Session Quality Scoring evaluates the complete assembled session.
+
+It does not average exercise scores mechanically.
+
+A session containing several strong exercises may still be incoherent.
+
+Default criteria:
+
+| Criterion                       | Weight |
+| ------------------------------- | -----: |
+| Primary Objective Coherence     |      5 |
+| Safety                          |      5 |
+| Athlete Readiness Compatibility |      5 |
+| Module Selection Coherence      |      4 |
+| Module Order Coherence          |      4 |
+| Fatigue Control                 |      4 |
+| Recovery Compatibility          |      4 |
+| Weekly Integration              |      4 |
+| Combat-Practice Compatibility   |      4 |
+| Duration Feasibility            |      3 |
+| Redundancy Control              |      3 |
+| Progression Coherence           |      3 |
+| Athlete Adherence               |      2 |
+
+Session Quality Scoring occurs after assembly.
+
+Final Validation remains authoritative.
+
+A session with a blocking validation error is invalid regardless of its Session Quality Score.
+
+---
+
+# Module-Specific Criterion Adjustments
+
+Each Capability Module may define a specialized Exercise Selection profile.
+
+The weights below describe priorities, not complete profiles.
+
+---
+
+## Preparation
+
+Increase weight for:
+
+* Session-Objective Relevance;
+* Technical Simplicity;
+* Low Fatigue;
+* Time Compatibility;
+* Transition Value.
+
+Preparation must not score highly because it creates fatigue.
+
+---
+
+## Movement
+
+Increase weight for:
+
+* Movement Relevance;
+* Active Control;
+* Technical Clarity;
+* Low Fatigue;
+* Transfer to Required Positions;
+* Measurability.
+
+Movement work must not be scored by exhaustion or calorie expenditure.
+
+---
+
+## Power
+
+Increase weight for:
+
+* Velocity Profile Match;
+* Maximal Intent Compatibility;
+* Technical Feasibility;
+* Neural Readiness;
+* Low Technical Fatigue;
+* Force Direction Match;
+* Stopping-Criterion Reliability.
+
+Power candidates must be rejected or modified when significant velocity or technical loss is expected.
+
+---
+
+## Strength
+
+Increase weight for:
+
+* Primary Adaptation Match;
+* Loadability;
+* Technical Repeatability;
+* Progression Potential;
+* Measurability;
+* Recovery Compatibility.
+
+---
+
+## Functional Hypertrophy
+
+Increase weight for:
+
+* Target-Tissue Relevance;
+* Productive Volume Potential;
+* Loadability;
+* Technical Repeatability;
+* Stimulus-to-Fatigue Ratio;
+* Recovery Compatibility.
+
+---
+
+## Robustness
+
+Increase weight for:
+
+* Target-Tissue Relevance;
+* Pain Compatibility;
+* Load-Tolerance Progression;
+* Position Relevance;
+* Control;
+* Recovery Compatibility;
+* Consistency.
+
+Robustness work prioritizes progressive tolerance, not maximal fatigue.
+
+---
+
+## Grip
+
+Increase weight for:
+
+* Grip-Function Match;
+* Tissue Compatibility;
+* Progression Potential;
+* Combat-Practice Compatibility;
+* Local Fatigue Control;
+* Measurability.
+
+---
+
+## Core
+
+Increase weight for:
+
+* Trunk-Function Match;
+* Force-Transmission Relevance;
+* Postural Control;
+* Movement Integration;
+* Technical Repeatability;
+* Low Unnecessary Fatigue.
+
+Core work must not score highly solely because it produces abdominal fatigue.
+
+---
+
+## Conditioning
+
+Increase weight for:
+
+* Energy-System Match;
+* Work-to-Rest Compatibility;
+* Output Measurability;
+* Local-Limitation Compatibility;
+* Recovery Cost;
+* Combat-Practice Compatibility;
+* Technical Sustainability.
+
+A conditioning method receives a lower score when local muscular failure prevents the intended cardiovascular or energetic stimulus.
+
+---
+
+## Recovery
+
+Increase weight for:
+
+* Recovery Objective Match;
+* Low Physiological Cost;
+* Readiness Improvement Potential;
+* Symptom Compatibility;
+* Simplicity;
+* Athlete Adherence.
+
+A Recovery option must not create a disproportionate recovery cost.
+
+---
+
+# Heavy-Bag Work
+
+Heavy-bag work is scored according to its selected Capability Module.
+
+It does not use one universal heavy-bag score.
+
+---
+
+## Heavy-Bag Power Work
+
+High-priority criteria include:
+
+* Power Intent Match;
+* Velocity and Impact Quality;
+* Technical Control;
+* Full-Recovery Compatibility;
+* Output Consistency;
+* Low Repetition Degradation;
+* Shoulder and Lower-Body Readiness.
+
+The set or round must stop when:
+
+* impact quality falls;
+* speed falls significantly;
+* technique degrades;
+* maximal intent cannot be maintained.
+
+---
+
+## Heavy-Bag Conditioning Work
+
+High-priority criteria include:
+
+* Energy-System Match;
+* Work-to-Rest Ratio;
+* Sustainable Output;
+* Technical Sustainability;
+* Recovery Cost;
+* Weekly Compatibility.
+
+Conditioning bag work must not be described as Power when fatigue accumulation is the main execution characteristic.
+
+---
+
+## Heavy-Bag Movement Work
+
+Controlled bag or footwork drills may implement Movement when the objective is:
+
+* positioning;
+* controlled displacement;
+* coordination;
+* force-transfer organization;
+* low-fatigue movement quality.
+
+The engine must not claim that such work replaces discipline-specific technical coaching.
+
+---
+
+# Readiness
+
+Readiness affects candidates according to their demands.
+
+Readiness must not be applied as one identical penalty to every exercise.
+
+Relevant readiness dimensions may include:
+
+* general energy;
+* sleep;
+* motivation;
+* stress;
+* neural readiness;
+* local soreness;
+* pain;
+* resting heart rate;
+* recent workload;
+* combat workload.
+
+Examples:
+
+* poor lower-body readiness primarily affects high-demand lower-body work;
+* shoulder soreness affects pressing and striking;
+* poor sleep affects complex, ballistic and high-risk work more heavily;
+* local muscular fatigue may not prohibit low-intensity Recovery work.
+
+Readiness may influence:
+
+* eligibility;
+* mandatory criteria;
+* criterion scores;
+* contextual modifiers.
+
+The same readiness factor must not be counted repeatedly without justification.
+
+---
+
+# Readiness-to-Demand Check
+
+The engine may use a Readiness-to-Demand Check as a supporting rule.
+
+Both readiness and demand must be normalized to the same scale.
 
 ```text
-No Pain
-→ Normal scoring
-
-Mild Stable Discomfort
-→ Score reduction and monitoring
-
-Pain Alters Technique
-→ Exercise excluded
-
-Sharp, Radiating or Neurological Pain
-→ Session stopped or referred for appropriate assessment
+Readiness-to-Demand Ratio =
+Relevant Athlete Readiness
+÷ Candidate Demand
 ```
 
-Pain affecting execution creates a hard exclusion.
+Suggested interpretation:
+
+|         Ratio | Meaning                                           |
+| ------------: | ------------------------------------------------- |
+| 1.20 or above | Strong readiness margin                           |
+|     1.00–1.19 | Appropriate demand                                |
+|     0.85–0.99 | Adjustment may be required                        |
+|     0.70–0.84 | Significant reduction required                    |
+|    Below 0.70 | High-demand candidate should normally be replaced |
+
+This ratio is not a medical assessment.
+
+It must not replace the detailed fatigue dimensions.
 
 ---
 
-# Competition Proximity Modifier
+# Competition Proximity
 
 Competition proximity changes scoring priorities.
 
+---
+
 ## Far From Competition
 
-The system may tolerate:
+The engine may tolerate:
 
-* higher fatigue,
-* more volume,
-* greater novelty,
-* and heavier loading.
+* higher volume;
+* higher fatigue;
+* planned tissue loading;
+* controlled novelty;
+* demanding development work.
+
+---
 
 ## Moderate Proximity
 
-The system should prioritize:
+The engine should increasingly prioritize:
 
-* specificity,
-* quality,
-* controlled fatigue,
-* and stable exercise selection.
+* stable exercises;
+* technical quality;
+* controlled fatigue;
+* sport-relevant output;
+* predictable recovery.
+
+---
 
 ## Close to Competition
 
-The system should prioritize:
+The engine should prioritize:
 
-* readiness,
-* speed,
-* technical quality,
-* low soreness,
-* low injury risk,
-* and confidence.
+* readiness;
+* speed;
+* confidence;
+* low soreness;
+* low injury risk;
+* low unnecessary fatigue;
+* familiar exercise selection.
 
-High-eccentric or unfamiliar exercises receive stronger penalties near competition.
+High-eccentric, unfamiliar or high-damage options receive lower compatibility scores.
+
+A candidate may become ineligible when its recovery time conflicts directly with competition.
 
 ---
 
-# Combat Practice Modifier
+# Combat-Practice Integration
 
-Combat training is integrated into the scoring model.
+Combat practice is an external training demand that must influence scoring.
 
-The score must account for:
+Relevant inputs include:
 
-* combat session type,
-* session intensity,
-* expected contact,
-* striking volume,
-* grappling volume,
-* technical priority,
-* and proximity.
+* practice type;
+* session intensity;
+* expected contact;
+* striking volume;
+* kicking volume;
+* grappling volume;
+* technical priority;
+* session timing.
 
-Examples:
+---
 
 ## Before Hard Sparring
 
-Penalize:
+Reduce suitability for:
 
-* exhaustive conditioning,
-* high-volume leg work,
-* heavy shoulder fatigue,
-* and high-impact plyometrics.
-
-## Before Technical Training
-
-Penalize:
-
-* work that reduces coordination,
-* grip fatigue,
-* and local muscular failure.
-
-## After Hard Combat Training
-
-Penalize:
-
-* high-risk ballistic exercises,
-* maximal strength attempts,
-* and complex technical lifts.
+* exhaustive conditioning;
+* high-volume lower-body work;
+* high shoulder fatigue;
+* high-impact plyometrics;
+* work producing significant soreness.
 
 ---
 
-# Scientific Evidence Modifier
+## Before Technical Practice
 
-Methods may receive an evidence-confidence classification.
+Reduce suitability for:
 
-## Established
-
-Supported by strong scientific principles and broad practical evidence.
-
-Confidence modifier:
-
-```text
-1.00
-```
-
-## Supported
-
-Reasonably supported but dependent on context.
-
-Confidence modifier:
-
-```text
-0.95
-```
-
-## Emerging
-
-Promising but less certain.
-
-Confidence modifier:
-
-```text
-0.85 to 0.90
-```
-
-## Speculative
-
-Weak evidence or unclear practical value.
-
-Confidence modifier:
-
-```text
-0.70 to 0.80
-```
-
-## Unsupported
-
-Should not be selected automatically.
-
-Evidence strength does not replace athlete-specific response.
+* work that impairs coordination;
+* excessive grip fatigue;
+* local muscular failure;
+* significant neural fatigue.
 
 ---
 
-# Missing Data Rules
+## After Hard Combat Practice
+
+Reduce suitability for:
+
+* maximal attempts;
+* high-risk ballistic work;
+* complex technical lifts;
+* high-impact work;
+* additional exhaustive conditioning.
+
+---
+
+# Missing Data
 
 The system must not silently assume ideal conditions.
 
-When data are missing, it should:
+When data are missing, it must:
 
-1. identify the missing criterion,
-2. lower confidence,
-3. use conservative assumptions,
-4. avoid high-risk options,
-5. select simpler and safer candidates.
+1. identify the missing information;
+2. assess whether it is safety-critical;
+3. reduce confidence;
+4. use conservative assumptions;
+5. avoid high-risk candidates;
+6. prefer simple and controllable options.
 
-Examples of missing data:
+Examples of missing information include:
 
-* unknown pain status,
-* unknown equipment,
-* unknown technical level,
-* unknown recent training,
-* unknown competition date.
+* pain status;
+* equipment;
+* technical level;
+* recent training;
+* specific-practice workload;
+* competition date;
+* current readiness.
 
-Missing critical safety data may make a candidate temporarily ineligible.
+Missing critical safety information may make high-risk candidates ineligible.
 
 ---
 
 # Default Conservative Assumptions
 
-When information is incomplete, the system should assume:
+When non-critical data are incomplete, the engine may assume:
 
-* no direct supervision,
-* moderate technical competence,
-* no spotter,
-* average readiness,
-* limited equipment certainty,
-* and normal but not exceptional recovery.
+* no direct supervision;
+* no spotter;
+* moderate technical competence;
+* average readiness;
+* normal but not exceptional recovery;
+* uncertain equipment beyond confirmed items.
 
-The system must not assume:
+The engine must not assume:
 
-* advanced technical mastery,
-* medical clearance,
-* unlimited equipment,
-* perfect sleep,
-* or absence of injury.
-
----
-
-# Scoring Transparency
-
-Every final recommendation should be explainable.
-
-The system should be able to provide:
-
-```text
-Selected Option:
-Final Score:
-Confidence Level:
-Main Strengths:
-Main Limitations:
-Reason for Selection:
-Reason Other Options Were Rejected:
-```
-
-Example:
-
-```text
-Selected Option: Trap Bar Deadlift
-
-Final Score: 87/100
-Confidence Level: High
-
-Main Strengths:
-- Strong maximum-strength adaptation
-- High athlete compatibility
-- Reliable load progression
-- Lower technical demand than conventional deadlift
-
-Main Limitations:
-- Moderate systemic fatigue
-- Requires trap bar access
-
-Reason for Selection:
-Best balance between force development, technical consistency and recovery cost.
-```
-
----
-
-# Score Breakdown
-
-The system should retain the detailed score internally.
-
-Example:
-
-```text
-Safety: 5/5 × 5 = 25
-Primary Adaptation Match: 5/5 × 5 = 25
-Athlete Compatibility: 4/5 × 5 = 20
-Movement Pattern Match: 5/5 × 4 = 20
-Recovery Compatibility: 3/5 × 4 = 12
-Stimulus-to-Fatigue Ratio: 4/5 × 4 = 16
-Progression Potential: 5/5 × 3 = 15
-Equipment Compatibility: 5/5 × 2 = 10
-Athlete Preference: 3/5 × 1 = 3
-```
-
-The user-facing explanation does not need to display every criterion unless requested.
-
----
-
-# Scoring Consistency
-
-The same criterion definitions must be used across the system.
-
-For example:
-
-* Safety 5 must mean the same level of safety across exercise selection and substitution.
-* Adaptation Match 5 must represent a direct and strong match.
-* Technical Feasibility 3 must represent acceptable but imperfect execution readiness.
-
-Criterion definitions should not change to justify a preferred answer.
-
----
-
-# Score Calibration
-
-The scoring model must be calibrated over time.
-
-Calibration compares predicted suitability with actual athlete response.
-
-Relevant outcomes include:
-
-* performance progression,
-* pain response,
-* fatigue,
-* soreness,
-* adherence,
-* technical quality,
-* recovery,
-* and combat performance.
-
-Calibration may adjust:
-
-* criterion weights,
-* confidence factors,
-* athlete-specific modifiers,
-* and substitution rankings.
-
----
-
-# Athlete-Specific Weighting
-
-The default model may be personalized.
-
-Examples:
-
-## Injury-Prone Athlete
-
-Increase weight for:
-
-* Safety
-* Joint Stress
-* Recovery Compatibility
-* Previous Response
-* Robustness Contribution
-
-## Advanced Athlete
-
-Increase weight for:
-
-* Specificity
-* Velocity Profile
-* Force Direction
-* Phase Compatibility
-* Measurability
-
-## Beginner Athlete
-
-Increase weight for:
-
-* Technical Feasibility
-* Error Tolerance
-* Progression Potential
-* Setup Reliability
-* Exercise Continuity
-
-## Combat Athlete With High Skill Volume
-
-Increase weight for:
-
-* Interference Risk
-* Recovery Compatibility
-* Combat Practice Compatibility
-* Stimulus-to-Fatigue Ratio
-
-Personalized weights must remain within defined limits to prevent extreme distortion.
-
----
-
-# Weight Limits
-
-Recommended criterion weights range from:
-
-```text
-Minimum Weight = 1
-Maximum Weight = 5
-```
-
-A criterion may receive a weight of 0 only when it is genuinely irrelevant to the decision.
-
-Mandatory criteria may never receive a weight of 0.
+* advanced technical mastery;
+* medical clearance;
+* perfect recovery;
+* unlimited equipment;
+* absence of pain;
+* absence of previous injury.
 
 ---
 
 # Double-Counting Prevention
 
-The model must avoid rewarding or penalizing the same factor multiple times.
+The same underlying factor must not be rewarded or penalized repeatedly.
 
 Examples:
 
-* pain should not be fully counted under Safety, Pain Compatibility and Injury History without adjustment,
-* combat interference should not be duplicated across Recovery and Weekly Compatibility,
-* equipment absence should be a hard exclusion, not several separate penalties,
-* complexity should not be duplicated under Technical Feasibility, Supervision and Error Tolerance without clear distinctions.
+* pain must not be fully penalized under Safety, Pain Compatibility and Injury History simultaneously;
+* combat interference must not be duplicated across multiple criteria and modifiers;
+* missing equipment must be an eligibility decision, not several penalties;
+* technical complexity must be separated clearly from supervision and error tolerance;
+* recent exposure must not be penalized under both continuity and variation without an explicit distinction.
 
-Related criteria should be reviewed for correlation.
+Rules:
+
+1. Use the most direct criterion for the factor.
+2. Apply a modifier only when the factor is not already represented adequately.
+3. Record which criterion owns the factor.
+4. Review strongly correlated criteria during calibration.
 
 ---
 
-# Maximum Penalty Limits
+# Continuity and Variation
 
-Context penalties should not reduce an otherwise eligible option by more than:
+The model must balance exercise continuity and useful variation.
+
+Continuity is preferred when:
+
+* progression continues;
+* technique remains strong;
+* pain remains acceptable;
+* fatigue remains appropriate;
+* the exercise still serves the Training Cycle.
+
+Variation may be justified by:
+
+* plateau;
+* overuse;
+* adverse response;
+* changed objective;
+* changed equipment;
+* phase transition;
+* adherence decline.
+
+Repeated exposure must not create an automatic penalty when the exercise remains productive.
+
+A repetition penalty may apply only when repetition creates a specific concern.
+
+Suggested maximum repetition modifier:
 
 ```text
-Default Maximum Total Penalty = 25 points
+Minor concern = -1
+Moderate concern = -2
+Clear overexposure concern = -4
 ```
 
-When a penalty greater than 25 appears necessary, the system should reconsider whether the option should instead be excluded.
-
 ---
 
-# Maximum Bonus Limits
+# Redundancy
 
-Bonuses should not increase the score by more than:
+Redundancy is primarily a session-level issue.
 
-```text
-Default Maximum Total Bonus = 10 points
-```
+Exercises may be redundant when they duplicate:
 
-Bonuses must not convert a weak option into a strong option.
+* primary adaptation;
+* movement function;
+* joint stress;
+* target tissues;
+* fatigue profile;
+* progression purpose.
 
-An option with a Base Normalized Score below 60 should not normally exceed the automatic selection threshold through bonuses.
-
----
-
-# Score Stability
-
-Minor changes in data should not cause extreme changes in recommendations.
-
-The system should avoid unstable rankings caused by:
-
-* excessive weighting,
-* duplicate criteria,
-* overly large bonuses,
-* or false precision.
-
-When two options remain close, both may be presented as valid alternatives.
-
----
-
-# Diversity Constraint
-
-The highest-scoring option should not always be selected if repeated exposure creates:
-
-* overuse,
-* monotony,
-* adaptation stagnation,
-* or excessive local stress.
-
-The system may apply a controlled repetition penalty.
-
-Example:
-
-```text
-Repeated Exposure Penalty:
-0 recent exposures = 0
-1 recent exposure = 0
-2 recent exposures = -1
-3 recent exposures = -3
-4 or more recent exposures = -5
-```
-
-Continuity should still be rewarded when progress remains positive.
-
-The model must balance continuity and variation.
-
----
-
-# Redundancy Penalty
-
-Within a session, exercises may receive a redundancy penalty when they duplicate:
-
-* the same movement pattern,
-* the same adaptation,
-* the same joint stress,
-* the same muscle emphasis,
-* and the same fatigue profile.
-
-Suggested penalty:
+Suggested session-level modifiers:
 
 ```text
 Minor Redundancy = -2
@@ -2050,260 +2323,323 @@ Moderate Redundancy = -5
 High Redundancy = -10
 ```
 
-Redundancy may be intentional in specialization phases.
+Redundancy may be deliberate during specialization.
+
+Intentional redundancy must be justified in the Decision Trace.
 
 ---
 
-# Session Budget Model
+# Session and Weekly Budgets
 
-A session may have limited budgets for:
+The engine may track internal comparative budgets for:
 
-* systemic fatigue,
-* local fatigue,
-* joint stress,
-* high-impact contacts,
-* technical complexity,
-* and time.
+* neural fatigue;
+* muscular fatigue;
+* connective-tissue stress;
+* metabolic fatigue;
+* impact contacts;
+* technical complexity;
+* time.
 
-Each exercise consumes part of these budgets.
+Budget values are internal planning units.
 
-Example:
+They are not direct physiological measurements.
 
-```text
-Session Fatigue Budget = 100 units
+A session exceeding a budget must be:
 
-Primary Power Exercise = 15
-Primary Strength Exercise = 30
-Secondary Strength Exercise = 20
-Hypertrophy Accessory = 15
-Conditioning Block = 25
+* reduced;
+* reorganized;
+* substituted;
+* or rejected.
 
-Total = 105
-```
+The same logic applies to weekly exposure.
 
-The session exceeds the fatigue budget and must be adjusted.
+Possible weekly categories include:
 
-Fatigue units are internal comparative values, not physiological measurements.
+* lower-body high-intensity exposure;
+* upper-body pressing exposure;
+* pulling exposure;
+* grip exposure;
+* sprint exposure;
+* plyometric contacts;
+* impact exposure;
+* maximal-strength work;
+* high-intensity conditioning.
 
----
+Budget logic belongs to constraints and validation.
 
-# Weekly Budget Model
-
-The same logic applies across the week.
-
-Possible weekly budgets include:
-
-* lower-body high-intensity exposure,
-* upper-body pressing exposure,
-* pulling exposure,
-* impact exposure,
-* sprint exposure,
-* plyometric contacts,
-* high-intensity conditioning,
-* and maximal-strength work.
-
-The scoring model should reduce the score of options that exceed the weekly budget.
+It should influence scores only when candidates remain valid alternatives.
 
 ---
 
-# Priority Score
+# Progression Scoring
 
-Training priorities may be scored separately.
+A progression option must be evaluated before selection.
 
-Example:
+Default progression criteria include:
 
-```text
-Priority Score =
-Importance × 5
-+ Current Deficit × 5
-+ Goal Relevance × 5
-+ Phase Relevance × 4
-+ Opportunity for Progress × 3
-- Interference Cost × 4
-- Recovery Cost × 3
-```
+| Criterion            | Weight |
+| -------------------- | -----: |
+| Technical Readiness  |      5 |
+| Recent Performance   |      5 |
+| Pain Compatibility   |      5 |
+| Recovery Response    |      4 |
+| Adaptation Relevance |      4 |
+| Progression Size     |      4 |
+| Risk Compatibility   |      4 |
+| Long-Term Value      |      3 |
 
-The Priority Score determines which adaptations receive the greatest session resources.
+Completing the previous session does not automatically authorize progression.
 
----
+The engine should verify:
 
-# Readiness-to-Demand Ratio
+* target work completed;
+* technical quality maintained;
+* symptoms acceptable;
+* velocity appropriate when relevant;
+* recovery satisfactory;
+* progression increment reasonable.
 
-The system may compare athlete readiness with exercise demand.
+Possible progression outcomes include:
 
-```text
-Readiness-to-Demand Ratio =
-Athlete Readiness Score
-÷ Exercise Demand Score
-```
-
-Interpretation:
-
-| Ratio         | Meaning                            |
-| ------------- | ---------------------------------- |
-| 1.20 or above | Athlete is highly ready            |
-| 1.00–1.19     | Appropriate demand                 |
-| 0.85–0.99     | Caution and possible adjustment    |
-| 0.70–0.84     | Significant reduction required     |
-| Below 0.70    | Replace or cancel high-demand work |
-
-This ratio is a decision-support value.
-
-It is not a medical assessment.
-
----
-
-# Demand Score
-
-Exercise Demand may combine:
-
-* load intensity,
-* volume,
-* eccentric stress,
-* impact,
-* technical complexity,
-* cardiovascular demand,
-* and psychological demand.
-
-Example:
-
-```text
-Exercise Demand Score =
-Intensity Demand
-+ Volume Demand
-+ Technical Demand
-+ Impact Demand
-+ Recovery Demand
-```
-
-The score must be normalized before comparison with readiness.
-
----
-
-# Scoring Model for Heavy Bag Work
-
-Heavy bag drills require specific criteria.
-
-Recommended criteria include:
-
-* Technical Objective Match
-* Speed Intent Match
-* Power Intent Match
-* Combination Complexity
-* Impact Demand
-* Conditioning Demand
-* Shoulder Fatigue
-* Lower-Body Fatigue
-* Technical Breakdown Risk
-* Combat Transfer
-* Equipment Availability
-
-Example:
-
-## Power Bag Round
-
-High weights:
-
-* power intent,
-* impact quality,
-* technical control,
-* full recovery,
-* low repetition degradation.
-
-## Conditioning Bag Round
-
-High weights:
-
-* energy-system match,
-* work-to-rest ratio,
-* sustainable technique,
-* output consistency.
-
-## Speed Bag Round
-
-High weights:
-
-* velocity,
-* relaxation,
-* technical precision,
-* low fatigue,
-* stopping before speed loss.
-
----
-
-# Scoring Model for Conditioning
-
-Conditioning modalities should be scored according to:
-
-* energy-system match,
-* interval compatibility,
-* cardiovascular demand,
-* local muscular limitation,
-* impact,
-* technical complexity,
-* recovery cost,
-* sport specificity,
-* and equipment.
-
-A modality that causes local muscular failure before the cardiovascular target is reached receives a lower score.
-
----
-
-# Scoring Model for Robustness
-
-Robustness exercises should be scored according to:
-
-* target tissue relevance,
-* load tolerance,
-* control,
-* pain response,
-* progression potential,
-* recovery cost,
-* joint-position relevance,
-* and interference.
-
-Robustness work usually prioritizes consistency over maximal fatigue.
-
----
-
-# Scoring Model for Movement
-
-Movement exercises should be scored according to:
-
-* movement-quality relevance,
-* coordination demand,
-* technical clarity,
-* fatigue cost,
-* transfer to target movement,
-* and athlete limitation.
-
-Movement work must not be scored primarily by caloric cost or muscular exhaustion.
+* increase load;
+* increase repetitions;
+* increase velocity target;
+* increase range of motion;
+* increase volume;
+* improve density;
+* increase complexity;
+* repeat current prescription;
+* regress;
+* deload.
 
 ---
 
 # Manual Override
 
-A qualified coach or authorized system rule may override the ranking.
+A qualified coach or authorized system rule may override a numerical ranking.
 
 An override must record:
 
-* original highest-scoring option,
-* selected option,
-* reason,
-* expected benefit,
-* known compromise,
-* and review date.
+* original highest-ranked candidate;
+* selected candidate;
+* reason;
+* expected benefit;
+* known compromise;
+* review condition or date.
 
-Valid override reasons include:
+Valid reasons may include:
 
-* coaching observation not represented in data,
-* competition strategy,
-* rehabilitation instruction,
-* psychological preparation,
-* deliberate exercise exposure,
-* or technical teaching priority.
+* coaching observation not represented in data;
+* competition strategy;
+* rehabilitation instruction;
+* psychological exposure;
+* deliberate technical teaching;
+* planned assessment.
 
-Manual overrides must not bypass hard safety exclusions.
+Manual override must never bypass:
+
+* hard safety exclusions;
+* medical contraindications;
+* blocking validation errors.
+
+---
+
+# Transparency
+
+Every recommendation must be explainable.
+
+Internal scoring output should include:
+
+```text
+Decision Type:
+Candidate:
+Eligibility:
+Eligibility Reasons:
+Mandatory Criteria:
+Mandatory Criteria Passed:
+Active Scoring Profile:
+Criterion Scores:
+Criterion Weights:
+Base Suitability Score:
+Positive Modifiers:
+Negative Modifiers:
+Final Suitability Score:
+Confidence Level:
+Confidence Reasons:
+Rank:
+Selection Status:
+```
+
+User-facing output may include:
+
+```text
+Selected Option:
+Why It Was Selected:
+Main Benefit:
+Main Limitation:
+Relevant Adjustment:
+```
+
+The user-facing explanation does not need to display every numerical criterion unless requested.
+
+---
+
+# Decision Trace Integration
+
+The Scoring Model must provide the Decision Trace with:
+
+* candidates considered;
+* candidates excluded;
+* exclusion reasons;
+* mandatory-threshold failures;
+* active criteria;
+* active weights;
+* applied modifiers;
+* final ranking;
+* confidence level;
+* tie-break rules used;
+* override information.
+
+The Decision Trace must reflect the actual calculation and rules applied.
+
+It must not create a retrospective narrative unrelated to the real decision process.
+
+---
+
+# Scoring Consistency
+
+Criterion meanings must remain stable across the engine.
+
+For example:
+
+* Safety `5` must represent the same safety quality in selection and substitution;
+* Primary Adaptation Match `5` must represent a direct and strong match;
+* Technical Feasibility `3` must represent acceptable current execution;
+* Recovery Compatibility `2` must represent a meaningful recovery concern.
+
+Definitions must not change between candidates to favor a preferred result.
+
+---
+
+# Calibration
+
+The Scoring Model must be calibrated against actual athlete outcomes.
+
+Calibration data may include:
+
+* performance progression;
+* technical quality;
+* pain response;
+* fatigue;
+* soreness;
+* adherence;
+* recovery;
+* session completion;
+* exercise substitution frequency;
+* combat-practice quality.
+
+Calibration may adjust:
+
+* criterion definitions;
+* default weights;
+* module-specific profiles;
+* modifier ranges;
+* confidence rules;
+* athlete-specific preferences.
+
+Calibration must not weaken hard safety rules.
+
+---
+
+# Athlete-Specific Adaptation
+
+The default model may become athlete-specific over time.
+
+Examples:
+
+## Athlete With Recurrent Injury Concerns
+
+Increase priority for:
+
+* Pain Compatibility;
+* Previous Athlete Response;
+* Connective-Tissue Cost Compatibility;
+* Recovery Compatibility;
+* Technical Repeatability.
+
+## Advanced Athlete
+
+Increase priority for:
+
+* Phase Relevance;
+* Velocity Profile Match;
+* Force Direction Match;
+* Measurability;
+* athlete-specific response.
+
+## Beginner Athlete
+
+Increase priority for:
+
+* Technical Feasibility;
+* Error Tolerance;
+* Setup Reliability;
+* Exercise Continuity;
+* Progression Potential.
+
+## Combat Athlete With High Specific-Practice Volume
+
+Increase priority for:
+
+* Interference Compatibility;
+* Recovery Compatibility;
+* Combat-Practice Compatibility;
+* Stimulus-to-Fatigue Ratio;
+* weekly integration.
+
+Personalized weights must remain within:
+
+```text
+1 to 5
+```
+
+Mandatory criteria remain mandatory.
+
+Personalization must not distort the model enough to make poor-adaptation or unsafe options rank highly.
+
+---
+
+# Data Quality
+
+Data quality supports Confidence assessment.
+
+Data may be classified as:
+
+## High Quality
+
+* direct measurement;
+* repeated observation;
+* validated testing;
+* consistent training history.
+
+## Moderate Quality
+
+* structured athlete feedback;
+* coach observation;
+* recent self-report;
+* repeated but non-instrumented observation.
+
+## Low Quality
+
+* incomplete memory;
+* isolated subjective impression;
+* unverified assumption;
+* outdated information.
+
+Low data quality must be visible.
+
+It must not be presented as certainty.
 
 ---
 
@@ -2311,111 +2647,97 @@ Manual overrides must not bypass hard safety exclusions.
 
 The system should periodically audit:
 
-* selected scores,
-* rejected candidates,
-* actual athlete outcomes,
-* substitution success,
-* pain events,
-* progression,
-* and recovery.
+* high-scoring selections;
+* excluded candidates;
+* substitution outcomes;
+* progression decisions;
+* pain events;
+* fatigue predictions;
+* recovery predictions;
+* exercise continuity;
+* athlete adherence;
+* confidence accuracy.
 
 Audit questions include:
 
-* Did high-scoring exercises produce good outcomes?
-* Were low-scoring options incorrectly rejected?
-* Are certain criteria overweighted?
-* Are athlete preferences being ignored?
-* Are fatigue costs underestimated?
+* Did high-scoring options produce the expected adaptation?
+* Were fatigue costs underestimated?
+* Were valid candidates rejected?
+* Are some criteria duplicated?
+* Are preferences overpowering adaptation?
+* Is the engine changing exercises too often?
 * Are combat sessions sufficiently protected?
-* Is the model rotating exercises too often?
 * Are confidence levels realistic?
+* Do manual overrides produce better outcomes?
 
 ---
 
 # Model Learning
 
-Future versions of CAS may use athlete data to refine scores.
+Future versions of CAS may refine scores using athlete data.
 
-Possible athlete-specific learning inputs include:
+Possible inputs include:
 
-* completed sessions,
-* skipped exercises,
-* pain reports,
-* RPE,
-* RIR,
-* velocity,
-* load progression,
-* heart rate,
-* session duration,
-* recovery,
-* soreness,
-* and combat performance.
+* completed sessions;
+* skipped exercises;
+* substitutions;
+* pain reports;
+* RPE;
+* RIR;
+* velocity;
+* load progression;
+* heart rate;
+* session duration;
+* recovery;
+* soreness;
+* readiness;
+* combat-practice feedback.
 
 Learning must remain constrained by:
 
-* safety rules,
-* physiological principles,
-* explainability,
-* and data quality.
+* safety rules;
+* physiological doctrine;
+* explainability;
+* data quality;
+* the one-primary-adaptation rule.
 
-The system must not learn unsafe behavior from athlete preferences.
-
----
-
-# Data Quality Rules
-
-Data may be classified as:
-
-## High Quality
-
-* direct measurement,
-* repeated observation,
-* validated testing,
-* consistent logged history.
-
-## Moderate Quality
-
-* structured athlete feedback,
-* coach observation,
-* recent self-report.
-
-## Low Quality
-
-* incomplete memory,
-* unverified assumption,
-* isolated subjective impression.
-
-Lower data quality reduces confidence.
+The system must not learn unsafe behavior merely because the athlete repeatedly chooses it.
 
 ---
 
-# Example Exercise Comparison
+# Example — Exercise Selection
 
 Objective:
 
 ```text
-Develop lower-body maximum strength while minimizing fatigue before kick training.
+Develop lower-body maximum strength while limiting interference with kick training.
+```
+
+Selected module:
+
+```text
+Strength
 ```
 
 Candidates:
 
-* Back Squat
-* Front Squat
-* Trap Bar Deadlift
-* Bulgarian Split Squat
-* Leg Press
+* Back Squat;
+* Front Squat;
+* Trap Bar Deadlift;
+* Bulgarian Split Squat;
+* Leg Press.
 
-Example result:
+Illustrative result:
 
-| Exercise              | Base Score | Penalties | Confidence | Final Score |
-| --------------------- | ---------: | --------: | ---------: | ----------: |
-| Front Squat           |         86 |        -6 |       0.97 |          78 |
-| Back Squat            |         88 |       -10 |       0.97 |          76 |
-| Trap Bar Deadlift     |         84 |        -4 |       1.00 |          80 |
-| Bulgarian Split Squat |         82 |        -8 |       0.97 |          72 |
-| Leg Press             |         78 |        -2 |       0.95 |          72 |
+| Candidate             | Final Score | Confidence |
+| --------------------- | ----------: | ---------- |
+| Trap Bar Deadlift     |          84 | High       |
+| Front Squat           |          81 | High       |
+| Back Squat            |          78 | High       |
+| Bulgarian Split Squat |          74 | High       |
+| Leg Press             |          71 | Moderate   |
 
-Selected option:
+Selected candidate:
 
 ```text
 Trap Bar Deadlift
@@ -2424,16 +2746,16 @@ Trap Bar Deadlift
 Reason:
 
 ```text
-Best balance between high force production, technical reliability and lower interference with upcoming kick training.
+It provides a strong maximum-strength stimulus with reliable loading and a lower predicted interference cost for the upcoming kick session.
 ```
 
-This example is contextual.
+This result is contextual.
 
-It does not mean the trap bar deadlift is universally superior.
+It does not establish universal superiority.
 
 ---
 
-# Example Substitution Comparison
+# Example — Substitution
 
 Original exercise:
 
@@ -2449,21 +2771,21 @@ No pull-up bar available
 
 Candidates:
 
-* Heavy Lat Pulldown
-* Kneeling Band Pulldown
-* Chest-Supported Row
-* Inverted Row
+* Heavy Lat Pulldown;
+* Kneeling Band Pulldown;
+* Inverted Row;
+* Chest-Supported Row.
 
-Example result:
+Illustrative result:
 
-| Substitute             | Score | Confidence |
-| ---------------------- | ----: | ---------: |
-| Heavy Lat Pulldown     |    88 |       High |
-| Kneeling Band Pulldown |    75 |   Moderate |
-| Inverted Row           |    68 |       High |
-| Chest-Supported Row    |    64 |       High |
+| Candidate              | Final Score | Confidence |
+| ---------------------- | ----------: | ---------- |
+| Heavy Lat Pulldown     |          88 | High       |
+| Kneeling Band Pulldown |          76 | Moderate   |
+| Inverted Row           |          69 | High       |
+| Chest-Supported Row    |          64 | High       |
 
-Selected option:
+Selected substitute:
 
 ```text
 Heavy Lat Pulldown
@@ -2471,138 +2793,167 @@ Heavy Lat Pulldown
 
 Preserved:
 
-* vertical pulling,
-* high-force intent,
-* progressive loading.
+* vertical pulling function;
+* high-force intent;
+* progressive loading;
+* primary Strength adaptation.
+
+Changed:
+
+* body position;
+* stabilization demand.
 
 Reduced:
 
-* bodyweight stabilization,
 * relative-strength specificity.
 
 ---
 
-# Example Readiness Adjustment
+# Example — Hard Exclusion
 
-Planned exercise:
+Planned candidate:
 
 ```text
 Depth Jump
 ```
 
-Current data:
+Current athlete data:
 
-* poor sleep,
-* high calf soreness,
-* hard sparring previous evening,
-* reduced landing quality.
+* poor sleep;
+* significant calf soreness;
+* hard sparring during the previous evening;
+* reduced landing control.
 
 Result:
 
 ```text
-Eligibility = FALSE
+Eligibility = INELIGIBLE
+Final Score = NOT APPLICABLE
+Selection Status = EXCLUDED
 ```
 
-The exercise is not given a low score.
+The candidate is not assigned a low score.
 
-It is excluded.
-
-Possible substitute:
-
-```text
-Low-Intensity Landing Drill
-```
-
-The substitute is scored separately.
+A lower-demand landing drill or Recovery option must be evaluated separately.
 
 ---
 
-# Recommended Output Format
-
-Internal output:
+# Recommended Engine Output
 
 ```text
-Candidate:
-Eligibility:
-Mandatory Criteria Passed:
-Base Weighted Score:
-Normalized Score:
-Bonuses:
-Penalties:
-Confidence Factor:
-Final Score:
-Rank:
-Selection Status:
+decision_type:
+candidate_id:
+candidate_name:
+
+eligibility:
+eligibility_reasons:
+
+mandatory_criteria:
+mandatory_criteria_passed:
+
+scoring_profile:
+criterion_scores:
+criterion_weights:
+
+base_suitability_score:
+positive_modifiers:
+negative_modifiers:
+final_suitability_score:
+
+confidence_level:
+confidence_reasons:
+
+rank:
+selection_status:
+tie_break_applied:
+override_applied:
 ```
 
-User-facing output:
+The definitive implementation format is governed by:
 
-```text
-Selected exercise:
-Why:
-Main benefit:
-Main limitation:
-Prescription adjustment:
-```
+* `19_ENGINE_INPUT_SCHEMA.md`;
+* `20_ENGINE_OUTPUT_SCHEMA.md`;
+* `21_DECISION_TRACE.md`.
 
 ---
 
 # Decision Logic Summary
 
 ```text
-Is the option safe and feasible?
+Is the candidate allowed?
         ↓
-No → Exclude
-        ↓
-Yes
-        ↓
-Does it sufficiently match the primary adaptation?
-        ↓
-No → Exclude or downgrade to secondary candidate
+No → Exclude without score
         ↓
 Yes
         ↓
-Score athlete compatibility
+Does every mandatory criterion pass?
         ↓
-Score execution quality
+No → Reject or evaluate a regression
         ↓
-Score fatigue and recovery cost
+Yes
         ↓
-Score context compatibility
+Select the correct scoring profile
         ↓
-Apply bonuses and penalties
+Score active criteria
         ↓
-Adjust for confidence
+Apply predefined weights
+        ↓
+Normalize to 0–100
+        ↓
+Apply limited contextual modifiers
+        ↓
+Assess confidence separately
         ↓
 Rank valid candidates
         ↓
+Apply tie-break rules
+        ↓
 Select the highest-value coherent option
+        ↓
+Run final validation
 ```
 
 ---
 
-# Final Principle
+# Final Principles
 
-The Combat Athlete System does not select the option with the highest theoretical performance potential.
+The Combat Athlete System does not select the option with the greatest theoretical performance potential in isolation.
 
-It selects the valid option with the highest expected value for the specific athlete, objective and context.
+It selects the valid option with the highest expected value for the specific:
+
+* athlete;
+* adaptation;
+* Capability Module;
+* session;
+* Training Cycle;
+* recovery state;
+* combat schedule;
+* practical context.
 
 Expected value includes:
 
-* adaptation,
-* safety,
-* execution,
-* recovery,
-* adherence,
-* and long-term development.
+* adaptation quality;
+* safety;
+* technical execution;
+* fatigue control;
+* recovery;
+* progression;
+* adherence;
+* long-term development.
 
-The model must always remain:
+The model must remain:
 
-* explainable,
-* contextual,
-* conservative when data are incomplete,
-* and subordinate to hard safety rules.
+* explainable;
+* contextual;
+* conservative when critical data are incomplete;
+* consistent across decisions;
+* subordinate to hard rules;
+* compatible with final validation.
 
-The score guides the decision.
+> Eligibility decides what is allowed.
 
-It does not replace judgment.
+> Scoring decides what is preferable.
+
+> Confidence describes how certain the engine is.
+
+> Validation decides whether the final result may be delivered.
