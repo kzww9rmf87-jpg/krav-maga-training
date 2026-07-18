@@ -148,15 +148,17 @@ describe("registryVocabulary — equipment capabilities", () => {
   test("adding medicine_ball/wall as vocabulary changed no prescription that predates them", () => {
     // Scoped to the 30 entries that existed when medicine_ball/wall were added
     // as pure vocabulary (the 29 pre-Ballistics entries + med_ball_slam,
-    // which uses slam_ball, not medicine_ball/wall). The four throw-variant
-    // entries that deliberately use medicine_ball/wall were integrated in a
-    // later, separate step (see ballisticExercises.test.ts) and are excluded
-    // from this non-regression check by design, not by oversight.
+    // which uses slam_ball, not medicine_ball/wall). The six throw-variant
+    // entries that deliberately use medicine_ball/wall were integrated across
+    // two later, separate steps (see ballisticExercises.test.ts) and are
+    // excluded from this non-regression check by design, not by oversight.
     const PRE_MEDICINE_BALL_INTEGRATION_IDS = [
       "med_ball_chest_pass",
       "med_ball_overhead_throw",
       "med_ball_shot_put_throw",
       "med_ball_reverse_throw",
+      "med_ball_rotational_throw",
+      "med_ball_scoop_toss",
     ];
     for (const [id, entry] of Object.entries(EXERCISE_PRESCRIPTION_REGISTRY)) {
       if (PRE_MEDICINE_BALL_INTEGRATION_IDS.includes(id)) {

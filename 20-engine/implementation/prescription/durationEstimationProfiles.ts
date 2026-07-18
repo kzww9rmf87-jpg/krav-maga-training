@@ -124,6 +124,12 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   unresolvedProfile("med_ball_reverse_throw", "sets_reps", [
     "50-exercises/67_BALLISTICS/16_MED_BALL_REVERSE_THROW.md",
   ]),
+  unresolvedProfile("med_ball_rotational_throw", "sets_reps", [
+    "50-exercises/67_BALLISTICS/12_MED_BALL_ROTATIONAL_THROW.md",
+  ]),
+  unresolvedProfile("med_ball_scoop_toss", "sets_reps", [
+    "50-exercises/67_BALLISTICS/13_MED_BALL_SCOOP_TOSS.md",
+  ]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

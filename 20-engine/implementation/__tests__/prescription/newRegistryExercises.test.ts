@@ -414,34 +414,35 @@ describe("new registry exercises — runEngine integration", () => {
 // -----------------------------------------------------------------------------
 // 7. An unknown exercise stays unavailable
 //
-// med_ball_slam, med_ball_chest_pass, med_ball_overhead_throw,
-// med_ball_shot_put_throw and med_ball_reverse_throw were all integrated in
-// later sessions (see ballisticExercises.test.ts for their full coverage) —
-// this block now uses med_ball_rotational_throw, which remains genuinely
-// unintegrated: its documented laterality ("Unilateral Emphasis with
-// Bilateral Support") does not map onto ExerciseLaterality without an
-// unmade CAS design decision, see the integrability report.
+// All 7 documented Ballistics chapters (med_ball_slam, med_ball_chest_pass,
+// med_ball_overhead_throw, med_ball_shot_put_throw, med_ball_reverse_throw,
+// med_ball_rotational_throw and med_ball_scoop_toss) are now integrated —
+// see ballisticExercises.test.ts for their full coverage, including the
+// laterality business decision that unblocked the last two. No real,
+// documented-but-excluded exercise remains in this family, so this block
+// now demonstrates the generic safe-failure behavior with a clearly
+// fictional id instead.
 // -----------------------------------------------------------------------------
 
-describe("new registry exercises — an unintegrated exercise (med_ball_rotational_throw) stays unavailable", () => {
+describe("new registry exercises — an unknown exercise id stays unavailable", () => {
   test("getExercisePrescriptionSource reports EXERCISE_NOT_IN_REGISTRY without throwing", () => {
-    expect(isPilotExerciseId("med_ball_rotational_throw")).toBe(false);
+    expect(isPilotExerciseId("med_ball_does_not_exist")).toBe(false);
 
-    const result = getExercisePrescriptionSource("med_ball_rotational_throw", {
+    const result = getExercisePrescriptionSource("med_ball_does_not_exist", {
       rangeContext: "normal",
       athleteReferences: [],
       availableEquipmentCapabilities: [],
     });
 
     if (result.ok) {
-      throw new Error("Expected med_ball_rotational_throw to be reported as not in the registry.");
+      throw new Error("Expected med_ball_does_not_exist to be reported as not in the registry.");
     }
     expect(result.failureCode).toBe("EXERCISE_NOT_IN_REGISTRY");
   });
 
-  test("runEngine keeps a med_ball_rotational_throw candidate's prescription unavailable, never fabricated", () => {
+  test("runEngine keeps an unknown candidate's prescription unavailable, never fabricated", () => {
     const input = makeValidInput();
-    const exercise = makeExercise({ id: "med_ball_rotational_throw" });
+    const exercise = makeExercise({ id: "med_ball_does_not_exist" });
 
     const result = runEngine(input, [exercise], new Map());
 
@@ -452,7 +453,7 @@ describe("new registry exercises — an unintegrated exercise (med_ball_rotation
       throw new Error(`Expected prescription status "unavailable", got: ${JSON.stringify(result.prescription)}`);
     }
     expect(
-      result.prescription.missingSourceData.some((gap) => gap.exerciseId === "med_ball_rotational_throw"),
+      result.prescription.missingSourceData.some((gap) => gap.exerciseId === "med_ball_does_not_exist"),
     ).toBe(true);
   });
 });

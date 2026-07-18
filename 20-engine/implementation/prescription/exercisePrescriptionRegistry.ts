@@ -132,17 +132,23 @@ export const PILOT_EXERCISE_IDS = [
   "split_squat_jump",
   // Ballistics
   // "medicine_ball" and "wall" were added to equipmentCapabilities.ts,
-  // unblocking five of the seven Ballistics chapters. Two remain excluded:
-  // med_ball_rotational_throw and med_ball_scoop_toss are both documented
-  // with laterality "Unilateral Emphasis with Bilateral Support", which
-  // does not map onto ExerciseLaterality (bilateral | unilateral |
-  // alternating | asymmetrical | not_applicable) without an unmade CAS
-  // design decision — see the integrability report. Each entry below that
-  // represents a single documented variant out of several ("Wall or
-  // Partner", "Open Space or Wall") says so explicitly in its own comment.
+  // unblocking all seven Ballistics chapters' equipment requirement. The
+  // remaining laterality question — both med_ball_rotational_throw and
+  // med_ball_scoop_toss are documented with "Unilateral Emphasis with
+  // Bilateral Support", which has no direct ExerciseLaterality member —
+  // was resolved by an explicit CAS business decision: represent both as
+  // "unilateral" with volumeInterpretations ["repetitions_per_side"],
+  // matching their own documented "repetitions per side" prescription and
+  // the identical precedent already used by med_ball_shot_put_throw. See
+  // the laterality decision report. Each entry below that represents a
+  // single documented variant out of several ("Wall or Partner", "Open
+  // Space or Wall", "Standing Rotational Scoop Toss" vs. "Forward Scoop
+  // Toss" vs. "Lateral Scoop Toss") says so explicitly in its own comment.
   "med_ball_slam",
   "med_ball_chest_pass",
   "med_ball_overhead_throw",
+  "med_ball_rotational_throw",
+  "med_ball_scoop_toss",
   "med_ball_shot_put_throw",
   "med_ball_reverse_throw",
 ] as const;
@@ -3963,6 +3969,312 @@ const medBallReverseThrowEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Medicine-Ball Rotational Throw — WALL VARIANT ONLY
+// (This chapter documents "Equipment: Medicine Ball, Wall or Partner" — two
+// alternative receiving surfaces for the same throw, exactly like Chest
+// Pass. requiredEquipmentCapabilities describes the prescribed variant, not
+// every documented alternative. This entry represents the wall variant
+// only. No "partner" capability exists and none is created here.)
+// Source: 50-exercises/67_BALLISTICS/12_MED_BALL_ROTATIONAL_THROW.md
+//   - Primary Classification: "Rotational Ballistic Power"; Exercise
+//     Identity: "Complexity: Moderate"; "Unilateral or Bilateral:
+//     Unilateral Emphasis with Bilateral Support" — resolved to
+//     `laterality: "unilateral"` / `volumeInterpretations:
+//     ["repetitions_per_side"]` per the laterality decision report,
+//     matching this chapter's own "Prescription Variables > Repetitions:
+//     ...repetitions per side" and the identical precedent already used
+//     by med_ball_shot_put_throw. The "Bilateral Support" nuance is not
+//     separately represented, consistent with every other unilateral
+//     entry in this registry.
+//   - Starting Position: "...the body positioned side-on or slightly
+//     angled to the target... The throwing distance must allow safe
+//     release and rebound management."
+//   - Key Technical Cues: "Rotate from the hips.", "Let the trunk
+//     transfer the force.", "Throw through the target.", "Keep the ball
+//     close during the load.", "Do not arm the throw.", "Keep the ribs
+//     controlled.", "Finish balanced.", "Reset before repeating."
+//   - Common Errors (verbatim, abridged): "Arm-Dominant Throw... Poor
+//     Foot Pivot... Inconsistent Release Direction: The ball travels
+//     upward, downward or away from the target. Risk: poor
+//     standardization, unsafe rebound... Loss of Balance: The athlete
+//     steps uncontrollably after release."
+//   - Coaching Priorities: "...Train both sides. Stop before velocity
+//     declines."
+//   - Regression Criteria: "...or fatigue reduces output."
+//   - Safety Rules: "...Verify the wall or partner setup... Use a safe
+//     rebound distance... Terminate immediately if sharp pain,
+//     dizziness, numbness or sudden weakness occurs."
+// Method: power_repetition_sets / power / primary (matches every other
+//   Ballistics entry; movement_intent only — no ball mass claimed).
+// -----------------------------------------------------------------------------
+
+const SOURCE_MED_BALL_ROTATIONAL_THROW = "50-exercises/67_BALLISTICS/12_MED_BALL_ROTATIONAL_THROW.md";
+
+const medBallRotationalThrowStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "med_ball_rotational_throw_technical_failure",
+    description:
+      "Stop the set if the athlete throws mainly with the arms, the rear foot fails to pivot while the body rotates aggressively, or the athlete rotates primarily through the lower back.",
+    sourceRuleIds: [SOURCE_MED_BALL_ROTATIONAL_THROW],
+  }),
+  velocityLossCondition({
+    conditionId: "med_ball_rotational_throw_velocity_loss",
+    description: "Stop before velocity declines.",
+    sourceRuleIds: [SOURCE_MED_BALL_ROTATIONAL_THROW],
+  }),
+  fatigueLimitCondition({
+    conditionId: "med_ball_rotational_throw_fatigue_limit",
+    description: "Regress or stop the set when fatigue reduces output.",
+    sourceRuleIds: [SOURCE_MED_BALL_ROTATIONAL_THROW],
+  }),
+  impactLimitCondition({
+    conditionId: "med_ball_rotational_throw_impact_limit",
+    description:
+      "Stop the set if the ball travels upward, downward or away from the target, creating an unsafe rebound.",
+    sourceRuleIds: [SOURCE_MED_BALL_ROTATIONAL_THROW],
+  }),
+  balanceLossCondition({
+    conditionId: "med_ball_rotational_throw_balance_loss",
+    description: "Stop the set if the athlete steps uncontrollably or spins excessively after release.",
+    sourceRuleIds: [SOURCE_MED_BALL_ROTATIONAL_THROW],
+  }),
+  painCondition({
+    conditionId: "med_ball_rotational_throw_pain",
+    description: "Terminate immediately if sharp pain, dizziness, numbness or sudden weakness occurs.",
+    sourceRuleIds: [SOURCE_MED_BALL_ROTATIONAL_THROW],
+  }),
+  completionCondition({
+    conditionId: "med_ball_rotational_throw_completion",
+    description: "Stop once the prescribed sets and repetitions per side are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const medBallRotationalThrowInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "med_ball_rotational_throw_setup",
+    "setup",
+    "Set up at a wall, in a stable athletic stance positioned side-on or slightly angled to the wall, with the medicine ball held near the hip, waist or chest, at a distance that allows safe release and rebound management. This entry covers the wall variant only, not the partner variant.",
+    "high",
+    true,
+    SOURCE_MED_BALL_ROTATIONAL_THROW,
+  ),
+  makeInstruction(
+    "med_ball_rotational_throw_execution",
+    "execution",
+    "Rotate from the hips, let the trunk transfer the force, throw through the target, keep the ball close during the load, do not arm the throw, keep the ribs controlled and finish balanced.",
+    "high",
+    true,
+    SOURCE_MED_BALL_ROTATIONAL_THROW,
+  ),
+];
+
+const medBallRotationalThrowEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "med_ball_rotational_throw",
+  moduleId: "power",
+  role: "primary",
+  explicitMethodId: "power_repetition_sets",
+  capabilities: {
+    exerciseId: "med_ball_rotational_throw",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["power_repetition_sets"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["movement_intent"],
+    preferredIntensityTypes: ["movement_intent"],
+    supportedLoadingModes: ["medicine_ball"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "unilateral",
+    volumeInterpretations: ["repetitions_per_side"],
+    capabilityTags: ["countable_repetitions", "global_movement_intent", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["medicine_ball", "wall"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["med_ball_rotational_throw_setup", "med_ball_rotational_throw_execution"],
+    requiredStopConditionIds: [
+      "med_ball_rotational_throw_technical_failure",
+      "med_ball_rotational_throw_velocity_loss",
+      "med_ball_rotational_throw_fatigue_limit",
+      "med_ball_rotational_throw_impact_limit",
+      "med_ball_rotational_throw_balance_loss",
+      "med_ball_rotational_throw_pain",
+      "med_ball_rotational_throw_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_med_ball_rotational_throw",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_MED_BALL_ROTATIONAL_THROW, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["movement_intent"],
+  preferredIntensityType: "movement_intent",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: medBallRotationalThrowInstructions,
+  stopConditionDefinitions: medBallRotationalThrowStopConditions,
+  sourceRuleIds: [
+    SOURCE_MED_BALL_ROTATIONAL_THROW,
+    SOURCE_METHOD_CATALOGUE,
+    SOURCE_MODULE_PROFILES,
+    SOURCE_NUMERICAL_TABLES,
+  ],
+};
+
+// -----------------------------------------------------------------------------
+// Medicine-Ball Scoop Toss — STANDING ROTATIONAL VARIANT ONLY, OPEN SPACE
+// (This chapter documents three named variants relevant here: "Standing
+// Rotational Scoop Toss" — "This is the default variation for most
+// athletes" — is the ONLY variant represented by this entry. "Forward
+// Scoop Toss" is explicitly bilateral ("bilateral sequencing") and is NOT
+// covered. "Lateral Scoop Toss" is explicitly directed "toward a wall" and
+// is also NOT covered — its wall requirement must not be attributed to the
+// Standing Rotational variant, which mentions no specific target surface.
+// Equipment: the chapter's Exercise Identity states "Medicine Ball, Wall or
+// Open Space"; since the Standing Rotational variant's own description
+// names no target/wall requirement, and "open_space" is the
+// non-target-dependent, unconditionally sufficient branch of that
+// alternative, this entry uses ["medicine_ball", "open_space"] — chosen
+// from the fiche's text, not deduced.)
+// Source: 50-exercises/67_BALLISTICS/13_MED_BALL_SCOOP_TOSS.md
+//   - Primary Classification: "Hip-Driven Ballistic Power"; Exercise
+//     Identity: "Complexity: Moderate"; "Unilateral or Bilateral:
+//     Unilateral Emphasis with Bilateral Support" — resolved identically
+//     to med_ball_rotational_throw: `laterality: "unilateral"` /
+//     `volumeInterpretations: ["repetitions_per_side"]`, matching this
+//     chapter's own "Prescription Variables > Repetitions: ...repetitions
+//     per side."
+//   - "Standing Rotational Scoop Toss": "Primary role: whole-body
+//     rotational and diagonal power. Primary characteristics: high
+//     lower-body contribution, moderate complexity, strong hip-to-hand
+//     sequencing. This is the default variation for most athletes."
+//   - Starting Position: "...feet in a stable athletic stance, the
+//     medicine ball held low near the hip... For rotational variations,
+//     the body should be positioned side-on or slightly angled to the
+//     target area."
+//   - Key Technical Cues: "Drive from the hips.", "Scoop through the
+//     target.", "Let the legs start the throw.", "Keep the ball close
+//     during the load.", "Accelerate through release.", "Do not arm the
+//     toss.", "Finish tall and balanced.", "Reset before repeating."
+//   - Common Errors (verbatim, abridged): "Arm-Dominant Toss... Excessive
+//     Lumbar Extension... Excessive Lumbar Rotation... Inconsistent
+//     Release Direction: The ball travels unpredictably. Risk: poor
+//     standardization, unsafe rebound... Loss of Balance: The athlete
+//     steps or falls uncontrollably after release."
+//   - Coaching Priorities: "...Train both sides when applicable. Stop
+//     before velocity declines."
+//   - Regression Criteria: "...or fatigue reduces output."
+//   - Safety Rules: "...Verify the wall or open-space setup... Terminate
+//     immediately if sharp pain, dizziness, numbness or sudden weakness
+//     occurs."
+// Method: power_repetition_sets / power / primary
+// -----------------------------------------------------------------------------
+
+const SOURCE_MED_BALL_SCOOP_TOSS = "50-exercises/67_BALLISTICS/13_MED_BALL_SCOOP_TOSS.md";
+
+const medBallScoopTossStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "med_ball_scoop_toss_technical_failure",
+    description:
+      "Stop the set if the athlete lifts and throws primarily with the arms, arches or rotates through the lower back instead of the hips, or allows the ball to drift away from the body during the load.",
+    sourceRuleIds: [SOURCE_MED_BALL_SCOOP_TOSS],
+  }),
+  velocityLossCondition({
+    conditionId: "med_ball_scoop_toss_velocity_loss",
+    description: "Stop before velocity declines.",
+    sourceRuleIds: [SOURCE_MED_BALL_SCOOP_TOSS],
+  }),
+  fatigueLimitCondition({
+    conditionId: "med_ball_scoop_toss_fatigue_limit",
+    description: "Regress or stop the set when fatigue reduces output.",
+    sourceRuleIds: [SOURCE_MED_BALL_SCOOP_TOSS],
+  }),
+  impactLimitCondition({
+    conditionId: "med_ball_scoop_toss_impact_limit",
+    description: "Stop the set if the ball travels unpredictably, creating an unsafe rebound.",
+    sourceRuleIds: [SOURCE_MED_BALL_SCOOP_TOSS],
+  }),
+  balanceLossCondition({
+    conditionId: "med_ball_scoop_toss_balance_loss",
+    description: "Stop the set if the athlete steps or falls uncontrollably after release.",
+    sourceRuleIds: [SOURCE_MED_BALL_SCOOP_TOSS],
+  }),
+  painCondition({
+    conditionId: "med_ball_scoop_toss_pain",
+    description: "Terminate immediately if sharp pain, dizziness, numbness or sudden weakness occurs.",
+    sourceRuleIds: [SOURCE_MED_BALL_SCOOP_TOSS],
+  }),
+  completionCondition({
+    conditionId: "med_ball_scoop_toss_completion",
+    description: "Stop once the prescribed sets and repetitions per side are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const medBallScoopTossInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "med_ball_scoop_toss_setup",
+    "setup",
+    "Set up in a clear open space, in a stable athletic stance positioned side-on or slightly angled toward the target area, with the medicine ball held low near the hip. This entry covers the Standing Rotational Scoop Toss variant only, prescribed in open space — the bilateral Forward Scoop Toss variant and the wall-directed Lateral Scoop Toss variant are not represented, and repetitions are prescribed per side.",
+    "high",
+    true,
+    SOURCE_MED_BALL_SCOOP_TOSS,
+  ),
+  makeInstruction(
+    "med_ball_scoop_toss_execution",
+    "execution",
+    "Drive from the hips, scoop through the target, let the legs start the throw, keep the ball close during the load, accelerate through release, do not arm the toss and finish tall and balanced.",
+    "high",
+    true,
+    SOURCE_MED_BALL_SCOOP_TOSS,
+  ),
+];
+
+const medBallScoopTossEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "med_ball_scoop_toss",
+  moduleId: "power",
+  role: "primary",
+  explicitMethodId: "power_repetition_sets",
+  capabilities: {
+    exerciseId: "med_ball_scoop_toss",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["power_repetition_sets"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["movement_intent"],
+    preferredIntensityTypes: ["movement_intent"],
+    supportedLoadingModes: ["medicine_ball"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "unilateral",
+    volumeInterpretations: ["repetitions_per_side"],
+    capabilityTags: ["countable_repetitions", "global_movement_intent", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["medicine_ball", "open_space"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["med_ball_scoop_toss_setup", "med_ball_scoop_toss_execution"],
+    requiredStopConditionIds: [
+      "med_ball_scoop_toss_technical_failure",
+      "med_ball_scoop_toss_velocity_loss",
+      "med_ball_scoop_toss_fatigue_limit",
+      "med_ball_scoop_toss_impact_limit",
+      "med_ball_scoop_toss_balance_loss",
+      "med_ball_scoop_toss_pain",
+      "med_ball_scoop_toss_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_med_ball_scoop_toss",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_MED_BALL_SCOOP_TOSS, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["movement_intent"],
+  preferredIntensityType: "movement_intent",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: medBallScoopTossInstructions,
+  stopConditionDefinitions: medBallScoopTossStopConditions,
+  sourceRuleIds: [
+    SOURCE_MED_BALL_SCOOP_TOSS,
+    SOURCE_METHOD_CATALOGUE,
+    SOURCE_MODULE_PROFILES,
+    SOURCE_NUMERICAL_TABLES,
+  ],
+};
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -4011,6 +4323,8 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   med_ball_overhead_throw: medBallOverheadThrowEntry,
   med_ball_shot_put_throw: medBallShotPutThrowEntry,
   med_ball_reverse_throw: medBallReverseThrowEntry,
+  med_ball_rotational_throw: medBallRotationalThrowEntry,
+  med_ball_scoop_toss: medBallScoopTossEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>
