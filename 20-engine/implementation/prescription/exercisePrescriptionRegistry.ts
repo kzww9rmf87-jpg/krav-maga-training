@@ -2429,6 +2429,21 @@ const overheadCarryEntry: ExercisePrescriptionRegistryEntry = {
 // Source: 50-exercises/65_GRIP/12_PINCH_CARRY.md
 //   - Exercise Identity: "Equipment: Weight Plates or Pinch Blocks";
 //     "Unilateral or Bilateral: Unilateral or Bilateral"
+//   - CAS decision: this entry represents only the documented Bilateral
+//     Variation ("The athlete carries one implement in each hand" —
+//     Bilateral Variation section), which the source doc treats as the
+//     default/reference execution: it appears before the unilateral carry
+//     in "Recommended Progression Sequence" (step 3 vs. step 4),
+//     "unilateral execution" is listed under Progressions (harder) while
+//     "bilateral execution" is listed under Regressions (easier), and the
+//     doc's own Decision Trace example prescribes "three short bilateral
+//     carries". The Unilateral Variation and Offset Variation sections are
+//     NOT represented by this entry — no "per side" numerical value exists
+//     anywhere in the source doc for either variant (unlike suitcase_carry,
+//     whose source doc gives explicit per-side numbers), so representing
+//     them here would require inventing one. laterality stays "bilateral"
+//     and volumeInterpretations stays ["total_distance"] — both already
+//     correct for the variant now explicitly represented.
 //   - Key Technical Cues: "Pinch hard through the thumb.", "Keep the
 //     wrist neutral.", "Keep the plate vertical.", "Walk tall.", "Keep
 //     the load off the thigh.", "Stop before slipping."
@@ -2486,7 +2501,7 @@ const pinchCarryInstructions: InstructionDefinition[] = [
   makeInstruction(
     "pinch_carry_execution",
     "execution",
-    "Pinch hard through the thumb, keep the wrist neutral, keep the plate vertical, walk tall, keep the load off the thigh and take controlled steps.",
+    "Grip one implement in each hand with matched loads, pinch hard through the thumb, keep the wrist neutral, keep both implements vertical, walk tall with a level, symmetric gait and no lateral lean, keep the load off the thigh and take controlled steps.",
     "high",
     true,
     SOURCE_PINCH_CARRY,

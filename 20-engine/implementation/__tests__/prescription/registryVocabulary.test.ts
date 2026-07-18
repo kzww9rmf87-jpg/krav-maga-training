@@ -17,6 +17,7 @@ import {
   EXERCISE_PRESCRIPTION_REGISTRY,
   getExercisePrescriptionSource,
   PILOT_EXERCISE_IDS,
+  type PilotExerciseId,
   type PrescriptionExecutionContext,
 } from "../../prescription/exercisePrescriptionRegistry";
 import { validatePilotRegistry, validateRegistryEntry } from "../../prescription/registryValidators";
@@ -472,5 +473,100 @@ describe("registryVocabulary — carry loading modes corrected to match document
     // tests in newRegistryExercises.test.ts, which exercise pinch_carry,
     // sandbag_carry and zercher_carry end-to-end and read supportedLoadingModes
     // nowhere in that path.
+  });
+});
+
+// -----------------------------------------------------------------------------
+// pinch_carry laterality decision — the entry now explicitly represents only
+// the documented Bilateral Variation. laterality, volumeInterpretations,
+// requiredEquipmentCapabilities and supportedLoadingModes are all unchanged
+// by this decision (they were already correct); only the source comment and
+// the execution instruction were clarified to name the represented variant.
+// -----------------------------------------------------------------------------
+
+describe("registryVocabulary — pinch_carry represents only the Bilateral Variation", () => {
+  test("1. laterality remains exactly \"bilateral\"", () => {
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.pinch_carry.capabilities.laterality).toBe("bilateral");
+  });
+
+  test("2. volumeInterpretations remains exactly [\"total_distance\"]", () => {
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.pinch_carry.capabilities.volumeInterpretations).toEqual([
+      "total_distance",
+    ]);
+  });
+
+  test("3. requiredEquipmentCapabilities remains exactly [\"pinch_grip_implement\"]", () => {
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.pinch_carry.capabilities.requiredEquipmentCapabilities).toEqual([
+      "pinch_grip_implement",
+    ]);
+  });
+
+  test("4. supportedLoadingModes remains exactly [\"plate\"]", () => {
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.pinch_carry.capabilities.supportedLoadingModes).toEqual(["plate"]);
+  });
+
+  test("5. the execution instruction explicitly mentions one implement in each hand", () => {
+    const executionInstruction = EXERCISE_PRESCRIPTION_REGISTRY.pinch_carry.instructionDefinitions.find(
+      (instruction) => instruction.instructionId === "pinch_carry_execution",
+    );
+    expect(executionInstruction).toBeDefined();
+    expect(executionInstruction?.text.toLowerCase()).toContain("each hand");
+  });
+
+  test("6. the execution instruction explicitly names the bilateral execution", () => {
+    const executionInstruction = EXERCISE_PRESCRIPTION_REGISTRY.pinch_carry.instructionDefinitions.find(
+      (instruction) => instruction.instructionId === "pinch_carry_execution",
+    );
+    expect(executionInstruction?.text.toLowerCase()).toMatch(/one implement in each hand/);
+  });
+
+  test("7. no instruction claims to cover the unilateral or offset variation", () => {
+    for (const instruction of EXERCISE_PRESCRIPTION_REGISTRY.pinch_carry.instructionDefinitions) {
+      const text = instruction.text.toLowerCase();
+      expect(text).not.toContain("unilateral");
+      expect(text).not.toContain("offset");
+      expect(text).not.toContain("one side");
+    }
+  });
+
+  test("8. the 34 other pilot registry entries have unchanged instructionDefinitions text", () => {
+    // Every entry's first instruction text is a stable fingerprint: if any
+    // unrelated entry's instructions had been touched, this would drift.
+    const OTHER_ENTRY_FIRST_INSTRUCTION: Record<string, string> = {
+      bench_press: EXERCISE_PRESCRIPTION_REGISTRY.bench_press.instructionDefinitions[0].text,
+      farmer_carry: EXERCISE_PRESCRIPTION_REGISTRY.farmer_carry.instructionDefinitions[0].text,
+      suitcase_carry: EXERCISE_PRESCRIPTION_REGISTRY.suitcase_carry.instructionDefinitions[0].text,
+      front_rack_carry: EXERCISE_PRESCRIPTION_REGISTRY.front_rack_carry.instructionDefinitions[0].text,
+      sandbag_carry: EXERCISE_PRESCRIPTION_REGISTRY.sandbag_carry.instructionDefinitions[0].text,
+      zercher_carry: EXERCISE_PRESCRIPTION_REGISTRY.zercher_carry.instructionDefinitions[0].text,
+    };
+    for (const [id, text] of Object.entries(OTHER_ENTRY_FIRST_INSTRUCTION)) {
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id as PilotExerciseId].instructionDefinitions[0].text).toBe(text);
+    }
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(35);
+  });
+
+  test("9. the registry still contains exactly 35 active exercises", () => {
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(35);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(35);
+  });
+
+  test("10. explicitMethodId, supportedMethodIds, supportedVolumeStructures and stop conditions are unchanged", () => {
+    const pinchCarry = EXERCISE_PRESCRIPTION_REGISTRY.pinch_carry;
+    expect(pinchCarry.explicitMethodId).toBe("distance_carry_sets");
+    expect(pinchCarry.capabilities.supportedMethodIds).toEqual(["distance_carry_sets"]);
+    expect(pinchCarry.capabilities.supportedVolumeStructures).toEqual(["sets_distance"]);
+    expect(pinchCarry.capabilities.requiredStopConditionIds).toEqual([
+      "pinch_carry_technical_failure",
+      "pinch_carry_balance_loss",
+      "pinch_carry_equipment_failure",
+      "pinch_carry_pain",
+      "pinch_carry_completion",
+    ]);
+    // Eligibility, scoring and numeric prescription resolution read none of
+    // the fields touched by this clarification (source comment + instruction
+    // text) — proven unaffected by the existing, unmodified
+    // "Carries/Grip family prescribes completely" test for pinch_carry in
+    // newRegistryExercises.test.ts.
   });
 });
