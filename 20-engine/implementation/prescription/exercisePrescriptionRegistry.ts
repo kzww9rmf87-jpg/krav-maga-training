@@ -180,6 +180,18 @@ export const PILOT_EXERCISE_IDS = [
   "med_ball_scoop_toss",
   "med_ball_shot_put_throw",
   "med_ball_reverse_throw",
+  // Robustness
+  // Shared profile: robustness_accessory_straight_sets_v0_1 (moduleId
+  // robustness, methodId straight_sets_repetitions, exerciseRole
+  // accessory) — a single profile narrowed per exercise via
+  // exerciseDoseConstraints/exerciseIntensityConstraints, never widened
+  // and never duplicated for the same triplet. wrist_strengthening
+  // represents its repetitions variant only; the isometric-hold variant
+  // is out of scope.
+  "tibialis_raise",
+  "rotator_cuff_training",
+  "wrist_strengthening",
+  "soleus_raise",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -4428,6 +4440,469 @@ const medBallScoopTossEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Robustness
+// Shared profile: robustness_accessory_straight_sets_v0_1
+//   (moduleId: robustness, methodId: straight_sets_repetitions, exerciseRole: accessory)
+//   sets 2-3-5, repetitions 10-20-30, RPE 3-5-8, technical_effort: high_quality,
+//   rest 45-60-90s, tempo: global_intent/controlled. Every exercise below only
+//   narrows this single shared profile via exerciseDoseConstraints /
+//   exerciseIntensityConstraints — none of them widen it, none of them create
+//   a second profile for the same triplet, and all four keep role: "accessory".
+// -----------------------------------------------------------------------------
+
+// Source: 50-exercises/41_TIBIALIS_RAISE
+//   - Primary Classification: "Robustness"
+//   - Typical Intensity: "Bodyweight to Moderate Load"; Typical Volume:
+//     2-5 sets, 12-30 repetitions
+//   - Equipment Requirements: Required: None; Optional: Tibialis Machine,
+//     Resistance Band, Dumbbell, Slant Board — no single implement is
+//     required, so supportedLoadingModes reflects the documented
+//     bodyweight-to-loaded continuum ("bodyweight", "added_external_load"),
+//     matching the precedent already set by bulgarian_split_squat.
+//   - Coaching Cues: "Lift through the front of the ankle.", "Control the
+//     lowering phase.", "Maintain full range of motion.", "Avoid
+//     compensating with the hips."
+//   - Common Errors: Using momentum, incomplete range of motion, externally
+//     rotating the feet, rushing repetitions.
+// Method: straight_sets_repetitions / robustness / accessory
+const SOURCE_TIBIALIS_RAISE = "50-exercises/41_TIBIALIS_RAISE";
+
+const tibialisRaiseStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "tibialis_raise_technical_failure",
+    description:
+      "The set must stop when momentum replaces controlled ankle dorsiflexion, range of motion becomes incomplete, the feet rotate externally to compensate, repetitions are rushed, or hip compensation replaces ankle control.",
+    sourceRuleIds: [SOURCE_TIBIALIS_RAISE],
+  }),
+  painCondition({
+    conditionId: "tibialis_raise_pain",
+    description: "The set must stop when pain appears.",
+    sourceRuleIds: [SOURCE_TIBIALIS_RAISE],
+  }),
+  completionCondition({
+    conditionId: "tibialis_raise_completion",
+    description:
+      "The set must not continue merely to reach the planned repetition count; stop once the prescribed work is completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const tibialisRaiseInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "tibialis_raise_setup",
+    "setup",
+    "Stand or sit with the foot flat, ready to lift through the front of the ankle; bodyweight or added resistance (such as a band or dumbbell) may be used if available.",
+    "high",
+    true,
+    SOURCE_TIBIALIS_RAISE,
+  ),
+  makeInstruction(
+    "tibialis_raise_execution",
+    "execution",
+    "Lift through the front of the ankle, control the lowering phase, maintain full range of motion, and avoid compensating with the hips.",
+    "high",
+    true,
+    SOURCE_TIBIALIS_RAISE,
+  ),
+  makeInstruction(
+    "tibialis_raise_safety",
+    "safety",
+    "Never force a repetition to muscular failure; stop at the first sign of technical breakdown.",
+    "high",
+    true,
+    SOURCE_TIBIALIS_RAISE,
+  ),
+];
+
+const tibialisRaiseEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "tibialis_raise",
+  moduleId: "robustness",
+  role: "accessory",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "tibialis_raise",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["rpe", "technical_effort"],
+    preferredIntensityTypes: ["rpe", "technical_effort"],
+    supportedLoadingModes: ["bodyweight", "added_external_load"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: [],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["tibialis_raise_setup", "tibialis_raise_execution", "tibialis_raise_safety"],
+    requiredStopConditionIds: ["tibialis_raise_technical_failure", "tibialis_raise_pain", "tibialis_raise_completion"],
+    durationEstimationProfileId: "duration_profile_tibialis_raise",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_TIBIALIS_RAISE, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "technical_effort"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: "global_intent",
+  instructionDefinitions: tibialisRaiseInstructions,
+  stopConditionDefinitions: tibialisRaiseStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: null, repetitions: 12, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: null,
+    sourceRuleIds: [SOURCE_TIBIALIS_RAISE],
+  },
+  exerciseIntensityConstraints: {
+    allowedIntensityTypes: null,
+    rangeConstraints: [{ type: "rpe", minimum: 5, maximum: 8, normal: 6 }],
+    sourceRuleIds: [SOURCE_TIBIALIS_RAISE],
+  },
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_TIBIALIS_RAISE, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/42_ROTATOR_CUFF_TRAINING
+//   - Primary Classification: "Robustness"
+//   - Typical Intensity: "Very Light"; Typical Volume: 2-5 sets, 12-25 reps
+//   - Equipment Requirements: Required: "Resistance Band or Cable" — no
+//     bodyweight-only variant is documented, so requiredEquipmentCapabilities
+//     uses the existing cable_or_band_resistance equivalence group (already
+//     canonical, already used identically by pallof_press) and
+//     supportedLoadingModes is limited to the two modes actually named
+//     ("cable", "resistance_band") — no "bodyweight" mode.
+//   - Coaching Cues: "Move slowly.", "Keep the elbow controlled.",
+//     "Maintain scapular stability.", "Use light resistance.", "Prioritize
+//     precision."
+//   - Common Errors: Using excessive weight, shrugging the shoulders,
+//     losing scapular control, using momentum, poor posture.
+// Method: straight_sets_repetitions / robustness / accessory
+const SOURCE_ROTATOR_CUFF_TRAINING = "50-exercises/42_ROTATOR_CUFF_TRAINING";
+
+const rotatorCuffTrainingStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "rotator_cuff_training_technical_failure",
+    description:
+      "The set must stop when excessive weight is used, the shoulders shrug, scapular control is lost, momentum replaces controlled rotation, posture breaks down, or the required shoulder position cannot be maintained.",
+    sourceRuleIds: [SOURCE_ROTATOR_CUFF_TRAINING],
+  }),
+  painCondition({
+    conditionId: "rotator_cuff_training_pain",
+    description: "The set must stop when pain appears.",
+    sourceRuleIds: [SOURCE_ROTATOR_CUFF_TRAINING],
+  }),
+  completionCondition({
+    conditionId: "rotator_cuff_training_completion",
+    description:
+      "The set must not continue merely to reach the planned repetition count; stop once the prescribed work is completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const rotatorCuffTrainingInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "rotator_cuff_training_setup",
+    "setup",
+    "Attach light resistance (a band or cable) at an appropriate height, keep the elbow close to the body, and set the shoulders in a stable, relaxed position before beginning.",
+    "high",
+    true,
+    SOURCE_ROTATOR_CUFF_TRAINING,
+  ),
+  makeInstruction(
+    "rotator_cuff_training_execution",
+    "execution",
+    "Move slowly, keep the elbow controlled, maintain scapular stability, use light resistance, and prioritize precision over speed or load.",
+    "high",
+    true,
+    SOURCE_ROTATOR_CUFF_TRAINING,
+  ),
+  makeInstruction(
+    "rotator_cuff_training_safety",
+    "safety",
+    "Never force a repetition to muscular failure; stop at the first sign of technical breakdown.",
+    "high",
+    true,
+    SOURCE_ROTATOR_CUFF_TRAINING,
+  ),
+];
+
+const rotatorCuffTrainingEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "rotator_cuff_training",
+  moduleId: "robustness",
+  role: "accessory",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "rotator_cuff_training",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["rpe", "technical_effort"],
+    preferredIntensityTypes: ["rpe", "technical_effort"],
+    supportedLoadingModes: ["cable", "resistance_band"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["cable_or_band_resistance"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: [
+      "rotator_cuff_training_setup",
+      "rotator_cuff_training_execution",
+      "rotator_cuff_training_safety",
+    ],
+    requiredStopConditionIds: [
+      "rotator_cuff_training_technical_failure",
+      "rotator_cuff_training_pain",
+      "rotator_cuff_training_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_rotator_cuff_training",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_ROTATOR_CUFF_TRAINING, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "technical_effort"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: "global_intent",
+  instructionDefinitions: rotatorCuffTrainingInstructions,
+  stopConditionDefinitions: rotatorCuffTrainingStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: null, repetitions: 12, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: null, repetitions: 25, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_ROTATOR_CUFF_TRAINING],
+  },
+  exerciseIntensityConstraints: {
+    allowedIntensityTypes: null,
+    rangeConstraints: [{ type: "rpe", minimum: 3, maximum: 6, normal: 4 }],
+    sourceRuleIds: [SOURCE_ROTATOR_CUFF_TRAINING],
+  },
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_ROTATOR_CUFF_TRAINING, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/43_WRIST_STRENGTHENING
+//   - Primary Classification: "Robustness"
+//   - Typical Intensity: "Very Light"; Typical Volume: 2-5 sets, 10-30
+//     repetitions "or 20-45 second holds" — this entry represents the
+//     repetitions variant ONLY. The isometric-hold variant is explicitly
+//     out of scope and is structurally excluded: this entry only declares
+//     explicitMethodId "straight_sets_repetitions" and
+//     supportedVolumeStructures ["sets_reps"], never
+//     "timed_isometric_sets"/"sets_duration".
+//   - Equipment Requirements: Required: None; Optional: Resistance Band,
+//     Hammer, Dumbbell, Wrist Roller, Grip Tools, Rice Bucket, Fat Gripz —
+//     no single implement required, so supportedLoadingModes reflects the
+//     documented bodyweight-to-loaded continuum, matching the precedent
+//     already set by bulgarian_split_squat and tibialis_raise above.
+//   - Coaching Cues: "Control every repetition.", "Move through full
+//     range.", "Avoid compensation.", "Train both sides equally.",
+//     "Prioritize quality over resistance."
+//   - Common Errors: Using excessive load, partial range of motion,
+//     ignoring pain, training only flexion, poor wrist alignment.
+// Method: straight_sets_repetitions / robustness / accessory
+const SOURCE_WRIST_STRENGTHENING = "50-exercises/43_WRIST_STRENGTHENING";
+
+const wristStrengtheningStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "wrist_strengthening_technical_failure",
+    description:
+      "The set must stop when load becomes excessive, range of motion becomes partial, wrist alignment breaks down, or one side is trained while neglecting the other.",
+    sourceRuleIds: [SOURCE_WRIST_STRENGTHENING],
+  }),
+  painCondition({
+    conditionId: "wrist_strengthening_pain",
+    description: "The set must stop when pain appears.",
+    sourceRuleIds: [SOURCE_WRIST_STRENGTHENING],
+  }),
+  completionCondition({
+    conditionId: "wrist_strengthening_completion",
+    description:
+      "The set must not continue merely to reach the planned repetition count; stop once the prescribed work is completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const wristStrengtheningInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "wrist_strengthening_setup",
+    "setup",
+    "Position the wrist and forearm in a stable position for the chosen movement (flexion, extension or deviation); bodyweight or added resistance may be used if available.",
+    "high",
+    true,
+    SOURCE_WRIST_STRENGTHENING,
+  ),
+  makeInstruction(
+    "wrist_strengthening_execution",
+    "execution",
+    "Control every repetition through the full range of motion, avoid compensation, train both sides equally, and prioritize quality over resistance.",
+    "high",
+    true,
+    SOURCE_WRIST_STRENGTHENING,
+  ),
+  makeInstruction(
+    "wrist_strengthening_safety",
+    "safety",
+    "Never force a repetition to muscular failure; stop at the first sign of technical breakdown.",
+    "high",
+    true,
+    SOURCE_WRIST_STRENGTHENING,
+  ),
+];
+
+const wristStrengtheningEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "wrist_strengthening",
+  moduleId: "robustness",
+  role: "accessory",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "wrist_strengthening",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["rpe", "technical_effort"],
+    preferredIntensityTypes: ["rpe", "technical_effort"],
+    supportedLoadingModes: ["bodyweight", "added_external_load"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: [],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["wrist_strengthening_setup", "wrist_strengthening_execution", "wrist_strengthening_safety"],
+    requiredStopConditionIds: [
+      "wrist_strengthening_technical_failure",
+      "wrist_strengthening_pain",
+      "wrist_strengthening_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_wrist_strengthening",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_WRIST_STRENGTHENING, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "technical_effort"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: "global_intent",
+  instructionDefinitions: wristStrengtheningInstructions,
+  stopConditionDefinitions: wristStrengtheningStopConditions,
+  exerciseDoseConstraints: null,
+  exerciseIntensityConstraints: {
+    allowedIntensityTypes: null,
+    rangeConstraints: [{ type: "rpe", minimum: 3, maximum: 6, normal: 4 }],
+    sourceRuleIds: [SOURCE_WRIST_STRENGTHENING],
+  },
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_WRIST_STRENGTHENING, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/44_SOLEUS_RAISE
+//   - Primary Classification: "Robustness"
+//   - Typical Intensity: "Moderate"; Typical Volume: 2-5 sets, 15-30 reps
+//   - Equipment Requirements: Required: None; Optional: Seated Calf Raise
+//     Machine, Smith Machine, Dumbbell, Weight Plate, Resistance Band — no
+//     single implement required, so supportedLoadingModes reflects the
+//     documented bodyweight-to-loaded continuum, matching the precedent
+//     already set by bulgarian_split_squat.
+//   - Coaching Cues: "Maintain knee flexion.", "Control the eccentric.",
+//     "Reach full plantar flexion.", "Avoid bouncing.", "Use full range of
+//     motion."
+//   - Common Errors: Straightening the knees, using momentum, incomplete
+//     range of motion, excessive loading, poor tempo control.
+// Method: straight_sets_repetitions / robustness / accessory
+const SOURCE_SOLEUS_RAISE = "50-exercises/44_SOLEUS_RAISE";
+
+const soleusRaiseStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "soleus_raise_technical_failure",
+    description:
+      "The set must stop when the knees straighten, momentum replaces controlled plantar flexion, range of motion becomes incomplete, load becomes excessive, or tempo control is lost, including bouncing at the bottom of the movement.",
+    sourceRuleIds: [SOURCE_SOLEUS_RAISE],
+  }),
+  painCondition({
+    conditionId: "soleus_raise_pain",
+    description: "The set must stop when pain appears.",
+    sourceRuleIds: [SOURCE_SOLEUS_RAISE],
+  }),
+  completionCondition({
+    conditionId: "soleus_raise_completion",
+    description:
+      "The set must not continue merely to reach the planned repetition count; stop once the prescribed work is completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const soleusRaiseInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "soleus_raise_setup",
+    "setup",
+    "Stand or sit with the knees flexed as prescribed, ready to control plantar flexion through the full range of motion; bodyweight or added resistance may be used if available.",
+    "high",
+    true,
+    SOURCE_SOLEUS_RAISE,
+  ),
+  makeInstruction(
+    "soleus_raise_execution",
+    "execution",
+    "Maintain knee flexion, control the eccentric phase, reach full plantar flexion, avoid bouncing, and use the full range of motion.",
+    "high",
+    true,
+    SOURCE_SOLEUS_RAISE,
+  ),
+  makeInstruction(
+    "soleus_raise_safety",
+    "safety",
+    "Never force a repetition to muscular failure; stop at the first sign of technical breakdown.",
+    "high",
+    true,
+    SOURCE_SOLEUS_RAISE,
+  ),
+];
+
+const soleusRaiseEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "soleus_raise",
+  moduleId: "robustness",
+  role: "accessory",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "soleus_raise",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["rpe", "technical_effort"],
+    preferredIntensityTypes: ["rpe", "technical_effort"],
+    supportedLoadingModes: ["bodyweight", "added_external_load"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: [],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["soleus_raise_setup", "soleus_raise_execution", "soleus_raise_safety"],
+    requiredStopConditionIds: ["soleus_raise_technical_failure", "soleus_raise_pain", "soleus_raise_completion"],
+    durationEstimationProfileId: "duration_profile_soleus_raise",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_SOLEUS_RAISE, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "technical_effort"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: "global_intent",
+  instructionDefinitions: soleusRaiseInstructions,
+  stopConditionDefinitions: soleusRaiseStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: null, repetitions: 15, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: null,
+    sourceRuleIds: [SOURCE_SOLEUS_RAISE],
+  },
+  exerciseIntensityConstraints: {
+    allowedIntensityTypes: null,
+    rangeConstraints: [{ type: "rpe", minimum: 5, maximum: 8, normal: 6 }],
+    sourceRuleIds: [SOURCE_SOLEUS_RAISE],
+  },
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_SOLEUS_RAISE, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -4478,6 +4953,11 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   med_ball_reverse_throw: medBallReverseThrowEntry,
   med_ball_rotational_throw: medBallRotationalThrowEntry,
   med_ball_scoop_toss: medBallScoopTossEntry,
+
+  tibialis_raise: tibialisRaiseEntry,
+  rotator_cuff_training: rotatorCuffTrainingEntry,
+  wrist_strengthening: wristStrengtheningEntry,
+  soleus_raise: soleusRaiseEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

@@ -1614,6 +1614,100 @@ not applicable
 
 ---
 
+# Table Group 11 — Robustness
+
+## Profile ROBUSTNESS-ACCESSORY
+
+```text
+profileId: robustness_accessory_straight_sets_v0_1
+moduleId: robustness
+methodId: straight_sets_repetitions
+exerciseRole: accessory
+```
+
+### Volume
+
+```text
+sets: 2–5
+repetitions: 10–30
+```
+
+Normal:
+
+```text
+3 sets × 20 repetitions
+```
+
+### Intensity
+
+```text
+RPE 3–8
+```
+
+or:
+
+```text
+technical_effort: high_quality
+```
+
+Normal:
+
+```text
+RPE 5
+```
+
+### Rest
+
+```text
+45–90 seconds
+```
+
+Normal:
+
+```text
+60 seconds
+```
+
+### Tempo
+
+```text
+type: global_intent
+globalIntent: controlled
+```
+
+### Minimum Dose
+
+```text
+2 sets × 10 repetitions
+```
+
+### Maximum Dose
+
+```text
+5 sets × 30 repetitions
+```
+
+### Stop Conditions
+
+- technical breakdown (loss of position, compensation, momentum, bouncing or incomplete range of motion, as documented per exercise);
+- pain;
+- completion.
+
+### Exercise-Specific Narrowing
+
+This shared envelope deliberately covers two distinct business categories documented across the four exercises using it. Each exercise narrows the shared RPE and repetition range to its own documented bounds via `exerciseIntensityConstraints`/`exerciseDoseConstraints` — this profile is never widened per exercise, only narrowed:
+
+```text
+tibialis_raise:          RPE 5–6–8   reps 12–30
+rotator_cuff_training:   RPE 3–4–6   reps 12–25
+wrist_strengthening:     RPE 3–4–6   reps 10–30
+soleus_raise:            RPE 5–6–8   reps 15–30
+```
+
+Rest (45–60–90 seconds) is identical across all four exercises and is not narrowed for any of them. `wrist_strengthening` represents its repetitions variant only — its documented isometric-hold variant is out of scope and is structurally excluded, since this profile's method (`straight_sets_repetitions`) and volume structure (`sets_reps`) cannot represent a timed hold.
+
+---
+
 # Exercise-Specific Numerical Requirement
 
 The generic profiles above are insufficient for final execution when an exercise requires:

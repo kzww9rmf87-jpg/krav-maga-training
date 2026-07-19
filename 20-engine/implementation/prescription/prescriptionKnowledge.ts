@@ -663,6 +663,53 @@ export const NUMERICAL_PRESCRIPTION_PROFILES = [
     requiresSportSpecificSubtype: true,
     sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
   },
+  {
+    profileId: "robustness_accessory_straight_sets_v0_1",
+    version: "0.1",
+    moduleId: "robustness",
+    methodId: "straight_sets_repetitions",
+    exerciseRole: "accessory",
+    volume: {
+      structure: "sets_reps",
+      sets: integerRange(2, 3, 5),
+      repetitions: { type: "fixed_range", range: integerRange(10, 20, 30) },
+      duration: null,
+      distance: null,
+      rounds: null,
+      workIntervals: null,
+    },
+    intensity: [
+      {
+        type: "rpe",
+        min: 3,
+        normal: 5,
+        max: 8,
+        unit: "rpe_scale_1_10",
+        referenceType: null,
+        sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_INTENSITY_MODEL],
+      },
+      {
+        type: "technical_effort",
+        value: "high_quality",
+        sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_INTENSITY_MODEL],
+      },
+    ],
+    rest: {
+      scope: "between_sets",
+      seconds: integerRange(45, 60, 90),
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    tempo: {
+      type: "global_intent",
+      globalIntent: "controlled",
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    minimumDose: { ...emptyDose(), sets: 2, repetitions: 10 },
+    maximumDose: { ...emptyDose(), sets: 5, repetitions: 30 },
+    requiresExerciseSpecificLoadRule: false,
+    requiresSportSpecificSubtype: false,
+    sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
+  },
 ] as const satisfies readonly NumericalPrescriptionProfile[];
 
 export const selectRangeValue = (

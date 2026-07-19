@@ -413,6 +413,10 @@ describe("registryVocabulary — carry loading modes corrected to match document
       med_ball_reverse_throw: ["medicine_ball"],
       med_ball_rotational_throw: ["medicine_ball"],
       med_ball_scoop_toss: ["medicine_ball"],
+      tibialis_raise: ["bodyweight", "added_external_load"],
+      rotator_cuff_training: ["cable", "resistance_band"],
+      wrist_strengthening: ["bodyweight", "added_external_load"],
+      soleus_raise: ["bodyweight", "added_external_load"],
     };
     const CORRECTED_IDS = ["pinch_carry", "sandbag_carry", "zercher_carry"];
 
@@ -428,9 +432,9 @@ describe("registryVocabulary — carry loading modes corrected to match document
     expect(PILOT_EXERCISE_IDS.length).toBe(CORRECTED_IDS.length + Object.keys(EXPECTED_LOADING_MODES).length);
   });
 
-  test("7. the registry still contains exactly 35 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(35);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(35);
+  test("7. the registry still contains exactly 39 active exercises", () => {
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(39);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(39);
   });
 
   test("8. every retained value (plate, sandbag, barbell) is a known, documented LoadingMode", () => {
@@ -543,12 +547,12 @@ describe("registryVocabulary — pinch_carry represents only the Bilateral Varia
     for (const [id, text] of Object.entries(OTHER_ENTRY_FIRST_INSTRUCTION)) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id as PilotExerciseId].instructionDefinitions[0].text).toBe(text);
     }
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(35);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(39);
   });
 
-  test("9. the registry still contains exactly 35 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(35);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(35);
+  test("9. the registry still contains exactly 39 active exercises", () => {
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(39);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(39);
   });
 
   test("10. explicitMethodId, supportedMethodIds, supportedVolumeStructures and stop conditions are unchanged", () => {
@@ -572,39 +576,69 @@ describe("registryVocabulary — pinch_carry represents only the Bilateral Varia
 });
 
 // -----------------------------------------------------------------------------
-// exerciseDoseConstraints — generic, per-exercise narrowing mechanism for
-// resolveVolume (see resolveVolume.test.ts for the resolution-level tests).
-// This block only proves the Registry itself: every one of the 35 active
-// pilot exercises declares the field explicitly as `null`, matching this
-// Registry's exhaustive-contract convention (no optional properties on
-// ExercisePrescriptionRegistryEntry).
+// exerciseDoseConstraints / exerciseIntensityConstraints / exerciseRestConstraints
+// — the generic, per-exercise narrowing mechanism for resolveVolume /
+// resolveIntensity / resolveRest (see the respective resolver test files for
+// the resolution-level tests). This block only proves the Registry itself.
+//
+// The Robustness batch (tibialis_raise, rotator_cuff_training,
+// wrist_strengthening, soleus_raise) is the first real user of this
+// mechanism: all four narrow exerciseIntensityConstraints; three of the
+// four (all but wrist_strengthening, whose own 10-30 rep range matches the
+// shared profile's 10-30 exactly) narrow exerciseDoseConstraints; none of
+// the four narrow exerciseRestConstraints (45-60-90s is identical across
+// both business categories). Every other pilot exercise keeps all three
+// fields explicitly `null`.
 // -----------------------------------------------------------------------------
 
+const ROBUSTNESS_EXERCISE_IDS = [
+  "tibialis_raise",
+  "rotator_cuff_training",
+  "wrist_strengthening",
+  "soleus_raise",
+] as const;
+
 describe("registryVocabulary — exerciseDoseConstraints", () => {
-  test("every one of the 35 pilot registry entries declares exerciseDoseConstraints explicitly (none Robustness yet)", () => {
+  test("every pilot registry entry outside the Robustness batch declares exerciseDoseConstraints as null", () => {
     for (const id of PILOT_EXERCISE_IDS) {
+      if ((ROBUSTNESS_EXERCISE_IDS as readonly string[]).includes(id)) {
+        continue;
+      }
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseDoseConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(35);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(39);
+  });
+
+  test("tibialis_raise, rotator_cuff_training and soleus_raise narrow exerciseDoseConstraints; wrist_strengthening does not", () => {
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.tibialis_raise.exerciseDoseConstraints).not.toBeNull();
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.rotator_cuff_training.exerciseDoseConstraints).not.toBeNull();
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.soleus_raise.exerciseDoseConstraints).not.toBeNull();
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.wrist_strengthening.exerciseDoseConstraints).toBeNull();
   });
 });
 
-// -----------------------------------------------------------------------------
-// exerciseIntensityConstraints / exerciseRestConstraints — the same generic
-// narrowing mechanism extended to resolveIntensity and resolveRest (see
-// resolveIntensity.test.ts and resolveRest.test.ts for the resolution-level
-// tests). This block only proves the Registry itself: every one of the 35
-// active pilot exercises declares both fields explicitly as `null`,
-// matching this Registry's exhaustive-contract convention (no optional
-// properties on ExercisePrescriptionRegistryEntry).
-// -----------------------------------------------------------------------------
-
 describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestConstraints", () => {
-  test("every one of the 35 pilot registry entries declares exerciseIntensityConstraints and exerciseRestConstraints explicitly (none Robustness yet)", () => {
+  test("every pilot registry entry outside the Robustness batch declares exerciseIntensityConstraints and exerciseRestConstraints as null", () => {
     for (const id of PILOT_EXERCISE_IDS) {
+      if ((ROBUSTNESS_EXERCISE_IDS as readonly string[]).includes(id)) {
+        continue;
+      }
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseIntensityConstraints).toBeNull();
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(35);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(39);
+  });
+
+  test("all four Robustness exercises narrow exerciseIntensityConstraints and none narrow exerciseRestConstraints", () => {
+    for (const id of ROBUSTNESS_EXERCISE_IDS) {
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseIntensityConstraints).not.toBeNull();
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).toBeNull();
+    }
+  });
+
+  test("no Robustness entry uses role: \"robustness\" — all four keep role: \"accessory\"", () => {
+    for (const id of ROBUSTNESS_EXERCISE_IDS) {
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].role).toBe("accessory");
+    }
   });
 });
