@@ -29,3 +29,6 @@ ios/CAS/.build/
 ios/CAS/DerivedData/
 ios/CAS/*.xcworkspace/
 ios/CAS/xcuserdata/
+
+# Context export archives — local snapshots for external tooling, not source of truth
+*.zip
