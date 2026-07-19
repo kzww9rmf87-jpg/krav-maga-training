@@ -48,6 +48,7 @@ import type { TrainingMethodId } from "./contracts";
 import type { PrescribeExerciseInput } from "./prescribeExercise";
 import type { RangeContext } from "./prescriptionKnowledge";
 import type { IntensityReference } from "./types";
+import type { ExerciseDoseConstraints } from "./resolveVolume";
 
 // -----------------------------------------------------------------------------
 // Source-rule identifiers (mirrors the `SOURCE_*` convention already used in
@@ -89,6 +90,15 @@ export interface ExercisePrescriptionRegistryEntry {
   preferredTempoType: TempoType | null;
   instructionDefinitions: readonly InstructionDefinition[];
   stopConditionDefinitions: readonly StopConditionDefinition[];
+  /**
+   * Documented, exercise-specific narrowing of the shared numerical
+   * profile's volume range (see `ExerciseDoseConstraints` in
+   * `resolveVolume.ts`). This is a prescription constraint, not an
+   * exercise capability — it never lives on `capabilities`. `null` for
+   * every exercise whose documented range matches its module/method/role
+   * profile exactly.
+   */
+  exerciseDoseConstraints: ExerciseDoseConstraints | null;
   sourceRuleIds: readonly Identifier[];
 }
 
@@ -247,6 +257,7 @@ const benchPressEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: benchPressInstructions,
   stopConditionDefinitions: benchPressStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_BENCH_PRESS, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -336,6 +347,7 @@ const backSquatEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: backSquatInstructions,
   stopConditionDefinitions: backSquatStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_BACK_SQUAT, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -433,6 +445,7 @@ const trapBarDeadliftEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: trapBarDeadliftInstructions,
   stopConditionDefinitions: trapBarDeadliftStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_TRAP_BAR_DEADLIFT, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -527,6 +540,7 @@ const pullUpEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: pullUpInstructions,
   stopConditionDefinitions: pullUpStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_PULL_UP, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -642,6 +656,7 @@ const farmerCarryEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: farmerCarryInstructions,
   stopConditionDefinitions: farmerCarryStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_FARMER_CARRY, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -746,6 +761,7 @@ const pallofPressEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: pallofPressInstructions,
   stopConditionDefinitions: pallofPressStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_PALLOF_PRESS, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -881,6 +897,7 @@ const boxJumpEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: boxJumpInstructions,
   stopConditionDefinitions: boxJumpStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_BOX_JUMP, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -976,6 +993,7 @@ const frontSquatEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: frontSquatInstructions,
   stopConditionDefinitions: frontSquatStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_FRONT_SQUAT, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -1072,6 +1090,7 @@ const romanianDeadliftEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: romanianDeadliftInstructions,
   stopConditionDefinitions: romanianDeadliftStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [
     SOURCE_ROMANIAN_DEADLIFT,
     SOURCE_METHOD_CATALOGUE,
@@ -1173,6 +1192,7 @@ const overheadPressEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: overheadPressInstructions,
   stopConditionDefinitions: overheadPressStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_OVERHEAD_PRESS, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -1274,6 +1294,7 @@ const bulgarianSplitSquatEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: bulgarianSplitSquatInstructions,
   stopConditionDefinitions: bulgarianSplitSquatStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [
     SOURCE_BULGARIAN_SPLIT_SQUAT,
     SOURCE_METHOD_CATALOGUE,
@@ -1410,6 +1431,7 @@ const pushPressEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: pushPressInstructions,
   stopConditionDefinitions: pushPressStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_PUSH_PRESS_POWER, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -1530,6 +1552,7 @@ const hangHighPullEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: hangHighPullInstructions,
   stopConditionDefinitions: hangHighPullStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_HANG_HIGH_PULL, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -1647,6 +1670,7 @@ const jumpShrugEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: jumpShrugInstructions,
   stopConditionDefinitions: jumpShrugStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_JUMP_SHRUG, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -1752,6 +1776,7 @@ const hollowBodyHoldEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: hollowBodyHoldInstructions,
   stopConditionDefinitions: hollowBodyHoldStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [
     SOURCE_HOLLOW_BODY_HOLD,
     SOURCE_METHOD_CATALOGUE,
@@ -1854,6 +1879,7 @@ const dragonFlagEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: dragonFlagInstructions,
   stopConditionDefinitions: dragonFlagStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_DRAGON_FLAG, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -1964,6 +1990,7 @@ const frontRackCarryEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: frontRackCarryInstructions,
   stopConditionDefinitions: frontRackCarryStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [
     SOURCE_FRONT_RACK_CARRY,
     SOURCE_METHOD_CATALOGUE,
@@ -2076,6 +2103,7 @@ const sandbagCarryEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: sandbagCarryInstructions,
   stopConditionDefinitions: sandbagCarryStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_SANDBAG_CARRY, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -2188,6 +2216,7 @@ const zercherCarryEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: zercherCarryInstructions,
   stopConditionDefinitions: zercherCarryStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_ZERCHER_CARRY, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -2303,6 +2332,7 @@ const suitcaseCarryEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: suitcaseCarryInstructions,
   stopConditionDefinitions: suitcaseCarryStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [
     SOURCE_SUITCASE_CARRY,
     SOURCE_METHOD_CATALOGUE,
@@ -2417,6 +2447,7 @@ const overheadCarryEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: overheadCarryInstructions,
   stopConditionDefinitions: overheadCarryStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [
     SOURCE_OVERHEAD_CARRY,
     SOURCE_METHOD_CATALOGUE,
@@ -2547,6 +2578,7 @@ const pinchCarryEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: pinchCarryInstructions,
   stopConditionDefinitions: pinchCarryStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_PINCH_CARRY, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -2668,6 +2700,7 @@ const depthJumpEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: depthJumpInstructions,
   stopConditionDefinitions: depthJumpStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_DEPTH_JUMP, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -2788,6 +2821,7 @@ const broadJumpEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: broadJumpInstructions,
   stopConditionDefinitions: broadJumpStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_BROAD_JUMP, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -2908,6 +2942,7 @@ const kneeJumpEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: kneeJumpInstructions,
   stopConditionDefinitions: kneeJumpStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_KNEE_JUMP, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -3028,6 +3063,7 @@ const lateralBoundEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: lateralBoundInstructions,
   stopConditionDefinitions: lateralBoundStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_LATERAL_BOUND, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -3148,6 +3184,7 @@ const singleLegHopEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: singleLegHopInstructions,
   stopConditionDefinitions: singleLegHopStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [
     SOURCE_SINGLE_LEG_HOP,
     SOURCE_METHOD_CATALOGUE,
@@ -3272,6 +3309,7 @@ const splitSquatJumpEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: splitSquatJumpInstructions,
   stopConditionDefinitions: splitSquatJumpStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [
     SOURCE_SPLIT_SQUAT_JUMP,
     SOURCE_METHOD_CATALOGUE,
@@ -3427,6 +3465,7 @@ const medBallSlamEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: medBallSlamInstructions,
   stopConditionDefinitions: medBallSlamStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [SOURCE_MED_BALL_SLAM, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
@@ -3567,6 +3606,7 @@ const medBallChestPassEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: medBallChestPassInstructions,
   stopConditionDefinitions: medBallChestPassStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [
     SOURCE_MED_BALL_CHEST_PASS,
     SOURCE_METHOD_CATALOGUE,
@@ -3705,6 +3745,7 @@ const medBallOverheadThrowEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: medBallOverheadThrowInstructions,
   stopConditionDefinitions: medBallOverheadThrowStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [
     SOURCE_MED_BALL_OVERHEAD_THROW,
     SOURCE_METHOD_CATALOGUE,
@@ -3845,6 +3886,7 @@ const medBallShotPutThrowEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: medBallShotPutThrowInstructions,
   stopConditionDefinitions: medBallShotPutThrowStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [
     SOURCE_MED_BALL_SHOT_PUT_THROW,
     SOURCE_METHOD_CATALOGUE,
@@ -3980,6 +4022,7 @@ const medBallReverseThrowEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: medBallReverseThrowInstructions,
   stopConditionDefinitions: medBallReverseThrowStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [
     SOURCE_MED_BALL_REVERSE_THROW,
     SOURCE_METHOD_CATALOGUE,
@@ -4129,6 +4172,7 @@ const medBallRotationalThrowEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: medBallRotationalThrowInstructions,
   stopConditionDefinitions: medBallRotationalThrowStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [
     SOURCE_MED_BALL_ROTATIONAL_THROW,
     SOURCE_METHOD_CATALOGUE,
@@ -4286,6 +4330,7 @@ const medBallScoopTossEntry: ExercisePrescriptionRegistryEntry = {
   preferredTempoType: null,
   instructionDefinitions: medBallScoopTossInstructions,
   stopConditionDefinitions: medBallScoopTossStopConditions,
+  exerciseDoseConstraints: null,
   sourceRuleIds: [
     SOURCE_MED_BALL_SCOOP_TOSS,
     SOURCE_METHOD_CATALOGUE,
@@ -4462,6 +4507,7 @@ export function getExercisePrescriptionSource(
       availableAthleteReferenceTypes: availableReferenceTypes as readonly IntensityReferenceType[],
       instructionDefinitions: entry.instructionDefinitions,
       stopConditionDefinitions: entry.stopConditionDefinitions,
+      exerciseDoseConstraints: entry.exerciseDoseConstraints,
       loadRounding: context.loadRounding,
       sourceRuleIds: entry.sourceRuleIds,
     },

@@ -570,3 +570,21 @@ describe("registryVocabulary — pinch_carry represents only the Bilateral Varia
     // newRegistryExercises.test.ts.
   });
 });
+
+// -----------------------------------------------------------------------------
+// exerciseDoseConstraints — generic, per-exercise narrowing mechanism for
+// resolveVolume (see resolveVolume.test.ts for the resolution-level tests).
+// This block only proves the Registry itself: every one of the 35 active
+// pilot exercises declares the field explicitly as `null`, matching this
+// Registry's exhaustive-contract convention (no optional properties on
+// ExercisePrescriptionRegistryEntry).
+// -----------------------------------------------------------------------------
+
+describe("registryVocabulary — exerciseDoseConstraints", () => {
+  test("every one of the 35 pilot registry entries declares exerciseDoseConstraints explicitly (none Robustness yet)", () => {
+    for (const id of PILOT_EXERCISE_IDS) {
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseDoseConstraints).toBeNull();
+    }
+    expect(PILOT_EXERCISE_IDS).toHaveLength(35);
+  });
+});

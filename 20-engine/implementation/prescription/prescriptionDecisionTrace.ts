@@ -134,7 +134,9 @@ function buildStageEntries(
       ...entryBase,
       id: idFor("volume"),
       decision: volume.ok ? `Volume resolved for exercise "${exerciseId}".` : `Volume resolution failed for exercise "${exerciseId}".`,
-      reasons: volume.ok ? [summarizeVolume(volume.volume)] : [volume.message],
+      reasons: volume.ok
+        ? [summarizeVolume(volume.volume), ...volume.narrowingNotes]
+        : [volume.message],
       sourceRuleIds: volume.sourceRuleIds,
     });
   }

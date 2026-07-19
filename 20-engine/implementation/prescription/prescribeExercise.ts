@@ -34,6 +34,7 @@ import {
 } from "./validateCompatibility";
 import {
   resolveVolume,
+  type ExerciseDoseConstraints,
   type VolumeResolutionResult,
 } from "./resolveVolume";
 import {
@@ -94,6 +95,14 @@ export interface PrescribeExerciseInput {
 
   laterality?: PrescriptionLaterality | null;
   lateralityRequired?: boolean;
+
+  /**
+   * Documented, exercise-specific narrowing of the shared numerical
+   * profile's volume range — see `ExerciseDoseConstraints` in
+   * `resolveVolume.ts`. Absent or `null` for every exercise whose
+   * documented range matches its module/method/role profile exactly.
+   */
+  exerciseDoseConstraints?: ExerciseDoseConstraints | null;
 
   supportedIntensityTypes: readonly IntensityType[];
   athleteReferences?: readonly IntensityReference[];
@@ -270,6 +279,7 @@ export const prescribeExercise = (
     rangeContext: input.rangeContext,
     laterality: input.laterality,
     lateralityRequired: input.lateralityRequired,
+    exerciseDoseConstraints: input.exerciseDoseConstraints,
     sourceRuleIds: [
       ...(input.sourceRuleIds ?? []),
       ...method.sourceRuleIds,

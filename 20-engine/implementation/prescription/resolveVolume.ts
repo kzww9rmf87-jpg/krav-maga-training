@@ -17,7 +17,11 @@ import type { TrainingMethodId } from "./contracts";
 import {
   getNumericalPrescriptionProfile,
   selectRangeValue,
+  type DoseBoundary,
+  type IntegerRange,
+  type NumericRange,
   type NumericalPrescriptionProfile,
+  type NumericalVolumeProfile,
   type RangeContext,
 } from "./prescriptionKnowledge";
 import type {
@@ -26,6 +30,26 @@ import type {
   PrescriptionVolume,
   RepetitionTarget,
 } from "./types";
+
+// -----------------------------------------------------------------------------
+// Exercise-specific dose constraints
+// -----------------------------------------------------------------------------
+
+/**
+ * Documented, exercise-specific narrowing of the shared numerical profile's
+ * volume range. This is not an exercise capability (`ExercisePrescriptionCapabilities`
+ * describes what the exercise supports) — it is a numerical prescription
+ * constraint, scoped to `resolveVolume` alone. `minimumDose`/`maximumDose`
+ * may only narrow the shared profile's range, per dimension, never widen it:
+ * `effectiveMin = max(profileMin, exerciseMin)`, `effectiveMax = min(profileMax, exerciseMax)`.
+ * A dimension left `null` on both `minimumDose` and `maximumDose` is fully
+ * governed by the shared profile, unchanged.
+ */
+export interface ExerciseDoseConstraints {
+  minimumDose: DoseBoundary | null;
+  maximumDose: DoseBoundary | null;
+  sourceRuleIds: readonly Identifier[];
+}
 
 // -----------------------------------------------------------------------------
 // Result types
@@ -40,7 +64,10 @@ export type VolumeResolutionFailureCode =
   | "VOLUME_LATERALITY_REQUIRED"
   | "VOLUME_BELOW_MINIMUM_DOSE"
   | "VOLUME_ABOVE_MAXIMUM_DOSE"
-  | "VOLUME_RULE_SOURCE_MISSING";
+  | "VOLUME_RULE_SOURCE_MISSING"
+  | "EXERCISE_DOSE_CONSTRAINT_INVALID"
+  | "EXERCISE_DOSE_CONSTRAINT_SOURCE_MISSING"
+  | "EXERCISE_DOSE_RANGE_EMPTY";
 
 export interface VolumeResolutionSuccess {
   ok: true;
@@ -50,6 +77,14 @@ export interface VolumeResolutionSuccess {
   profileId: Identifier;
   rangeContext: RangeContext;
   volume: PrescriptionVolume;
+  /**
+   * One human-readable sentence per dimension actually narrowed by
+   * `exerciseDoseConstraints`, e.g. "repetitions range 10-30 narrowed to
+   * 15-30 by documented exercise-specific bounds." Empty when no exercise
+   * constraint was supplied or none of them narrowed the shared profile.
+   * Consumed by `prescriptionDecisionTrace.ts` as additional `reasons`.
+   */
+  narrowingNotes: readonly string[];
   sourceRuleIds: readonly Identifier[];
 }
 
@@ -89,6 +124,14 @@ export interface ResolveVolumeInput {
    * Set true when the exact exercise capability profile requires laterality.
    */
   lateralityRequired?: boolean;
+
+  /**
+   * Documented, exercise-specific narrowing of the shared profile's volume
+   * range (see `ExerciseDoseConstraints`). `null` when the exercise has no
+   * documented bounds narrower than the shared profile — resolution then
+   * behaves exactly as it did before this field existed.
+   */
+  exerciseDoseConstraints?: ExerciseDoseConstraints | null;
 
   sourceRuleIds?: readonly Identifier[];
 }
@@ -132,6 +175,177 @@ const buildFailure = (
     ...(profile?.sourceRuleIds ?? []),
   ]),
 });
+
+type DoseDimension = keyof DoseBoundary;
+
+const DOSE_DIMENSIONS: readonly DoseDimension[] = [
+  "sets",
+  "repetitions",
+  "durationSeconds",
+  "distanceMeters",
+  "rounds",
+  "workIntervals",
+];
+
+const DISCRETE_DOSE_DIMENSIONS: readonly DoseDimension[] = [
+  "sets",
+  "repetitions",
+  "rounds",
+  "workIntervals",
+];
+
+/** The profile's own selection range for `dimension`, or `null` when this volume structure does not use it. */
+const profileRangeForDimension = (
+  volumeRule: NumericalVolumeProfile,
+  dimension: DoseDimension,
+): IntegerRange | NumericRange | null => {
+  switch (dimension) {
+    case "sets":
+      return volumeRule.sets;
+    case "repetitions":
+      return volumeRule.repetitions?.range ?? null;
+    case "durationSeconds":
+      return volumeRule.duration?.range ?? null;
+    case "distanceMeters":
+      return volumeRule.distance?.range ?? null;
+    case "rounds":
+      return volumeRule.rounds;
+    case "workIntervals":
+      return volumeRule.workIntervals;
+  }
+};
+
+/**
+ * Structural validation of `ExerciseDoseConstraints`, independent of any
+ * particular resolution attempt: every declared dimension must target a
+ * dimension the shared profile's volume structure actually uses, every
+ * bound must be strictly positive, discrete dimensions must be integers,
+ * and a per-dimension minimum may never exceed its own maximum.
+ */
+const validateExerciseDoseConstraints = (
+  constraints: ExerciseDoseConstraints,
+  volumeRule: NumericalVolumeProfile,
+):
+  | { valid: true }
+  | {
+      valid: false;
+      code: "EXERCISE_DOSE_CONSTRAINT_SOURCE_MISSING" | "EXERCISE_DOSE_CONSTRAINT_INVALID";
+      message: string;
+    } => {
+  if (constraints.sourceRuleIds.length === 0) {
+    return {
+      valid: false,
+      code: "EXERCISE_DOSE_CONSTRAINT_SOURCE_MISSING",
+      message: "Exercise dose constraints have no source rule.",
+    };
+  }
+
+  for (const dimension of DOSE_DIMENSIONS) {
+    const exerciseMin = constraints.minimumDose?.[dimension] ?? null;
+    const exerciseMax = constraints.maximumDose?.[dimension] ?? null;
+
+    if (exerciseMin === null && exerciseMax === null) {
+      continue;
+    }
+
+    if (profileRangeForDimension(volumeRule, dimension) === null) {
+      return {
+        valid: false,
+        code: "EXERCISE_DOSE_CONSTRAINT_INVALID",
+        message: `Exercise dose constraint declares "${dimension}", which the shared profile's volume structure does not use.`,
+      };
+    }
+
+    if (
+      DISCRETE_DOSE_DIMENSIONS.includes(dimension) &&
+      ((exerciseMin !== null && !Number.isInteger(exerciseMin)) ||
+        (exerciseMax !== null && !Number.isInteger(exerciseMax)))
+    ) {
+      return {
+        valid: false,
+        code: "EXERCISE_DOSE_CONSTRAINT_INVALID",
+        message: `Exercise dose constraint for "${dimension}" must be an integer.`,
+      };
+    }
+
+    if (
+      (exerciseMin !== null && exerciseMin <= 0) ||
+      (exerciseMax !== null && exerciseMax <= 0)
+    ) {
+      return {
+        valid: false,
+        code: "EXERCISE_DOSE_CONSTRAINT_INVALID",
+        message: `Exercise dose constraint for "${dimension}" must be strictly positive.`,
+      };
+    }
+
+    if (
+      exerciseMin !== null &&
+      exerciseMax !== null &&
+      exerciseMin > exerciseMax
+    ) {
+      return {
+        valid: false,
+        code: "EXERCISE_DOSE_CONSTRAINT_INVALID",
+        message: `Exercise dose constraint for "${dimension}" has a minimum (${exerciseMin}) greater than its maximum (${exerciseMax}).`,
+      };
+    }
+  }
+
+  return { valid: true };
+};
+
+/**
+ * Narrows `profileRange` by the exercise-specific bounds declared for
+ * `dimension`, if any: `effectiveMin = max(profileMin, exerciseMin)`,
+ * `effectiveMax = min(profileMax, exerciseMax)`. Never widens the shared
+ * profile. Returns `ok: false` when the intersection is empty — the caller
+ * must fail deterministically, never silently correct a bound.
+ */
+const applyExerciseDoseConstraint = <T extends IntegerRange | NumericRange>(
+  profileRange: T,
+  dimension: DoseDimension,
+  constraints: ExerciseDoseConstraints | null | undefined,
+): { ok: true; range: T; narrowed: boolean } | { ok: false } => {
+  const exerciseMin = constraints?.minimumDose?.[dimension] ?? null;
+  const exerciseMax = constraints?.maximumDose?.[dimension] ?? null;
+
+  if (exerciseMin === null && exerciseMax === null) {
+    return { ok: true, range: profileRange, narrowed: false };
+  }
+
+  const effectiveMin =
+    exerciseMin === null
+      ? profileRange.min
+      : Math.max(profileRange.min, exerciseMin);
+  const effectiveMax =
+    exerciseMax === null
+      ? profileRange.max
+      : Math.min(profileRange.max, exerciseMax);
+
+  if (effectiveMin > effectiveMax) {
+    return { ok: false };
+  }
+
+  const effectiveNormal = Math.min(
+    Math.max(profileRange.normal, effectiveMin),
+    effectiveMax,
+  );
+
+  return {
+    ok: true,
+    range: { ...profileRange, min: effectiveMin, normal: effectiveNormal, max: effectiveMax },
+    narrowed:
+      effectiveMin !== profileRange.min || effectiveMax !== profileRange.max,
+  };
+};
+
+const narrowingNote = (
+  dimension: DoseDimension,
+  profileRange: IntegerRange | NumericRange,
+  effectiveRange: IntegerRange | NumericRange,
+): string =>
+  `${dimension} range ${profileRange.min}-${profileRange.max} narrowed to ${effectiveRange.min}-${effectiveRange.max} by documented exercise-specific bounds.`;
 
 const validateDoseBoundary = (
   volume: PrescriptionVolume,
@@ -267,39 +481,99 @@ export const resolveVolume = (
   }
 
   const volumeRule = profile.volume;
+  const doseConstraints = input.exerciseDoseConstraints ?? null;
 
-  const sets =
-    volumeRule.sets === null
-      ? null
-      : selectRangeValue(volumeRule.sets, input.rangeContext);
+  if (doseConstraints !== null) {
+    const constraintValidation = validateExerciseDoseConstraints(
+      doseConstraints,
+      volumeRule,
+    );
 
-  const repetitionValue =
-    volumeRule.repetitions === null
-      ? null
-      : selectRangeValue(
-          volumeRule.repetitions.range,
-          input.rangeContext,
-        );
+    if (!constraintValidation.valid) {
+      return buildFailure(
+        input,
+        profile,
+        constraintValidation.code,
+        constraintValidation.message,
+      );
+    }
+  }
 
-  const durationValue =
-    volumeRule.duration === null
-      ? null
-      : selectRangeValue(volumeRule.duration.range, input.rangeContext);
+  const narrowingNotes: string[] = [];
 
-  const distanceValue =
-    volumeRule.distance === null
-      ? null
-      : selectRangeValue(volumeRule.distance.range, input.rangeContext);
+  const resolveDimension = (
+    dimension: DoseDimension,
+    profileRange: IntegerRange | NumericRange | null,
+  ):
+    | { ok: true; value: number | null }
+    | { ok: false } => {
+    if (profileRange === null) {
+      return { ok: true, value: null };
+    }
 
-  const rounds =
-    volumeRule.rounds === null
-      ? null
-      : selectRangeValue(volumeRule.rounds, input.rangeContext);
+    const narrowed = applyExerciseDoseConstraint(
+      profileRange,
+      dimension,
+      doseConstraints,
+    );
 
-  const workIntervals =
-    volumeRule.workIntervals === null
-      ? null
-      : selectRangeValue(volumeRule.workIntervals, input.rangeContext);
+    if (!narrowed.ok) {
+      return { ok: false };
+    }
+
+    if (narrowed.narrowed) {
+      narrowingNotes.push(
+        narrowingNote(dimension, profileRange, narrowed.range),
+      );
+    }
+
+    return {
+      ok: true,
+      value: selectRangeValue(narrowed.range, input.rangeContext),
+    };
+  };
+
+  const setsResult = resolveDimension("sets", volumeRule.sets);
+  const repetitionsResult = resolveDimension(
+    "repetitions",
+    volumeRule.repetitions?.range ?? null,
+  );
+  const durationResult = resolveDimension(
+    "durationSeconds",
+    volumeRule.duration?.range ?? null,
+  );
+  const distanceResult = resolveDimension(
+    "distanceMeters",
+    volumeRule.distance?.range ?? null,
+  );
+  const roundsResult = resolveDimension("rounds", volumeRule.rounds);
+  const workIntervalsResult = resolveDimension(
+    "workIntervals",
+    volumeRule.workIntervals,
+  );
+
+  if (
+    !setsResult.ok ||
+    !repetitionsResult.ok ||
+    !durationResult.ok ||
+    !distanceResult.ok ||
+    !roundsResult.ok ||
+    !workIntervalsResult.ok
+  ) {
+    return buildFailure(
+      input,
+      profile,
+      "EXERCISE_DOSE_RANGE_EMPTY",
+      `Exercise-specific dose bounds do not intersect the shared profile ${profile.profileId} for at least one dimension.`,
+    );
+  }
+
+  const sets = setsResult.value;
+  const repetitionValue = repetitionsResult.value;
+  const durationValue = durationResult.value;
+  const distanceValue = distanceResult.value;
+  const rounds = roundsResult.value;
+  const workIntervals = workIntervalsResult.value;
 
   const volume: PrescriptionVolume = {
     structure: volumeRule.structure,
@@ -425,9 +699,11 @@ export const resolveVolume = (
     profileId: profile.profileId,
     rangeContext: input.rangeContext,
     volume,
+    narrowingNotes,
     sourceRuleIds: unique([
       ...(input.sourceRuleIds ?? []),
       ...profile.sourceRuleIds,
+      ...(doseConstraints?.sourceRuleIds ?? []),
     ]),
   };
 };
