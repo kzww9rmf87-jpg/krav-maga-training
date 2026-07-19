@@ -150,9 +150,12 @@ function buildStageEntries(
         ? `Intensity resolved via "${intensity.selectedRuleType}" for exercise "${exerciseId}".`
         : `Intensity resolution failed for exercise "${exerciseId}".`,
       reasons: intensity.ok
-        ? intensity.rejectedRuleTypes.length > 0
-          ? [`Rejected rule types: ${intensity.rejectedRuleTypes.join(", ")}.`]
-          : ["No intensity rule rejected."]
+        ? [
+            ...(intensity.rejectedRuleTypes.length > 0
+              ? [`Rejected rule types: ${intensity.rejectedRuleTypes.join(", ")}.`]
+              : ["No intensity rule rejected."]),
+            ...intensity.narrowingNotes,
+          ]
         : [intensity.message],
       sourceRuleIds: intensity.sourceRuleIds,
     });
@@ -168,7 +171,9 @@ function buildStageEntries(
           ? `No rest required for exercise "${exerciseId}".`
           : `Rest resolved for exercise "${exerciseId}".`
         : `Rest resolution failed for exercise "${exerciseId}".`,
-      reasons: rest.ok ? [`Rest type: ${rest.rest === null ? "none" : rest.rest.type}.`] : [rest.message],
+      reasons: rest.ok
+        ? [`Rest type: ${rest.rest === null ? "none" : rest.rest.type}.`, ...rest.narrowingNotes]
+        : [rest.message],
       sourceRuleIds: rest.sourceRuleIds,
     });
   }

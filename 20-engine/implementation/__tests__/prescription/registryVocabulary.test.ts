@@ -588,3 +588,23 @@ describe("registryVocabulary — exerciseDoseConstraints", () => {
     expect(PILOT_EXERCISE_IDS).toHaveLength(35);
   });
 });
+
+// -----------------------------------------------------------------------------
+// exerciseIntensityConstraints / exerciseRestConstraints — the same generic
+// narrowing mechanism extended to resolveIntensity and resolveRest (see
+// resolveIntensity.test.ts and resolveRest.test.ts for the resolution-level
+// tests). This block only proves the Registry itself: every one of the 35
+// active pilot exercises declares both fields explicitly as `null`,
+// matching this Registry's exhaustive-contract convention (no optional
+// properties on ExercisePrescriptionRegistryEntry).
+// -----------------------------------------------------------------------------
+
+describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestConstraints", () => {
+  test("every one of the 35 pilot registry entries declares exerciseIntensityConstraints and exerciseRestConstraints explicitly (none Robustness yet)", () => {
+    for (const id of PILOT_EXERCISE_IDS) {
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseIntensityConstraints).toBeNull();
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).toBeNull();
+    }
+    expect(PILOT_EXERCISE_IDS).toHaveLength(35);
+  });
+});

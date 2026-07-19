@@ -39,10 +39,12 @@ import {
 } from "./resolveVolume";
 import {
   resolveIntensity,
+  type ExerciseIntensityConstraints,
   type IntensityResolutionResult,
 } from "./resolveIntensity";
 import {
   resolveRest,
+  type ExerciseRestConstraints,
   type RestResolutionResult,
 } from "./resolveRest";
 import {
@@ -103,6 +105,23 @@ export interface PrescribeExerciseInput {
    * documented range matches its module/method/role profile exactly.
    */
   exerciseDoseConstraints?: ExerciseDoseConstraints | null;
+
+  /**
+   * Documented, exercise-specific narrowing of the shared numerical
+   * profile's intensity rules — see `ExerciseIntensityConstraints` in
+   * `resolveIntensity.ts`. Absent or `null` for every exercise whose
+   * documented intensity bounds match its module/method/role profile
+   * exactly.
+   */
+  exerciseIntensityConstraints?: ExerciseIntensityConstraints | null;
+
+  /**
+   * Documented, exercise-specific narrowing of the shared numerical
+   * profile's rest rule — see `ExerciseRestConstraints` in
+   * `resolveRest.ts`. Absent or `null` for every exercise whose documented
+   * rest bounds match its module/method/role profile exactly.
+   */
+  exerciseRestConstraints?: ExerciseRestConstraints | null;
 
   supportedIntensityTypes: readonly IntensityType[];
   athleteReferences?: readonly IntensityReference[];
@@ -305,6 +324,7 @@ export const prescribeExercise = (
     athleteReferences: input.athleteReferences,
     preferredIntensityType: input.preferredIntensityType,
     loadRounding: input.loadRounding,
+    exerciseIntensityConstraints: input.exerciseIntensityConstraints,
     sourceRuleIds: [
       ...(input.sourceRuleIds ?? []),
       ...method.sourceRuleIds,
@@ -327,6 +347,7 @@ export const prescribeExercise = (
     methodId: method.methodId,
     role: input.role,
     rangeContext: input.rangeContext,
+    exerciseRestConstraints: input.exerciseRestConstraints,
     sourceRuleIds: [
       ...(input.sourceRuleIds ?? []),
       ...method.sourceRuleIds,

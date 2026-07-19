@@ -16,7 +16,9 @@ import {
 import {
   getNumericalPrescriptionProfile,
   selectRangeValue,
+  type IntegerRange,
   type NumericalPrescriptionProfile,
+  type NumericalRestRule,
   type RangeContext,
 } from "./prescriptionKnowledge";
 import type {
@@ -25,6 +27,26 @@ import type {
   RestScope,
   RestTarget,
 } from "./types";
+
+// -----------------------------------------------------------------------------
+// Exercise-specific rest constraints
+// -----------------------------------------------------------------------------
+
+/**
+ * Documented, exercise-specific narrowing of the shared numerical profile's
+ * rest rule. `scope` must strictly equal the profile's own `rest.scope` —
+ * an exercise constraint can never turn a documented rest requirement into
+ * `"not_applicable"`, nor assume a scope the profile does not document.
+ * `minimumSeconds`/`maximumSeconds` may only narrow the profile's own
+ * `seconds` range, never widen it, and can never fabricate a duration when
+ * the profile's `seconds` is `null`.
+ */
+export interface ExerciseRestConstraints {
+  scope: RestScope | "not_applicable";
+  minimumSeconds: number | null;
+  maximumSeconds: number | null;
+  sourceRuleIds: readonly Identifier[];
+}
 
 // -----------------------------------------------------------------------------
 // Results
@@ -36,7 +58,11 @@ export type RestResolutionFailureCode =
   | "REST_FORBIDDEN_BUT_DOCUMENTED"
   | "REST_SCOPE_INVALID"
   | "REST_VALUE_INVALID"
-  | "REST_RULE_SOURCE_MISSING";
+  | "REST_RULE_SOURCE_MISSING"
+  | "EXERCISE_REST_RANGE_EMPTY"
+  | "EXERCISE_REST_SCOPE_INCOMPATIBLE"
+  | "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID"
+  | "EXERCISE_PRESCRIPTION_CONSTRAINT_SOURCE_MISSING";
 
 export interface RestResolutionSuccess {
   ok: true;
@@ -46,6 +72,15 @@ export interface RestResolutionSuccess {
   profileId: Identifier;
   rangeContext: RangeContext;
   rest: PrescriptionRest | null;
+  /**
+   * One human-readable sentence when the resolved rest range was narrowed
+   * by `exerciseRestConstraints`, showing both the shared profile's
+   * original range and the resulting effective (intersected) range. Empty
+   * when no exercise constraint was supplied or no numeric narrowing
+   * applied. Consumed by `prescriptionDecisionTrace.ts` as additional
+   * `reasons`.
+   */
+  narrowingNotes: readonly string[];
   sourceRuleIds: readonly Identifier[];
 }
 
@@ -74,6 +109,15 @@ export interface ResolveRestInput {
   methodId: TrainingMethodId;
   role: ExerciseRole;
   rangeContext: RangeContext;
+
+  /**
+   * Documented, exercise-specific narrowing of the shared profile's rest
+   * rule (see `ExerciseRestConstraints`). `null` when the exercise has no
+   * documented bounds narrower than the shared profile — resolution then
+   * behaves exactly as it did before this field existed.
+   */
+  exerciseRestConstraints?: ExerciseRestConstraints | null;
+
   sourceRuleIds?: readonly Identifier[];
 }
 
@@ -103,6 +147,94 @@ const buildFailure = (
     ...(profile?.rest?.sourceRuleIds ?? []),
   ]),
 });
+
+/**
+ * Structural validation of `ExerciseRestConstraints` against the profile's
+ * own (possibly absent) rest rule: a constraint declared against a `null`
+ * profile rest rule is invalid; `scope` must strictly equal the profile's
+ * documented scope — `"not_applicable"` can never override a real,
+ * documented scope, nor can a real scope be assumed when the profile
+ * itself has none; a numeric bound cannot be declared when the profile's
+ * `seconds` is `null`, since that would fabricate an envelope the profile
+ * never documented; declared bounds must be strictly positive integers,
+ * and a minimum may never exceed its own maximum.
+ */
+const validateExerciseRestConstraints = (
+  constraints: ExerciseRestConstraints,
+  restRule: NumericalRestRule | null,
+):
+  | { valid: true }
+  | {
+      valid: false;
+      code: "EXERCISE_PRESCRIPTION_CONSTRAINT_SOURCE_MISSING" | "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID" | "EXERCISE_REST_SCOPE_INCOMPATIBLE";
+      message: string;
+    } => {
+  if (constraints.sourceRuleIds.length === 0) {
+    return {
+      valid: false,
+      code: "EXERCISE_PRESCRIPTION_CONSTRAINT_SOURCE_MISSING",
+      message: "Exercise rest constraints have no source rule.",
+    };
+  }
+
+  if (restRule === null) {
+    return {
+      valid: false,
+      code: "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID",
+      message: "Exercise rest constraint declared, but the shared profile documents no rest rule at all.",
+    };
+  }
+
+  if (constraints.scope !== restRule.scope) {
+    return {
+      valid: false,
+      code: "EXERCISE_REST_SCOPE_INCOMPATIBLE",
+      message: `Exercise rest constraint declares scope "${constraints.scope}", which does not match the shared profile's documented scope "${restRule.scope}".`,
+    };
+  }
+
+  if (
+    restRule.seconds === null &&
+    (constraints.minimumSeconds !== null || constraints.maximumSeconds !== null)
+  ) {
+    return {
+      valid: false,
+      code: "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID",
+      message: "Exercise rest constraint declares a numeric bound, but the shared profile documents no rest duration to narrow.",
+    };
+  }
+
+  for (const bound of [constraints.minimumSeconds, constraints.maximumSeconds]) {
+    if (bound !== null && (!Number.isInteger(bound) || bound <= 0)) {
+      return {
+        valid: false,
+        code: "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID",
+        message: `Exercise rest constraint bound (${bound}) must be a strictly positive integer.`,
+      };
+    }
+  }
+
+  if (
+    constraints.minimumSeconds !== null &&
+    constraints.maximumSeconds !== null &&
+    constraints.minimumSeconds > constraints.maximumSeconds
+  ) {
+    return {
+      valid: false,
+      code: "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID",
+      message: `Exercise rest constraint has a minimum (${constraints.minimumSeconds}) greater than its maximum (${constraints.maximumSeconds}).`,
+    };
+  }
+
+  return { valid: true };
+};
+
+const restNarrowingNote = (
+  profileSeconds: IntegerRange,
+  effectiveMin: number,
+  effectiveMax: number,
+): string =>
+  `rest range ${profileSeconds.min}-${profileSeconds.max}s narrowed to ${effectiveMin}-${effectiveMax}s by documented exercise-specific bounds.`;
 
 const toRestScope = (
   scope: "between_sets" | "between_rounds" | "between_intervals",
@@ -162,6 +294,23 @@ export const resolveRest = (
 
   const method = getTrainingMethodContract(input.methodId);
   const restRule = profile.rest;
+  const exerciseRestConstraints = input.exerciseRestConstraints ?? null;
+
+  if (exerciseRestConstraints !== null) {
+    const constraintValidation = validateExerciseRestConstraints(
+      exerciseRestConstraints,
+      restRule,
+    );
+
+    if (!constraintValidation.valid) {
+      return buildFailure(
+        input,
+        profile,
+        constraintValidation.code,
+        constraintValidation.message,
+      );
+    }
+  }
 
   if (restRule === null) {
     if (method.restPolicy === "required") {
@@ -181,6 +330,7 @@ export const resolveRest = (
       profileId: profile.profileId,
       rangeContext: input.rangeContext,
       rest: null,
+      narrowingNotes: [],
       sourceRuleIds: unique([
         ...(input.sourceRuleIds ?? []),
         ...profile.sourceRuleIds,
@@ -219,6 +369,7 @@ export const resolveRest = (
       profileId: profile.profileId,
       rangeContext: input.rangeContext,
       rest: null,
+      narrowingNotes: [],
       sourceRuleIds: unique([
         ...(input.sourceRuleIds ?? []),
         ...profile.sourceRuleIds,
@@ -246,8 +397,45 @@ export const resolveRest = (
     );
   }
 
+  let effectiveSeconds = restRule.seconds;
+  const narrowingNotes: string[] = [];
+
+  if (
+    exerciseRestConstraints !== null &&
+    (exerciseRestConstraints.minimumSeconds !== null ||
+      exerciseRestConstraints.maximumSeconds !== null)
+  ) {
+    const effectiveMin =
+      exerciseRestConstraints.minimumSeconds !== null
+        ? Math.max(restRule.seconds.min, exerciseRestConstraints.minimumSeconds)
+        : restRule.seconds.min;
+    const effectiveMax =
+      exerciseRestConstraints.maximumSeconds !== null
+        ? Math.min(restRule.seconds.max, exerciseRestConstraints.maximumSeconds)
+        : restRule.seconds.max;
+
+    if (effectiveMin > effectiveMax) {
+      return buildFailure(
+        input,
+        profile,
+        "EXERCISE_REST_RANGE_EMPTY",
+        `Exercise-specific rest constraint narrowed profile ${profile.profileId}'s rest range ${restRule.seconds.min}-${restRule.seconds.max}s to an empty range.`,
+      );
+    }
+
+    const effectiveNormal = Math.min(
+      Math.max(restRule.seconds.normal, effectiveMin),
+      effectiveMax,
+    );
+
+    effectiveSeconds = { min: effectiveMin, normal: effectiveNormal, max: effectiveMax };
+    narrowingNotes.push(
+      restNarrowingNote(restRule.seconds, effectiveMin, effectiveMax),
+    );
+  }
+
   const seconds = selectRangeValue(
-    restRule.seconds,
+    effectiveSeconds,
     input.rangeContext,
   );
 
@@ -266,6 +454,7 @@ export const resolveRest = (
     ...profile.sourceRuleIds,
     ...method.sourceRuleIds,
     ...restRule.sourceRuleIds,
+    ...(exerciseRestConstraints === null ? [] : exerciseRestConstraints.sourceRuleIds),
   ]);
 
   return {
@@ -280,6 +469,7 @@ export const resolveRest = (
       fixedRestTarget(seconds, scope),
       sourceRuleIds,
     ),
+    narrowingNotes,
     sourceRuleIds,
   };
 };

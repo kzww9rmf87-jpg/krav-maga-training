@@ -33,6 +33,39 @@ import type {
 } from "./types";
 
 // -----------------------------------------------------------------------------
+// Exercise-specific intensity constraints
+// -----------------------------------------------------------------------------
+
+/**
+ * Documented, exercise-specific narrowing of a single intensity rule's range
+ * within the shared numerical profile. Only applies to `IntensityRangeRule`
+ * entries — categorical rules (`IntensityCategoryRule`) have no numeric
+ * range and can only be included or excluded via `allowedIntensityTypes`.
+ * `minimum`/`maximum` may only narrow the shared rule's own range, never
+ * widen it: `effectiveMin = max(ruleMin, min)`, `effectiveMax = min(ruleMax, max)`.
+ */
+export interface ExerciseIntensityRangeConstraint {
+  type: IntensityType;
+  minimum: number | null;
+  maximum: number | null;
+}
+
+/**
+ * Documented, exercise-specific narrowing of the shared numerical profile's
+ * intensity rules. Not an exercise capability — `supportedIntensityTypes`
+ * already expresses what the exercise capability profile supports; this
+ * expresses what the documented exercise-specific prescription bounds are.
+ * `allowedIntensityTypes: null` means no exercise-specific type restriction
+ * (every profile-documented type remains a candidate). An empty array is a
+ * legitimate, deliberate restriction to zero types, not an omission.
+ */
+export interface ExerciseIntensityConstraints {
+  allowedIntensityTypes: readonly IntensityType[] | null;
+  rangeConstraints: readonly ExerciseIntensityRangeConstraint[];
+  sourceRuleIds: readonly Identifier[];
+}
+
+// -----------------------------------------------------------------------------
 // Result types
 // -----------------------------------------------------------------------------
 
@@ -44,7 +77,11 @@ export type IntensityResolutionFailureCode =
   | "INTENSITY_REFERENCE_INVALID"
   | "INTENSITY_TARGET_INVALID"
   | "INTENSITY_RULE_SOURCE_MISSING"
-  | "INTENSITY_EXERCISE_SPECIFIC_RULE_REQUIRED";
+  | "INTENSITY_EXERCISE_SPECIFIC_RULE_REQUIRED"
+  | "EXERCISE_INTENSITY_RANGE_EMPTY"
+  | "EXERCISE_INTENSITY_TYPE_UNSUPPORTED"
+  | "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID"
+  | "EXERCISE_PRESCRIPTION_CONSTRAINT_SOURCE_MISSING";
 
 export interface IntensityResolutionSuccess {
   ok: true;
@@ -56,6 +93,15 @@ export interface IntensityResolutionSuccess {
   intensity: PrescriptionIntensity;
   selectedRuleType: IntensityType;
   rejectedRuleTypes: readonly IntensityType[];
+  /**
+   * One human-readable sentence when the selected rule's range was narrowed
+   * by `exerciseIntensityConstraints`, showing both the shared profile's
+   * original range and the resulting effective (intersected) range. Empty
+   * when no exercise constraint was supplied or the selected rule was not
+   * narrowed. Consumed by `prescriptionDecisionTrace.ts` as additional
+   * `reasons`.
+   */
+  narrowingNotes: readonly string[];
   sourceRuleIds: readonly Identifier[];
 }
 
@@ -111,6 +157,14 @@ export interface ResolveIntensityInput {
     mode: "nearest" | "down" | "up";
     ruleId: Identifier;
   } | null;
+
+  /**
+   * Documented, exercise-specific narrowing of the shared profile's
+   * intensity rules (see `ExerciseIntensityConstraints`). `null` when the
+   * exercise has no documented bounds narrower than the shared profile —
+   * resolution then behaves exactly as it did before this field existed.
+   */
+  exerciseIntensityConstraints?: ExerciseIntensityConstraints | null;
 
   sourceRuleIds?: readonly Identifier[];
 }
@@ -332,6 +386,200 @@ const buildFailure = (
   ]),
 });
 
+const isRangeRule = (
+  rule: NumericalIntensityRule,
+): rule is Extract<NumericalIntensityRule, { min: number }> => "min" in rule;
+
+/**
+ * Structural validation of `ExerciseIntensityConstraints`, independent of
+ * any particular resolution attempt: `allowedIntensityTypes` must contain
+ * no duplicate and no type absent from the profile; each `rangeConstraints`
+ * entry must target a type the profile actually documents, must target a
+ * range rule (never a categorical rule), must express at least one bound,
+ * and a declared minimum may never exceed its own maximum.
+ */
+const validateExerciseIntensityConstraints = (
+  constraints: ExerciseIntensityConstraints,
+  profile: NumericalPrescriptionProfile,
+):
+  | { valid: true }
+  | {
+      valid: false;
+      code: "EXERCISE_PRESCRIPTION_CONSTRAINT_SOURCE_MISSING" | "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID";
+      message: string;
+    } => {
+  if (constraints.sourceRuleIds.length === 0) {
+    return {
+      valid: false,
+      code: "EXERCISE_PRESCRIPTION_CONSTRAINT_SOURCE_MISSING",
+      message: "Exercise intensity constraints have no source rule.",
+    };
+  }
+
+  if (constraints.allowedIntensityTypes !== null) {
+    const seenTypes = new Set<IntensityType>();
+
+    for (const type of constraints.allowedIntensityTypes) {
+      if (seenTypes.has(type)) {
+        return {
+          valid: false,
+          code: "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID",
+          message: `Exercise intensity constraint declares "${type}" more than once in allowedIntensityTypes.`,
+        };
+      }
+      seenTypes.add(type);
+
+      if (!profile.intensity.some((rule) => rule.type === type)) {
+        return {
+          valid: false,
+          code: "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID",
+          message: `Exercise intensity constraint allows "${type}", which profile ${profile.profileId} does not document.`,
+        };
+      }
+    }
+  }
+
+  const seenRangeTypes = new Set<IntensityType>();
+
+  for (const rangeConstraint of constraints.rangeConstraints) {
+    if (seenRangeTypes.has(rangeConstraint.type)) {
+      return {
+        valid: false,
+        code: "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID",
+        message: `Exercise intensity constraint declares more than one range constraint for "${rangeConstraint.type}".`,
+      };
+    }
+    seenRangeTypes.add(rangeConstraint.type);
+
+    const targetRule = profile.intensity.find(
+      (rule) => rule.type === rangeConstraint.type,
+    );
+
+    if (targetRule === undefined) {
+      return {
+        valid: false,
+        code: "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID",
+        message: `Exercise intensity range constraint targets "${rangeConstraint.type}", which profile ${profile.profileId} does not document.`,
+      };
+    }
+
+    if (!isRangeRule(targetRule)) {
+      return {
+        valid: false,
+        code: "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID",
+        message: `Exercise intensity range constraint targets "${rangeConstraint.type}", which is a categorical rule and cannot be range-constrained.`,
+      };
+    }
+
+    if (rangeConstraint.minimum === null && rangeConstraint.maximum === null) {
+      return {
+        valid: false,
+        code: "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID",
+        message: `Exercise intensity range constraint for "${rangeConstraint.type}" declares neither a minimum nor a maximum.`,
+      };
+    }
+
+    if (
+      (rangeConstraint.minimum !== null && !Number.isFinite(rangeConstraint.minimum)) ||
+      (rangeConstraint.maximum !== null && !Number.isFinite(rangeConstraint.maximum))
+    ) {
+      return {
+        valid: false,
+        code: "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID",
+        message: `Exercise intensity range constraint for "${rangeConstraint.type}" must use finite bounds.`,
+      };
+    }
+
+    if (
+      rangeConstraint.minimum !== null &&
+      rangeConstraint.maximum !== null &&
+      rangeConstraint.minimum > rangeConstraint.maximum
+    ) {
+      return {
+        valid: false,
+        code: "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID",
+        message: `Exercise intensity range constraint for "${rangeConstraint.type}" has a minimum (${rangeConstraint.minimum}) greater than its maximum (${rangeConstraint.maximum}).`,
+      };
+    }
+  }
+
+  return { valid: true };
+};
+
+const intensityNarrowingNote = (
+  rule: Extract<NumericalIntensityRule, { min: number }>,
+  effectiveMin: number,
+  effectiveMax: number,
+): string =>
+  `${rule.type} range ${rule.min}-${rule.max} narrowed to ${effectiveMin}-${effectiveMax} by documented exercise-specific bounds.`;
+
+interface EffectiveIntensityRule {
+  rule: NumericalIntensityRule;
+  narrowingNote: string | null;
+}
+
+/**
+ * Phase 1 of exercise-specific intensity resolution: builds the effective
+ * candidate rule set before any capability/reference/preference selection
+ * runs. A type excluded via `allowedIntensityTypes` is simply dropped, not
+ * a failure. A `rangeConstraints` entry that intersects to an empty range
+ * fails immediately — an explicit constraint inconsistent with the rule it
+ * targets must surface, never be silently ignored.
+ */
+const buildEffectiveIntensityRules = (
+  profile: NumericalPrescriptionProfile,
+  constraints: ExerciseIntensityConstraints | null,
+):
+  | { ok: true; rules: EffectiveIntensityRule[]; excludedTypes: IntensityType[] }
+  | { ok: false; ruleType: IntensityType } => {
+  const excludedTypes: IntensityType[] = [];
+  const rules: EffectiveIntensityRule[] = [];
+
+  for (const rule of profile.intensity) {
+    if (
+      constraints !== null &&
+      constraints.allowedIntensityTypes !== null &&
+      !constraints.allowedIntensityTypes.includes(rule.type)
+    ) {
+      excludedTypes.push(rule.type);
+      continue;
+    }
+
+    const rangeConstraint =
+      constraints?.rangeConstraints.find((c) => c.type === rule.type) ?? null;
+
+    if (rangeConstraint === null || !isRangeRule(rule)) {
+      rules.push({ rule, narrowingNote: null });
+      continue;
+    }
+
+    const effectiveMin =
+      rangeConstraint.minimum !== null
+        ? Math.max(rule.min, rangeConstraint.minimum)
+        : rule.min;
+    const effectiveMax =
+      rangeConstraint.maximum !== null
+        ? Math.min(rule.max, rangeConstraint.maximum)
+        : rule.max;
+
+    if (effectiveMin > effectiveMax) {
+      return { ok: false, ruleType: rule.type };
+    }
+
+    const effectiveNormal = Math.min(
+      Math.max(rule.normal, effectiveMin),
+      effectiveMax,
+    );
+
+    rules.push({
+      rule: { ...rule, min: effectiveMin, normal: effectiveNormal, max: effectiveMax },
+      narrowingNote: intensityNarrowingNote(rule, effectiveMin, effectiveMax),
+    });
+  }
+
+  return { ok: true, rules, excludedTypes };
+};
+
 // -----------------------------------------------------------------------------
 // Resolver
 // -----------------------------------------------------------------------------
@@ -365,10 +613,63 @@ export const resolveIntensity = (
     );
   }
 
-  const athleteReferences = input.athleteReferences ?? [];
-  const rejectedRuleTypes: IntensityType[] = [];
+  const exerciseIntensityConstraints = input.exerciseIntensityConstraints ?? null;
 
-  const orderedRules = [...profile.intensity].sort((left, right) => {
+  if (exerciseIntensityConstraints !== null) {
+    const constraintValidation = validateExerciseIntensityConstraints(
+      exerciseIntensityConstraints,
+      profile,
+    );
+
+    if (!constraintValidation.valid) {
+      return buildFailure(
+        input,
+        profile,
+        constraintValidation.code,
+        constraintValidation.message,
+        [],
+      );
+    }
+  }
+
+  const effectiveRulesResult = buildEffectiveIntensityRules(
+    profile,
+    exerciseIntensityConstraints,
+  );
+
+  if (!effectiveRulesResult.ok) {
+    return buildFailure(
+      input,
+      profile,
+      "EXERCISE_INTENSITY_RANGE_EMPTY",
+      `Exercise-specific intensity constraint narrowed rule "${effectiveRulesResult.ruleType}" in profile ${profile.profileId} to an empty range.`,
+      [],
+    );
+  }
+
+  const { rules: effectiveIntensityRules, excludedTypes } = effectiveRulesResult;
+
+  if (effectiveIntensityRules.length === 0) {
+    return buildFailure(
+      input,
+      profile,
+      "EXERCISE_INTENSITY_TYPE_UNSUPPORTED",
+      `Exercise-specific intensity constraints exclude every documented intensity type in profile ${profile.profileId}.`,
+      unique(excludedTypes),
+    );
+  }
+
+  const narrowingNoteByType = new Map<IntensityType, string>();
+  for (const effectiveRule of effectiveIntensityRules) {
+    if (effectiveRule.narrowingNote !== null) {
+      narrowingNoteByType.set(effectiveRule.rule.type, effectiveRule.narrowingNote);
+    }
+  }
+
+  const athleteReferences = input.athleteReferences ?? [];
+  const rejectedRuleTypes: IntensityType[] = [...excludedTypes];
+
+  const orderedRules = effectiveIntensityRules.map((r) => r.rule).sort((left, right) => {
     if (input.preferredIntensityType === null ||
         input.preferredIntensityType === undefined) {
       return 0;
@@ -458,7 +759,12 @@ export const resolveIntensity = (
       ...(input.loadRounding === undefined || input.loadRounding === null
         ? []
         : [input.loadRounding.ruleId]),
+      ...(exerciseIntensityConstraints === null
+        ? []
+        : exerciseIntensityConstraints.sourceRuleIds),
     ]);
+
+    const narrowingNote = narrowingNoteByType.get(rule.type) ?? null;
 
     return {
       ok: true,
@@ -477,6 +783,7 @@ export const resolveIntensity = (
       },
       selectedRuleType: rule.type,
       rejectedRuleTypes: unique(rejectedRuleTypes),
+      narrowingNotes: narrowingNote === null ? [] : [narrowingNote],
       sourceRuleIds,
     };
   }
