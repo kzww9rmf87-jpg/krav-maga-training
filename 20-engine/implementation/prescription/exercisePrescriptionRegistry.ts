@@ -15,9 +15,10 @@
  * condition is either (a) copied from the cited exercise chapter, (b)
  * copied from the method/module contract already implemented in
  * `contracts.ts`, or (c) copied from the numerical profile already
- * implemented in `prescriptionKnowledge.ts`. `28_STOP_CONDITIONS.md` is
- * never used as a source — it is a confirmed erroneous duplicate of
- * `27_REST_TEMPO_RULES.md`.
+ * implemented in `prescriptionKnowledge.ts`. `28_STOP_CONDITIONS.md` now
+ * documents the stop-condition categories and factories used below;
+ * exercise-specific instruction text is still grounded in the cited
+ * exercise chapter, never invented from `28_STOP_CONDITIONS.md` alone.
  *
  * This registry is static and does not read `context` to decide *what* an
  * exercise supports — `context` only supplies athlete- and

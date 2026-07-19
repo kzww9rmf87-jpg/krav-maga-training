@@ -11,9 +11,11 @@
  * description and the `sourceRuleIds` vary per call site. The description
  * text passed in by each registry entry must be grounded in a real
  * document (an exercise chapter, `31_TRAINING_METHOD_CATALOGUE.md`,
- * `32_MODULE_PRESCRIPTION_PROFILES.md` or `33_EXERCISE_PRESCRIPTION_CAPABILITIES.md`)
- * — never `28_STOP_CONDITIONS.md`, which is a confirmed erroneous byte-for-byte
- * duplicate of `27_REST_TEMPO_RULES.md` and is not a reliable source.
+ * `32_MODULE_PRESCRIPTION_PROFILES.md` or `33_EXERCISE_PRESCRIPTION_CAPABILITIES.md`).
+ * `28_STOP_CONDITIONS.md` is now the specification for the eight
+ * categories implemented below (scope, trigger type, action, priority,
+ * recoverability) — it documents this file's shape, but is not itself a
+ * source for exercise-specific description text.
  */
 
 import type { Identifier } from "../types";
