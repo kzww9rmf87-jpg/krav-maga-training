@@ -188,7 +188,7 @@ describe("resolveIntensity — exerciseIntensityConstraints", () => {
       supportedIntensityTypes: ["rpe"],
       exerciseIntensityConstraints: {
         allowedIntensityTypes: null,
-        rangeConstraints: [{ type: "rpe", minimum: 8, maximum: 8 }],
+        rangeConstraints: [{ type: "rpe", minimum: 8, maximum: 8, normal: null }],
         sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
       },
     });
@@ -217,7 +217,7 @@ describe("resolveIntensity — exerciseIntensityConstraints", () => {
       supportedIntensityTypes: ["rir"],
       exerciseIntensityConstraints: {
         allowedIntensityTypes: null,
-        rangeConstraints: [{ type: "rir", minimum: 0, maximum: 2 }],
+        rangeConstraints: [{ type: "rir", minimum: 0, maximum: 2, normal: null }],
         sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
       },
     });
@@ -243,7 +243,7 @@ describe("resolveIntensity — exerciseIntensityConstraints", () => {
       supportedIntensityTypes: ["rir"],
       exerciseIntensityConstraints: {
         allowedIntensityTypes: null,
-        rangeConstraints: [{ type: "rir", minimum: 2, maximum: 5 }],
+        rangeConstraints: [{ type: "rir", minimum: 2, maximum: 5, normal: null }],
         sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
       },
     });
@@ -268,7 +268,7 @@ describe("resolveIntensity — exerciseIntensityConstraints", () => {
       athleteReferences: [makeOneRepMaxReference({ value: 100 })],
       exerciseIntensityConstraints: {
         allowedIntensityTypes: null,
-        rangeConstraints: [{ type: "rpe", minimum: 9.5, maximum: 9.5 }],
+        rangeConstraints: [{ type: "rpe", minimum: 9.5, maximum: 9.5, normal: null }],
         sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
       },
     });
@@ -376,8 +376,8 @@ describe("resolveIntensity — exerciseIntensityConstraints", () => {
       exerciseIntensityConstraints: {
         allowedIntensityTypes: null,
         rangeConstraints: [
-          { type: "rpe", minimum: 8, maximum: null },
-          { type: "rpe", minimum: null, maximum: 8.5 },
+          { type: "rpe", minimum: 8, maximum: null, normal: null },
+          { type: "rpe", minimum: null, maximum: 8.5, normal: null },
         ],
         sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
       },
@@ -399,7 +399,7 @@ describe("resolveIntensity — exerciseIntensityConstraints", () => {
       supportedIntensityTypes: ["rpe"],
       exerciseIntensityConstraints: {
         allowedIntensityTypes: null,
-        rangeConstraints: [{ type: "absolute_load", minimum: 10, maximum: 20 }],
+        rangeConstraints: [{ type: "absolute_load", minimum: 10, maximum: 20, normal: null }],
         sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
       },
     });
@@ -421,7 +421,7 @@ describe("resolveIntensity — exerciseIntensityConstraints", () => {
       athleteReferences: [makeOneRepMaxReference({ value: 100 })],
       exerciseIntensityConstraints: {
         allowedIntensityTypes: null,
-        rangeConstraints: [{ type: "movement_intent", minimum: 1, maximum: 2 }],
+        rangeConstraints: [{ type: "movement_intent", minimum: 1, maximum: 2, normal: null }],
         sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
       },
     });
@@ -468,7 +468,7 @@ describe("resolveIntensity — exerciseIntensityConstraints", () => {
       supportedIntensityTypes: ["rpe"],
       exerciseIntensityConstraints: {
         allowedIntensityTypes: null,
-        rangeConstraints: [{ type: "rpe", minimum: null, maximum: null }],
+        rangeConstraints: [{ type: "rpe", minimum: null, maximum: null, normal: null }],
         sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
       },
     });
@@ -489,7 +489,7 @@ describe("resolveIntensity — exerciseIntensityConstraints", () => {
       supportedIntensityTypes: ["rpe"],
       exerciseIntensityConstraints: {
         allowedIntensityTypes: null,
-        rangeConstraints: [{ type: "rpe", minimum: 8.5, maximum: 8 }],
+        rangeConstraints: [{ type: "rpe", minimum: 8.5, maximum: 8, normal: null }],
         sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
       },
     });
@@ -510,7 +510,7 @@ describe("resolveIntensity — exerciseIntensityConstraints", () => {
       supportedIntensityTypes: ["rpe"],
       exerciseIntensityConstraints: {
         allowedIntensityTypes: null,
-        rangeConstraints: [{ type: "rpe", minimum: 8, maximum: 8.5 }],
+        rangeConstraints: [{ type: "rpe", minimum: 8, maximum: 8.5, normal: null }],
         sourceRuleIds: [],
       },
     });
@@ -535,7 +535,7 @@ describe("resolveIntensity — exerciseIntensityConstraints", () => {
       supportedIntensityTypes: ["rpe"],
       exerciseIntensityConstraints: {
         allowedIntensityTypes: null,
-        rangeConstraints: [{ type: "percentage_1rm", minimum: 82, maximum: 88 }],
+        rangeConstraints: [{ type: "percentage_1rm", minimum: 82, maximum: 88, normal: null }],
         sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
       },
     });
@@ -557,7 +557,7 @@ describe("resolveIntensity — exerciseIntensityConstraints", () => {
       supportedIntensityTypes: ["rpe"],
       exerciseIntensityConstraints: {
         allowedIntensityTypes: null,
-        rangeConstraints: [{ type: "rpe", minimum: 8, maximum: 8.5 }],
+        rangeConstraints: [{ type: "rpe", minimum: 8, maximum: 8.5, normal: null }],
         sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
       },
     });
@@ -578,7 +578,7 @@ describe("resolveIntensity — exerciseIntensityConstraints", () => {
       supportedIntensityTypes: ["rpe"] as const,
       exerciseIntensityConstraints: {
         allowedIntensityTypes: null,
-        rangeConstraints: [{ type: "rpe" as const, minimum: 8, maximum: 8.5 }],
+        rangeConstraints: [{ type: "rpe" as const, minimum: 8, maximum: 8.5, normal: null }],
         sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
       },
     };
@@ -595,7 +595,309 @@ describe("resolveIntensity — exerciseIntensityConstraints", () => {
       supportedIntensityTypes: ["rpe"] as const,
       exerciseIntensityConstraints: {
         allowedIntensityTypes: null,
-        rangeConstraints: [{ type: "rpe" as const, minimum: 8, maximum: 8.5 }],
+        rangeConstraints: [{ type: "rpe" as const, minimum: 8, maximum: 8.5, normal: null }],
+        sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
+      },
+    };
+    const snapshot = JSON.parse(JSON.stringify(input));
+
+    resolveIntensity(input);
+
+    expect(input).toEqual(snapshot);
+  });
+});
+
+// Substrate: strength/straight_sets_repetitions/primary — rpe is documented
+// 7.5-8-9. The two cases below reproduce, on this real substrate, the exact
+// two shapes discussed with the business owner (a constraint narrowing the
+// low end with a lower exercise-specific normal, and a constraint narrowing
+// the high end with a higher exercise-specific normal) — the illustrative
+// "3-5-8" profile from that discussion is not a real profile and is not
+// created here; only the intersection/normal-override logic is under test.
+describe("resolveIntensity — exerciseIntensityConstraints — normal override", () => {
+  test("an in-range exercise-specific normal below the shared normal is honored, not clamped", () => {
+    const result = resolveIntensity({
+      moduleId: "strength",
+      methodId: "straight_sets_repetitions",
+      role: "primary",
+      rangeContext: "normal",
+      supportedIntensityTypes: ["rpe"],
+      exerciseIntensityConstraints: {
+        allowedIntensityTypes: null,
+        rangeConstraints: [{ type: "rpe", minimum: null, maximum: 8.5, normal: 7.5 }],
+        sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
+      },
+    });
+
+    if (!result.ok) {
+      throw new Error(`Expected resolution to succeed, got failure: ${result.message}`);
+    }
+
+    expect(result.intensity.primaryMetric.target).toEqual({ type: "fixed", value: 7.5 });
+    expect(result.narrowingNotes).toContain(
+      "Shared rpe normal 8 was adjusted to 7.5 within the exercise-specific effective range 7.5-8.5.",
+    );
+  });
+
+  test("an in-range exercise-specific normal above the shared normal is honored, not clamped", () => {
+    const result = resolveIntensity({
+      moduleId: "strength",
+      methodId: "straight_sets_repetitions",
+      role: "primary",
+      rangeContext: "normal",
+      supportedIntensityTypes: ["rpe"],
+      exerciseIntensityConstraints: {
+        allowedIntensityTypes: null,
+        rangeConstraints: [{ type: "rpe", minimum: 8.5, maximum: null, normal: 8.5 }],
+        sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
+      },
+    });
+
+    if (!result.ok) {
+      throw new Error(`Expected resolution to succeed, got failure: ${result.message}`);
+    }
+
+    expect(result.intensity.primaryMetric.target).toEqual({ type: "fixed", value: 8.5 });
+    expect(result.narrowingNotes).toContain(
+      "Shared rpe normal 8 was adjusted to 8.5 within the exercise-specific effective range 8.5-9.",
+    );
+  });
+
+  test("fails with EXERCISE_INTENSITY_NORMAL_OUT_OF_RANGE when the exercise-specific normal is below effectiveMin", () => {
+    const result = resolveIntensity({
+      moduleId: "strength",
+      methodId: "straight_sets_repetitions",
+      role: "primary",
+      rangeContext: "normal",
+      supportedIntensityTypes: ["rpe"],
+      exerciseIntensityConstraints: {
+        allowedIntensityTypes: null,
+        rangeConstraints: [{ type: "rpe", minimum: 8, maximum: 8.5, normal: 7.5 }],
+        sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
+      },
+    });
+
+    if (result.ok) {
+      throw new Error("Expected resolution to fail when the exercise-specific normal is below effectiveMin.");
+    }
+
+    expect(result.failureCode).toBe("EXERCISE_INTENSITY_NORMAL_OUT_OF_RANGE");
+  });
+
+  test("fails with EXERCISE_INTENSITY_NORMAL_OUT_OF_RANGE when the exercise-specific normal is above effectiveMax", () => {
+    const result = resolveIntensity({
+      moduleId: "strength",
+      methodId: "straight_sets_repetitions",
+      role: "primary",
+      rangeContext: "normal",
+      supportedIntensityTypes: ["rpe"],
+      exerciseIntensityConstraints: {
+        allowedIntensityTypes: null,
+        rangeConstraints: [{ type: "rpe", minimum: 7.5, maximum: 8, normal: 8.5 }],
+        sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
+      },
+    });
+
+    if (result.ok) {
+      throw new Error("Expected resolution to fail when the exercise-specific normal is above effectiveMax.");
+    }
+
+    expect(result.failureCode).toBe("EXERCISE_INTENSITY_NORMAL_OUT_OF_RANGE");
+  });
+
+  test("fails with EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID when the exercise-specific normal is not finite", () => {
+    const result = resolveIntensity({
+      moduleId: "strength",
+      methodId: "straight_sets_repetitions",
+      role: "primary",
+      rangeContext: "normal",
+      supportedIntensityTypes: ["rpe"],
+      exerciseIntensityConstraints: {
+        allowedIntensityTypes: null,
+        rangeConstraints: [{ type: "rpe", minimum: 7.5, maximum: 9, normal: Number.POSITIVE_INFINITY }],
+        sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
+      },
+    });
+
+    if (result.ok) {
+      throw new Error("Expected resolution to fail when the exercise-specific normal is not finite.");
+    }
+
+    expect(result.failureCode).toBe("EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID");
+  });
+
+  test("accepts an exercise-specific normal exactly equal to effectiveMin", () => {
+    const result = resolveIntensity({
+      moduleId: "strength",
+      methodId: "straight_sets_repetitions",
+      role: "primary",
+      rangeContext: "normal",
+      supportedIntensityTypes: ["rpe"],
+      exerciseIntensityConstraints: {
+        allowedIntensityTypes: null,
+        rangeConstraints: [{ type: "rpe", minimum: 8, maximum: 8.5, normal: 8 }],
+        sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
+      },
+    });
+
+    if (!result.ok) {
+      throw new Error(`Expected resolution to succeed, got failure: ${result.message}`);
+    }
+
+    expect(result.intensity.primaryMetric.target).toEqual({ type: "fixed", value: 8 });
+  });
+
+  test("accepts an exercise-specific normal exactly equal to effectiveMax", () => {
+    const result = resolveIntensity({
+      moduleId: "strength",
+      methodId: "straight_sets_repetitions",
+      role: "primary",
+      rangeContext: "normal",
+      supportedIntensityTypes: ["rpe"],
+      exerciseIntensityConstraints: {
+        allowedIntensityTypes: null,
+        rangeConstraints: [{ type: "rpe", minimum: 7.5, maximum: 8, normal: 8 }],
+        sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
+      },
+    });
+
+    if (!result.ok) {
+      throw new Error(`Expected resolution to succeed, got failure: ${result.message}`);
+    }
+
+    expect(result.intensity.primaryMetric.target).toEqual({ type: "fixed", value: 8 });
+  });
+
+  test("normal: null strictly preserves the prior clamp behavior — non-regression", () => {
+    const result = resolveIntensity({
+      moduleId: "strength",
+      methodId: "straight_sets_repetitions",
+      role: "primary",
+      rangeContext: "normal",
+      supportedIntensityTypes: ["rpe"],
+      exerciseIntensityConstraints: {
+        allowedIntensityTypes: null,
+        rangeConstraints: [{ type: "rpe", minimum: 8, maximum: 8.5, normal: null }],
+        sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
+      },
+    });
+
+    if (!result.ok) {
+      throw new Error(`Expected resolution to succeed, got failure: ${result.message}`);
+    }
+
+    // Clamp: min(max(8 [shared normal], 8 [effectiveMin]), 8.5 [effectiveMax]) = 8.
+    expect(result.intensity.primaryMetric.target).toEqual({ type: "fixed", value: 8 });
+    expect(
+      result.narrowingNotes.some((note) => note.includes("was adjusted to")),
+    ).toBe(false);
+  });
+
+  test("no normal-adjustment note is added when the exercise-specific normal equals the shared normal", () => {
+    const result = resolveIntensity({
+      moduleId: "strength",
+      methodId: "straight_sets_repetitions",
+      role: "primary",
+      rangeContext: "normal",
+      supportedIntensityTypes: ["rpe"],
+      exerciseIntensityConstraints: {
+        allowedIntensityTypes: null,
+        rangeConstraints: [{ type: "rpe", minimum: 7, maximum: 9, normal: 8 }],
+        sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
+      },
+    });
+
+    if (!result.ok) {
+      throw new Error(`Expected resolution to succeed, got failure: ${result.message}`);
+    }
+
+    expect(
+      result.narrowingNotes.some((note) => note.includes("was adjusted to")),
+    ).toBe(false);
+  });
+
+  test("the exercise-specific normal never widens the effective bounds — reduced/high contexts remain governed by effectiveMin/effectiveMax alone", () => {
+    const constraint = {
+      allowedIntensityTypes: null,
+      rangeConstraints: [{ type: "rpe" as const, minimum: 8, maximum: 8.5, normal: 8 }],
+      sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
+    };
+
+    const reduced = resolveIntensity({
+      moduleId: "strength",
+      methodId: "straight_sets_repetitions",
+      role: "primary",
+      rangeContext: "reduced",
+      supportedIntensityTypes: ["rpe"],
+      exerciseIntensityConstraints: constraint,
+    });
+    const high = resolveIntensity({
+      moduleId: "strength",
+      methodId: "straight_sets_repetitions",
+      role: "primary",
+      rangeContext: "high",
+      supportedIntensityTypes: ["rpe"],
+      exerciseIntensityConstraints: constraint,
+    });
+
+    if (!reduced.ok || !high.ok) {
+      throw new Error("Expected both resolutions to succeed.");
+    }
+
+    // effectiveMin = 8, effectiveMax = 8.5 — the normal override (8) must
+    // never leak into reduced/high selection, and must never widen bounds.
+    expect(reduced.intensity.primaryMetric.target).toEqual({ type: "fixed", value: 8 });
+    expect(high.intensity.primaryMetric.target).toEqual({ type: "fixed", value: 8.5 });
+  });
+
+  test("sourceRuleIds remain complete and unchanged when a normal override is applied", () => {
+    const result = resolveIntensity({
+      moduleId: "strength",
+      methodId: "straight_sets_repetitions",
+      role: "primary",
+      rangeContext: "normal",
+      supportedIntensityTypes: ["rpe"],
+      exerciseIntensityConstraints: {
+        allowedIntensityTypes: null,
+        rangeConstraints: [{ type: "rpe", minimum: null, maximum: 8.5, normal: 7.5 }],
+        sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
+      },
+    });
+
+    if (!result.ok) {
+      throw new Error(`Expected resolution to succeed, got failure: ${result.message}`);
+    }
+
+    expect(result.sourceRuleIds).toContain("TEST_EXERCISE_INTENSITY_RULE");
+  });
+
+  test("determinism: identical input with a normal override produces an identical result", () => {
+    const input = {
+      moduleId: "strength" as const,
+      methodId: "straight_sets_repetitions" as const,
+      role: "primary" as const,
+      rangeContext: "normal" as const,
+      supportedIntensityTypes: ["rpe"] as const,
+      exerciseIntensityConstraints: {
+        allowedIntensityTypes: null,
+        rangeConstraints: [{ type: "rpe" as const, minimum: null, maximum: 8.5, normal: 7.5 }],
+        sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
+      },
+    };
+
+    expect(resolveIntensity(input)).toEqual(resolveIntensity(input));
+  });
+
+  test("does not mutate its input when a normal override is provided", () => {
+    const input = {
+      moduleId: "strength" as const,
+      methodId: "straight_sets_repetitions" as const,
+      role: "primary" as const,
+      rangeContext: "normal" as const,
+      supportedIntensityTypes: ["rpe"] as const,
+      exerciseIntensityConstraints: {
+        allowedIntensityTypes: null,
+        rangeConstraints: [{ type: "rpe" as const, minimum: null, maximum: 8.5, normal: 7.5 }],
         sourceRuleIds: ["TEST_EXERCISE_INTENSITY_RULE"],
       },
     };

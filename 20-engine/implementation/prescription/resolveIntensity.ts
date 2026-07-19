@@ -43,11 +43,18 @@ import type {
  * range and can only be included or excluded via `allowedIntensityTypes`.
  * `minimum`/`maximum` may only narrow the shared rule's own range, never
  * widen it: `effectiveMin = max(ruleMin, min)`, `effectiveMax = min(ruleMax, max)`.
+ * `normal`, when not `null`, is an exercise-specific override of the shared
+ * rule's own normal value: it never participates in computing
+ * `effectiveMin`/`effectiveMax`, must itself fall inside the resulting
+ * effective range, and is used as-is instead of the usual
+ * profile-normal-clamped-into-range behavior. `null` preserves that
+ * existing clamp exactly as before this field existed.
  */
 export interface ExerciseIntensityRangeConstraint {
   type: IntensityType;
   minimum: number | null;
   maximum: number | null;
+  normal: number | null;
 }
 
 /**
@@ -80,6 +87,7 @@ export type IntensityResolutionFailureCode =
   | "INTENSITY_EXERCISE_SPECIFIC_RULE_REQUIRED"
   | "EXERCISE_INTENSITY_RANGE_EMPTY"
   | "EXERCISE_INTENSITY_TYPE_UNSUPPORTED"
+  | "EXERCISE_INTENSITY_NORMAL_OUT_OF_RANGE"
   | "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID"
   | "EXERCISE_PRESCRIPTION_CONSTRAINT_SOURCE_MISSING";
 
@@ -490,6 +498,14 @@ const validateExerciseIntensityConstraints = (
       };
     }
 
+    if (rangeConstraint.normal !== null && !Number.isFinite(rangeConstraint.normal)) {
+      return {
+        valid: false,
+        code: "EXERCISE_PRESCRIPTION_CONSTRAINT_INVALID",
+        message: `Exercise intensity range constraint for "${rangeConstraint.type}" must use a finite normal value.`,
+      };
+    }
+
     if (
       rangeConstraint.minimum !== null &&
       rangeConstraint.maximum !== null &&
@@ -513,9 +529,17 @@ const intensityNarrowingNote = (
 ): string =>
   `${rule.type} range ${rule.min}-${rule.max} narrowed to ${effectiveMin}-${effectiveMax} by documented exercise-specific bounds.`;
 
+const intensityNormalNote = (
+  rule: Extract<NumericalIntensityRule, { min: number }>,
+  effectiveMin: number,
+  effectiveMax: number,
+  normal: number,
+): string =>
+  `Shared ${rule.type} normal ${rule.normal} was adjusted to ${normal} within the exercise-specific effective range ${effectiveMin}-${effectiveMax}.`;
+
 interface EffectiveIntensityRule {
   rule: NumericalIntensityRule;
-  narrowingNote: string | null;
+  narrowingNotes: readonly string[];
 }
 
 /**
@@ -524,14 +548,17 @@ interface EffectiveIntensityRule {
  * runs. A type excluded via `allowedIntensityTypes` is simply dropped, not
  * a failure. A `rangeConstraints` entry that intersects to an empty range
  * fails immediately — an explicit constraint inconsistent with the rule it
- * targets must surface, never be silently ignored.
+ * targets must surface, never be silently ignored. An explicit `normal`
+ * that falls outside the resulting effective range fails immediately for
+ * the same reason, distinguished from an empty-range failure so the caller
+ * can report the precise cause.
  */
 const buildEffectiveIntensityRules = (
   profile: NumericalPrescriptionProfile,
   constraints: ExerciseIntensityConstraints | null,
 ):
   | { ok: true; rules: EffectiveIntensityRule[]; excludedTypes: IntensityType[] }
-  | { ok: false; ruleType: IntensityType } => {
+  | { ok: false; ruleType: IntensityType; reason: "range_empty" | "normal_out_of_range" } => {
   const excludedTypes: IntensityType[] = [];
   const rules: EffectiveIntensityRule[] = [];
 
@@ -549,7 +576,7 @@ const buildEffectiveIntensityRules = (
       constraints?.rangeConstraints.find((c) => c.type === rule.type) ?? null;
 
     if (rangeConstraint === null || !isRangeRule(rule)) {
-      rules.push({ rule, narrowingNote: null });
+      rules.push({ rule, narrowingNotes: [] });
       continue;
     }
 
@@ -563,17 +590,34 @@ const buildEffectiveIntensityRules = (
         : rule.max;
 
     if (effectiveMin > effectiveMax) {
-      return { ok: false, ruleType: rule.type };
+      return { ok: false, ruleType: rule.type, reason: "range_empty" };
     }
 
-    const effectiveNormal = Math.min(
-      Math.max(rule.normal, effectiveMin),
-      effectiveMax,
-    );
+    const narrowingNotes: string[] = [
+      intensityNarrowingNote(rule, effectiveMin, effectiveMax),
+    ];
+
+    let effectiveNormal: number;
+
+    if (rangeConstraint.normal !== null) {
+      if (rangeConstraint.normal < effectiveMin || rangeConstraint.normal > effectiveMax) {
+        return { ok: false, ruleType: rule.type, reason: "normal_out_of_range" };
+      }
+
+      effectiveNormal = rangeConstraint.normal;
+
+      if (effectiveNormal !== rule.normal) {
+        narrowingNotes.push(
+          intensityNormalNote(rule, effectiveMin, effectiveMax, effectiveNormal),
+        );
+      }
+    } else {
+      effectiveNormal = Math.min(Math.max(rule.normal, effectiveMin), effectiveMax);
+    }
 
     rules.push({
       rule: { ...rule, min: effectiveMin, normal: effectiveNormal, max: effectiveMax },
-      narrowingNote: intensityNarrowingNote(rule, effectiveMin, effectiveMax),
+      narrowingNotes,
     });
   }
 
@@ -638,6 +682,16 @@ export const resolveIntensity = (
   );
 
   if (!effectiveRulesResult.ok) {
+    if (effectiveRulesResult.reason === "normal_out_of_range") {
+      return buildFailure(
+        input,
+        profile,
+        "EXERCISE_INTENSITY_NORMAL_OUT_OF_RANGE",
+        `Exercise-specific normal for rule "${effectiveRulesResult.ruleType}" in profile ${profile.profileId} falls outside the effective range.`,
+        [],
+      );
+    }
+
     return buildFailure(
       input,
       profile,
@@ -659,10 +713,10 @@ export const resolveIntensity = (
     );
   }
 
-  const narrowingNoteByType = new Map<IntensityType, string>();
+  const narrowingNotesByType = new Map<IntensityType, readonly string[]>();
   for (const effectiveRule of effectiveIntensityRules) {
-    if (effectiveRule.narrowingNote !== null) {
-      narrowingNoteByType.set(effectiveRule.rule.type, effectiveRule.narrowingNote);
+    if (effectiveRule.narrowingNotes.length > 0) {
+      narrowingNotesByType.set(effectiveRule.rule.type, effectiveRule.narrowingNotes);
     }
   }
 
@@ -764,7 +818,7 @@ export const resolveIntensity = (
         : exerciseIntensityConstraints.sourceRuleIds),
     ]);
 
-    const narrowingNote = narrowingNoteByType.get(rule.type) ?? null;
+    const narrowingNotes = narrowingNotesByType.get(rule.type) ?? [];
 
     return {
       ok: true,
@@ -783,7 +837,7 @@ export const resolveIntensity = (
       },
       selectedRuleType: rule.type,
       rejectedRuleTypes: unique(rejectedRuleTypes),
-      narrowingNotes: narrowingNote === null ? [] : [narrowingNote],
+      narrowingNotes,
       sourceRuleIds,
     };
   }
