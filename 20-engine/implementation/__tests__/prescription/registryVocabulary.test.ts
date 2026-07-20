@@ -417,6 +417,7 @@ describe("registryVocabulary — carry loading modes corrected to match document
       rotator_cuff_training: ["cable", "resistance_band"],
       wrist_strengthening: ["bodyweight", "added_external_load"],
       soleus_raise: ["bodyweight", "added_external_load"],
+      countermovement_jump: ["bodyweight"],
     };
     const CORRECTED_IDS = ["pinch_carry", "sandbag_carry", "zercher_carry"];
 
@@ -432,9 +433,9 @@ describe("registryVocabulary — carry loading modes corrected to match document
     expect(PILOT_EXERCISE_IDS.length).toBe(CORRECTED_IDS.length + Object.keys(EXPECTED_LOADING_MODES).length);
   });
 
-  test("7. the registry still contains exactly 39 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(39);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(39);
+  test("7. the registry still contains exactly 40 active exercises", () => {
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(40);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(40);
   });
 
   test("8. every retained value (plate, sandbag, barbell) is a known, documented LoadingMode", () => {
@@ -547,12 +548,12 @@ describe("registryVocabulary — pinch_carry represents only the Bilateral Varia
     for (const [id, text] of Object.entries(OTHER_ENTRY_FIRST_INSTRUCTION)) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id as PilotExerciseId].instructionDefinitions[0].text).toBe(text);
     }
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(39);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(40);
   });
 
-  test("9. the registry still contains exactly 39 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(39);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(39);
+  test("9. the registry still contains exactly 40 active exercises", () => {
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(40);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(40);
   });
 
   test("10. explicitMethodId, supportedMethodIds, supportedVolumeStructures and stop conditions are unchanged", () => {
@@ -606,7 +607,7 @@ describe("registryVocabulary — exerciseDoseConstraints", () => {
       }
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseDoseConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(39);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(40);
   });
 
   test("tibialis_raise, rotator_cuff_training and soleus_raise narrow exerciseDoseConstraints; wrist_strengthening does not", () => {
@@ -626,7 +627,7 @@ describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestCons
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseIntensityConstraints).toBeNull();
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(39);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(40);
   });
 
   test("all four Robustness exercises narrow exerciseIntensityConstraints and none narrow exerciseRestConstraints", () => {

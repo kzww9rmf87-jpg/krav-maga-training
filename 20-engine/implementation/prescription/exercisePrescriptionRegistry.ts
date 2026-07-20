@@ -192,6 +192,11 @@ export const PILOT_EXERCISE_IDS = [
   "rotator_cuff_training",
   "wrist_strengthening",
   "soleus_raise",
+  // Force/Tirage — first unblocked sub-lot (see audit): only
+  // countermovement_jump requires no new business rule, no new numerical
+  // profile, no new equipment vocabulary, no reclassification and no
+  // documentary conflict resolution.
+  "countermovement_jump",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -4903,6 +4908,140 @@ const soleusRaiseEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Force/Tirage — first unblocked sub-lot
+// Source: 50-exercises/21_COUNTERMOVEMENT_JUMP
+//   - Primary Classification: "Power"
+//   - Typical Intensity: "Bodyweight"; Typical Volume: 3-6 sets, 2-5
+//     repetitions — a strict superset of the shared profile's own 3-4-5
+//     sets / 2-3-5 reps, so the shared profile is used unchanged (no
+//     exerciseDoseConstraints).
+//   - Equipment Requirements: Required: None — no surface requirement is
+//     documented here, unlike broad_jump's own fiche ("Stable non-slip
+//     training surface"), so requiredEquipmentCapabilities stays empty:
+//     no safe_landing_surface for this exercise specifically.
+//   - Coaching Cues: "Move fast.", "Brace before jumping.", "Explode
+//     vertically.", "Land softly.", "Absorb force efficiently."
+//   - Common Errors: Slow Countermovement, Poor Landing, Excessive Knee
+//     Valgus, Incomplete Triple Extension, Loss of Balance.
+// Method: power_repetition_sets / power / primary
+// Reuses power_primary_repetition_sets_v0_1 unchanged (movement_intent:
+// maximal_acceleration matches the fiche's own "Maximum Velocity, Maximum
+// Intent... movement velocity is the objective" exactly).
+// -----------------------------------------------------------------------------
+const SOURCE_COUNTERMOVEMENT_JUMP = "50-exercises/21_COUNTERMOVEMENT_JUMP";
+
+const countermovementJumpStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "countermovement_jump_technical_failure",
+    description:
+      "Stop or regress the set when the countermovement becomes slow, triple extension is incomplete, or the knees collapse inward during take-off or landing.",
+    sourceRuleIds: [SOURCE_COUNTERMOVEMENT_JUMP],
+  }),
+  velocityLossCondition({
+    conditionId: "countermovement_jump_velocity_loss",
+    description:
+      "Stop the set once take-off velocity or jump height becomes visibly reduced — movement velocity is the objective of this exercise.",
+    sourceRuleIds: [SOURCE_COUNTERMOVEMENT_JUMP],
+  }),
+  fatigueLimitCondition({
+    conditionId: "countermovement_jump_fatigue_limit",
+    description:
+      "Stop the exercise once jump height or explosive output declines meaningfully, or neuromuscular readiness appears reduced between repetitions.",
+    sourceRuleIds: [SOURCE_COUNTERMOVEMENT_JUMP],
+  }),
+  impactLimitCondition({
+    conditionId: "countermovement_jump_impact_limit",
+    description: "Stop the set if landing mechanics become poor or forceful rather than soft and absorbed.",
+    sourceRuleIds: [SOURCE_COUNTERMOVEMENT_JUMP],
+  }),
+  balanceLossCondition({
+    conditionId: "countermovement_jump_balance_loss",
+    description: "Stop the set if the athlete loses balance on landing.",
+    sourceRuleIds: [SOURCE_COUNTERMOVEMENT_JUMP],
+  }),
+  painCondition({
+    conditionId: "countermovement_jump_pain",
+    description: "Stop immediately if pain occurs during the countermovement, take-off, flight or landing.",
+    sourceRuleIds: [SOURCE_COUNTERMOVEMENT_JUMP],
+  }),
+  completionCondition({
+    conditionId: "countermovement_jump_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const countermovementJumpInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "countermovement_jump_setup",
+    "setup",
+    "Stand tall with feet roughly shoulder-width apart on a stable surface, ready to move directly into the countermovement without hesitation.",
+    "high",
+    true,
+    SOURCE_COUNTERMOVEMENT_JUMP,
+  ),
+  makeInstruction(
+    "countermovement_jump_execution",
+    "execution",
+    "Move fast: brace before jumping, dip directly into the countermovement, explode vertically through full triple extension, then land softly and absorb force efficiently.",
+    "high",
+    true,
+    SOURCE_COUNTERMOVEMENT_JUMP,
+  ),
+];
+
+const countermovementJumpEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "countermovement_jump",
+  moduleId: "power",
+  role: "primary",
+  explicitMethodId: "power_repetition_sets",
+  capabilities: {
+    exerciseId: "countermovement_jump",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["power_repetition_sets"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["movement_intent"],
+    preferredIntensityTypes: ["movement_intent"],
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "global_movement_intent", "technical_quality_observation"],
+    requiredEquipmentCapabilities: [],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["countermovement_jump_setup", "countermovement_jump_execution"],
+    requiredStopConditionIds: [
+      "countermovement_jump_technical_failure",
+      "countermovement_jump_velocity_loss",
+      "countermovement_jump_fatigue_limit",
+      "countermovement_jump_impact_limit",
+      "countermovement_jump_balance_loss",
+      "countermovement_jump_pain",
+      "countermovement_jump_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_countermovement_jump",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_COUNTERMOVEMENT_JUMP, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["movement_intent"],
+  preferredIntensityType: "movement_intent",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: countermovementJumpInstructions,
+  stopConditionDefinitions: countermovementJumpStopConditions,
+  exerciseDoseConstraints: null,
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [
+    SOURCE_COUNTERMOVEMENT_JUMP,
+    SOURCE_METHOD_CATALOGUE,
+    SOURCE_MODULE_PROFILES,
+    SOURCE_NUMERICAL_TABLES,
+  ],
+};
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -4958,6 +5097,8 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   rotator_cuff_training: rotatorCuffTrainingEntry,
   wrist_strengthening: wristStrengtheningEntry,
   soleus_raise: soleusRaiseEntry,
+
+  countermovement_jump: countermovementJumpEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>
