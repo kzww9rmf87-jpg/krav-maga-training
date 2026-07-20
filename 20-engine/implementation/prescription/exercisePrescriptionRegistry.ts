@@ -200,6 +200,11 @@ export const PILOT_EXERCISE_IDS = [
   // Core / Robustness — unilateral isometric adductor hold, reuses
   // timed_isometric_core_robustness_v0_1 (see audit).
   "copenhagen_plank",
+  // Force/Tirage — shared strength_accessory_straight_sets_v0_1 profile,
+  // RPE-only (no rir, no percentage_1rm — see audit).
+  "hip_thrust",
+  "chin_up",
+  "barbell_row",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -5175,6 +5180,326 @@ const copenhagenPlankEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Force/Tirage — strength_accessory_straight_sets_v0_1 batch
+// Shared profile: strength_accessory_straight_sets_v0_1
+//   (moduleId: strength, methodId: straight_sets_repetitions, exerciseRole: accessory)
+//   sets 2-3-6, repetitions 4-8-15, RPE 6-7-8 only (no rir, no
+//   percentage_1rm), rest 90-120-180s, tempo: null. hip_thrust and
+//   barbell_row document 60-90% 1RM in their own chapters — this range is
+//   acknowledged but deliberately not activated in V0.1 (see
+//   34_NUMERICAL_PRESCRIPTION_TABLES.md, Table Group 12, "Documented But
+//   Inactive Capability"): resolveVolume and resolveIntensity resolve
+//   volume and intensity independently, and a wide repetition range (4-15)
+//   combined with a wide percentage_1rm range (60-90%) could produce an
+//   incoherent pair (e.g. 15 repetitions at 90% of the one-repetition
+//   maximum). No percentage-to-RPE conversion is performed anywhere below.
+// -----------------------------------------------------------------------------
+
+// Source: 50-exercises/05_HIP_THRUST
+//   - Primary Classification: "Strength"; Typical Intensity: "60-90% 1RM"
+//     (documented, not activated — see note above); Typical Volume: 3-6
+//     sets, 4-10 repetitions.
+//   - Equipment Requirements: Required: Barbell, Bench, Weight Plates.
+//   - Coaching Cues: "Brace first.", "Drive through the heels.", "Extend
+//     the hips explosively.", "Finish with the glutes.", "Avoid lumbar
+//     hyperextension.", "Control the descent."
+//   - Common Errors: Lumbar Hyperextension, Insufficient Hip Extension,
+//     Bouncing the Bar.
+// Method: straight_sets_repetitions / strength / accessory
+const SOURCE_HIP_THRUST = "50-exercises/05_HIP_THRUST";
+
+const hipThrustStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "hip_thrust_technical_failure",
+    description:
+      "Stop the set when lumbar hyperextension occurs, hip extension is incomplete at the top, or the bar bounces or is not controlled through the range of motion.",
+    sourceRuleIds: [SOURCE_HIP_THRUST],
+  }),
+  painCondition({
+    conditionId: "hip_thrust_pain",
+    description: "Stop immediately if pain occurs.",
+    sourceRuleIds: [SOURCE_HIP_THRUST],
+  }),
+  completionCondition({
+    conditionId: "hip_thrust_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const hipThrustInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "hip_thrust_setup",
+    "setup",
+    "Position the upper back across a bench with the barbell over the hips, feet planted flat and shoulder-width apart.",
+    "high",
+    true,
+    SOURCE_HIP_THRUST,
+  ),
+  makeInstruction(
+    "hip_thrust_execution",
+    "execution",
+    "Brace first, drive through the heels, extend the hips explosively, finish with the glutes, avoid lumbar hyperextension, and control the descent.",
+    "high",
+    true,
+    SOURCE_HIP_THRUST,
+  ),
+  makeInstruction(
+    "hip_thrust_safety",
+    "safety",
+    "Never force a repetition to muscular failure; stop at the first sign of technical breakdown.",
+    "high",
+    true,
+    SOURCE_HIP_THRUST,
+  ),
+];
+
+const hipThrustEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "hip_thrust",
+  moduleId: "strength",
+  role: "accessory",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "hip_thrust",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["rpe"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["barbell", "added_external_load"],
+    supportedTempoTypes: [],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["barbell", "bench", "plates"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["hip_thrust_setup", "hip_thrust_execution", "hip_thrust_safety"],
+    requiredStopConditionIds: ["hip_thrust_technical_failure", "hip_thrust_pain", "hip_thrust_completion"],
+    durationEstimationProfileId: "duration_profile_hip_thrust",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_HIP_THRUST, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: [],
+  preferredTempoType: null,
+  instructionDefinitions: hipThrustInstructions,
+  stopConditionDefinitions: hipThrustStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: 4, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 6, repetitions: 10, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_HIP_THRUST],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_HIP_THRUST, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/11_CHIN_UP
+//   - Primary Classification: "Strength"; Typical Intensity: "Bodyweight";
+//     Typical Volume: 2-6 sets, 4-15 repetitions — matches the shared
+//     profile's own envelope exactly, so no exerciseDoseConstraints.
+//   - Equipment Requirements: Required: Pull-Up Bar only. The loaded
+//     variant is a distinct, separately documented exercise
+//     (weighted_pull_up) — not represented here.
+//   - Coaching Cues: "Initiate with the scapula.", "Brace the trunk.",
+//     "Lead with the chest.", "Pull the elbows toward the ribs.",
+//     "Control the descent."
+//   - Common Errors: Partial Range of Motion, Shrugged Shoulders, Swinging,
+//     Forward Head Position, Loss of Scapular Control, Incomplete Elbow
+//     Extension.
+// Method: straight_sets_repetitions / strength / accessory
+const SOURCE_CHIN_UP = "50-exercises/11_CHIN_UP";
+
+const chinUpStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "chin_up_technical_failure",
+    description:
+      "Stop the set when range of motion becomes incomplete, swinging or kipping replaces controlled pulling, or scapular control is lost.",
+    sourceRuleIds: [SOURCE_CHIN_UP],
+  }),
+  painCondition({
+    conditionId: "chin_up_pain",
+    description: "Stop immediately if pain occurs.",
+    sourceRuleIds: [SOURCE_CHIN_UP],
+  }),
+  completionCondition({
+    conditionId: "chin_up_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const chinUpInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "chin_up_setup",
+    "setup",
+    "Grip the pull-up bar with a supinated grip and hang with the arms fully extended before initiating the pull.",
+    "high",
+    true,
+    SOURCE_CHIN_UP,
+  ),
+  makeInstruction(
+    "chin_up_execution",
+    "execution",
+    "Initiate with the scapula, brace the trunk, lead with the chest, pull the elbows toward the ribs, and control the descent.",
+    "high",
+    true,
+    SOURCE_CHIN_UP,
+  ),
+  makeInstruction(
+    "chin_up_safety",
+    "safety",
+    "Never force a repetition to muscular failure; stop at the first sign of technical breakdown.",
+    "high",
+    true,
+    SOURCE_CHIN_UP,
+  ),
+];
+
+const chinUpEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "chin_up",
+  moduleId: "strength",
+  role: "accessory",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "chin_up",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["rpe"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: [],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["pull_up_bar"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["chin_up_setup", "chin_up_execution", "chin_up_safety"],
+    requiredStopConditionIds: ["chin_up_technical_failure", "chin_up_pain", "chin_up_completion"],
+    durationEstimationProfileId: "duration_profile_chin_up",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_CHIN_UP, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: [],
+  preferredTempoType: null,
+  instructionDefinitions: chinUpInstructions,
+  stopConditionDefinitions: chinUpStopConditions,
+  exerciseDoseConstraints: null,
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_CHIN_UP, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/12_BARBELL_ROW
+//   - Primary Classification: "Strength"; Typical Intensity: "60-90% 1RM"
+//     (documented, not activated — see note above); Typical Volume: 3-6
+//     sets, 5-12 repetitions.
+//   - Equipment Requirements: Required: Barbell, Weight Plates (no rack —
+//     lifted from the floor).
+//   - Coaching Cues: "Brace before pulling.", "Maintain the hip hinge.",
+//     "Pull the elbows toward the hips.", "Squeeze the shoulder blades.",
+//     "Control the lowering phase.", "Avoid excessive torso movement."
+//   - Common Errors: Lumbar Flexion, Using Momentum, Incomplete Range of
+//     Motion, Shoulder Shrugging, Early Trunk Extension, Poor Scapular
+//     Retraction.
+// Method: straight_sets_repetitions / strength / accessory
+const SOURCE_BARBELL_ROW = "50-exercises/12_BARBELL_ROW";
+
+const barbellRowStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "barbell_row_technical_failure",
+    description:
+      "Stop the set when lumbar flexion occurs, momentum replaces controlled pulling, or scapular retraction and trunk position are lost.",
+    sourceRuleIds: [SOURCE_BARBELL_ROW],
+  }),
+  painCondition({
+    conditionId: "barbell_row_pain",
+    description: "Stop immediately if pain occurs.",
+    sourceRuleIds: [SOURCE_BARBELL_ROW],
+  }),
+  completionCondition({
+    conditionId: "barbell_row_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const barbellRowInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "barbell_row_setup",
+    "setup",
+    "Hinge at the hips to grip the barbell, brace the trunk, and set a stable hip-hinge position before pulling.",
+    "high",
+    true,
+    SOURCE_BARBELL_ROW,
+  ),
+  makeInstruction(
+    "barbell_row_execution",
+    "execution",
+    "Brace before pulling, maintain the hip hinge, pull the elbows toward the hips, squeeze the shoulder blades, and control the lowering phase.",
+    "high",
+    true,
+    SOURCE_BARBELL_ROW,
+  ),
+  makeInstruction(
+    "barbell_row_safety",
+    "safety",
+    "Never force a repetition to muscular failure; stop at the first sign of technical breakdown.",
+    "high",
+    true,
+    SOURCE_BARBELL_ROW,
+  ),
+];
+
+const barbellRowEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "barbell_row",
+  moduleId: "strength",
+  role: "accessory",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "barbell_row",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["rpe"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["barbell", "added_external_load"],
+    supportedTempoTypes: [],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["barbell", "plates"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["barbell_row_setup", "barbell_row_execution", "barbell_row_safety"],
+    requiredStopConditionIds: ["barbell_row_technical_failure", "barbell_row_pain", "barbell_row_completion"],
+    durationEstimationProfileId: "duration_profile_barbell_row",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_BARBELL_ROW, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: [],
+  preferredTempoType: null,
+  instructionDefinitions: barbellRowInstructions,
+  stopConditionDefinitions: barbellRowStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: 5, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 6, repetitions: 12, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_BARBELL_ROW],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_BARBELL_ROW, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -5234,6 +5559,10 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   countermovement_jump: countermovementJumpEntry,
 
   copenhagen_plank: copenhagenPlankEntry,
+
+  hip_thrust: hipThrustEntry,
+  chin_up: chinUpEntry,
+  barbell_row: barbellRowEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

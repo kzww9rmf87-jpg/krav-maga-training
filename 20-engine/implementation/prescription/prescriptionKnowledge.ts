@@ -710,6 +710,44 @@ export const NUMERICAL_PRESCRIPTION_PROFILES = [
     requiresSportSpecificSubtype: false,
     sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
   },
+  {
+    profileId: "strength_accessory_straight_sets_v0_1",
+    version: "0.1",
+    moduleId: "strength",
+    methodId: "straight_sets_repetitions",
+    exerciseRole: "accessory",
+    volume: {
+      structure: "sets_reps",
+      sets: integerRange(2, 3, 6),
+      repetitions: { type: "fixed_range", range: integerRange(4, 8, 15) },
+      duration: null,
+      distance: null,
+      rounds: null,
+      workIntervals: null,
+    },
+    intensity: [
+      {
+        type: "rpe",
+        min: 6,
+        normal: 7,
+        max: 8,
+        unit: "rpe_scale_1_10",
+        referenceType: null,
+        sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_INTENSITY_MODEL],
+      },
+    ],
+    rest: {
+      scope: "between_sets",
+      seconds: integerRange(90, 120, 180),
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    tempo: null,
+    minimumDose: { ...emptyDose(), sets: 2, repetitions: 4 },
+    maximumDose: { ...emptyDose(), sets: 6, repetitions: 15 },
+    requiresExerciseSpecificLoadRule: false,
+    requiresSportSpecificSubtype: false,
+    sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
+  },
 ] as const satisfies readonly NumericalPrescriptionProfile[];
 
 export const selectRangeValue = (

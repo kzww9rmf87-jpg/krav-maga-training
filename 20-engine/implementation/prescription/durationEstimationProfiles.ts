@@ -141,6 +141,11 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   unresolvedProfile("countermovement_jump", "sets_reps", ["50-exercises/21_COUNTERMOVEMENT_JUMP"]),
 
   unresolvedProfile("copenhagen_plank", "sets_duration", ["50-exercises/19_COPENHAGEN_PLANK"]),
+
+  // Force/Tirage — strength_accessory_straight_sets_v0_1 batch
+  unresolvedProfile("hip_thrust", "sets_reps", ["50-exercises/05_HIP_THRUST"]),
+  unresolvedProfile("chin_up", "sets_reps", ["50-exercises/11_CHIN_UP"]),
+  unresolvedProfile("barbell_row", "sets_reps", ["50-exercises/12_BARBELL_ROW"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

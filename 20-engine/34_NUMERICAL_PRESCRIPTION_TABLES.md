@@ -1708,6 +1708,88 @@ Rest (45–60–90 seconds) is identical across all four exercises and is not na
 
 ---
 
+# Table Group 12 — Strength Accessory (Extended Repetitions)
+
+## Profile STRENGTH-ACCESSORY
+
+```text
+profileId: strength_accessory_straight_sets_v0_1
+moduleId: strength
+methodId: straight_sets_repetitions
+exerciseRole: accessory
+```
+
+### Volume
+
+```text
+sets: 2–6
+repetitions: 4–15
+```
+
+Normal:
+
+```text
+3 sets × 8 repetitions
+```
+
+### Intensity
+
+```text
+RPE 6–8
+```
+
+Normal:
+
+```text
+RPE 7
+```
+
+### Rest
+
+```text
+90–180 seconds
+```
+
+Normal:
+
+```text
+120 seconds
+```
+
+### Minimum Dose
+
+```text
+2 sets × 4 repetitions
+```
+
+### Maximum Dose
+
+```text
+6 sets × 15 repetitions
+```
+
+### Stop Conditions
+
+- technical breakdown (documented per exercise);
+- pain;
+- completion.
+
+### Exercise-Specific Narrowing
+
+```text
+hip_thrust:    reps 4–10   sets 3–6
+chin_up:       reps 4–15   sets 2–6  (matches the shared envelope exactly)
+barbell_row:   reps 5–12   sets 3–6
+```
+
+### Documented But Inactive Capability — percentage_1rm
+
+`hip_thrust` and `barbell_row` document a loading range of 60–90% of the one-repetition maximum in their own chapters. This range is acknowledged here as a real, sourced documentary fact, but `percentage_1rm` is **not activated** in their CAS V0.1 prescription. No conversion from this documented percentage range into an RPE value is performed anywhere in this profile or in either exercise's Registry entry — the RPE range above is an independent CAS V0.1 business decision, not a derivation of the percentage range.
+
+This exclusion is deliberate: `resolveVolume` and `resolveIntensity` currently resolve volume and intensity independently, with no coupling between them. A wide repetition range (4–15) combined with a wide `percentage_1rm` range (60–90%) could produce an incoherent pair — for example, 15 repetitions at 90% of the one-repetition maximum, which is not achievable. A future evolution must model a coupled relationship between resolved repetitions and load intensity before `percentage_1rm` can be safely activated for exercises using this profile.
+
+---
+
 # Exercise-Specific Numerical Requirement
 
 The generic profiles above are insufficient for final execution when an exercise requires:
