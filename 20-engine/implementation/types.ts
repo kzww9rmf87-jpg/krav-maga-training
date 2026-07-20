@@ -672,6 +672,18 @@ export interface InitialSessionDraft {
   confidence: ConfidenceLevel;
 }
 
+/**
+ * Stable, typed identifier for each of `sessionGenerator.ts`'s two blocking
+ * conditions. Added alongside the pre-existing free-text `reason` — never
+ * derived from it by string-matching downstream — so a public consumer
+ * (see `sessionOutput/`) can rely on a closed code instead of parsing
+ * prose. Extending `sessionGenerator.ts` with a new blocking condition
+ * must add its code here first; this type carries no default case.
+ */
+export type SessionBlockedReasonCode =
+  | "NO_PRIMARY_MODULE_SELECTED"
+  | "NO_PRIMARY_MODULE_EXERCISE_AVAILABLE";
+
 export type InitialSessionGenerationResult =
   | {
       outcome: "draft";
@@ -679,6 +691,7 @@ export type InitialSessionGenerationResult =
     }
   | {
       outcome: "blocked";
+      reasonCode: SessionBlockedReasonCode;
       reason: string;
       blockedModules: CapabilityModule[];
     };

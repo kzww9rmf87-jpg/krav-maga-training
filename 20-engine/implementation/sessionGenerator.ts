@@ -88,6 +88,7 @@ export function generateInitialSession(
   if (primaryResolutions.length === 0) {
     return {
       outcome: "blocked",
+      reasonCode: "NO_PRIMARY_MODULE_SELECTED",
       reason: "No primary Capability Module was selected for the session.",
       blockedModules: [],
     };
@@ -97,6 +98,7 @@ export function generateInitialSession(
   if (blockedModules.length > 0) {
     return {
       outcome: "blocked",
+      reasonCode: "NO_PRIMARY_MODULE_EXERCISE_AVAILABLE",
       reason: "No selected exercise is available for one or more primary Capability Modules.",
       blockedModules,
     };

@@ -43,7 +43,7 @@ describe("contract guards", () => {
         [],
         [],
         [],
-        { outcome: "blocked", reason: "n/a", blockedModules: [] },
+        { outcome: "blocked", reasonCode: "NO_PRIMARY_MODULE_SELECTED", reason: "n/a", blockedModules: [] },
         [],
       ),
     ).toThrowError('Decision trace cannot contain duplicate module selection "strength".');
@@ -78,7 +78,7 @@ describe("contract guards", () => {
         [eligibility],
         [scored],
         [exerciseSelection],
-        { outcome: "blocked", reason: "n/a", blockedModules: [] },
+        { outcome: "blocked", reasonCode: "NO_PRIMARY_MODULE_SELECTED", reason: "n/a", blockedModules: [] },
         [],
       ),
     ).toThrowError('Decision trace cannot summarize module "strength": multiple exercises are selected.');

@@ -1,0 +1,691 @@
+{
+  "contractVersion": "cas-session-output.v1",
+  "engineVersion": "0.1",
+  "generatedAt": "2026-01-15T09:00:00.000Z",
+  "outcome": "draft",
+  "validation": {
+    "valid": true,
+    "issues": []
+  },
+  "selectedModules": [
+    {
+      "module": "strength",
+      "role": "primary",
+      "primaryAdaptation": "maximum_strength",
+      "reason": "Selected as the primary module for the maximum_strength adaptation."
+    }
+  ],
+  "sessionDraft": {
+    "sessionId": "request-1",
+    "title": "Maximum Strength Session",
+    "primaryObjective": {
+      "adaptationDomain": "maximum_strength"
+    },
+    "secondaryObjectives": [],
+    "estimatedDurationMinutes": 10,
+    "confidence": "very_high",
+    "modules": [
+      {
+        "order": 1,
+        "selectedModule": {
+          "module": "strength",
+          "role": "primary",
+          "primaryAdaptation": "maximum_strength",
+          "reason": "Selected as the primary module for the maximum_strength adaptation."
+        },
+        "estimatedDurationMinutes": 10,
+        "exercises": [
+          {
+            "exerciseId": "bench_press",
+            "selectionReasons": [
+              "Automatically selected with a final score of 82.33 (threshold: 80).",
+              "Highest-ranked admissible candidate for the strength module."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "conflicts": [],
+  "conflictResolutions": [],
+  "prescription": {
+    "status": "prescribed",
+    "session": {
+      "sessionId": "request-1",
+      "sessionName": "Maximum Strength Session",
+      "modules": [
+        "strength"
+      ],
+      "exercises": [
+        {
+          "order": 1,
+          "blockId": "strength",
+          "required": true,
+          "prescription": {
+            "exerciseId": "bench_press",
+            "moduleId": "strength",
+            "role": "primary",
+            "methodId": "straight_sets_repetitions",
+            "volume": {
+              "structure": "sets_reps",
+              "sets": 3,
+              "repetitions": {
+                "type": "fixed",
+                "value": 5,
+                "min": null,
+                "max": null,
+                "unit": "repetitions"
+              },
+              "duration": null,
+              "distance": null,
+              "rounds": null,
+              "workIntervals": null,
+              "laterality": null
+            },
+            "intensity": {
+              "primaryMetric": {
+                "type": "percentage_1rm",
+                "target": {
+                  "type": "fixed",
+                  "value": 85
+                },
+                "unit": "percentage",
+                "scope": "per_exercise",
+                "reference": {
+                  "referenceType": "one_rep_max",
+                  "value": 100,
+                  "unit": "kilograms",
+                  "sourceId": "athlete-ref-1rm",
+                  "measuredAt": null,
+                  "validUntil": null,
+                  "confidence": "validated"
+                }
+              },
+              "secondaryMetrics": [],
+              "calculation": {
+                "calculationId": "INTENSITY_CALCULATION_percentage_1rm",
+                "formulaId": "REFERENCE_MULTIPLIED_BY_PERCENTAGE_V0_1",
+                "inputs": [
+                  {
+                    "name": "reference",
+                    "value": 100,
+                    "unit": "kilograms",
+                    "sourceId": "athlete-ref-1rm"
+                  },
+                  {
+                    "name": "percentage",
+                    "value": 85,
+                    "unit": "percentage",
+                    "sourceId": "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1"
+                  }
+                ],
+                "rawResult": 85,
+                "roundedResult": null,
+                "outputUnit": "kilograms",
+                "sourceRuleIds": [
+                  "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+                  "26_INTENSITY_MODEL_V0_1"
+                ]
+              },
+              "adjustments": [],
+              "sourceRuleIds": [
+                "50-exercises/07_BENCH_PRESS",
+                "31_TRAINING_METHOD_CATALOGUE_V0_1",
+                "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
+                "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+                "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
+                "26_INTENSITY_MODEL_V0_1",
+                "athlete-ref-1rm"
+              ],
+              "status": "complete"
+            },
+            "rest": {
+              "type": "fixed",
+              "betweenReps": null,
+              "betweenClusters": null,
+              "betweenSets": {
+                "type": "fixed",
+                "duration": {
+                  "value": 180,
+                  "unit": "seconds",
+                  "scope": "between_sets"
+                }
+              },
+              "betweenRounds": null,
+              "betweenIntervals": null,
+              "betweenExercises": null,
+              "afterBlock": null,
+              "adjustments": [],
+              "sourceRuleIds": [
+                "50-exercises/07_BENCH_PRESS",
+                "31_TRAINING_METHOD_CATALOGUE_V0_1",
+                "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
+                "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+                "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
+                "26_INTENSITY_MODEL_V0_1",
+                "athlete-ref-1rm",
+                "27_REST_TEMPO_RULES_V0_1"
+              ],
+              "status": "complete"
+            },
+            "tempo": {
+              "type": "phase_intent",
+              "eccentric": null,
+              "bottom": null,
+              "concentric": null,
+              "top": null,
+              "hold": null,
+              "globalIntent": "maximal_safe_speed",
+              "adjustments": [],
+              "sourceRuleIds": [
+                "50-exercises/07_BENCH_PRESS",
+                "31_TRAINING_METHOD_CATALOGUE_V0_1",
+                "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
+                "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+                "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
+                "26_INTENSITY_MODEL_V0_1",
+                "athlete-ref-1rm",
+                "27_REST_TEMPO_RULES_V0_1"
+              ],
+              "status": "complete"
+            },
+            "instructions": [
+              {
+                "instructionId": "bench_press_setup",
+                "category": "setup",
+                "text": "Set the barbell on a rack with a bench, weight plates loaded, and safety arms or a spotter in place before unracking.",
+                "sourceRuleId": "50-exercises/07_BENCH_PRESS",
+                "priority": "high"
+              },
+              {
+                "instructionId": "bench_press_execution",
+                "category": "execution",
+                "text": "Brace before unracking, keep the shoulders packed, control the descent, press explosively and maintain full-body tension.",
+                "sourceRuleId": "50-exercises/07_BENCH_PRESS",
+                "priority": "high"
+              }
+            ],
+            "stopConditions": [
+              {
+                "conditionId": "bench_press_pain",
+                "category": "pain",
+                "scope": "exercise",
+                "trigger": {
+                  "type": "pain_report",
+                  "metric": null,
+                  "operator": "detected",
+                  "expectedValue": null,
+                  "unit": null,
+                  "evaluationTiming": "during_set"
+                },
+                "threshold": null,
+                "action": "stop_exercise",
+                "priority": "critical",
+                "recoverability": "not_recoverable",
+                "instructions": [
+                  {
+                    "instructionId": "bench_press_pain_instruction",
+                    "audience": "athlete",
+                    "text": "Stop immediately if pain occurs during horizontal pressing, or in the presence of an acute shoulder or pectoral injury.",
+                    "sourceRuleId": "50-exercises/07_BENCH_PRESS"
+                  }
+                ],
+                "sourceRuleIds": [
+                  "50-exercises/07_BENCH_PRESS"
+                ]
+              },
+              {
+                "conditionId": "bench_press_technical_failure",
+                "category": "technical_failure",
+                "scope": "set",
+                "trigger": {
+                  "type": "technical_breakdown",
+                  "metric": null,
+                  "operator": "detected",
+                  "expectedValue": null,
+                  "unit": null,
+                  "evaluationTiming": "during_set"
+                },
+                "threshold": null,
+                "action": "end_set",
+                "priority": "high",
+                "recoverability": "recoverable_same_exercise",
+                "instructions": [
+                  {
+                    "instructionId": "bench_press_technical_failure_instruction",
+                    "audience": "athlete",
+                    "text": "Stop the set if shoulder elevation, excessive elbow flare, bouncing the bar off the chest, partial range of motion, loss of scapular position or an uneven press occurs.",
+                    "sourceRuleId": "50-exercises/07_BENCH_PRESS"
+                  }
+                ],
+                "sourceRuleIds": [
+                  "50-exercises/07_BENCH_PRESS"
+                ]
+              },
+              {
+                "conditionId": "bench_press_completion",
+                "category": "completion",
+                "scope": "exercise",
+                "trigger": {
+                  "type": "planned_work_completed",
+                  "metric": null,
+                  "operator": "detected",
+                  "expectedValue": null,
+                  "unit": null,
+                  "evaluationTiming": "during_set"
+                },
+                "threshold": null,
+                "action": "stop_exercise",
+                "priority": "low",
+                "recoverability": "not_recoverable",
+                "instructions": [
+                  {
+                    "instructionId": "bench_press_completion_instruction",
+                    "audience": "athlete",
+                    "text": "Stop once the prescribed sets and repetitions are completed.",
+                    "sourceRuleId": "31_TRAINING_METHOD_CATALOGUE_V0_1"
+                  }
+                ],
+                "sourceRuleIds": [
+                  "31_TRAINING_METHOD_CATALOGUE_V0_1"
+                ]
+              }
+            ],
+            "sourceRuleIds": [
+              "50-exercises/07_BENCH_PRESS",
+              "31_TRAINING_METHOD_CATALOGUE_V0_1",
+              "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
+              "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+              "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
+              "26_INTENSITY_MODEL_V0_1",
+              "athlete-ref-1rm",
+              "27_REST_TEMPO_RULES_V0_1"
+            ],
+            "status": "complete"
+          }
+        }
+      ],
+      "sourceRuleIds": [
+        "50-exercises/07_BENCH_PRESS",
+        "31_TRAINING_METHOD_CATALOGUE_V0_1",
+        "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
+        "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+        "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
+        "26_INTENSITY_MODEL_V0_1",
+        "athlete-ref-1rm",
+        "27_REST_TEMPO_RULES_V0_1"
+      ],
+      "status": "complete"
+    }
+  },
+  "decisionTrace": {
+    "traceId": "trace_request-1",
+    "entries": [
+      {
+        "id": "trace_request-1_input_validation",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "input_validation",
+        "decision": "Input validation completed: valid.",
+        "reasons": [
+          "No validation issues were detected."
+        ],
+        "inputReferences": [
+          "athleteProfile",
+          "medicalState",
+          "readiness",
+          "trainingHistory",
+          "environment",
+          "request"
+        ]
+      },
+      {
+        "id": "trace_request-1_module_selection_strength",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "module_selection",
+        "decision": "Module \"strength\" selected with role \"primary\".",
+        "reasons": [
+          "Selected as the primary module for the maximum_strength adaptation."
+        ],
+        "inputReferences": [
+          "request.primaryObjective",
+          "request.secondaryObjectives",
+          "request.requiredModules",
+          "request.excludedModules"
+        ],
+        "affectedModules": [
+          "strength"
+        ]
+      },
+      {
+        "id": "trace_request-1_eligibility_filtering",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "eligibility_filtering",
+        "decision": "1 of 1 candidate exercises were eligible; 0 were rejected.",
+        "reasons": [
+          "All evaluated exercises passed hard eligibility constraints."
+        ],
+        "inputReferences": [
+          "medicalState",
+          "athleteProfile.preferences",
+          "environment",
+          "request.excludedModules"
+        ],
+        "affectedExerciseIds": []
+      },
+      {
+        "id": "trace_request-1_scoring_strength",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "exercise_scoring",
+        "decision": "Exercise \"bench_press\" selected for module \"strength\" with final score 82.33.",
+        "reasons": [
+          "Exercise module and primary adaptation both match the selected module \"strength\".",
+          "Technical risk penalty applied: -1 (complexity, technical fatigue and/or borderline technical level).",
+          "Automatically selected with a final score of 82.33 (threshold: 80).",
+          "Highest-ranked admissible candidate for the strength module.",
+          "0 backup candidate(s) were retained for this module."
+        ],
+        "inputReferences": [
+          "athleteProfile.experience",
+          "athleteProfile.preferences",
+          "trainingHistory.recentSessions",
+          "environment.availableEquipment",
+          "readiness",
+          "request.primaryObjective"
+        ],
+        "affectedExerciseIds": [
+          "bench_press"
+        ],
+        "affectedModules": [
+          "strength"
+        ],
+        "confidence": "very_high"
+      },
+      {
+        "id": "trace_request-1_session_assembly",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "session_assembly",
+        "decision": "Initial session draft generated.",
+        "reasons": [
+          "Session title: \"Maximum Strength Session\".",
+          "The draft contains 1 module(s).",
+          "Estimated duration: 10 minute(s)."
+        ],
+        "inputReferences": [
+          "request.requestId",
+          "request.requestedAt",
+          "request.primaryObjective",
+          "request.secondaryObjectives"
+        ],
+        "affectedModules": [
+          "strength"
+        ],
+        "confidence": "very_high"
+      },
+      {
+        "id": "trace_request-1_prescription_generation_bench_press_method",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "prescription_generation",
+        "decision": "Method \"straight_sets_repetitions\" selected via explicit_upstream_method.",
+        "reasons": [
+          "2 candidate(s) considered; 0 rejected."
+        ],
+        "affectedExerciseIds": [
+          "bench_press"
+        ],
+        "affectedModules": [
+          "strength"
+        ],
+        "sourceRuleIds": [
+          "50-exercises/07_BENCH_PRESS",
+          "31_TRAINING_METHOD_CATALOGUE_V0_1",
+          "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
+          "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1"
+        ]
+      },
+      {
+        "id": "trace_request-1_prescription_generation_bench_press_compatibility",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "prescription_generation",
+        "decision": "Exercise \"bench_press\" is compatible with method \"straight_sets_repetitions\".",
+        "reasons": [
+          "No compatibility issue detected."
+        ],
+        "affectedExerciseIds": [
+          "bench_press"
+        ],
+        "affectedModules": [
+          "strength"
+        ],
+        "sourceRuleIds": [
+          "50-exercises/07_BENCH_PRESS",
+          "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
+          "31_TRAINING_METHOD_CATALOGUE_V0_1",
+          "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+          "32_MODULE_PRESCRIPTION_PROFILES_V0_1"
+        ]
+      },
+      {
+        "id": "trace_request-1_prescription_generation_bench_press_volume",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "prescription_generation",
+        "decision": "Volume resolved for exercise \"bench_press\".",
+        "reasons": [
+          "structure=sets_reps, sets=3, reps=5"
+        ],
+        "affectedExerciseIds": [
+          "bench_press"
+        ],
+        "affectedModules": [
+          "strength"
+        ],
+        "sourceRuleIds": [
+          "50-exercises/07_BENCH_PRESS",
+          "31_TRAINING_METHOD_CATALOGUE_V0_1",
+          "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
+          "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+          "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1"
+        ]
+      },
+      {
+        "id": "trace_request-1_prescription_generation_bench_press_intensity",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "prescription_generation",
+        "decision": "Intensity resolved via \"percentage_1rm\" for exercise \"bench_press\".",
+        "reasons": [
+          "No intensity rule rejected."
+        ],
+        "affectedExerciseIds": [
+          "bench_press"
+        ],
+        "affectedModules": [
+          "strength"
+        ],
+        "sourceRuleIds": [
+          "50-exercises/07_BENCH_PRESS",
+          "31_TRAINING_METHOD_CATALOGUE_V0_1",
+          "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
+          "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+          "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
+          "26_INTENSITY_MODEL_V0_1",
+          "athlete-ref-1rm"
+        ]
+      },
+      {
+        "id": "trace_request-1_prescription_generation_bench_press_rest",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "prescription_generation",
+        "decision": "Rest resolved for exercise \"bench_press\".",
+        "reasons": [
+          "Rest type: fixed."
+        ],
+        "affectedExerciseIds": [
+          "bench_press"
+        ],
+        "affectedModules": [
+          "strength"
+        ],
+        "sourceRuleIds": [
+          "50-exercises/07_BENCH_PRESS",
+          "31_TRAINING_METHOD_CATALOGUE_V0_1",
+          "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
+          "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+          "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
+          "26_INTENSITY_MODEL_V0_1",
+          "athlete-ref-1rm",
+          "27_REST_TEMPO_RULES_V0_1"
+        ]
+      },
+      {
+        "id": "trace_request-1_prescription_generation_bench_press_tempo",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "prescription_generation",
+        "decision": "Tempo resolved for exercise \"bench_press\".",
+        "reasons": [
+          "Tempo type: phase_intent."
+        ],
+        "affectedExerciseIds": [
+          "bench_press"
+        ],
+        "affectedModules": [
+          "strength"
+        ],
+        "sourceRuleIds": [
+          "50-exercises/07_BENCH_PRESS",
+          "31_TRAINING_METHOD_CATALOGUE_V0_1",
+          "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
+          "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+          "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
+          "26_INTENSITY_MODEL_V0_1",
+          "athlete-ref-1rm",
+          "27_REST_TEMPO_RULES_V0_1"
+        ]
+      },
+      {
+        "id": "trace_request-1_prescription_generation_bench_press_instructions",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "prescription_generation",
+        "decision": "2 instruction(s) resolved for exercise \"bench_press\".",
+        "reasons": [
+          "0 optional instruction(s) omitted."
+        ],
+        "affectedExerciseIds": [
+          "bench_press"
+        ],
+        "affectedModules": [
+          "strength"
+        ],
+        "sourceRuleIds": [
+          "50-exercises/07_BENCH_PRESS",
+          "31_TRAINING_METHOD_CATALOGUE_V0_1",
+          "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
+          "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+          "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1"
+        ]
+      },
+      {
+        "id": "trace_request-1_prescription_generation_bench_press_stop_conditions",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "prescription_generation",
+        "decision": "3 stop condition(s) resolved for exercise \"bench_press\".",
+        "reasons": [
+          "0 optional stop condition(s) omitted."
+        ],
+        "affectedExerciseIds": [
+          "bench_press"
+        ],
+        "affectedModules": [
+          "strength"
+        ],
+        "sourceRuleIds": [
+          "50-exercises/07_BENCH_PRESS",
+          "31_TRAINING_METHOD_CATALOGUE_V0_1",
+          "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
+          "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+          "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1"
+        ]
+      },
+      {
+        "id": "trace_request-1_prescription_generation_bench_press_validation",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "prescription_generation",
+        "decision": "Final validation passed for exercise \"bench_press\".",
+        "reasons": [
+          "No validation issue detected."
+        ],
+        "affectedExerciseIds": [
+          "bench_press"
+        ],
+        "affectedModules": [
+          "strength"
+        ],
+        "sourceRuleIds": [
+          "50-exercises/07_BENCH_PRESS",
+          "31_TRAINING_METHOD_CATALOGUE_V0_1",
+          "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
+          "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+          "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
+          "26_INTENSITY_MODEL_V0_1",
+          "athlete-ref-1rm",
+          "27_REST_TEMPO_RULES_V0_1"
+        ]
+      },
+      {
+        "id": "trace_request-1_prescription_generation_bench_press_summary",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "prescription_generation",
+        "decision": "Exercise \"bench_press\" fully prescribed with method \"straight_sets_repetitions\".",
+        "reasons": [
+          "2 instruction(s), 3 stop condition(s)."
+        ],
+        "affectedExerciseIds": [
+          "bench_press"
+        ],
+        "affectedModules": [
+          "strength"
+        ],
+        "sourceRuleIds": [
+          "50-exercises/07_BENCH_PRESS",
+          "31_TRAINING_METHOD_CATALOGUE_V0_1",
+          "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
+          "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+          "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
+          "26_INTENSITY_MODEL_V0_1",
+          "athlete-ref-1rm",
+          "27_REST_TEMPO_RULES_V0_1"
+        ]
+      },
+      {
+        "id": "trace_request-1_prescription_generation_session_request-1_summary",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "prescription_generation",
+        "decision": "Session \"request-1\" fully prescribed.",
+        "reasons": [
+          "1 exercise(s) prescribed.",
+          "0 optional exercise(s) omitted."
+        ],
+        "affectedModules": [
+          "strength"
+        ],
+        "sourceRuleIds": [
+          "50-exercises/07_BENCH_PRESS",
+          "31_TRAINING_METHOD_CATALOGUE_V0_1",
+          "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
+          "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
+          "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
+          "26_INTENSITY_MODEL_V0_1",
+          "athlete-ref-1rm",
+          "27_REST_TEMPO_RULES_V0_1"
+        ]
+      }
+    ],
+    "rejectedExercises": [],
+    "detectedConflicts": [],
+    "conflictResolutions": [],
+    "warnings": []
+  },
+  "exerciseReferences": {
+    "bench_press": {
+      "displayName": "Bench Press"
+    }
+  }
+}
