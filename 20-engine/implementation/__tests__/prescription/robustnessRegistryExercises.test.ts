@@ -389,9 +389,9 @@ describe("robustness batch — stop conditions", () => {
 // -----------------------------------------------------------------------------
 
 describe("robustness batch — non-regression", () => {
-  test("the registry now contains exactly 40 active exercises", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(40);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(40);
+  test("the registry now contains exactly 41 active exercises", () => {
+    expect(PILOT_EXERCISE_IDS).toHaveLength(41);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(41);
   });
 
   test("determinism: identical input produces an identical result for every Robustness exercise", () => {

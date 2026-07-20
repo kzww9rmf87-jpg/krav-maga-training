@@ -139,6 +139,8 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
 
   // Force/Tirage — first unblocked sub-lot
   unresolvedProfile("countermovement_jump", "sets_reps", ["50-exercises/21_COUNTERMOVEMENT_JUMP"]),
+
+  unresolvedProfile("copenhagen_plank", "sets_duration", ["50-exercises/19_COPENHAGEN_PLANK"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

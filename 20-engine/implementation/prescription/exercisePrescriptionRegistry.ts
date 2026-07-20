@@ -197,6 +197,9 @@ export const PILOT_EXERCISE_IDS = [
   // profile, no new equipment vocabulary, no reclassification and no
   // documentary conflict resolution.
   "countermovement_jump",
+  // Core / Robustness — unilateral isometric adductor hold, reuses
+  // timed_isometric_core_robustness_v0_1 (see audit).
+  "copenhagen_plank",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -5042,6 +5045,136 @@ const countermovementJumpEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Source: 50-exercises/19_COPENHAGEN_PLANK
+//   - Primary Classification: "Stability" (not a canonical CapabilityModule);
+//     Capability Mapping Primary: "Dynamic Stability, Core Stability,
+//     Adductor Strength" — Core Stability is explicitly primary. Purpose
+//     itself names "groin robustness" — moduleId "core" / role "robustness"
+//     reflects the fiche's own language, not analogy with pallof_press.
+//   - Movement Context: "Unilateral, Ground Based, Isometric, Bodyweight" —
+//     each hold is one side. laterality: "unilateral" with
+//     volumeInterpretations: ["duration_per_side"] is required by
+//     validateCompatibility's hasResolvedVolumeInterpretation gate for any
+//     unilateral exercise, and matches the exact precedent of
+//     single_leg_hop. The resolved PrescriptionVolume never carries a
+//     "per side" label itself (DurationRule.scope only has
+//     "per_set"/"per_round"/"per_interval"/"total") — the per-side meaning
+//     lives solely in this declared capability, not in the resolver output.
+//   - Typical Volume: "2-4 sets, 15-45 second holds" — sets match
+//     timed_isometric_core_robustness_v0_1 exactly (2-4). The documented
+//     minimum hold (15s) is above the shared profile's own minimum (10s),
+//     so exerciseDoseConstraints narrows durationSeconds up to 15 — the
+//     profile's maximum (40s) already sits below the fiche's own ceiling
+//     (45s) and is used unchanged (narrowing-only; never widened).
+//   - Equipment Requirements: Required: Bench (Optional: Exercise Box, Pad
+//     — not represented). Represents the canonical variant only: short
+//     lever, unweighted, on a bench — long lever, dynamic, weighted and
+//     partner-assisted variants (all documented under Variations/
+//     Progressions) are out of scope.
+//   - Coaching Cues: "Maintain a straight body line.", "Brace
+//     continuously.", "Keep the pelvis level.", "Drive through the
+//     supporting leg.", "Breathe normally."
+//   - Common Errors: Hip Rotation, Pelvic Drop, Neck Tension, Loss of
+//     Alignment, Holding Breath.
+// Method: timed_isometric_sets / core / robustness
+// Reuses timed_isometric_core_robustness_v0_1 with a single narrowing
+// (durationSeconds minimum 15s).
+// -----------------------------------------------------------------------------
+const SOURCE_COPENHAGEN_PLANK = "50-exercises/19_COPENHAGEN_PLANK";
+
+const copenhagenPlankStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "copenhagen_plank_technical_failure",
+    description:
+      "Stop the set when the body line is lost, the hips drop, control of the supporting leg is lost, or the position can no longer be maintained.",
+    sourceRuleIds: [SOURCE_COPENHAGEN_PLANK],
+  }),
+  painCondition({
+    conditionId: "copenhagen_plank_pain",
+    description: "Stop immediately if pain occurs.",
+    sourceRuleIds: [SOURCE_COPENHAGEN_PLANK],
+  }),
+  completionCondition({
+    conditionId: "copenhagen_plank_completion",
+    description: "Stop once the prescribed sets and hold duration are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const copenhagenPlankInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "copenhagen_plank_setup",
+    "setup",
+    "Rest the top foot on a bench with the body in a side-lying position, supported on the bottom forearm, with a short lever (bent bottom knee) for the canonical variant.",
+    "high",
+    true,
+    SOURCE_COPENHAGEN_PLANK,
+  ),
+  makeInstruction(
+    "copenhagen_plank_execution",
+    "execution",
+    "Maintain a straight body line, brace continuously, keep the pelvis level, drive through the supporting leg, and breathe normally throughout the hold.",
+    "high",
+    true,
+    SOURCE_COPENHAGEN_PLANK,
+  ),
+  makeInstruction(
+    "copenhagen_plank_safety",
+    "safety",
+    "Never force the hold past a loss of body line or pelvic control; stop at the first sign of technical breakdown.",
+    "high",
+    true,
+    SOURCE_COPENHAGEN_PLANK,
+  ),
+];
+
+const copenhagenPlankEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "copenhagen_plank",
+  moduleId: "core",
+  role: "robustness",
+  explicitMethodId: "timed_isometric_sets",
+  capabilities: {
+    exerciseId: "copenhagen_plank",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["timed_isometric_sets"],
+    supportedVolumeStructures: ["sets_duration"],
+    supportedIntensityTypes: ["rpe", "technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["isometric_hold"],
+    laterality: "unilateral",
+    volumeInterpretations: ["duration_per_side"],
+    capabilityTags: ["timed_effort", "tempo_control", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["bench"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["copenhagen_plank_setup", "copenhagen_plank_execution", "copenhagen_plank_safety"],
+    requiredStopConditionIds: [
+      "copenhagen_plank_technical_failure",
+      "copenhagen_plank_pain",
+      "copenhagen_plank_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_copenhagen_plank",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_COPENHAGEN_PLANK, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: ["isometric_hold"],
+  preferredTempoType: null,
+  instructionDefinitions: copenhagenPlankInstructions,
+  stopConditionDefinitions: copenhagenPlankStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: null, repetitions: null, durationSeconds: 15, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: null,
+    sourceRuleIds: [SOURCE_COPENHAGEN_PLANK],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_COPENHAGEN_PLANK, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -5099,6 +5232,8 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   soleus_raise: soleusRaiseEntry,
 
   countermovement_jump: countermovementJumpEntry,
+
+  copenhagen_plank: copenhagenPlankEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>
