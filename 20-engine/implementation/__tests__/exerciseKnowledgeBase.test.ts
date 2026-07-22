@@ -18,7 +18,13 @@ import {
   validateExerciseRequirementsStructure,
   validateRequirementsCoexistenceInvariant,
 } from "../exerciseRequirements";
-import { EXERCISE_KNOWLEDGE_BASE, MED_BALL_CHEST_PASS, MED_BALL_OVERHEAD_THROW, MED_BALL_SLAM } from "../exerciseKnowledgeBase";
+import {
+  EXERCISE_KNOWLEDGE_BASE,
+  MED_BALL_CHEST_PASS,
+  MED_BALL_OVERHEAD_THROW,
+  MED_BALL_ROTATIONAL_THROW,
+  MED_BALL_SLAM,
+} from "../exerciseKnowledgeBase";
 
 import { makeEnvironment, makeExercise, makeValidInput } from "./fixtures";
 
@@ -443,5 +449,172 @@ describe("MED_BALL_OVERHEAD_THROW — Exercise Requirements Model pilot integrat
       }),
     });
     expect(checkExerciseEligibility(MED_BALL_SLAM, slamInput).eligible).toBe(true);
+  });
+});
+
+describe("MED_BALL_ROTATIONAL_THROW — Exercise Requirements Model pilot integration", () => {
+  test("1. the entry exists in the catalog", () => {
+    expect(EXERCISE_KNOWLEDGE_BASE).toContain(MED_BALL_ROTATIONAL_THROW);
+  });
+
+  test("2. has a unique identifier within the catalog", () => {
+    expect(MED_BALL_ROTATIONAL_THROW.id).toBe("med_ball_rotational_throw");
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  test("3. respects the coexistence invariant: requiredEquipment is empty, optionalEquipment is absent", () => {
+    expect(MED_BALL_ROTATIONAL_THROW.requiredEquipment).toEqual([]);
+    expect(MED_BALL_ROTATIONAL_THROW.optionalEquipment).toBeUndefined();
+    expect(validateRequirementsCoexistenceInvariant(MED_BALL_ROTATIONAL_THROW)).toBeNull();
+    expect(validateExerciseRequirementsStructure(MED_BALL_ROTATIONAL_THROW.requirements!)).toEqual([]);
+  });
+
+  test("4a. eligible with medicine_ball and a usable wall", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: true,
+      }),
+    });
+
+    const result = checkExerciseEligibility(MED_BALL_ROTATIONAL_THROW, input);
+
+    expect(result.eligible).toBe(true);
+    expect(result.rejectionReasons).toEqual([]);
+  });
+
+  test("4b. eligible with medicine_ball and a partner, with no usable wall", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: false,
+        partnerAvailable: true,
+      }),
+    });
+
+    const result = checkExerciseEligibility(MED_BALL_ROTATIONAL_THROW, input);
+
+    expect(result.eligible).toBe(true);
+    expect(result.rejectionReasons).toEqual([]);
+  });
+
+  test("5. ineligible without the required equipment (medicine_ball)", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "bodyweight" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: true,
+      }),
+    });
+
+    const result = checkExerciseEligibility(MED_BALL_ROTATIONAL_THROW, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+  });
+
+  test("6. ineligible when throwing is not allowed", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: false,
+        availableSpace: "limited",
+        usableWall: true,
+      }),
+    });
+
+    const result = checkExerciseEligibility(MED_BALL_ROTATIONAL_THROW, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT")).toBe(true);
+  });
+
+  test("7. ineligible when available space is below the documented minimum (limited)", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "very_limited",
+        usableWall: true,
+      }),
+    });
+
+    const result = checkExerciseEligibility(MED_BALL_ROTATIONAL_THROW, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+  });
+
+  test("8. ineligible without a wall or a partner", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: false,
+        partnerAvailable: false,
+      }),
+    });
+
+    const result = checkExerciseEligibility(MED_BALL_ROTATIONAL_THROW, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.length).toBe(2);
+    expect(result.rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT")).toBe(true);
+    expect(result.rejectionReasons.some((r) => r.code === "OTHER")).toBe(true);
+  });
+
+  test("9. no unintended dependency on floor safety", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: true,
+        floorSafe: false, // never mentioned by this exercise's documentation
+      }),
+    });
+
+    const result = checkExerciseEligibility(MED_BALL_ROTATIONAL_THROW, input);
+
+    expect(result.eligible).toBe(true);
+    expect(result.rejectionReasons).toEqual([]);
+  });
+
+  test("10. adding this entry never changes the three previously integrated exercises", () => {
+    const chestPassInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: true,
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_CHEST_PASS, chestPassInput).eligible).toBe(true);
+
+    const slamInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "slam_ball" }],
+        throwingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_SLAM, slamInput).eligible).toBe(true);
+
+    const overheadThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_OVERHEAD_THROW, overheadThrowInput).eligible).toBe(true);
   });
 });
