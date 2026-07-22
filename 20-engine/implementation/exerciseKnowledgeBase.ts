@@ -597,6 +597,128 @@ export const MED_BALL_SCOOP_TOSS: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Medicine-Ball Shot-Put Throw
+// Source: 50-exercises/67_BALLISTICS/15_MED_BALL_SHOT_PUT_THROW.md
+// -----------------------------------------------------------------------------
+
+/**
+ * KNOWN LIMITATION — `MED_BALL_SHOT_PUT_THROW_WALL_VARIANT_UNPRESCRIBABLE`
+ *
+ * Same shape of gap as `med_ball_overhead_throw`/`med_ball_scoop_toss`: the
+ * canonical documentation ("Exercise Identity" — "Equipment: Medicine Ball,
+ * Wall or Open Space") supports throwing against a wall or into open
+ * space — no partner variant is documented at all for this exercise (the
+ * repeated "train both sides" / "both sides can be trained safely"
+ * language throughout the doc is a bilateral-training recommendation for a
+ * unilateral movement, not a human-assistance requirement — it is
+ * deliberately not represented as a `human_assistance` atom).
+ * `prescription/exercisePrescriptionRegistry.ts` currently integrates
+ * `med_ball_shot_put_throw` as the open-space variant only
+ * (`requiredEquipmentCapabilities: ["medicine_ball", "open_space"]`). No
+ * wall-based prescription path exists. An eligibility result obtained
+ * solely through the `usable_wall` branch of `requirements` below will
+ * therefore pass `checkExerciseEligibility` but cannot currently be
+ * prescribed. Deliberate, documented gap — not a bug, and out of scope to
+ * close in this step.
+ */
+export const MED_BALL_SHOT_PUT_THROW_WALL_VARIANT_UNPRESCRIBABLE =
+  "med_ball_shot_put_throw: eligible via the `usable_wall` branch of its " +
+  "Exercise Requirements Model, but exercisePrescriptionRegistry.ts (V0.1) " +
+  "only integrates the open-space variant (`medicine_ball` + `open_space`) " +
+  "— a wall-only eligibility result cannot currently be prescribed.";
+
+export const MED_BALL_SHOT_PUT_THROW: ExerciseDefinition = {
+  id: "med_ball_shot_put_throw",
+  name: "Medicine-Ball Shot-Put Throw",
+  module: "power",
+  primaryAdaptation: "power",
+  physicalQualities: ["explosive_strength", "rate_of_force_development"],
+  // Primary Pattern is plainly "Unilateral Horizontal Ballistic
+  // Projection" — no "rotational" wording in this exercise's own identity
+  // block (unlike med_ball_rotational_throw/med_ball_scoop_toss). The doc's
+  // "Rotational and Translational Contribution" section frames rotation as
+  // an optional, variation-dependent emphasis, not this exercise's own
+  // default classification, so "rotation" is deliberately not added here.
+  // No ad hoc "shot put" capability is introduced anywhere.
+  movementPatterns: ["throw"],
+  // Doc's own Force Vector: "Primary vector: horizontal and forward." —
+  // quoted directly.
+  forceVectors: ["horizontal", "forward"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "medicine_ball" },
+          { kind: "environment", capability: "throwing_allowed" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "limited" },
+        ],
+      },
+      {
+        kind: "any_of",
+        items: [
+          { kind: "equipment", equipment: "open_space" },
+          { kind: "environment", capability: "usable_wall" },
+        ],
+      },
+    ],
+  },
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // "Unilateral or Bilateral: Unilateral" in the source doc — plain,
+  // unambiguous (unlike med_ball_rotational_throw/med_ball_scoop_toss's
+  // compound "Unilateral Emphasis with Bilateral Support" phrasing).
+  // Matches exercisePrescriptionRegistry.ts's own `laterality: "unilateral"`
+  // for this exact exercise.
+  unilateral: true,
+  bodyRegionsLoaded: ["chest", "shoulder", "upper_arm", "abdomen", "hip", "thigh"],
+  contraindications: [
+    {
+      description: "Acute upper-limb injury (shoulder, elbow, wrist or hand).",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+    {
+      description: "Acute spinal injury (cervical, thoracic or lumbar).",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+    {
+      region: "ribcage",
+      description: "Acute rib injury.",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+    {
+      description: "Inability to stand safely in a staggered stance.",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+  ],
+  fatigueProfile: {
+    types: ["neural", "muscular", "connective_tissue", "systemic"],
+    neural: 3,
+    muscular: 2,
+    metabolic: 1,
+    connectiveTissue: 2,
+    technical: 3,
+  },
+  evidenceLevel: "unknown",
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    mma: 5,
+    wrestling: 4,
+    judo: 3,
+    brazilian_jiu_jitsu: 3,
+    krav_maga: 5,
+  },
+  substitutionExerciseIds: ["med_ball_chest_pass", "med_ball_rotational_throw", "med_ball_scoop_toss"],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -606,4 +728,5 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   MED_BALL_OVERHEAD_THROW,
   MED_BALL_ROTATIONAL_THROW,
   MED_BALL_SCOOP_TOSS,
+  MED_BALL_SHOT_PUT_THROW,
 ];
