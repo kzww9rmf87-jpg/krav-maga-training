@@ -475,7 +475,7 @@ describe("runEngine — default exercise catalog wiring", () => {
     expect(result.sessionResult.blockedModules).toEqual(["power"]);
   });
 
-  test("4. the default catalog contains all 7 integrated ballistic exercises", () => {
+  test("4. the default catalog contains all 7 integrated ballistic exercises plus box_jump", () => {
     const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
 
     expect(ids).toEqual([
@@ -486,6 +486,7 @@ describe("runEngine — default exercise catalog wiring", () => {
       "med_ball_scoop_toss",
       "med_ball_shot_put_throw",
       "med_ball_reverse_throw",
+      "box_jump",
     ]);
   });
 

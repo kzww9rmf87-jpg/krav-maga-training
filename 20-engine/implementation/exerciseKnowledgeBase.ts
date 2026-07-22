@@ -829,6 +829,167 @@ export const MED_BALL_REVERSE_THROW: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Box Jump
+// Source: 50-exercises/63_PLYOMETRICS/10_BOX_JUMP.md
+// -----------------------------------------------------------------------------
+
+/**
+ * First Plyometrics-category entry and first entry of this knowledge base
+ * with no throwing/wall/partner requirement at all — this is a jump, not a
+ * throw. Its box height, progression, regression and technical-failure
+ * criteria (both extensively documented in the source chapter) are
+ * deliberately NOT represented in `requirements`: box height is a
+ * prescription/coaching concern (belongs with load/volume selection, not
+ * eligibility), and progression/regression/stop-condition logic already has
+ * its own dedicated layers (`prescription/exercisePrescriptionRegistry.ts`'s
+ * `boxJumpEntry` — stop conditions, instructions) which this file never
+ * duplicates. `requirements` here answers exactly one question: is a stable
+ * plyometric box, a safe landing surface, permission to jump and enough
+ * space available — nothing about how high, how many, or how to progress.
+ *
+ * `plyometric_box` (not the generic `box` equipment type) is used because
+ * "Equipment Requirements" names a specific implement — "Stable plyometric
+ * box" / "Stable low platform specifically designed to support landing" —
+ * not an approximate general-purpose box. `exercisePrescriptionRegistry.ts`
+ * already integrates this exact exercise with
+ * `requiredEquipmentCapabilities: ["plyometric_box", "safe_landing_surface"]`,
+ * confirming both the equipment vocabulary and the landing-surface capability
+ * chosen below independently from the source documentation.
+ */
+export const BOX_JUMP: ExerciseDefinition = {
+  id: "box_jump",
+  name: "Box Jump",
+  module: "power",
+  primaryAdaptation: "power",
+  // "Rate of Force Development ★★★★★" and "Explosive Strength" are both
+  // explicit, separately-labeled fields in the source doc. "Landing
+  // Mechanics" (Secondary Classifications) maps to "stability" — the
+  // closest direct PhysicalQuality match for landing control.
+  physicalQualities: ["explosive_strength", "rate_of_force_development", "stability"],
+  // Movement Pattern — Primary: "Bilateral Vertical Jump".
+  movementPatterns: ["jump"],
+  // Biomechanical Profile — "Primary Force Vector: Vertical." The
+  // documented "Secondary Force Vector" is explicitly variable ("Slight
+  // Anterior-Posterior Component Depending on Box Distance") — too
+  // conditional to commit to a specific enum value without overreaching.
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "plyometric_box" },
+          { kind: "environment", capability: "jumping_allowed" },
+          // "Equipment Requirements": the box surface itself must be
+          // "Non-slip, Structurally stable, ... Free from sharp edges or
+          // obstacles" — a landing-surface concern, not a distinct
+          // "general floor safety" concern the doc never separates out.
+          // `floor_safe` is deliberately NOT added alongside this.
+          { kind: "environment", capability: "safe_landing_surface" },
+          // "Space Requirements: Low to Moderate" — clear floor space in
+          // front of the box, ceiling clearance, lateral clearance and an
+          // unobstructed step-down area around a single station. No
+          // exercise-comparison table exists yet for Plyometrics (unlike
+          // Ballistics' 90_COMPARISON.md), so this is an interpretive but
+          // conservative reading of "Low to Moderate": closer to the
+          // compact, single-station Ballistics entries already using
+          // "limited" (Chest Pass, Slam, Rotational Throw, Shot-Put
+          // Throw) than to the larger "moderate"/"open" tiers reserved for
+          // exercises with a genuine multi-metre throwing arc.
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "limited" },
+        ],
+      },
+    ],
+  },
+  // Skill Requirement: "Moderate". Technical Complexity — Overall
+  // Complexity: "Moderate".
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // Movement Pattern / Movement Context repeatedly state "Bilateral".
+  // Matches exercisePrescriptionRegistry.ts's own `laterality: "bilateral"`.
+  unilateral: false,
+  bodyRegionsLoaded: ["hip", "thigh", "lower_leg"],
+  // "Contraindications and Restrictions — Avoid or modify when the athlete
+  // presents: ...". This doc has no distinctly-labeled "Absolute
+  // Contraindications" heading (unlike the Ballistics chapters); the "Avoid
+  // or modify" list is treated as the absolute tier here, since it reads as
+  // stronger than the separate, deliberately-excluded "Use caution with:"
+  // list (matching how Ballistics' own "Relative Contraindications"
+  // sections were never encoded). "Insufficient clearance of the box edge"
+  // and "Unstable or inappropriate equipment" are excluded — both are
+  // environment/equipment concerns already covered by `requirements`
+  // above, not athlete-state contraindications. "Medical restrictions on
+  // jumping or impact" is excluded as non-actionable here — restriction
+  // matching is already handled generically by
+  // `AthleteRestriction`/`checkHardRestrictionProhibitsMovement` in
+  // `exerciseSelector.ts`, independently of this list.
+  contraindications: [
+    {
+      description: "Acute ankle, knee, hip or foot injury.",
+      prohibitedPatterns: ["jump"],
+      absolute: true,
+    },
+    {
+      description: "Active Achilles or patellar tendon pain.",
+      prohibitedPatterns: ["jump"],
+      absolute: true,
+    },
+    {
+      description: "Recent lower-limb surgery.",
+      prohibitedPatterns: ["jump"],
+      absolute: true,
+    },
+    {
+      description: "Poor bilateral landing control.",
+      prohibitedPatterns: ["jump"],
+      absolute: true,
+    },
+    {
+      description: "Significant fear or hesitation around the box.",
+      prohibitedPatterns: ["jump"],
+      absolute: true,
+    },
+    {
+      description: "Severe fatigue or impaired coordination.",
+      prohibitedPatterns: ["jump"],
+      absolute: true,
+    },
+  ],
+  fatigueProfile: {
+    // This doc's own Fatigue Profile uses different dimension names than
+    // the Ballistics chapters (Local Muscular / Central Neuromuscular /
+    // Tendon and Joint Exposure / Metabolic), mapped onto the same fixed
+    // ExerciseFatigueProfile shape. "impact" is included given the
+    // extensive documented landing-impact stress (Joint Stress Profile,
+    // Safety Profile) — the first knowledge-base entry to warrant it.
+    types: ["neural", "muscular", "connective_tissue", "impact"],
+    neural: 3, // "Central Neuromuscular Fatigue: Moderate"
+    muscular: 2, // "Local Muscular Fatigue: Low to Moderate"
+    metabolic: 1, // "Metabolic Fatigue: Low when programmed correctly"
+    connectiveTissue: 3, // "Tendon and Joint Exposure: Moderate"
+    technical: 3, // Technical Complexity: "Moderate"
+  },
+  // The source doc has a real "# Evidence Classification" section
+  // ("Moderate to High for jump training...", "High for the importance of
+  // low-fatigue, maximal-intent execution..."), unlike every Ballistics
+  // chapter integrated so far. It is still left "unknown" here: there is no
+  // documented crosswalk between this narrative evidence language and the
+  // engine's level_1/level_2/level_3 taxonomy, and guessing one would be
+  // exactly the kind of invented fact this project's scientific-integrity
+  // principle forbids. This is a known representational gap, not an
+  // absence of evidence discussion in the source.
+  evidenceLevel: "unknown",
+  // combatSportRelevance intentionally omitted: "Combat Transfer" states
+  // explicitly — "The transfer is general rather than sport-specific." —
+  // and no per-sport breakdown exists anywhere in this chapter (unlike
+  // every integrated Ballistics exercise's "Sport-Specific Relevance"
+  // section). Inventing individual sport ratings here would directly
+  // contradict the documentation's own stated position.
+  substitutionExerciseIds: ["countermovement_jump", "broad_jump", "knee_jump", "single_leg_hop", "med_ball_scoop_toss"],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -840,4 +1001,5 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   MED_BALL_SCOOP_TOSS,
   MED_BALL_SHOT_PUT_THROW,
   MED_BALL_REVERSE_THROW,
+  BOX_JUMP,
 ];
