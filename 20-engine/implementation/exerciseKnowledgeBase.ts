@@ -226,7 +226,135 @@ export const MED_BALL_SLAM: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Medicine-Ball Overhead Throw
+// Source: 50-exercises/67_BALLISTICS/11_MED_BALL_OVERHEAD_THROW.md
+// -----------------------------------------------------------------------------
+
+/**
+ * KNOWN LIMITATION — `MED_BALL_OVERHEAD_THROW_WALL_VARIANT_UNPRESCRIBABLE`
+ *
+ * The canonical documentation ("Exercise Identity" — "Equipment: Medicine
+ * Ball, Open Space or Wall") supports two independent setups: throwing into
+ * open space, or throwing against a wall. As with `med_ball_chest_pass`
+ * (see `MED_BALL_CHEST_PASS_PARTNER_VARIANT_UNPRESCRIBABLE` above), this is
+ * a CAS Engine eligibility decision, not a VITA one — `requirements` below
+ * matches that full documented reality (`open_space` OR `usable_wall`), not
+ * the narrower scope already integrated one layer downstream:
+ * `prescription/exercisePrescriptionRegistry.ts` currently integrates
+ * `med_ball_overhead_throw` as the open-space variant only
+ * (`requiredEquipmentCapabilities: ["medicine_ball", "open_space"]` — see
+ * `__tests__/prescription/ballisticExercises.test.ts`,
+ * "med_ball_overhead_throw — open-space variant"). No wall-based
+ * prescription path exists.
+ *
+ * Consequence: an athlete/environment combination that satisfies this
+ * exercise's `requirements` solely through the `usable_wall` branch
+ * (medicine ball + throwing allowed + sufficient space + a usable wall, but
+ * no `open_space` equipment declared) will pass `checkExerciseEligibility`
+ * here, then fail at `getExercisePrescriptionSource`/`prescribeExercise`
+ * for lack of the `open_space` equipment capability the registry still
+ * requires today. Same deliberate, documented gap as the chest-pass
+ * partner branch — not a bug, and not something this file's `requirements`
+ * should narrow to hide. Closing it is out of scope for this wiring step.
+ */
+export const MED_BALL_OVERHEAD_THROW_WALL_VARIANT_UNPRESCRIBABLE =
+  "med_ball_overhead_throw: eligible via the `usable_wall` branch of its " +
+  "Exercise Requirements Model, but exercisePrescriptionRegistry.ts (V0.1) " +
+  "only integrates the open-space variant (`medicine_ball` + `open_space`) " +
+  "— a wall-only eligibility result cannot currently be prescribed.";
+
+export const MED_BALL_OVERHEAD_THROW: ExerciseDefinition = {
+  id: "med_ball_overhead_throw",
+  name: "Medicine-Ball Overhead Throw",
+  module: "power",
+  primaryAdaptation: "power",
+  physicalQualities: ["explosive_strength", "rate_of_force_development"],
+  movementPatterns: ["throw", "vertical_push"],
+  // Documented force vector varies by variation (vertical, forward,
+  // backward) with no single fixed default named for the base entry —
+  // "mixed" is the only non-invented, honest representation.
+  forceVectors: ["mixed"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "medicine_ball" },
+          { kind: "environment", capability: "throwing_allowed" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "moderate" },
+        ],
+      },
+      {
+        kind: "any_of",
+        items: [
+          { kind: "equipment", equipment: "open_space" },
+          { kind: "environment", capability: "usable_wall" },
+        ],
+      },
+    ],
+  },
+  // "Complexity: Low to Moderate" in the source doc — rounded up to
+  // "moderate" (minimumTechnicalLevel: 2), rather than down to "low"/1 as
+  // used for med_ball_chest_pass and med_ball_slam: this exercise's own
+  // documentation flags sequencing quality and safe release angle as
+  // meaningfully more demanding than the plain-"Low" ballistic exercises —
+  // a conservative, safety-oriented rounding, not an invented constraint.
+  minimumTechnicalLevel: 2,
+  complexity: "moderate",
+  unilateral: false,
+  bodyRegionsLoaded: ["hip", "thigh", "lower_leg", "shoulder", "upper_arm"],
+  contraindications: [
+    {
+      description: "Acute upper-limb injury (shoulder, elbow, wrist or hand).",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+    {
+      description: "Acute spinal injury (cervical, thoracic or lumbar).",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+    {
+      description: "Uncontrolled neurological weakness affecting the athlete's ability to throw safely.",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+  ],
+  fatigueProfile: {
+    types: ["neural", "muscular", "connective_tissue", "systemic"],
+    neural: 3,
+    muscular: 2,
+    metabolic: 1,
+    connectiveTissue: 2,
+    technical: 3,
+  },
+  evidenceLevel: "unknown",
+  combatSportRelevance: {
+    boxing: 3,
+    kickboxing: 4,
+    muay_thai: 4,
+    mma: 4,
+    wrestling: 4,
+    judo: 4,
+    brazilian_jiu_jitsu: 3,
+    krav_maga: 4,
+  },
+  substitutionExerciseIds: [
+    "med_ball_reverse_throw",
+    "med_ball_slam",
+    "push_press",
+    "med_ball_scoop_toss",
+    "jump_shrug",
+  ],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
-export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [MED_BALL_CHEST_PASS, MED_BALL_SLAM];
+export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
+  MED_BALL_CHEST_PASS,
+  MED_BALL_SLAM,
+  MED_BALL_OVERHEAD_THROW,
+];
