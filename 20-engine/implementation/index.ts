@@ -71,17 +71,36 @@ import { buildDecisionTrace, buildInvalidInputDecisionTrace } from "./decisionTr
 import type { ExercisePrescriptionSource } from "./prescription/buildPrescriptionInput";
 import { prescribeEngineSession } from "./prescription/prescribeEngineSession";
 import type { PrescriptionTraceContext } from "./prescription/prescriptionDecisionTrace";
+import { EXERCISE_KNOWLEDGE_BASE } from "./exerciseKnowledgeBase";
 
 // -----------------------------------------------------------------------------
 // Public API
 // -----------------------------------------------------------------------------
 
 /**
+ * The CAS Engine's production exercise catalog, re-exported here because
+ * `index.ts` is the engine's sole public entry point. `runEngine` already
+ * defaults to it when its `exercises` parameter is omitted (see below) —
+ * this export exists for callers that need the catalog itself directly
+ * (e.g. to build a `prescriptionSources` map keyed by its ids, or to
+ * inspect/derive a filtered array before passing it explicitly).
+ */
+export { EXERCISE_KNOWLEDGE_BASE } from "./exerciseKnowledgeBase";
+
+/**
  * Runs the full V0.1 pipeline against `input` and the candidate exercise
  * pool `exercises`, returning the most complete honest result this
- * version can produce. Stops immediately after validation when `input`
- * is invalid (`outcome: "invalid_input"`), and immediately after session
- * generation when no primary module has a selected exercise
+ * version can produce. `exercises` defaults to `EXERCISE_KNOWLEDGE_BASE`
+ * (a fresh copy of the engine's own production catalog) when omitted —
+ * this default is a CAS Engine decision, not VITA's: VITA never
+ * constructs or owns the exercise catalog. Passing an explicit array
+ * (test fixtures, a filtered subset, any advanced caller) still fully
+ * overrides the default, exactly as every historical two- and
+ * three-argument call already does — omitting `exercises` was not a
+ * valid call shape before this parameter had a default, so no existing
+ * call site changes behavior. Stops immediately after validation when
+ * `input` is invalid (`outcome: "invalid_input"`), and immediately after
+ * session generation when no primary module has a selected exercise
  * (`outcome: "blocked"`). Otherwise attempts, in a single non-looping
  * pass, to resolve every detected `"combat_schedule"` conflict via an
  * already-ranked backup from the same module, then returns
@@ -94,7 +113,7 @@ import type { PrescriptionTraceContext } from "./prescription/prescriptionDecisi
  */
 export function runEngine(
   input: EngineInput,
-  exercises: ExerciseDefinition[],
+  exercises: ExerciseDefinition[] = [...EXERCISE_KNOWLEDGE_BASE],
   prescriptionSources?: ReadonlyMap<Identifier, ExercisePrescriptionSource>,
 ): EngineRunResult {
   const validation = validateEngineInput(input);
