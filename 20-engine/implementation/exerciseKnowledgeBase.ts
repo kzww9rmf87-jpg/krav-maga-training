@@ -468,6 +468,135 @@ export const MED_BALL_ROTATIONAL_THROW: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Medicine-Ball Scoop Toss
+// Source: 50-exercises/67_BALLISTICS/13_MED_BALL_SCOOP_TOSS.md
+// -----------------------------------------------------------------------------
+
+/**
+ * KNOWN LIMITATION — `MED_BALL_SCOOP_TOSS_WALL_VARIANT_UNPRESCRIBABLE`
+ *
+ * Same shape of gap as `med_ball_overhead_throw` (see
+ * `MED_BALL_OVERHEAD_THROW_WALL_VARIANT_UNPRESCRIBABLE` above), not
+ * `med_ball_chest_pass`'s: the canonical documentation ("Exercise Identity"
+ * — "Equipment: Medicine Ball, Wall or Open Space") supports throwing
+ * against a wall or into open space — no partner variant is documented at
+ * all for this exercise. `prescription/exercisePrescriptionRegistry.ts`
+ * currently integrates `med_ball_scoop_toss` as the open-space variant only
+ * (`requiredEquipmentCapabilities: ["medicine_ball", "open_space"]`, per
+ * `__tests__/prescription/ballisticExercises.test.ts` — "STANDING
+ * ROTATIONAL VARIANT ONLY, open space"). No wall-based prescription path
+ * exists. An eligibility result obtained solely through the `usable_wall`
+ * branch of `requirements` below will therefore pass
+ * `checkExerciseEligibility` but cannot currently be prescribed. Deliberate,
+ * documented gap — not a bug, and out of scope to close in this step.
+ */
+export const MED_BALL_SCOOP_TOSS_WALL_VARIANT_UNPRESCRIBABLE =
+  "med_ball_scoop_toss: eligible via the `usable_wall` branch of its " +
+  "Exercise Requirements Model, but exercisePrescriptionRegistry.ts (V0.1) " +
+  "only integrates the open-space variant (`medicine_ball` + `open_space`) " +
+  "— a wall-only eligibility result cannot currently be prescribed.";
+
+export const MED_BALL_SCOOP_TOSS: ExerciseDefinition = {
+  id: "med_ball_scoop_toss",
+  name: "Medicine-Ball Scoop Toss",
+  module: "power",
+  primaryAdaptation: "power",
+  physicalQualities: ["rate_of_force_development"],
+  // The "scoop" character, throw direction, hip extension and movement
+  // plane live entirely in biomechanical classification fields
+  // (movementPatterns, forceVectors) — no ad hoc "scoop" capability is
+  // introduced in the Exercise Requirements Model for this.
+  movementPatterns: ["throw", "rotation"],
+  // Doc's own Primary Pattern: "Diagonal or Rotational Ballistic
+  // Projection" — quoted directly, not the vaguer variation-dependent
+  // options ("upward", "upward and forward") listed only under "Force
+  // Vector" for alternate, non-default variations.
+  forceVectors: ["diagonal", "rotational"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "medicine_ball" },
+          { kind: "environment", capability: "throwing_allowed" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "moderate" },
+        ],
+      },
+      {
+        kind: "any_of",
+        items: [
+          { kind: "equipment", equipment: "open_space" },
+          { kind: "environment", capability: "usable_wall" },
+        ],
+      },
+    ],
+  },
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // "Unilateral Emphasis with Bilateral Support" in the source doc —
+  // resolved the same way as med_ball_rotational_throw's identical
+  // documented phrase, matching exercisePrescriptionRegistry.ts's own
+  // `laterality: "unilateral"` resolution for this exact exercise.
+  unilateral: true,
+  bodyRegionsLoaded: ["hip", "thigh", "abdomen", "shoulder"],
+  contraindications: [
+    {
+      description: "Acute spinal injury (cervical, thoracic or lumbar).",
+      prohibitedPatterns: ["rotation", "throw"],
+      absolute: true,
+    },
+    {
+      region: "hip",
+      description: "Acute hip injury.",
+      prohibitedPatterns: ["rotation", "throw"],
+      absolute: true,
+    },
+    {
+      region: "knee",
+      description: "Acute knee injury.",
+      prohibitedPatterns: ["rotation", "throw"],
+      absolute: true,
+    },
+    {
+      description: "Acute upper-limb injury (shoulder, elbow, wrist or hand).",
+      prohibitedPatterns: ["rotation", "throw"],
+      absolute: true,
+    },
+    {
+      description: "Inability to rotate or extend safely through the hips and trunk.",
+      prohibitedPatterns: ["rotation", "throw"],
+      absolute: true,
+    },
+  ],
+  fatigueProfile: {
+    types: ["neural", "muscular", "connective_tissue", "systemic"],
+    neural: 3,
+    muscular: 2,
+    metabolic: 1,
+    connectiveTissue: 2,
+    technical: 3,
+  },
+  evidenceLevel: "unknown",
+  combatSportRelevance: {
+    boxing: 4,
+    kickboxing: 5,
+    muay_thai: 5,
+    mma: 5,
+    wrestling: 5,
+    judo: 5,
+    brazilian_jiu_jitsu: 4,
+    krav_maga: 5,
+  },
+  substitutionExerciseIds: [
+    "med_ball_rotational_throw",
+    "med_ball_overhead_throw",
+    "med_ball_shot_put_throw",
+    "jump_shrug",
+  ],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -476,4 +605,5 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   MED_BALL_SLAM,
   MED_BALL_OVERHEAD_THROW,
   MED_BALL_ROTATIONAL_THROW,
+  MED_BALL_SCOOP_TOSS,
 ];
