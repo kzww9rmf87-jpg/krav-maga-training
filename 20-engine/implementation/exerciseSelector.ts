@@ -21,8 +21,11 @@
  * - Decision Trace generation;
  * - implicit anatomical, medical or biomechanical matching beyond what
  *   `BodyRegion` and `MovementPattern` values in `types.ts` already encode;
- * - space constraints (`ExerciseDefinition` has no required-space field to
- *   compare against `TrainingEnvironment.availableSpace`).
+ * - space constraints for exercises without `requirements` (no legacy
+ *   required-space field exists on `ExerciseDefinition` to compare against
+ *   `TrainingEnvironment.availableSpace`); exercises using the Exercise
+ *   Requirements Model (`requirements` defined) get `sufficient_space`
+ *   enforcement via `checkNewExerciseRequirementsModel` below.
  *
  * Every rejection reason produced here is a hard constraint
  * (`hardConstraint: true`) — this module never produces a soft
@@ -36,9 +39,16 @@ import type {
   ExerciseEligibilityResult,
   ExerciseRejectionReason,
   ExerciseRejectionReasonCode,
+  ExerciseRequirementAtom,
+  ExerciseRequirements,
   MovementPattern,
   PainReport,
 } from "./types";
+import {
+  evaluateExerciseRequirements,
+  validateExerciseRequirementsStructure,
+  validateRequirementsCoexistenceInvariant,
+} from "./exerciseRequirements";
 
 // -----------------------------------------------------------------------------
 // Public API
@@ -69,11 +79,7 @@ export function checkExerciseEligibility(
   checkAbsoluteContraindicationMatchesContext(exercise, input, reasons);
   checkActivePainInLoadedRegion(exercise, input, reasons);
   checkActivePainAggravatedByMovement(exercise, input, reasons);
-  checkRequiredEquipmentAvailable(exercise, input, reasons);
-  checkThrowingAllowed(exercise, input, reasons);
-  checkJumpingAllowed(exercise, input, reasons);
-  checkSprintingAllowed(exercise, input, reasons);
-  checkFloorSafety(exercise, input, reasons);
+  checkEquipmentAndEnvironmentRequirements(exercise, input, reasons);
   checkTechnicalLevel(exercise, input, reasons);
 
   return {
@@ -301,6 +307,102 @@ function checkActivePainAggravatedByMovement(
         "ACTIVE_PAIN",
         `A movement pattern of exercise "${exercise.id}" is reported to aggravate active pain in region "${report.region}".`,
       );
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Checks 9–13 — Equipment, environment and human-assistance requirements
+// -----------------------------------------------------------------------------
+
+/**
+ * Exclusive dispatch between the Exercise Requirements Model and the legacy
+ * equipment/environment checks. An exercise with `requirements` defined is
+ * gated solely by `checkNewExerciseRequirementsModel` — `requiredEquipment`,
+ * `optionalEquipment` and the legacy throw/jump/sprint/floor checks never
+ * run for it. An exercise without `requirements` keeps the historical
+ * behavior below byte-for-byte.
+ */
+function checkEquipmentAndEnvironmentRequirements(
+  exercise: ExerciseDefinition,
+  input: EngineInput,
+  reasons: ExerciseRejectionReason[],
+): void {
+  const requirements = exercise.requirements;
+  if (requirements !== undefined) {
+    checkNewExerciseRequirementsModel(exercise, requirements, input, reasons);
+    return;
+  }
+
+  checkRequiredEquipmentAvailable(exercise, input, reasons);
+  checkThrowingAllowed(exercise, input, reasons);
+  checkJumpingAllowed(exercise, input, reasons);
+  checkSprintingAllowed(exercise, input, reasons);
+  checkFloorSafety(exercise, input, reasons);
+}
+
+/**
+ * Maps an unsatisfied atom's `kind` (and, for `"environment"` atoms, its
+ * `capability`) onto the closest existing `ExerciseRejectionReasonCode`.
+ * `"human_assistance"` has no dedicated code today, so it falls back to
+ * `"OTHER"` — adding a dedicated code is a `types.ts` change, out of scope
+ * for this wiring step.
+ */
+function rejectionCodeForAtom(atom: ExerciseRequirementAtom): ExerciseRejectionReasonCode {
+  switch (atom.kind) {
+    case "equipment":
+      return "EQUIPMENT_UNAVAILABLE";
+    case "environment":
+      return atom.capability === "sufficient_space" ? "INSUFFICIENT_SPACE" : "UNSAFE_ENVIRONMENT";
+    case "human_assistance":
+      return "OTHER";
+  }
+}
+
+/**
+ * Runs the Exercise Requirements Model for a single exercise: structural
+ * validation, then the requirements/legacy-equipment coexistence invariant,
+ * then evaluation of `required` clauses against `input.environment`. Stops
+ * at the first failing validation stage so a malformed `ExerciseRequirements`
+ * is never passed to `evaluateExerciseRequirements`, which throws on
+ * structural issues. `optional` clauses are evaluated internally by
+ * `evaluateExerciseRequirements` but their results are never consulted here
+ * — an unsatisfied optional clause must never make the exercise ineligible.
+ */
+function checkNewExerciseRequirementsModel(
+  exercise: ExerciseDefinition,
+  requirements: ExerciseRequirements,
+  input: EngineInput,
+  reasons: ExerciseRejectionReason[],
+): void {
+  const coexistenceViolation = validateRequirementsCoexistenceInvariant(exercise);
+  if (coexistenceViolation !== null) {
+    addReason(reasons, "OTHER", coexistenceViolation.reason);
+    return;
+  }
+
+  const structuralIssues = validateExerciseRequirementsStructure(requirements);
+  if (structuralIssues.length > 0) {
+    for (const issue of structuralIssues) {
+      addReason(reasons, "OTHER", issue.reason);
+    }
+    return;
+  }
+
+  const result = evaluateExerciseRequirements(requirements, input.environment);
+  if (result.eligible) {
+    return;
+  }
+
+  for (const clauseResult of result.requiredClauseResults) {
+    if (clauseResult.satisfied) {
+      continue;
+    }
+    for (const atomResult of clauseResult.atomResults) {
+      if (atomResult.satisfied) {
+        continue;
+      }
+      addReason(reasons, rejectionCodeForAtom(atomResult.atom), atomResult.reason);
     }
   }
 }

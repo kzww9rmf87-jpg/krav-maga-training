@@ -225,7 +225,14 @@ export type EquipmentType =
   | "cardio_machine"
   | "open_space"
   | "wall"
-  | "other";
+  | "other"
+  | "trap_bar"
+  | "plyometric_box"
+  | "pinch_grip_implement"
+  | "slam_ball"
+  | "rigid_anchor_support"
+  | "knee_protection_pad"
+  | "farmer_handle";
 
 export type ExerciseComplexity =
   | "very_low"
@@ -431,9 +438,21 @@ export interface TrainingEnvironment {
   jumpingAllowed?: boolean;
   sprintingAllowed?: boolean;
   floorSafe?: boolean;
+  // Exercise Requirements Model additions — reused as the sole source of
+  // environmental context for "usable_wall"/"partner" atoms, per the locked
+  // decision not to represent either as an `EquipmentType` member.
+  usableWall?: boolean;
+  partnerAvailable?: boolean;
   temperatureCelsius?: number;
   environmentNotes?: string[];
 }
+
+/**
+ * `TrainingEnvironment["availableSpace"]`, named on its own so the Exercise
+ * Requirements Model's `sufficient_space` atom and `isAvailableSpaceSufficient`
+ * can reference it without duplicating the literal union.
+ */
+export type AvailableSpaceLevel = TrainingEnvironment["availableSpace"];
 
 // -----------------------------------------------------------------------------
 // Training request
@@ -510,6 +529,51 @@ export interface ExerciseFatigueProfile {
   recoveryHours?: number;
 }
 
+export type EnvironmentCapability =
+  | "safe_landing_surface"
+  | "usable_wall"
+  | "throwing_allowed"
+  | "jumping_allowed"
+  | "sprinting_allowed"
+  | "floor_safe"
+  | "sufficient_space";
+
+export type HumanAssistanceCapability = "partner";
+
+export type ExerciseRequirementAtom =
+  | {
+      kind: "equipment";
+      equipment: EquipmentType;
+    }
+  | {
+      kind: "environment";
+      capability: Exclude<EnvironmentCapability, "sufficient_space">;
+    }
+  | {
+      kind: "environment";
+      capability: "sufficient_space";
+      minimumSpace: AvailableSpaceLevel;
+    }
+  | {
+      kind: "human_assistance";
+      assistance: HumanAssistanceCapability;
+    };
+
+export type ExerciseRequirementClause =
+  | {
+      kind: "all_of";
+      items: readonly ExerciseRequirementAtom[];
+    }
+  | {
+      kind: "any_of";
+      items: readonly ExerciseRequirementAtom[];
+    };
+
+export interface ExerciseRequirements {
+  required: readonly ExerciseRequirementClause[];
+  optional?: readonly ExerciseRequirementClause[];
+}
+
 export interface ExerciseDefinition {
   id: Identifier;
   name: string;
@@ -521,6 +585,7 @@ export interface ExerciseDefinition {
   forceVectors?: ForceVector[];
   requiredEquipment: EquipmentType[];
   optionalEquipment?: EquipmentType[];
+  requirements?: ExerciseRequirements;
   minimumTechnicalLevel: TechnicalLevel;
   complexity: ExerciseComplexity;
   unilateral: boolean;
