@@ -134,7 +134,99 @@ export const MED_BALL_CHEST_PASS: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Medicine-Ball Slam
+// Source: 50-exercises/67_BALLISTICS/14_MED_BALL_SLAM.md
+// -----------------------------------------------------------------------------
+
+/**
+ * No wall or partner requirement: the canonical documentation never
+ * mentions either for this exercise — its "Equipment" line names only
+ * "Slam Ball or Non-Rebounding Medicine Ball, Suitable Floor Surface".
+ * `slam_ball` (not `medicine_ball`) is used because the documentation
+ * explicitly requires a non-rebounding implement throughout ("Safety
+ * Rules" — "Use a slam ball or appropriate non-rebounding medicine ball";
+ * "Absolute Contraindications" — "an unsuitable floor and ball setup"); a
+ * plain `medicine_ball` equipment entry does not guarantee that property.
+ * This also matches the equipment vocabulary
+ * `prescription/exercisePrescriptionRegistry.ts` already uses for this
+ * same exercise (`requiredEquipmentCapabilities: ["slam_ball",
+ * "safe_landing_surface"]`) — consistent naming across both layers for
+ * the same physical constraint, even though this file never reads or
+ * depends on that registry.
+ */
+export const MED_BALL_SLAM: ExerciseDefinition = {
+  id: "med_ball_slam",
+  name: "Medicine-Ball Slam",
+  module: "power",
+  primaryAdaptation: "power",
+  physicalQualities: ["explosive_strength", "rate_of_force_development", "trunk_strength"],
+  movementPatterns: ["throw"],
+  forceVectors: ["downward"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "slam_ball" },
+          { kind: "environment", capability: "throwing_allowed" },
+          { kind: "environment", capability: "safe_landing_surface" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "limited" },
+        ],
+      },
+    ],
+  },
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  unilateral: false,
+  bodyRegionsLoaded: ["abdomen", "shoulder", "upper_arm"],
+  contraindications: [
+    {
+      description: "Acute upper-limb injury (shoulder, elbow, wrist or hand).",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+    {
+      description: "Acute spinal injury (cervical, thoracic or lumbar).",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+    {
+      region: "abdomen",
+      description: "Acute abdominal or rib injury.",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+    {
+      description: "Neurological weakness affecting the athlete's ability to release the ball safely.",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+  ],
+  fatigueProfile: {
+    types: ["neural", "muscular", "connective_tissue", "systemic"],
+    neural: 3,
+    muscular: 2,
+    metabolic: 2,
+    connectiveTissue: 2,
+    technical: 2,
+  },
+  evidenceLevel: "unknown",
+  combatSportRelevance: {
+    boxing: 3,
+    kickboxing: 4,
+    muay_thai: 4,
+    mma: 4,
+    wrestling: 4,
+    judo: 3,
+    brazilian_jiu_jitsu: 3,
+    krav_maga: 4,
+  },
+  substitutionExerciseIds: ["med_ball_overhead_throw", "med_ball_rotational_throw", "med_ball_scoop_toss"],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
-export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [MED_BALL_CHEST_PASS];
+export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [MED_BALL_CHEST_PASS, MED_BALL_SLAM];
