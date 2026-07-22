@@ -22,6 +22,7 @@ import {
   EXERCISE_KNOWLEDGE_BASE,
   MED_BALL_CHEST_PASS,
   MED_BALL_OVERHEAD_THROW,
+  MED_BALL_REVERSE_THROW,
   MED_BALL_ROTATIONAL_THROW,
   MED_BALL_SCOOP_TOSS,
   MED_BALL_SHOT_PUT_THROW,
@@ -980,5 +981,227 @@ describe("MED_BALL_SHOT_PUT_THROW — Exercise Requirements Model pilot integrat
     expect(MED_BALL_SHOT_PUT_THROW.movementPatterns).toEqual(["throw"]);
     // Force Vector: "Primary vector: horizontal and forward."
     expect(MED_BALL_SHOT_PUT_THROW.forceVectors).toEqual(["horizontal", "forward"]);
+  });
+});
+
+describe("MED_BALL_REVERSE_THROW — Exercise Requirements Model pilot integration", () => {
+  test("1. the entry exists in the catalog", () => {
+    expect(EXERCISE_KNOWLEDGE_BASE).toContain(MED_BALL_REVERSE_THROW);
+  });
+
+  test("2. has a unique identifier within the catalog", () => {
+    expect(MED_BALL_REVERSE_THROW.id).toBe("med_ball_reverse_throw");
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  test("3. respects the coexistence invariant: requiredEquipment is empty, optionalEquipment is absent", () => {
+    expect(MED_BALL_REVERSE_THROW.requiredEquipment).toEqual([]);
+    expect(MED_BALL_REVERSE_THROW.optionalEquipment).toBeUndefined();
+    expect(validateRequirementsCoexistenceInvariant(MED_BALL_REVERSE_THROW)).toBeNull();
+    expect(validateExerciseRequirementsStructure(MED_BALL_REVERSE_THROW.requirements!)).toEqual([]);
+  });
+
+  test("4. eligible in the single documented configuration (medicine_ball + open_space)", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        floorSafe: true,
+        availableSpace: "open",
+      }),
+    });
+
+    const result = checkExerciseEligibility(MED_BALL_REVERSE_THROW, input);
+
+    expect(result.eligible).toBe(true);
+    expect(result.rejectionReasons).toEqual([]);
+  });
+
+  test("5. ineligible without the required equipment (medicine_ball or open_space)", () => {
+    const withoutBall = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "open_space" }], // no medicine_ball
+        throwingAllowed: true,
+        floorSafe: true,
+        availableSpace: "open",
+      }),
+    });
+    expect(
+      checkExerciseEligibility(MED_BALL_REVERSE_THROW, withoutBall).rejectionReasons.some(
+        (r) => r.code === "EQUIPMENT_UNAVAILABLE",
+      ),
+    ).toBe(true);
+
+    const withoutOpenSpace = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }], // no open_space
+        throwingAllowed: true,
+        floorSafe: true,
+        availableSpace: "open",
+      }),
+    });
+    expect(
+      checkExerciseEligibility(MED_BALL_REVERSE_THROW, withoutOpenSpace).rejectionReasons.some(
+        (r) => r.code === "EQUIPMENT_UNAVAILABLE",
+      ),
+    ).toBe(true);
+  });
+
+  test("6. ineligible when throwing is not allowed", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: false,
+        floorSafe: true,
+        availableSpace: "open",
+      }),
+    });
+
+    const result = checkExerciseEligibility(MED_BALL_REVERSE_THROW, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT")).toBe(true);
+  });
+
+  test("7. ineligible when available space is below the documented minimum (open)", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        floorSafe: true,
+        availableSpace: "large", // one tier below "open"
+      }),
+    });
+
+    const result = checkExerciseEligibility(MED_BALL_REVERSE_THROW, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+  });
+
+  test("8. no unintended dependency on a wall or a partner", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        floorSafe: true,
+        availableSpace: "open",
+        usableWall: false,
+        partnerAvailable: false,
+      }),
+    });
+
+    const result = checkExerciseEligibility(MED_BALL_REVERSE_THROW, input);
+
+    expect(result.eligible).toBe(true);
+    expect(result.rejectionReasons).toEqual([]);
+  });
+
+  test("9. no ad hoc capability tied to the backward/reverse direction — floor safety is the only environment gate beyond throwing_allowed and sufficient_space", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        floorSafe: false, // documented "suitable landing surface" requirement
+        availableSpace: "open",
+      }),
+    });
+
+    const result = checkExerciseEligibility(MED_BALL_REVERSE_THROW, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.length).toBe(1);
+    expect(result.rejectionReasons[0].code).toBe("UNSAFE_ENVIRONMENT");
+  });
+
+  test("10. adding this entry never changes the six previously integrated exercises", () => {
+    const chestPassInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: true,
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_CHEST_PASS, chestPassInput).eligible).toBe(true);
+
+    const slamInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "slam_ball" }],
+        throwingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_SLAM, slamInput).eligible).toBe(true);
+
+    const overheadThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_OVERHEAD_THROW, overheadThrowInput).eligible).toBe(true);
+
+    const rotationalThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: true,
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_ROTATIONAL_THROW, rotationalThrowInput).eligible).toBe(true);
+
+    const scoopTossInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_SCOOP_TOSS, scoopTossInput).eligible).toBe(true);
+
+    const shotPutThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_SHOT_PUT_THROW, shotPutThrowInput).eligible).toBe(true);
+  });
+
+  test("11. biomechanical fields match the documentation", () => {
+    // "Unilateral or Bilateral: Bilateral"
+    expect(MED_BALL_REVERSE_THROW.unilateral).toBe(false);
+    // Primary Pattern: "Backward Whole-Body Ballistic Projection" — a
+    // throw; the backward direction lives in forceVectors, not here.
+    expect(MED_BALL_REVERSE_THROW.movementPatterns).toEqual(["throw"]);
+    // Force Vector: "Primary vector: upward and backward."
+    expect(MED_BALL_REVERSE_THROW.forceVectors).toEqual(["upward", "backward"]);
+    // Complexity: "Moderate"
+    expect(MED_BALL_REVERSE_THROW.complexity).toBe("moderate");
+    expect(MED_BALL_REVERSE_THROW.minimumTechnicalLevel).toBe(3);
+  });
+
+  test("12. never mutates the exercise or the input it is given during evaluation", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        floorSafe: true,
+        availableSpace: "open",
+      }),
+    });
+    const exerciseSnapshot = structuredClone(MED_BALL_REVERSE_THROW);
+    const inputSnapshot = structuredClone(input);
+
+    checkExerciseEligibility(MED_BALL_REVERSE_THROW, input);
+
+    expect(MED_BALL_REVERSE_THROW).toEqual(exerciseSnapshot);
+    expect(input).toEqual(inputSnapshot);
   });
 });

@@ -719,6 +719,116 @@ export const MED_BALL_SHOT_PUT_THROW: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Medicine-Ball Reverse Throw
+// Source: 50-exercises/67_BALLISTICS/16_MED_BALL_REVERSE_THROW.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Unlike every other ballistic exercise integrated so far, this exercise's
+ * canonical documentation names exactly one setup — "Exercise Identity" —
+ * "Equipment: Medicine Ball, Open Space" — with no wall or partner
+ * alternative documented anywhere in the chapter. No `any_of` clause is
+ * therefore needed, and no `MED_BALL_REVERSE_THROW_..._UNPRESCRIBABLE`
+ * known-limitation constant is required: `exercisePrescriptionRegistry.ts`
+ * already integrates the exact same equipment pair
+ * (`requiredEquipmentCapabilities: ["medicine_ball", "open_space"]`), so
+ * there is no wall/partner branch our eligibility layer permits that the
+ * prescription layer cannot serve. The backward throw direction itself is
+ * represented entirely through existing biomechanical fields
+ * (`forceVectors: ["upward", "backward"]`) — no ad hoc "reverse" or
+ * "backward-projection" capability is introduced in the Exercise
+ * Requirements Model.
+ */
+export const MED_BALL_REVERSE_THROW: ExerciseDefinition = {
+  id: "med_ball_reverse_throw",
+  name: "Medicine-Ball Reverse Throw",
+  module: "power",
+  primaryAdaptation: "power",
+  physicalQualities: ["explosive_strength", "rate_of_force_development"],
+  // Primary Pattern: "Backward Whole-Body Ballistic Projection" — a throw;
+  // the backward direction itself lives in forceVectors below, not here.
+  movementPatterns: ["throw"],
+  // Force Vector: "Primary vector: upward and backward." — quoted directly.
+  forceVectors: ["upward", "backward"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "medicine_ball" },
+          { kind: "equipment", equipment: "open_space" },
+          { kind: "environment", capability: "throwing_allowed" },
+          // Safety Rules: "Use a suitable landing surface." — explicit,
+          // same treatment as med_ball_slam's floor requirement.
+          { kind: "environment", capability: "safe_landing_surface" },
+          // 90_COMPARISON.md, "Space Requirement Comparison" — "Highest
+          // Space Requirement: Reverse Throw. Reverse Throw requires a
+          // fully clear area behind the athlete." The rear-clearance
+          // requirement is translated using the existing sufficient_space
+          // capability at its highest documented tier, not a new one.
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "open" },
+        ],
+      },
+    ],
+  },
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // "Unilateral or Bilateral: Bilateral" — plain, unambiguous. Matches
+  // exercisePrescriptionRegistry.ts's own `laterality: "bilateral"` for
+  // this exact exercise.
+  unilateral: false,
+  bodyRegionsLoaded: ["hip", "thigh", "lower_leg", "shoulder", "upper_arm"],
+  contraindications: [
+    {
+      description: "Acute spinal injury (cervical, thoracic or lumbar).",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+    {
+      description: "Acute lower-limb injury (hip, knee, ankle or foot).",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+    {
+      description: "Acute upper-limb injury (shoulder, elbow, wrist or hand).",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+    {
+      description: "Inability to project the ball backward safely.",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+    {
+      description: "Severe balance impairment.",
+      prohibitedPatterns: ["throw"],
+      absolute: true,
+    },
+  ],
+  fatigueProfile: {
+    types: ["neural", "muscular", "connective_tissue", "systemic"],
+    neural: 3,
+    muscular: 2,
+    metabolic: 1,
+    connectiveTissue: 2,
+    technical: 3,
+  },
+  evidenceLevel: "unknown",
+  combatSportRelevance: {
+    boxing: 3,
+    kickboxing: 4,
+    muay_thai: 4,
+    mma: 4,
+    wrestling: 5,
+    judo: 5,
+    brazilian_jiu_jitsu: 4,
+    krav_maga: 4,
+  },
+  substitutionExerciseIds: ["med_ball_overhead_throw", "med_ball_scoop_toss", "jump_shrug", "broad_jump"],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -729,4 +839,5 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   MED_BALL_ROTATIONAL_THROW,
   MED_BALL_SCOOP_TOSS,
   MED_BALL_SHOT_PUT_THROW,
+  MED_BALL_REVERSE_THROW,
 ];
