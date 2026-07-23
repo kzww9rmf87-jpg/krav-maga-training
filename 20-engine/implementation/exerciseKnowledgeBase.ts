@@ -990,6 +990,186 @@ export const BOX_JUMP: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Depth Jump
+// Source: 50-exercises/63_PLYOMETRICS/11_DEPTH_JUMP.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Second Plyometrics-category entry. Like `BOX_JUMP`, this is a jump with
+ * no throwing/wall/partner requirement — `requirements` answers only
+ * whether an elevated platform, permission to jump, a safe landing surface
+ * and enough space are available; drop height, ground-contact time,
+ * rebound quality and the extensive Technical Failure Criteria in the
+ * source chapter are prescription/coaching concerns
+ * (`prescription/exercisePrescriptionRegistry.ts`'s `depthJumpEntry` —
+ * stop conditions, instructions), never represented as capabilities here.
+ *
+ * Depth Jump is not treated as `box_jump` with a different name: its own
+ * documentation is read independently (Primary Adaptation "Reactive
+ * Strength" vs. Box Jump's plain "Power"; "Overall Technical Complexity:
+ * High" vs. Box Jump's "Moderate"; a documented Skill Requirement of
+ * "High" with explicit prerequisites including "Competent box jump" —
+ * i.e. Box Jump sits *below* Depth Jump in the plyometric progression,
+ * not beside it).
+ *
+ * `plyometric_box` (not a generic `box`) is used for the same reason as
+ * `BOX_JUMP`: "Equipment Requirements" names a "Stable Elevated Platform"
+ * that "must not wobble, slide or have sharp exposed edges" — the
+ * Progression Model's own Stage 1 names "Low Box Jumps" and the Skill
+ * Requirement's own prerequisites name "Competent box jump", both
+ * confirming the elevated platform in question is the same stable
+ * plyometric box already integrated for `box_jump`, not an ad hoc
+ * "elevated platform" capability. `exercisePrescriptionRegistry.ts`
+ * already integrates this exact exercise with
+ * `requiredEquipmentCapabilities: ["plyometric_box", "safe_landing_surface"]`,
+ * confirming both the equipment vocabulary and the landing-surface
+ * capability chosen below independently from the source documentation.
+ *
+ * `floor_safe` is deliberately NOT added alongside `safe_landing_surface`:
+ * the source names one "Appropriate Landing Surface" requirement, never
+ * separating a general floor-safety concern from the landing surface
+ * itself (matching `BOX_JUMP`'s identical treatment, and the fact that
+ * both capabilities read the same `TrainingEnvironment.floorSafe` field —
+ * see `exerciseRequirements.ts`).
+ *
+ * "Space Requirements" documents "Vertical Space: Moderate to High" and
+ * requires the athlete to "complete the rebound without contacting walls,
+ * equipment or other athletes" — a materially higher bar than `box_jump`'s
+ * own "Low to Moderate" horizontal-only space section, so
+ * `minimumSpace: "moderate"` is used here rather than `box_jump`'s
+ * "limited".
+ */
+export const DEPTH_JUMP: ExerciseDefinition = {
+  id: "depth_jump",
+  name: "Depth Jump",
+  module: "power",
+  primaryAdaptation: "power",
+  // Primary Adaptation: "Reactive Strength" — exact PhysicalQuality match.
+  // Biomechanical Profile: "Rate of Force Development ★★★★★" — exact
+  // match. "Deceleration Capacity" (Capability Mapping — Secondary) and
+  // "High-Force Deceleration Tolerance" (Secondary Adaptations) both name
+  // deceleration explicitly. "Landing Control"/"Landing Stability"
+  // (Capability Mapping — Secondary / Secondary Adaptations) map to
+  // "stability", matching BOX_JUMP's own "Landing Mechanics" → "stability"
+  // treatment. No "Explosive Strength" label exists anywhere in this
+  // chapter (unlike BOX_JUMP's own doc) — not added here.
+  physicalQualities: ["reactive_strength", "rate_of_force_development", "deceleration", "stability"],
+  // Movement Pattern — Primary: "Bilateral Drop Landing to Immediate
+  // Vertical Jump". No enum value exists for the landing/drop component
+  // itself (as with BOX_JUMP's own "Bilateral Vertical Jump" — "jump" is
+  // the only applicable MovementPattern).
+  movementPatterns: ["jump"],
+  // Biomechanical Profile — "Primary Force Vector: Vertical." The
+  // documented "Secondary Force Vector: Minimal Anterior-Posterior
+  // Component When Performed Correctly" is explicitly conditional — too
+  // conditional to commit to a specific enum value, matching how
+  // BOX_JUMP's own conditional secondary vector was excluded.
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "plyometric_box" },
+          { kind: "environment", capability: "jumping_allowed" },
+          { kind: "environment", capability: "safe_landing_surface" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "moderate" },
+        ],
+      },
+    ],
+  },
+  // Skill Requirement: "High". Technical Complexity — Overall Technical
+  // Complexity: "High". One tier above BOX_JUMP's own clean "Moderate" →
+  // 3 mapping, following the same ordinal scale.
+  minimumTechnicalLevel: 4,
+  complexity: "high",
+  // Movement Context / Movement Pattern repeatedly state "Bilateral".
+  // Matches exercisePrescriptionRegistry.ts's own `laterality: "bilateral"`.
+  unilateral: false,
+  // Muscular Profile Primary Contributors (Gluteus Maximus, Quadriceps,
+  // Gastrocnemius, Soleus, Hamstrings) match BOX_JUMP's own primary
+  // contributors near-identically — same body-region set, following the
+  // same precedent of excluding secondary/stabilizer trunk and
+  // upper-body contributors (Spinal Erectors, Abdominal Wall, Anterior
+  // Deltoids, Latissimus Dorsi, Trapezius, Arm-Swing Musculature) that
+  // BOX_JUMP's own doc names too (as "Erector Spinae", "Rectus
+  // Abdominis", "Obliques", "Latissimus Dorsi and Shoulder Flexors During
+  // Arm Swing") without adding a body region for them.
+  bodyRegionsLoaded: ["hip", "thigh", "lower_leg"],
+  // "Contraindications and Restrictions — Avoid or restrict the exercise
+  // in the presence of: ...", quoted one line per source paragraph
+  // (unlike BOX_JUMP's own doc, which combines several joints/tendons
+  // onto a single line, this chapter separates each explicitly — so no
+  // combining is applied here). "Platform moves or becomes unstable" (a
+  // Technical Failure Criterion, not listed under this heading) and
+  // "Medical restriction against jumping or impact" are excluded — the
+  // former is an equipment/environment concern already covered by
+  // `requirements`, the latter is non-actionable here, handled generically
+  // by `AthleteRestriction`/`checkHardRestrictionProhibitsMovement` in
+  // `exerciseSelector.ts`, matching BOX_JUMP's identical exclusion of its
+  // own "Medical restrictions on jumping or impact" line. The separate
+  // "Use additional caution with:" list is excluded entirely, matching
+  // BOX_JUMP's identical exclusion of its own "Use caution with:" list.
+  contraindications: [
+    { description: "Acute ankle pain.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Acute knee pain.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Acute hip pain.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Achilles tendinopathy with reactive symptoms.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Patellar tendinopathy with reactive symptoms.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Recent lower-limb surgery.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Recent ankle sprain.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Poor balance.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Uncontrolled knee valgus.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Inability to land quietly and symmetrically.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Severe lower-body soreness.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Insufficient relative strength.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Major fatigue.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Fear of impact or stepping from the platform.", prohibitedPatterns: ["jump"], absolute: true },
+  ],
+  fatigueProfile: {
+    // This chapter's own "# Fatigue Profile" section uses different
+    // dimension names again than either BOX_JUMP's or the Ballistics
+    // chapters' (Local Fatigue / Neuromuscular Fatigue / Tendon Fatigue /
+    // Joint Stress Accumulation / Metabolic Fatigue / Technique
+    // Degradation Under Fatigue), mapped onto the same fixed
+    // ExerciseFatigueProfile shape.
+    types: ["neural", "muscular", "connective_tissue", "technical", "impact", "systemic"],
+    neural: 4, // "Neuromuscular Fatigue: High"
+    muscular: 2, // "Local Fatigue: Low to Moderate" — same documented phrase and rating BOX_JUMP used for its own "Local Muscular Fatigue: Low to Moderate"
+    metabolic: 1, // "Metabolic Fatigue: Low when correctly programmed" — same documented phrase and rating BOX_JUMP used
+    connectiveTissue: 4, // "Tendon Fatigue: Moderate to High" and "Joint Stress Accumulation: High"
+    // Unlike BOX_JUMP (which sourced its own `technical` rating from the
+    // separate "Technical Complexity" section instead of its Fatigue
+    // Profile's own "Technical Degradation Risk: High once fatigue
+    // accumulates"), this chapter's Fatigue Profile section is used
+    // directly here: "Technique Degradation Under Fatigue: Very High" —
+    // the single highest-rated dimension in the whole profile, which is
+    // also why "technical" is included in `types` here (BOX_JUMP left it
+    // out of its own `types` despite carrying a `technical` field value).
+    technical: 5,
+  },
+  // Same reasoning as BOX_JUMP: this chapter has a real "# Evidence
+  // Classification" section ("Evidence Level: Moderate to High" plus
+  // documented "Evidence Supports"/"Evidence Limitations"), but there is
+  // still no documented crosswalk between that narrative language and the
+  // engine's level_1/level_2/level_3 taxonomy. Left "unknown" rather than
+  // guessed, exactly as BOX_JUMP was.
+  evidenceLevel: "unknown",
+  // combatSportRelevance intentionally omitted: "Combat Transfer" states
+  // explicitly — "The transfer is general rather than technically
+  // specific." — and, like BOX_JUMP's own canonical chapter, no per-sport
+  // breakdown exists anywhere here (only an aggregate "Combat-Sport
+  // Transfer ★★★☆☆" line under "Relative Transfer Score"). The superseded
+  // top-level `50-exercises/24_DEPTH_JUMP` document does carry a
+  // per-sport "Transfer to Combat Sports" table, but it is not this
+  // exercise's canonical documentation (see BOX_JUMP's own identical
+  // situation with the superseded `50-exercises/23_BOX_JUMP`) and is not
+  // used here.
+  substitutionExerciseIds: ["box_jump", "countermovement_jump", "med_ball_scoop_toss"],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -1002,4 +1182,5 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   MED_BALL_SHOT_PUT_THROW,
   MED_BALL_REVERSE_THROW,
   BOX_JUMP,
+  DEPTH_JUMP,
 ];
