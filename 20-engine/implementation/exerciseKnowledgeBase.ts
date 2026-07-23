@@ -1170,6 +1170,185 @@ export const DEPTH_JUMP: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Countermovement Jump
+// Source: 50-exercises/21_COUNTERMOVEMENT_JUMP
+// -----------------------------------------------------------------------------
+
+/**
+ * Third Plyometrics-family entry, but unlike `BOX_JUMP`/`DEPTH_JUMP` this
+ * exercise has no `63_PLYOMETRICS/` chapter — its only canonical
+ * documentation is this shorter top-level fiche, and it reads very
+ * differently from its two siblings on nearly every axis that matters for
+ * `requirements`:
+ *
+ * - "Equipment Requirements — Required: None." No box, no implement.
+ *   `plyometric_box` is therefore never added here — this is a floor
+ *   exercise, not a box exercise, and treating it as "`box_jump` without
+ *   the box" would be exactly the un-earned equivalence this integration
+ *   step is required to avoid.
+ * - No landing-surface language anywhere in the fiche (checked: zero
+ *   occurrences of "surface", "floor", "space", "clearance" or "room" in
+ *   the entire document) — contrast `BOX_JUMP`/`DEPTH_JUMP`, both of which
+ *   have an explicit "Appropriate/Non-slip Landing Surface" requirement.
+ *   `safe_landing_surface`/`floor_safe` are therefore deliberately NOT
+ *   added. This matches `exercisePrescriptionRegistry.ts`'s own
+ *   independent conclusion for this exact exercise
+ *   (`requiredEquipmentCapabilities: []`, with an explicit comment
+ *   contrasting it against `broad_jump`'s documented "Stable non-slip
+ *   training surface").
+ * - No "Space Requirements" section at all (unlike `BOX_JUMP`/`DEPTH_JUMP`'s
+ *   own chapters) — consistent with "Movement Context: ... Standing..."
+ *   describing an in-place vertical jump with no horizontal travel, box
+ *   clearance or rebound-room concern to document. `sufficient_space` is
+ *   therefore deliberately NOT added: inventing a specific minimum tier
+ *   with no textual support would violate this project's scientific-
+ *   integrity principle exactly as much as inventing a physiological fact.
+ * - `requirements` is reduced, honestly, to the one real environmental gate
+ *   this fiche actually documents: permission to jump.
+ *
+ * `movement_intent: maximal_acceleration` is not a field on
+ * `ExerciseDefinition` at all — it is an `ExercisePrescriptionCapabilities`
+ * concept, already fixed independently by
+ * `exercisePrescriptionRegistry.ts`'s `countermovementJumpEntry`
+ * (`preferredIntensityTypes: ["movement_intent"]`, matching this fiche's
+ * own "Velocity Profile — Maximum Velocity, Maximum Intent... Movement
+ * velocity is the objective."). Nothing to add or contradict here; that
+ * decision is untouched by this file.
+ */
+export const COUNTERMOVEMENT_JUMP: ExerciseDefinition = {
+  id: "countermovement_jump",
+  name: "Countermovement Jump",
+  module: "power",
+  primaryAdaptation: "power",
+  // Capability Mapping — Primary: "Explosive Power" (→ explosive_strength,
+  // no separate "explosive_power" quality exists), "Rate of Force
+  // Development" (exact match, also confirmed by Biomechanical Profile's
+  // own "Rate of Force Development ★★★★★"), "Reactive Strength" (exact
+  // match). Secondary: "Movement Coordination" (→ coordination),
+  // "Acceleration" (exact match). "Force Production" and "Mechanical
+  // Efficiency" have no distinct enum counterpart beyond qualities already
+  // listed, so are not force-fitted into a new value. Unlike
+  // `BOX_JUMP`/`DEPTH_JUMP`, this fiche's Capability Mapping never
+  // mentions landing control/mechanics at all — "stability" is
+  // deliberately NOT added here.
+  physicalQualities: ["explosive_strength", "rate_of_force_development", "reactive_strength", "coordination", "acceleration"],
+  // Movement Pattern — Primary: "Jump". As with `BOX_JUMP`/`DEPTH_JUMP`, no
+  // enum value exists for the Secondary patterns (Triple Extension, Brace,
+  // Landing, Force Absorption) — "jump" is the only applicable value.
+  movementPatterns: ["jump"],
+  // Biomechanical Profile — "Primary Force Vector: Vertical." No secondary
+  // vector is documented at all here (unlike `BOX_JUMP`/`DEPTH_JUMP`'s own
+  // conditional secondary vectors), so there is nothing further to
+  // consider or exclude.
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [{ kind: "environment", capability: "jumping_allowed" }],
+      },
+    ],
+  },
+  // "Motor Complexity: Low" is the one field in this fiche that uses
+  // `ExerciseComplexity`'s own vocabulary directly (unlike "Skill
+  // Requirement: Beginner", a different Beginner/Intermediate/Advanced/
+  // Elite scale requiring translation) — used here directly, matching the
+  // established "low" → 1 mapping (`MED_BALL_CHEST_PASS`/`MED_BALL_SLAM`).
+  // Reinforced by "Skill Requirement: Beginner", "Learning Curve: Very
+  // Short" and "Suitable for virtually all athletes" — all converging on
+  // the simplest end of the scale, not the "Moderate"/"High" ratings that
+  // set `BOX_JUMP`/`DEPTH_JUMP` to 3/4.
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  // Movement Context: "Bilateral" (explicit). Matches
+  // exercisePrescriptionRegistry.ts's own `laterality: "bilateral"`.
+  // "Single-Leg" is listed only under Variations, not the base exercise.
+  unilateral: false,
+  // Muscular Profile Primary Contributors (Quadriceps, Gluteus Maximus,
+  // Calves) plus Secondary (Hamstrings, Hip Flexors) converge on the same
+  // hip/thigh/lower_leg set as `BOX_JUMP`/`DEPTH_JUMP` — a genuine
+  // independent match (same primary lower-body jump musculature), not a
+  // copy. Stabilizers (Core, Hip Stabilizers, Foot Intrinsic Muscles) are
+  // excluded, matching the same precedent of leaving out
+  // secondary/stabilizer contributors used for both siblings.
+  bodyRegionsLoaded: ["hip", "thigh", "lower_leg"],
+  // "# Contraindications" here is a short, plain four-item list with no
+  // "Avoid or modify"/"Avoid or restrict" framing and no separate "Use
+  // caution with:" list to exclude (unlike `BOX_JUMP`/`DEPTH_JUMP`'s own,
+  // much longer chapters) — quoted directly, one item per line.
+  contraindications: [
+    { description: "Acute knee injury.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Acute Achilles injury.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Acute ankle injury.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Pain during jumping.", prohibitedPatterns: ["jump"], absolute: true },
+  ],
+  fatigueProfile: {
+    // This fiche's own "# Fatigue Profile" names exactly two dimensions —
+    // "Neuromuscular Fatigue: Low" and "Mechanical Fatigue: Low" — plus
+    // "Metabolic Fatigue: Minimal" and "Overall Fatigue Cost: Very Low",
+    // capped off by its own explicit "Excellent stimulus-to-fatigue
+    // ratio." No tendon/joint fatigue field exists here at all (unlike
+    // `BOX_JUMP`'s "Tendon and Joint Exposure" / `DEPTH_JUMP`'s "Tendon
+    // Fatigue"/"Joint Stress Accumulation"), and Safety Profile's own
+    // "Overall Risk: Very Low" names no tendon/joint risk either — so
+    // `connectiveTissue` is rated low, not elevated by analogy to the
+    // other plyometric entries. No technical-degradation-under-fatigue
+    // field exists either; "Motor Complexity: Low"/"Learning Curve: Very
+    // Short" are the closest available signal. `types` therefore only
+    // tags the two dimensions this fiche actually names — no "impact" or
+    // "systemic" tag (contrast `BOX_JUMP`/`DEPTH_JUMP`, both documented
+    // with real landing-impact and systemic-load language this fiche
+    // simply does not have), and no "technical"/"connective_tissue" tag
+    // (mandatory field values still required below, but not flagged as a
+    // qualitatively notable fatigue category for this exercise).
+    types: ["neural", "muscular"],
+    neural: 2, // "Neuromuscular Fatigue: Low"
+    muscular: 2, // "Mechanical Fatigue: Low"
+    metabolic: 1, // "Metabolic Fatigue: Minimal"
+    connectiveTissue: 2, // no explicit tendon/joint fatigue field; "Overall Risk: Very Low" and the absence of any documented tendon/joint risk support a low, not elevated, rating
+    technical: 2, // no explicit technical-fatigue field; nearest signal is "Motor Complexity: Low" / "Learning Curve: Very Short"
+  },
+  // Same reasoning as `BOX_JUMP`/`DEPTH_JUMP`: a real "# Scientific
+  // Evidence" section exists ("Evidence Level ★★★★★" — "one of the most
+  // extensively validated assessments of lower-body power and
+  // neuromuscular readiness"), but there is still no documented crosswalk
+  // between narrative/star-rating evidence language and the engine's
+  // level_1/level_2/level_3 taxonomy. Left "unknown" rather than guessed.
+  evidenceLevel: "unknown",
+  // Unlike `BOX_JUMP`/`DEPTH_JUMP` (whose canonical `63_PLYOMETRICS`
+  // chapters carry no per-sport breakdown at all), this fiche IS its own
+  // sole canonical documentation and DOES carry a full "# Transfer to
+  // Combat Sports" table — so, unlike its two siblings, combatSportRelevance
+  // is populated here, directly from that table. Savate and Sambo are both
+  // rated in the source table but have no corresponding `CombatSport` enum
+  // member (see `types.ts` — only boxing, kickboxing, muay_thai, mma,
+  // wrestling, judo, brazilian_jiu_jitsu, krav_maga, other) and are
+  // therefore omitted rather than force-fit into "other".
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 5,
+    judo: 5,
+    brazilian_jiu_jitsu: 4,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // substitutionExerciseIds intentionally omitted: this fiche's own
+  // Regressions ("Submaximal Jump", "Squat Jump", "Low-Amplitude Jump")
+  // and Progressions ("Loaded Countermovement Jump", "Reactive Jump",
+  // "Repeated CMJ", "Contrast Training") name no exercise that currently
+  // has its own chapter/catalog id in this repository — inventing ids for
+  // them would repeat exactly the mistake this integration step is
+  // required to avoid (see `DEPTH_JUMP`'s identical exclusion of
+  // undocumented `pogo_jump`/`snap_down`/etc.). `BOX_JUMP`'s own entry
+  // already names `countermovement_jump` as one of its substitutes, but
+  // that relationship is not necessarily symmetric and is not repeated
+  // here without this fiche's own text supporting it.
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -1183,4 +1362,5 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   MED_BALL_REVERSE_THROW,
   BOX_JUMP,
   DEPTH_JUMP,
+  COUNTERMOVEMENT_JUMP,
 ];
