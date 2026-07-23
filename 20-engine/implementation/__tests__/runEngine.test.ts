@@ -475,7 +475,7 @@ describe("runEngine — default exercise catalog wiring", () => {
     expect(result.sessionResult.blockedModules).toEqual(["power"]);
   });
 
-  test("4. the default catalog contains all 7 integrated ballistic exercises plus box_jump, depth_jump, countermovement_jump, broad_jump, knee_jump and lateral_bound", () => {
+  test("4. the default catalog contains all 7 integrated ballistic exercises plus box_jump, depth_jump, countermovement_jump, broad_jump, knee_jump, lateral_bound and single_leg_hop", () => {
     const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
 
     expect(ids).toEqual([
@@ -492,6 +492,7 @@ describe("runEngine — default exercise catalog wiring", () => {
       "broad_jump",
       "knee_jump",
       "lateral_bound",
+      "single_leg_hop",
     ]);
   });
 
