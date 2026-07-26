@@ -6331,6 +6331,508 @@ export const CHEST_SUPPORTED_ROW: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Bench Press
+// Source: 50-exercises/07_BENCH_PRESS
+// -----------------------------------------------------------------------------
+
+/**
+ * First entry of the "Lot 3 — Poussées du haut du corps" batch, migrated
+ * alongside OVERHEAD_PRESS/DIP/LANDMINE_PRESS. `exercisePrescriptionRegistry.ts`
+ * has a corroborating `benchPressEntry` (`requiredEquipmentCapabilities:
+ * ["barbell", "bench", "rack", "plates"]`, `laterality: "bilateral"` —
+ * matching this entry's own equipment resolution exactly).
+ *
+ * Same documentation-format limitation as every entry migrated from this
+ * older `50-exercises/` layer so far: no space/floor-safety language
+ * anywhere in this fiche (checked directly) — neither `sufficient_space`
+ * nor `floor_safe` is added.
+ *
+ * "# Safety Profile — Spotter Recommended: Yes. Safety Arms Recommended:
+ * Yes." and "# Equipment Requirements — Optional: Safety Arms, Spotter,
+ * Bands, Chains." Both are explicit RECOMMENDATIONS, never Required — no
+ * `human_assistance: "partner"` clause is added for the spotter (the same
+ * recommended-vs-required distinction already established for BACK_SQUAT's
+ * own "Safety Arms Recommended: Yes" in Lot 1), and no safety-equipment
+ * atom is added for safety arms either.
+ */
+export const BENCH_PRESS: ExerciseDefinition = {
+  id: "bench_press",
+  name: "Bench Press",
+  module: "strength",
+  // "# Primary Classification: Strength" (explicit).
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Maximum Strength, Relative Strength,
+  // Upper-Body Force Production" → absolute_strength, relative_strength
+  // ("Upper-Body Force Production" is a generic, non-specific restatement
+  // already covered by the two strength values just listed and is not
+  // double-counted, matching this whole batch's established convention
+  // for this exact recurring phrase). "Secondary: Explosive Strength" →
+  // explosive_strength. "Core Stability" → trunk_strength. "Structural
+  // Robustness" → tissue_capacity (a close synonym of "Mechanical
+  // Robustness", mapped identically). "Movement Coordination" →
+  // coordination.
+  physicalQualities: ["absolute_strength", "relative_strength", "explosive_strength", "trunk_strength", "tissue_capacity", "coordination"],
+  // "# Movement Pattern — Primary: Horizontal Push." → horizontal_push
+  // (exact match). "Secondary: Brace, Shoulder Horizontal Adduction, Elbow
+  // Extension" → isometric (from Brace only); the other two are
+  // joint-action-level detail already implied by `horizontal_push`.
+  movementPatterns: ["horizontal_push", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Horizontal. Secondary
+  // Force Vector: Minimal Vertical." The explicit "Minimal" hedge excludes
+  // the secondary vector, matching the same resolution already applied to
+  // every "Minimal X" secondary vector throughout Lot 1.
+  forceVectors: ["horizontal"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "barbell" },
+          { kind: "equipment", equipment: "bench" },
+          { kind: "equipment", equipment: "rack" },
+          { kind: "equipment", equipment: "plates" },
+        ],
+      },
+    ],
+  },
+  // "# Skill Requirement: Beginner. Suitable after basic technical
+  // instruction." Corroborated by "# Neurological Profile — Motor
+  // Complexity: Low, Balance Requirement: Very Low".
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  // "Bilateral" (Movement Context, explicit).
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Pectoralis Major, Anterior
+  // Deltoid, Triceps Brachii" → chest (pectoralis major), shoulder
+  // (anterior deltoid), upper_arm (triceps brachii, an elbow extensor).
+  // Secondary Muscles (Serratus Anterior, Latissimus Dorsi) and
+  // Stabilizers are excluded, matching this catalog's established
+  // primary-muscles-only discipline.
+  bodyRegionsLoaded: ["chest", "shoulder", "upper_arm"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["horizontal_push", "isometric"], absolute: true },
+    { description: "Acute pectoral injury.", region: "chest", prohibitedPatterns: ["horizontal_push", "isometric"], absolute: true },
+    { description: "Pain during horizontal pressing.", prohibitedPatterns: ["horizontal_push", "isometric"], absolute: true },
+    { description: "Severe shoulder mobility restrictions.", region: "shoulder", prohibitedPatterns: ["horizontal_push", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: High. Mechanical
+    // Fatigue: Moderate. Metabolic Fatigue: Moderate." mapped via the
+    // Low=1/Moderate=2/Moderate-to-High=3/High=4/Very-High=5 word scale
+    // established across every Lot 1/Lot 2 entry from this same older
+    // documentary format. "Neuromuscular Fatigue" → neural. "Mechanical
+    // Fatigue" → muscular, also used as the shared source for
+    // `connectiveTissue` (no distinct "Connective-Tissue Fatigue" heading
+    // exists in this format).
+    types: ["neural"],
+    neural: 4,
+    muscular: 2,
+    connectiveTissue: 2, // inferred from "Mechanical Fatigue: Moderate"
+    metabolic: 2,
+    technical: 1, // fallback from "Skill Requirement: Beginner" (minimumTechnicalLevel 1)
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. The Bench Press is
+  // among the most extensively researched resistance exercises..." —
+  // mapped to the CAS Evidence Framework's "Level 1 — Scientific
+  // consensus" (20-engine/02_EXERCISE_KNOWLEDGE_BASE.md), matching every
+  // Lot 1/Lot 2 entry's own identical resolution of this exact
+  // star-rating/prose pattern.
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate is
+  // named in this table but has no `CombatSport` enum counterpart and is
+  // omitted rather than force-mapped.
+  combatSportRelevance: {
+    boxing: 4,
+    kickboxing: 3,
+    muay_thai: 3,
+    wrestling: 4,
+    brazilian_jiu_jitsu: 3,
+    judo: 3,
+    mma: 4,
+    krav_maga: 4,
+  },
+  // "# Regressions" names "Push-Up", "Incline Push-Up", "Machine Chest
+  // Press" and "Dumbbell Bench Press" — none have a dedicated
+  // chapter/catalog id anywhere in this repository (confirmed by direct
+  // search). `substitutionExerciseIds` is genuinely empty for this entry.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Overhead Press
+// Source: 50-exercises/08_OVERHEAD_PRESS
+// -----------------------------------------------------------------------------
+
+/**
+ * Second entry of this batch. `exercisePrescriptionRegistry.ts` has a
+ * corroborating `overheadPressEntry` (`requiredEquipmentCapabilities:
+ * ["barbell", "plates", "rack"]` — matching this entry's own equipment
+ * resolution exactly; a genuine confirmation that, unlike BARBELL_ROW in
+ * Lot 2, `rack` really is required here — the bar must be unracked from
+ * shoulder height before pressing overhead, unlike a row lifted directly
+ * from the floor).
+ *
+ * Same documentation-format limitation as every entry in this batch: no
+ * space/floor-safety language anywhere in this fiche (checked directly).
+ *
+ * Trunk bracing and bar-path quality are genuine biomechanical
+ * characteristics of this movement, represented entirely through
+ * `movementPatterns` (`isometric`) and `physicalQualities`
+ * (`trunk_strength`) — never as an equipment or environment requirement,
+ * matching the user's own explicit instruction.
+ */
+export const OVERHEAD_PRESS: ExerciseDefinition = {
+  id: "overhead_press",
+  name: "Overhead Press",
+  module: "strength",
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Maximum Strength, Relative Strength,
+  // Upper-Body Force Production" → absolute_strength, relative_strength
+  // (folded, matching BENCH_PRESS's own identical treatment of this
+  // recurring phrase). "Secondary: Core Stability" → trunk_strength.
+  // "Whole-Body Coordination" → coordination. "Postural Control" →
+  // stability. "Structural Robustness" → tissue_capacity.
+  physicalQualities: ["absolute_strength", "relative_strength", "trunk_strength", "coordination", "stability", "tissue_capacity"],
+  // "# Movement Pattern — Primary: Vertical Push." → vertical_push.
+  // "Secondary: Brace, Shoulder Flexion, Elbow Extension, Whole-Body
+  // Stabilization" → isometric (from Brace and Whole-Body Stabilization,
+  // both describing the same bracing demand); the other two are
+  // joint-action-level detail already implied by `vertical_push`.
+  movementPatterns: ["vertical_push", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Vertical." No
+  // "Secondary Force Vector" heading exists in this fiche.
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "barbell" },
+          { kind: "equipment", equipment: "plates" },
+          { kind: "equipment", equipment: "rack" },
+        ],
+      },
+    ],
+  },
+  // "# Skill Requirement: Intermediate. Requires adequate shoulder
+  // mobility and trunk stability."
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Anterior Deltoid, Medial
+  // Deltoid, Triceps Brachii" → shoulder (anterior and medial deltoid),
+  // upper_arm (triceps brachii).
+  bodyRegionsLoaded: ["shoulder", "upper_arm"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["vertical_push", "isometric"], absolute: true },
+    { description: "Acute cervical injury.", region: "neck", prohibitedPatterns: ["vertical_push", "isometric"], absolute: true },
+    { description: "Pain during overhead pressing.", prohibitedPatterns: ["vertical_push", "isometric"], absolute: true },
+    { description: "Limited shoulder mobility.", region: "shoulder", prohibitedPatterns: ["vertical_push", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: Moderate. Metabolic Fatigue: Moderate." A flat "Moderate"
+    // across every dimension.
+    types: [],
+    neural: 2,
+    muscular: 2,
+    connectiveTissue: 2, // inferred from "Mechanical Fatigue: Moderate"
+    metabolic: 2,
+    technical: 3, // fallback from "Skill Requirement: Intermediate" (minimumTechnicalLevel 3)
+  },
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star.
+  combatSportRelevance: {
+    boxing: 4,
+    kickboxing: 4,
+    muay_thai: 4,
+    wrestling: 4,
+    brazilian_jiu_jitsu: 3,
+    judo: 4,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" names "Landmine Press" → landmine_press (integrated in
+  // this same batch, real catalog id). "Seated Dumbbell Press",
+  // "Half-Kneeling Press" and "Resistance Band Press" name no exercise
+  // with its own chapter/catalog id.
+  substitutionExerciseIds: ["landmine_press"],
+};
+
+// -----------------------------------------------------------------------------
+// Dip
+// Source: 50-exercises/14_DIP
+// -----------------------------------------------------------------------------
+
+/**
+ * Third entry of this batch. No `exercisePrescriptionRegistry.ts` entry
+ * exists for `dip` (confirmed by direct search) — a known limitation,
+ * documented here without modifying that registry.
+ *
+ * Same documentation-format limitation as every entry in this batch: no
+ * space/floor-safety language anywhere in this fiche (checked directly).
+ *
+ * "# Equipment Requirements — Required: Parallel Bars." `dip_bars` is an
+ * existing, exact `EquipmentType` value for precisely this apparatus — the
+ * FIRST use of this type anywhere in `EXERCISE_KNOWLEDGE_BASE` (confirmed
+ * by direct search). "Optional — Dip Belt, Weighted Vest, Gymnastic Rings,
+ * Resistance Bands" are all documented as OPTIONAL, never Required —
+ * unlike WEIGHTED_PULL_UP's own fiche (Lot 2), which required BOTH a "Dip
+ * Belt" AND "Weight Plates" as load-bearing implements, this fiche's own
+ * "# Loading Profile — Typical Intensity: Bodyweight or Bodyweight +
+ * External Load" explicitly documents the unloaded bodyweight execution
+ * as a fully valid, default form — `requirements` therefore gates on
+ * `dip_bars` alone, with no `other`/loading-implement atom added.
+ */
+export const DIP: ExerciseDefinition = {
+  id: "dip",
+  name: "Dip",
+  module: "strength",
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Relative Strength, Upper-Body
+  // Strength" → relative_strength, absolute_strength (folded, matching
+  // this batch's established convention). "Secondary: Explosive Strength"
+  // → explosive_strength. "Core Stability" → trunk_strength. "Shoulder
+  // Stability" → stability. "Movement Coordination" → coordination.
+  // "Mechanical Robustness" → tissue_capacity.
+  physicalQualities: ["relative_strength", "absolute_strength", "explosive_strength", "trunk_strength", "stability", "coordination", "tissue_capacity"],
+  // "# Movement Pattern — Primary: Vertical Push." → vertical_push.
+  // "Secondary: Shoulder Extension, Elbow Extension, Brace, Scapular
+  // Depression" → isometric (from Brace only); the other three are
+  // joint-action-level detail already implied by `vertical_push`.
+  movementPatterns: ["vertical_push", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Vertical." No
+  // "Secondary Force Vector" heading exists in this fiche.
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [{ kind: "equipment", equipment: "dip_bars" }],
+      },
+    ],
+  },
+  // "# Skill Requirement: Intermediate. The athlete should demonstrate
+  // adequate shoulder mobility and body control before adding external
+  // load."
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // "Bilateral" (Movement Context, explicit).
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Pectoralis Major, Triceps
+  // Brachii, Anterior Deltoid" → chest (pectoralis major), upper_arm
+  // (triceps brachii), shoulder (anterior deltoid).
+  bodyRegionsLoaded: ["chest", "upper_arm", "shoulder"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["vertical_push", "isometric"], absolute: true },
+    { description: "Acute elbow injury.", region: "elbow", prohibitedPatterns: ["vertical_push", "isometric"], absolute: true },
+    { description: "Pain during dips.", prohibitedPatterns: ["vertical_push", "isometric"], absolute: true },
+    { description: "Severe shoulder instability.", region: "shoulder", prohibitedPatterns: ["vertical_push", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: Moderate. Metabolic Fatigue: Moderate." A flat "Moderate"
+    // across every dimension.
+    types: [],
+    neural: 2,
+    muscular: 2,
+    connectiveTissue: 2, // inferred from "Mechanical Fatigue: Moderate"
+    metabolic: 2,
+    technical: 3, // fallback from "Skill Requirement: Intermediate"
+  },
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star — identical
+  // to OVERHEAD_PRESS's own table.
+  combatSportRelevance: {
+    boxing: 4,
+    kickboxing: 4,
+    muay_thai: 4,
+    wrestling: 4,
+    brazilian_jiu_jitsu: 3,
+    judo: 4,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" names "Bench Dip", "Band-Assisted Dip", "Machine Dip"
+  // and "Push-Up" — none have a dedicated chapter/catalog id anywhere in
+  // this repository (confirmed by direct search). `substitutionExerciseIds`
+  // is genuinely empty for this entry.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Landmine Press
+// Source: 50-exercises/26_LANDMINE_PRESS
+// -----------------------------------------------------------------------------
+
+/**
+ * Fourth and final entry of this batch. No `exercisePrescriptionRegistry.ts`
+ * entry exists for `landmine_press` (confirmed by direct search) — a known
+ * limitation, documented here without modifying that registry.
+ *
+ * Same documentation-format limitation as every entry in this batch: no
+ * space/floor-safety language anywhere in this fiche (checked directly).
+ *
+ * KNOWN MODEL LIMITATION, flagged explicitly rather than silently
+ * approximated: "# Equipment Requirements — Required: Barbell, Landmine
+ * Attachment." `barbell` is an exact match. "Landmine Attachment" — the
+ * pivoting sleeve that anchors one end of the barbell to the floor — has
+ * no dedicated `EquipmentType` value. The existing `rigid_anchor_support`
+ * value is deliberately NOT reused here: that type was created
+ * specifically for `DRAGON_FLAG`'s own "Secure overhead or behind-head
+ * HAND anchor" (something the athlete grips directly with the hands — see
+ * that entry's own sourcing precedent, itself inherited from
+ * `TOWEL_PULL_UP`'s original scoping decision), a materially different
+ * physical function from a landmine sleeve that receives and pivots a
+ * BARBELL END, never gripped by the hands at all. Reusing it here would
+ * blur exactly the distinction that type was originally created to
+ * preserve. `"other"` is used instead as the flagged placeholder for the
+ * landmine attachment specifically — the same honest-escape-hatch pattern
+ * already established for AB_WHEEL/WEIGHTED_PULL_UP/CHEST_SUPPORTED_ROW.
+ * "# Optional — Weight Plates, Landmine Handle" are genuinely optional
+ * (the bar's own weight through the angled lever is sufficient for a
+ * valid execution) — no `plates` atom is added to `requirements`.
+ *
+ * DOCUMENTATION INCONSISTENCY, resolved explicitly: this fiche states its
+ * Skill Requirement TWICE with two different answers — "# Neurological
+ * Profile — Skill Requirement: Beginner to Intermediate" vs. the fiche's
+ * own dedicated, top-level "# Skill Requirement — Beginner. Accessible to
+ * most athletes." heading. Every other exercise in this entire migration
+ * project (across every batch so far) has sourced `minimumTechnicalLevel`/
+ * `complexity` from the dedicated top-level "# Skill Requirement" heading,
+ * never from the "Neurological Profile" sub-listing — the same sourcing
+ * discipline is applied here for consistency, resolving to the plain,
+ * unhedged "Beginner" (minimumTechnicalLevel 1 / "low"), not the hedged
+ * "Beginner to Intermediate" the Neurological Profile sub-field states.
+ *
+ * Central business question for this entry, explicitly flagged before
+ * writing began: "# Movement Pattern — Primary: Angled Push." This fiche
+ * never uses the literal words "Horizontal Push" or "Vertical Push"
+ * anywhere (checked directly) — it coins its own distinct term, directly
+ * corroborated by "# Biomechanical Profile — Primary Force Vector:
+ * Diagonal" (the `diagonal` `ForceVector` value exists precisely for this
+ * kind of case). No `MovementPattern` value represents a diagonal/angled
+ * push specifically — forcing this into `vertical_push` or
+ * `horizontal_push` would misrepresent a fiche that deliberately avoids
+ * both terms. The dedicated `"mixed"` value is used instead, the same
+ * escape hatch already used for DEAD_BUG's own blended/undefined pattern
+ * in 62_CORE.
+ */
+export const LANDMINE_PRESS: ExerciseDefinition = {
+  id: "landmine_press",
+  name: "Landmine Press",
+  module: "strength",
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Upper-Body Strength, Shoulder
+  // Stability, Core Stability" → absolute_strength (folded), stability
+  // (from Shoulder Stability), trunk_strength (from Core Stability).
+  // "Secondary: Explosive Power" → explosive_strength (the closest
+  // existing quality for this exact phrase). "Rotational Control" has no
+  // distinct PhysicalQuality counterpart beyond `trunk_strength` already
+  // listed and the dedicated `anti_rotation` MovementPattern value below
+  // — not double-counted. "Movement Coordination" → coordination.
+  // "Mechanical Robustness" → tissue_capacity.
+  physicalQualities: ["absolute_strength", "stability", "trunk_strength", "explosive_strength", "coordination", "tissue_capacity"],
+  // "# Movement Pattern — Primary: Angled Push" → mixed (see block comment
+  // above). "Secondary: Brace, Shoulder Flexion, Scapular Upward Rotation,
+  // Anti-Rotation" → isometric (from Brace), anti_rotation (from
+  // "Anti-Rotation", an exact enum match — a genuine demand present even
+  // in this exercise's own bilateral base execution, since the barbell
+  // pivots asymmetrically to one side of the body regardless of a
+  // one-handed or two-handed grip).
+  movementPatterns: ["mixed", "isometric", "anti_rotation"],
+  // "# Biomechanical Profile — Primary Force Vector: Diagonal. Secondary
+  // Force Vector: Vertical." Neither vector carries a "Minimal" hedge —
+  // both are kept.
+  forceVectors: ["diagonal", "vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "barbell" },
+          { kind: "equipment", equipment: "other" }, // flagged placeholder for "Landmine Attachment" — see block comment above
+        ],
+      },
+    ],
+  },
+  // "# Skill Requirement: Beginner. Accessible to most athletes." — see
+  // block comment above for why this dedicated heading governs over the
+  // fiche's own internally inconsistent "Neurological Profile" sub-field.
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  // "# Movement Context — Standing, Whole Body, Unilateral or Bilateral" —
+  // genuinely hedged in this fiche's own template. Resolved via
+  // "# Progressions — Single-Arm Landmine Press" (single-arm execution is
+  // named as a PROGRESSION, i.e. the harder variant), the same
+  // progression-vs-regression resolution logic already used for
+  // PINCH_CARRY's own identical "bilateral execution is listed under
+  // Regressions (easier) while unilateral execution is listed under
+  // Progressions (harder)" pattern — the two-handed/bilateral execution is
+  // therefore the base/default form.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Anterior Deltoid, Upper
+  // Pectoralis, Triceps" → shoulder (anterior deltoid), chest (upper
+  // pectoralis), upper_arm (triceps).
+  bodyRegionsLoaded: ["shoulder", "chest", "upper_arm"],
+  // "# Contraindications", quoted one item per source line — the shortest
+  // contraindication list in this batch (3 items), matching this fiche's
+  // own "Overall Risk: Very Low" Safety Profile rating, the lowest risk
+  // rating documented anywhere in this batch.
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["mixed", "isometric", "anti_rotation"], absolute: true },
+    { description: "Acute elbow injury.", region: "elbow", prohibitedPatterns: ["mixed", "isometric", "anti_rotation"], absolute: true },
+    { description: "Pain during pressing.", prohibitedPatterns: ["mixed", "isometric", "anti_rotation"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: Low. Metabolic Fatigue: Low. Overall Fatigue Cost: Low.
+    // Excellent stimulus-to-fatigue ratio." The lowest overall fatigue
+    // rating documented anywhere in this batch, directly corroborated by
+    // the explicit prose.
+    types: [],
+    neural: 2,
+    muscular: 1,
+    connectiveTissue: 1, // inferred from "Mechanical Fatigue: Low"
+    metabolic: 1,
+    technical: 1, // fallback from "Skill Requirement: Beginner"
+  },
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate is
+  // named in this table but has no `CombatSport` enum counterpart and is
+  // omitted rather than force-mapped.
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 4,
+    brazilian_jiu_jitsu: 4,
+    judo: 4,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" (Half-Kneeling Landmine Press, Tall-Kneeling Landmine
+  // Press, Resistance Band Press) name no exercise with its own
+  // chapter/catalog id anywhere in this fiche (checked directly). Despite
+  // OVERHEAD_PRESS's own Regressions naming "Landmine Press" as its own
+  // substitute, this fiche never names "Overhead Press" anywhere in its
+  // own Progressions/Regressions/Variations sections (checked directly) —
+  // the same faithfully-preserved one-directional asymmetry already
+  // documented elsewhere in this catalog (e.g. FRONT_SQUAT/BACK_SQUAT in
+  // Lot 1, CHEST_SUPPORTED_ROW/BARBELL_ROW in Lot 2), not a gap to "fix"
+  // by inventing a reciprocal reference. `substitutionExerciseIds` is
+  // genuinely empty for this entry.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -7712,4 +8214,8 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   CHIN_UP,
   BARBELL_ROW,
   CHEST_SUPPORTED_ROW,
+  BENCH_PRESS,
+  OVERHEAD_PRESS,
+  DIP,
+  LANDMINE_PRESS,
 ];

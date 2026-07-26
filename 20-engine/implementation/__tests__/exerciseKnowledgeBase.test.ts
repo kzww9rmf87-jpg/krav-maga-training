@@ -22,6 +22,7 @@ import {
   AB_WHEEL,
   BACK_SQUAT,
   BARBELL_ROW,
+  BENCH_PRESS,
   BOX_JUMP,
   BROAD_JUMP,
   BULGARIAN_SPLIT_SQUAT,
@@ -30,6 +31,7 @@ import {
   COUNTERMOVEMENT_JUMP,
   DEAD_BUG,
   DEPTH_JUMP,
+  DIP,
   DRAGON_FLAG,
   EXERCISE_KNOWLEDGE_BASE,
   FARMER_CARRY,
@@ -42,6 +44,7 @@ import {
   HOLLOW_BODY_HOLD,
   JUMP_SHRUG,
   KNEE_JUMP,
+  LANDMINE_PRESS,
   LATERAL_BOUND,
   MED_BALL_CHEST_PASS,
   MED_BALL_OVERHEAD_THROW,
@@ -51,6 +54,7 @@ import {
   MED_BALL_SHOT_PUT_THROW,
   MED_BALL_SLAM,
   OVERHEAD_CARRY,
+  OVERHEAD_PRESS,
   PALLOF_PRESS,
   PINCH_CARRY,
   PLATE_PINCH,
@@ -7885,5 +7889,532 @@ describe("Lot 2 — Tirages du haut du corps — Exercise Requirements Model bat
       }),
     });
     expect(checkExerciseEligibility(HIP_THRUST, hipThrustInput).eligible).toBe(true);
+  });
+});
+
+
+describe("Lot 3 — Poussées du haut du corps — Exercise Requirements Model batch integration", () => {
+  const LOT3_EXERCISES = [
+    { exercise: BENCH_PRESS, id: "bench_press" },
+    { exercise: OVERHEAD_PRESS, id: "overhead_press" },
+    { exercise: DIP, id: "dip" },
+    { exercise: LANDMINE_PRESS, id: "landmine_press" },
+  ] as const;
+
+  test.each(LOT3_EXERCISES)("$id — 1. exists in the catalog with the expected id", ({ exercise, id }) => {
+    expect(EXERCISE_KNOWLEDGE_BASE).toContain(exercise);
+    expect(exercise.id).toBe(id);
+  });
+
+  test("2. all four ids are unique within the catalog, and no prior id (e.g. weighted_pull_up) is duplicated", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const { id } of LOT3_EXERCISES) {
+      expect(ids.filter((existingId) => existingId === id)).toHaveLength(1);
+    }
+    expect(ids.filter((existingId) => existingId === "weighted_pull_up")).toEqual(["weighted_pull_up"]);
+  });
+
+  test.each(LOT3_EXERCISES)(
+    "$id — 3. respects the coexistence invariant: requiredEquipment is empty, optionalEquipment is absent",
+    ({ exercise }) => {
+      expect(exercise.requiredEquipment).toEqual([]);
+      expect(exercise.optionalEquipment).toBeUndefined();
+      expect(validateRequirementsCoexistenceInvariant(exercise)).toBeNull();
+      expect(validateExerciseRequirementsStructure(exercise.requirements!)).toEqual([]);
+    },
+  );
+
+  test("4. the default catalog used by runEngine(input) now also contains all four Lot 3 ids", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    for (const { id } of LOT3_EXERCISES) {
+      expect(ids).toContain(id);
+    }
+  });
+
+  test.each(LOT3_EXERCISES)("$id — 5. never mutates the exercise or the input it is given during evaluation", ({ exercise }) => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [
+          { type: "barbell" },
+          { type: "bench" },
+          { type: "rack" },
+          { type: "plates" },
+          { type: "dip_bars" },
+          { type: "other" },
+        ],
+        availableSpace: "large",
+      }),
+    });
+    const exerciseSnapshot = structuredClone(exercise);
+    const inputSnapshot = structuredClone(input);
+
+    checkExerciseEligibility(exercise, input);
+
+    expect(exercise).toEqual(exerciseSnapshot);
+    expect(input).toEqual(inputSnapshot);
+  });
+
+  describe("BENCH_PRESS", () => {
+    test("6. eligible with a barbell, bench, rack and plates", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "barbell" }, { type: "bench" }, { type: "rack" }, { type: "plates" }],
+        }),
+      });
+
+      const result = checkExerciseEligibility(BENCH_PRESS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("7. ineligible without a barbell", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "bench" }, { type: "rack" }, { type: "plates" }] }),
+      });
+
+      const result = checkExerciseEligibility(BENCH_PRESS, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("8. ineligible without a bench", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "barbell" }, { type: "rack" }, { type: "plates" }] }),
+      });
+
+      const result = checkExerciseEligibility(BENCH_PRESS, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("9. ineligible without a rack", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "barbell" }, { type: "bench" }, { type: "plates" }] }),
+      });
+
+      const result = checkExerciseEligibility(BENCH_PRESS, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("10. ineligible without weight plates", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "barbell" }, { type: "bench" }, { type: "rack" }] }),
+      });
+
+      const result = checkExerciseEligibility(BENCH_PRESS, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("11. no dependency on space, floor safety, jumping, throwing, a wall, or a partner — a spotter is documented only as a recommendation, never required", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "barbell" }, { type: "bench" }, { type: "rack" }, { type: "plates" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(BENCH_PRESS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("12. biomechanical fields match the canonical documentation", () => {
+      expect(BENCH_PRESS.physicalQualities).toEqual([
+        "absolute_strength",
+        "relative_strength",
+        "explosive_strength",
+        "trunk_strength",
+        "tissue_capacity",
+        "coordination",
+      ]);
+      expect(BENCH_PRESS.movementPatterns).toEqual(["horizontal_push", "isometric"]);
+      expect(BENCH_PRESS.forceVectors).toEqual(["horizontal"]);
+      expect(BENCH_PRESS.unilateral).toBe(false);
+      expect(BENCH_PRESS.bodyRegionsLoaded).toEqual(["chest", "shoulder", "upper_arm"]);
+      expect(BENCH_PRESS.complexity).toBe("low");
+      expect(BENCH_PRESS.minimumTechnicalLevel).toBe(1);
+      expect(BENCH_PRESS.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("OVERHEAD_PRESS", () => {
+    test("13. eligible with a barbell, plates and rack", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "barbell" }, { type: "plates" }, { type: "rack" }],
+        }),
+      });
+
+      const result = checkExerciseEligibility(OVERHEAD_PRESS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("14. ineligible without a barbell", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "plates" }, { type: "rack" }] }),
+      });
+
+      const result = checkExerciseEligibility(OVERHEAD_PRESS, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("15. ineligible without weight plates", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "barbell" }, { type: "rack" }] }),
+      });
+
+      const result = checkExerciseEligibility(OVERHEAD_PRESS, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("16. ineligible without a rack — unlike BARBELL_ROW, the rack is genuinely required here", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "barbell" }, { type: "plates" }] }),
+      });
+
+      const result = checkExerciseEligibility(OVERHEAD_PRESS, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("17. no dependency on space, floor safety, jumping, throwing, a wall or a partner", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "barbell" }, { type: "plates" }, { type: "rack" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(OVERHEAD_PRESS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("18. biomechanical fields match the canonical documentation", () => {
+      expect(OVERHEAD_PRESS.physicalQualities).toEqual([
+        "absolute_strength",
+        "relative_strength",
+        "trunk_strength",
+        "coordination",
+        "stability",
+        "tissue_capacity",
+      ]);
+      expect(OVERHEAD_PRESS.movementPatterns).toEqual(["vertical_push", "isometric"]);
+      expect(OVERHEAD_PRESS.forceVectors).toEqual(["vertical"]);
+      expect(OVERHEAD_PRESS.unilateral).toBe(false);
+      expect(OVERHEAD_PRESS.bodyRegionsLoaded).toEqual(["shoulder", "upper_arm"]);
+      expect(OVERHEAD_PRESS.complexity).toBe("moderate");
+      expect(OVERHEAD_PRESS.minimumTechnicalLevel).toBe(3);
+      expect(OVERHEAD_PRESS.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("DIP", () => {
+    test("19. eligible with dip bars alone", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "dip_bars" }] }),
+      });
+
+      const result = checkExerciseEligibility(DIP, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("20. ineligible without dip bars", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(DIP, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("21. no dependency on space, floor safety, jumping, throwing, a wall or a partner", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "dip_bars" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(DIP, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("22. biomechanical fields match the canonical documentation", () => {
+      expect(DIP.physicalQualities).toEqual([
+        "relative_strength",
+        "absolute_strength",
+        "explosive_strength",
+        "trunk_strength",
+        "stability",
+        "coordination",
+        "tissue_capacity",
+      ]);
+      expect(DIP.movementPatterns).toEqual(["vertical_push", "isometric"]);
+      expect(DIP.forceVectors).toEqual(["vertical"]);
+      expect(DIP.unilateral).toBe(false);
+      expect(DIP.bodyRegionsLoaded).toEqual(["chest", "upper_arm", "shoulder"]);
+      expect(DIP.complexity).toBe("moderate");
+      expect(DIP.minimumTechnicalLevel).toBe(3);
+      expect(DIP.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("LANDMINE_PRESS", () => {
+    test("23. eligible with a barbell and the 'other' landmine-attachment placeholder", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "barbell" }, { type: "other" }] }),
+      });
+
+      const result = checkExerciseEligibility(LANDMINE_PRESS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("24. ineligible without a barbell", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "other" }] }),
+      });
+
+      const result = checkExerciseEligibility(LANDMINE_PRESS, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("25. ineligible without the landmine-attachment placeholder", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "barbell" }] }),
+      });
+
+      const result = checkExerciseEligibility(LANDMINE_PRESS, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("26. no dependency on space, floor safety, jumping, throwing, a wall or a partner", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "barbell" }, { type: "other" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(LANDMINE_PRESS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("27. biomechanical fields match the canonical documentation", () => {
+      expect(LANDMINE_PRESS.physicalQualities).toEqual([
+        "absolute_strength",
+        "stability",
+        "trunk_strength",
+        "explosive_strength",
+        "coordination",
+        "tissue_capacity",
+      ]);
+      expect(LANDMINE_PRESS.movementPatterns).toEqual(["mixed", "isometric", "anti_rotation"]);
+      expect(LANDMINE_PRESS.forceVectors).toEqual(["diagonal", "vertical"]);
+      expect(LANDMINE_PRESS.unilateral).toBe(false);
+      expect(LANDMINE_PRESS.bodyRegionsLoaded).toEqual(["shoulder", "chest", "upper_arm"]);
+      expect(LANDMINE_PRESS.complexity).toBe("low");
+      expect(LANDMINE_PRESS.minimumTechnicalLevel).toBe(1);
+      expect(LANDMINE_PRESS.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("business distinctions", () => {
+    test("28. BENCH_PRESS vs. OVERHEAD_PRESS: distinct force vector, distinct equipment, distinct technical level", () => {
+      expect(BENCH_PRESS.forceVectors).toEqual(["horizontal"]);
+      expect(OVERHEAD_PRESS.forceVectors).toEqual(["vertical"]);
+      expect(BENCH_PRESS.movementPatterns).toContain("horizontal_push");
+      expect(OVERHEAD_PRESS.movementPatterns).toContain("vertical_push");
+
+      // BENCH_PRESS requires a bench (never required for OVERHEAD_PRESS); OVERHEAD_PRESS's own
+      // requirement set is a strict subset of BENCH_PRESS's (barbell, plates, rack) minus bench.
+      const benchPressEquipment = BENCH_PRESS.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      const overheadPressEquipment = OVERHEAD_PRESS.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(benchPressEquipment).toContain("bench");
+      expect(overheadPressEquipment).not.toContain("bench");
+
+      // BENCH_PRESS is documented as a plain "Beginner" skill exercise; OVERHEAD_PRESS as
+      // "Intermediate" — the whole-body standing coordination demand raises its technical floor.
+      expect(BENCH_PRESS.minimumTechnicalLevel).toBeLessThan(OVERHEAD_PRESS.minimumTechnicalLevel);
+    });
+
+    test("29. DIP vs. BENCH_PRESS: bodyweight vs. barbell-loaded pressing, distinct equipment and technical level", () => {
+      const dipEquipment = DIP.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      const benchPressEquipment = BENCH_PRESS.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(dipEquipment).toEqual(["dip_bars"]);
+      expect(benchPressEquipment).toEqual(expect.arrayContaining(["barbell", "bench", "rack", "plates"]));
+
+      // Both are vertical/horizontal-push-family exercises but on opposite force vectors, and DIP's
+      // own bodyweight-first execution carries a genuinely higher technical floor than BENCH_PRESS's
+      // plain "Beginner" rating (the athlete must stabilize the entire body, not just the bar path).
+      expect(DIP.movementPatterns).toContain("vertical_push");
+      expect(BENCH_PRESS.movementPatterns).toContain("horizontal_push");
+      expect(DIP.minimumTechnicalLevel).toBeGreaterThan(BENCH_PRESS.minimumTechnicalLevel);
+    });
+
+    test("30. LANDMINE_PRESS vs. OVERHEAD_PRESS: the only entry in this batch with a mixed/diagonal pattern instead of a clean vertical push", () => {
+      expect(LANDMINE_PRESS.movementPatterns).toContain("mixed");
+      expect(LANDMINE_PRESS.movementPatterns).not.toContain("vertical_push");
+      expect(OVERHEAD_PRESS.movementPatterns).toContain("vertical_push");
+      expect(OVERHEAD_PRESS.movementPatterns).not.toContain("mixed");
+
+      expect(LANDMINE_PRESS.forceVectors).toEqual(["diagonal", "vertical"]);
+      expect(OVERHEAD_PRESS.forceVectors).toEqual(["vertical"]);
+
+      // LANDMINE_PRESS never requires a rack (the barbell pivots at floor level via the landmine
+      // attachment); OVERHEAD_PRESS genuinely requires one.
+      const landmineEquipment = LANDMINE_PRESS.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(landmineEquipment).not.toContain("rack");
+      const overheadPressEquipment = OVERHEAD_PRESS.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(overheadPressEquipment).toContain("rack");
+
+      // LANDMINE_PRESS's own "excellent stimulus-to-fatigue ratio" is directly reflected in a
+      // markedly lower fatigue profile than OVERHEAD_PRESS across every dimension.
+      expect(LANDMINE_PRESS.fatigueProfile.muscular).toBeLessThanOrEqual(OVERHEAD_PRESS.fatigueProfile.muscular);
+      expect(LANDMINE_PRESS.fatigueProfile.metabolic).toBeLessThanOrEqual(OVERHEAD_PRESS.fatigueProfile.metabolic);
+    });
+
+    test("31. horizontal_push vs. vertical_push: BENCH_PRESS is the only horizontal push in this batch", () => {
+      expect(BENCH_PRESS.movementPatterns).toContain("horizontal_push");
+      expect(BENCH_PRESS.forceVectors).toEqual(["horizontal"]);
+
+      for (const verticalPusher of [OVERHEAD_PRESS, DIP]) {
+        expect(verticalPusher.movementPatterns).toContain("vertical_push");
+        expect(verticalPusher.movementPatterns).not.toContain("horizontal_push");
+        expect(verticalPusher.forceVectors).toEqual(["vertical"]);
+      }
+
+      // LANDMINE_PRESS documents neither term literally — its own "Angled Push" pattern resolves to
+      // `mixed`, distinct from both clean push families.
+      expect(LANDMINE_PRESS.movementPatterns).not.toContain("horizontal_push");
+      expect(LANDMINE_PRESS.movementPatterns).not.toContain("vertical_push");
+    });
+
+    test("32. joint-constraint profiles of the four pressing exercises: shoulder is universal, but the specific secondary regions differ", () => {
+      // Every entry in this batch documents at least one shoulder-region contraindication.
+      for (const exercise of [BENCH_PRESS, OVERHEAD_PRESS, DIP, LANDMINE_PRESS]) {
+        expect(exercise.contraindications.some((c) => c.region === "shoulder")).toBe(true);
+      }
+
+      // Only BENCH_PRESS documents a chest/pectoral-specific contraindication.
+      expect(BENCH_PRESS.contraindications.some((c) => c.region === "chest")).toBe(true);
+      expect(OVERHEAD_PRESS.contraindications.some((c) => c.region === "chest")).toBe(false);
+      expect(DIP.contraindications.some((c) => c.region === "chest")).toBe(false);
+      expect(LANDMINE_PRESS.contraindications.some((c) => c.region === "chest")).toBe(false);
+
+      // Only OVERHEAD_PRESS documents a neck/cervical-specific contraindication — the standing,
+      // whole-body kinetic chain travels through the cervical spine on the way to lockout.
+      expect(OVERHEAD_PRESS.contraindications.some((c) => c.region === "neck")).toBe(true);
+      for (const exercise of [BENCH_PRESS, DIP, LANDMINE_PRESS]) {
+        expect(exercise.contraindications.some((c) => c.region === "neck")).toBe(false);
+      }
+
+      // Only DIP and LANDMINE_PRESS document an elbow-specific contraindication.
+      expect(DIP.contraindications.some((c) => c.region === "elbow")).toBe(true);
+      expect(LANDMINE_PRESS.contraindications.some((c) => c.region === "elbow")).toBe(true);
+      expect(BENCH_PRESS.contraindications.some((c) => c.region === "elbow")).toBe(false);
+      expect(OVERHEAD_PRESS.contraindications.some((c) => c.region === "elbow")).toBe(false);
+    });
+  });
+
+  test("33. adding this batch never changes the previously integrated exercises, including WEIGHTED_PULL_UP and BACK_SQUAT", () => {
+    const weightedPullUpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "pull_up_bar" }, { type: "other" }, { type: "plates" }],
+      }),
+    });
+    expect(checkExerciseEligibility(WEIGHTED_PULL_UP, weightedPullUpInput).eligible).toBe(true);
+
+    const backSquatInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "rack" }, { type: "plates" }],
+      }),
+    });
+    expect(checkExerciseEligibility(BACK_SQUAT, backSquatInput).eligible).toBe(true);
+
+    const abWheelInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "other" }],
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(AB_WHEEL, abWheelInput).eligible).toBe(true);
+
+    const barbellRowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+      }),
+    });
+    expect(checkExerciseEligibility(BARBELL_ROW, barbellRowInput).eligible).toBe(true);
   });
 });

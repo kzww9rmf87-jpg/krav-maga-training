@@ -475,7 +475,7 @@ describe("runEngine — default exercise catalog wiring", () => {
     expect(result.sessionResult.blockedModules).toEqual(["power"]);
   });
 
-  test("4. the default catalog contains all 7 integrated ballistic exercises plus box_jump, depth_jump, countermovement_jump, broad_jump, knee_jump, lateral_bound, single_leg_hop, split_squat_jump, push_press, hang_high_pull, hang_power_clean, jump_shrug, the full 65_GRIP chapter (towel_pull_up, plate_pinch, pinch_carry, rope_climb, rope_pull), the full 66_CARRIES chapter (farmer_carry, front_rack_carry, sandbag_carry, zercher_carry), the full 62_CORE chapter batch (ab_wheel, pallof_press, dead_bug, hollow_body_hold, hanging_leg_raise, dragon_flag, suitcase_carry, overhead_carry), the Lot 1 — Force fondamentale bas du corps batch (back_squat, front_squat, trap_bar_deadlift, romanian_deadlift, hip_thrust, bulgarian_split_squat) and the Lot 2 — Tirages du haut du corps batch (weighted_pull_up, pull_up, chin_up, barbell_row, chest_supported_row)", () => {
+  test("4. the default catalog contains all 7 integrated ballistic exercises plus box_jump, depth_jump, countermovement_jump, broad_jump, knee_jump, lateral_bound, single_leg_hop, split_squat_jump, push_press, hang_high_pull, hang_power_clean, jump_shrug, the full 65_GRIP chapter (towel_pull_up, plate_pinch, pinch_carry, rope_climb, rope_pull), the full 66_CARRIES chapter (farmer_carry, front_rack_carry, sandbag_carry, zercher_carry), the full 62_CORE chapter batch (ab_wheel, pallof_press, dead_bug, hollow_body_hold, hanging_leg_raise, dragon_flag, suitcase_carry, overhead_carry), the Lot 1 — Force fondamentale bas du corps batch (back_squat, front_squat, trap_bar_deadlift, romanian_deadlift, hip_thrust, bulgarian_split_squat), the Lot 2 — Tirages du haut du corps batch (weighted_pull_up, pull_up, chin_up, barbell_row, chest_supported_row) and the Lot 3 — Poussées du haut du corps batch (bench_press, overhead_press, dip, landmine_press)", () => {
     const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
 
     expect(ids).toEqual([
@@ -526,6 +526,10 @@ describe("runEngine — default exercise catalog wiring", () => {
       "chin_up",
       "barbell_row",
       "chest_supported_row",
+      "bench_press",
+      "overhead_press",
+      "dip",
+      "landmine_press",
     ]);
   });
 
