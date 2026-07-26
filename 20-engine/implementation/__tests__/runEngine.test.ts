@@ -475,7 +475,7 @@ describe("runEngine — default exercise catalog wiring", () => {
     expect(result.sessionResult.blockedModules).toEqual(["power"]);
   });
 
-  test("4. the default catalog contains all 7 integrated ballistic exercises plus box_jump, depth_jump, countermovement_jump, broad_jump, knee_jump, lateral_bound, single_leg_hop, split_squat_jump, push_press, hang_high_pull, hang_power_clean, jump_shrug, the full 65_GRIP chapter (towel_pull_up, plate_pinch, pinch_carry, rope_climb, rope_pull), the full 66_CARRIES chapter (farmer_carry, front_rack_carry, sandbag_carry, zercher_carry), the full 62_CORE chapter batch (ab_wheel, pallof_press, dead_bug, hollow_body_hold, hanging_leg_raise, dragon_flag, suitcase_carry, overhead_carry), the Lot 1 — Force fondamentale bas du corps batch (back_squat, front_squat, trap_bar_deadlift, romanian_deadlift, hip_thrust, bulgarian_split_squat), the Lot 2 — Tirages du haut du corps batch (weighted_pull_up, pull_up, chin_up, barbell_row, chest_supported_row), the Lot 3 — Poussées du haut du corps batch (bench_press, overhead_press, dip, landmine_press), the Lot 4 — Chaine posterieure et robustness batch (nordic_hamstring_curl, copenhagen_plank, tibialis_raise, soleus_raise, rotator_cuff_training, wrist_strengthening, neck_training), the Lot 5 — Ground movement et transitions batch (technical_stand_up, bear_crawl, shrimping, bridging, turkish_get_up) and the Lot 6 — Combat striking et deplacements batch (heavy_bag_power_intervals, shadow_boxing, footwork_drills)", () => {
+  test("4. the default catalog contains all 7 integrated ballistic exercises plus box_jump, depth_jump, countermovement_jump, broad_jump, knee_jump, lateral_bound, single_leg_hop, split_squat_jump, push_press, hang_high_pull, hang_power_clean, jump_shrug, the full 65_GRIP chapter (towel_pull_up, plate_pinch, pinch_carry, rope_climb, rope_pull), the full 66_CARRIES chapter (farmer_carry, front_rack_carry, sandbag_carry, zercher_carry), the full 62_CORE chapter batch (ab_wheel, pallof_press, dead_bug, hollow_body_hold, hanging_leg_raise, dragon_flag, suitcase_carry, overhead_carry), the Lot 1 — Force fondamentale bas du corps batch (back_squat, front_squat, trap_bar_deadlift, romanian_deadlift, hip_thrust, bulgarian_split_squat), the Lot 2 — Tirages du haut du corps batch (weighted_pull_up, pull_up, chin_up, barbell_row, chest_supported_row), the Lot 3 — Poussées du haut du corps batch (bench_press, overhead_press, dip, landmine_press), the Lot 4 — Chaine posterieure et robustness batch (nordic_hamstring_curl, copenhagen_plank, tibialis_raise, soleus_raise, rotator_cuff_training, wrist_strengthening, neck_training), the Lot 5 — Ground movement et transitions batch (technical_stand_up, bear_crawl, shrimping, bridging, turkish_get_up), the Lot 6 — Combat striking et deplacements batch (heavy_bag_power_intervals, shadow_boxing, footwork_drills) and the Lot 7 — Conditionnement general batch (sled_push, battle_ropes, sprint_intervals, assault_bike_intervals, rowerg_intervals)", () => {
     const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
 
     expect(ids).toEqual([
@@ -545,6 +545,11 @@ describe("runEngine — default exercise catalog wiring", () => {
       "heavy_bag_power_intervals",
       "shadow_boxing",
       "footwork_drills",
+      "sled_push",
+      "battle_ropes",
+      "sprint_intervals",
+      "assault_bike_intervals",
+      "rowerg_intervals",
     ]);
   });
 

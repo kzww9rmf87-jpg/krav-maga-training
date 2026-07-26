@@ -20,8 +20,10 @@ import {
 } from "../exerciseRequirements";
 import {
   AB_WHEEL,
+  ASSAULT_BIKE_INTERVALS,
   BACK_SQUAT,
   BARBELL_ROW,
+  BATTLE_ROPES,
   BEAR_CRAWL,
   BENCH_PRESS,
   BOX_JUMP,
@@ -71,12 +73,15 @@ import {
   ROPE_CLIMB,
   ROPE_PULL,
   ROTATOR_CUFF_TRAINING,
+  ROWERG_INTERVALS,
   SANDBAG_CARRY,
   SHADOW_BOXING,
   SHRIMPING,
   SINGLE_LEG_HOP,
+  SLED_PUSH,
   SOLEUS_RAISE,
   SPLIT_SQUAT_JUMP,
+  SPRINT_INTERVALS,
   SUITCASE_CARRY,
   TECHNICAL_STAND_UP,
   TIBIALIS_RAISE,
@@ -9866,5 +9871,493 @@ describe("Lot 6 — Combat striking et deplacements — Exercise Requirements Mo
       }),
     });
     expect(checkExerciseEligibility(FARMER_CARRY, farmerCarryInput).eligible).toBe(true);
+  });
+});
+
+describe("Lot 7 — Conditionnement general — Exercise Requirements Model batch integration", () => {
+  const LOT7_EXERCISES = [
+    { exercise: SLED_PUSH, id: "sled_push" },
+    { exercise: BATTLE_ROPES, id: "battle_ropes" },
+    { exercise: SPRINT_INTERVALS, id: "sprint_intervals" },
+    { exercise: ASSAULT_BIKE_INTERVALS, id: "assault_bike_intervals" },
+    { exercise: ROWERG_INTERVALS, id: "rowerg_intervals" },
+  ] as const;
+
+  test.each(LOT7_EXERCISES)("$id — 1. exists in the catalog with the expected id", ({ exercise, id }) => {
+    expect(EXERCISE_KNOWLEDGE_BASE).toContain(exercise);
+    expect(exercise.id).toBe(id);
+  });
+
+  test("2. all five ids are unique within the catalog, and no prior id (e.g. footwork_drills) is duplicated", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const { id } of LOT7_EXERCISES) {
+      expect(ids.filter((existingId) => existingId === id)).toHaveLength(1);
+    }
+    expect(ids.filter((existingId) => existingId === "footwork_drills")).toEqual(["footwork_drills"]);
+  });
+
+  test.each(LOT7_EXERCISES)(
+    "$id — 3. respects the coexistence invariant: requiredEquipment is empty, optionalEquipment is absent",
+    ({ exercise }) => {
+      expect(exercise.requiredEquipment).toEqual([]);
+      expect(exercise.optionalEquipment).toBeUndefined();
+      expect(validateRequirementsCoexistenceInvariant(exercise)).toBeNull();
+      expect(validateExerciseRequirementsStructure(exercise.requirements!)).toEqual([]);
+    },
+  );
+
+  test("4. the default catalog used by runEngine(input) now also contains all five Lot 7 ids", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    for (const { id } of LOT7_EXERCISES) {
+      expect(ids).toContain(id);
+    }
+  });
+
+  test.each(LOT7_EXERCISES)("$id — 5. never mutates the exercise or the input it is given during evaluation", ({ exercise }) => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "sled" }, { type: "rope" }, { type: "rigid_anchor_support" }, { type: "cardio_machine" }],
+        availableSpace: "large",
+        sprintingAllowed: true,
+        floorSafe: true,
+      }),
+    });
+    const exerciseSnapshot = structuredClone(exercise);
+    const inputSnapshot = structuredClone(input);
+
+    checkExerciseEligibility(exercise, input);
+
+    expect(exercise).toEqual(exerciseSnapshot);
+    expect(input).toEqual(inputSnapshot);
+  });
+
+  describe("SLED_PUSH", () => {
+    test("6. eligible with a sled and a floor-safe, large-space environment", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "sled" }],
+          availableSpace: "large",
+          floorSafe: true,
+        }),
+      });
+
+      const result = checkExerciseEligibility(SLED_PUSH, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("7. ineligible without a sled", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "large",
+          floorSafe: true,
+        }),
+      });
+
+      const result = checkExerciseEligibility(SLED_PUSH, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("8. ineligible without floor_safe or with insufficient space", () => {
+      const withoutFloorSafe = checkExerciseEligibility(
+        SLED_PUSH,
+        makeValidInput({
+          environment: makeEnvironment({ availableEquipment: [{ type: "sled" }], availableSpace: "large", floorSafe: false }),
+        }),
+      );
+      expect(withoutFloorSafe.eligible).toBe(false);
+      expect(withoutFloorSafe.rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT")).toBe(true);
+
+      const withInsufficientSpace = checkExerciseEligibility(
+        SLED_PUSH,
+        makeValidInput({
+          environment: makeEnvironment({ availableEquipment: [{ type: "sled" }], availableSpace: "limited", floorSafe: true }),
+        }),
+      );
+      expect(withInsufficientSpace.eligible).toBe(false);
+      expect(withInsufficientSpace.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+    });
+
+    test("9. no dependency on plates, a rack, jumping, throwing, a wall or a partner — none is documented", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "sled" }],
+          availableSpace: "large",
+          floorSafe: true,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(SLED_PUSH, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("10. biomechanical fields match the canonical documentation", () => {
+      expect(SLED_PUSH.movementPatterns).toEqual(["locomotion", "horizontal_push", "isometric"]);
+      expect(SLED_PUSH.forceVectors).toEqual(["horizontal", "vertical"]);
+      expect(SLED_PUSH.unilateral).toBe(false);
+      expect(SLED_PUSH.complexity).toBe("low");
+      expect(SLED_PUSH.minimumTechnicalLevel).toBe(1);
+      expect(SLED_PUSH.module).toBe("power");
+      expect(SLED_PUSH.primaryAdaptation).toBe("power");
+      expect(SLED_PUSH.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("BATTLE_ROPES", () => {
+    test("11. eligible with a rope and a rigid anchor support", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "rope" }, { type: "rigid_anchor_support" }] }),
+      });
+
+      const result = checkExerciseEligibility(BATTLE_ROPES, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("12. ineligible without the rope, and ineligible without the anchor", () => {
+      const withoutRope = checkExerciseEligibility(
+        BATTLE_ROPES,
+        makeValidInput({ environment: makeEnvironment({ availableEquipment: [{ type: "rigid_anchor_support" }] }) }),
+      );
+      expect(withoutRope.eligible).toBe(false);
+      expect(withoutRope.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+
+      const withoutAnchor = checkExerciseEligibility(
+        BATTLE_ROPES,
+        makeValidInput({ environment: makeEnvironment({ availableEquipment: [{ type: "rope" }] }) }),
+      );
+      expect(withoutAnchor.eligible).toBe(false);
+      expect(withoutAnchor.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("13. no dependency on space, floor safety, jumping, throwing, a wall or a partner — none is documented", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "rope" }, { type: "rigid_anchor_support" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(BATTLE_ROPES, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("14. biomechanical fields match the canonical documentation", () => {
+      expect(BATTLE_ROPES.movementPatterns).toEqual(["mixed", "isometric", "hinge", "anti_rotation"]);
+      expect(BATTLE_ROPES.forceVectors).toEqual(["vertical", "horizontal"]);
+      expect(BATTLE_ROPES.unilateral).toBe(false);
+      expect(BATTLE_ROPES.complexity).toBe("moderate");
+      expect(BATTLE_ROPES.minimumTechnicalLevel).toBe(1);
+      expect(BATTLE_ROPES.evidenceLevel).toBe("level_2");
+    });
+  });
+
+  describe("SPRINT_INTERVALS", () => {
+    test("15. eligible with no equipment in a large, floor-safe, sprinting-permitted environment", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "large",
+          floorSafe: true,
+          sprintingAllowed: true,
+        }),
+      });
+
+      const result = checkExerciseEligibility(SPRINT_INTERVALS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("16. ineligible without sprinting_allowed, without floor_safe, or with insufficient space", () => {
+      const withoutSprinting = checkExerciseEligibility(
+        SPRINT_INTERVALS,
+        makeValidInput({ environment: makeEnvironment({ availableSpace: "large", floorSafe: true, sprintingAllowed: false }) }),
+      );
+      expect(withoutSprinting.eligible).toBe(false);
+      expect(withoutSprinting.rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT")).toBe(true);
+
+      const withoutFloorSafe = checkExerciseEligibility(
+        SPRINT_INTERVALS,
+        makeValidInput({ environment: makeEnvironment({ availableSpace: "large", floorSafe: false, sprintingAllowed: true }) }),
+      );
+      expect(withoutFloorSafe.eligible).toBe(false);
+      expect(withoutFloorSafe.rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT")).toBe(true);
+
+      const withInsufficientSpace = checkExerciseEligibility(
+        SPRINT_INTERVALS,
+        makeValidInput({ environment: makeEnvironment({ availableSpace: "limited", floorSafe: true, sprintingAllowed: true }) }),
+      );
+      expect(withInsufficientSpace.eligible).toBe(false);
+      expect(withInsufficientSpace.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+    });
+
+    test("17. no dependency on any physical equipment, jumping, throwing, a wall or a partner — a sled is documented only as optional", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "large",
+          floorSafe: true,
+          sprintingAllowed: true,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(SPRINT_INTERVALS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+      expect(SPRINT_INTERVALS.requiredEquipment).toEqual([]);
+    });
+
+    test("18. biomechanical fields match the canonical documentation", () => {
+      expect(SPRINT_INTERVALS.movementPatterns).toEqual(["sprint", "locomotion", "isometric"]);
+      expect(SPRINT_INTERVALS.forceVectors).toEqual(["horizontal", "vertical"]);
+      expect(SPRINT_INTERVALS.unilateral).toBe(false);
+      expect(SPRINT_INTERVALS.complexity).toBe("high");
+      expect(SPRINT_INTERVALS.minimumTechnicalLevel).toBe(3);
+      expect(SPRINT_INTERVALS.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("ASSAULT_BIKE_INTERVALS", () => {
+    test("19. eligible with a cardio machine", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "cardio_machine" }] }),
+      });
+
+      const result = checkExerciseEligibility(ASSAULT_BIKE_INTERVALS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("20. ineligible without a cardio machine", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(ASSAULT_BIKE_INTERVALS, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("21. no dependency on space, floor safety, jumping, throwing, a wall or a partner — none is documented", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "cardio_machine" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(ASSAULT_BIKE_INTERVALS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("22. biomechanical fields match the canonical documentation", () => {
+      expect(ASSAULT_BIKE_INTERVALS.movementPatterns).toEqual(["mixed", "isometric"]);
+      expect(ASSAULT_BIKE_INTERVALS.forceVectors).toEqual(["mixed"]);
+      expect(ASSAULT_BIKE_INTERVALS.unilateral).toBe(false);
+      expect(ASSAULT_BIKE_INTERVALS.complexity).toBe("low");
+      expect(ASSAULT_BIKE_INTERVALS.minimumTechnicalLevel).toBe(1);
+      expect(ASSAULT_BIKE_INTERVALS.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("ROWERG_INTERVALS", () => {
+    test("23. eligible with a cardio machine", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "cardio_machine" }] }),
+      });
+
+      const result = checkExerciseEligibility(ROWERG_INTERVALS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("24. ineligible without a cardio machine", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(ROWERG_INTERVALS, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("25. no dependency on space, floor safety, jumping, throwing, a wall or a partner — none is documented", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "cardio_machine" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(ROWERG_INTERVALS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("26. biomechanical fields match the canonical documentation", () => {
+      expect(ROWERG_INTERVALS.movementPatterns).toEqual(["horizontal_pull", "hinge", "isometric"]);
+      expect(ROWERG_INTERVALS.forceVectors).toEqual(["horizontal"]);
+      expect(ROWERG_INTERVALS.unilateral).toBe(false);
+      expect(ROWERG_INTERVALS.complexity).toBe("moderate");
+      expect(ROWERG_INTERVALS.minimumTechnicalLevel).toBe(2);
+      expect(ROWERG_INTERVALS.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("business distinctions", () => {
+    test("27. sled_push vs. sprint_intervals: only SLED_PUSH requires physical equipment; both share a locomotion pattern but diverge in primaryAdaptation", () => {
+      const sledEquipment = SLED_PUSH.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(sledEquipment).toEqual(["sled"]);
+      expect(SPRINT_INTERVALS.requiredEquipment).toEqual([]);
+
+      expect(SLED_PUSH.movementPatterns).toContain("locomotion");
+      expect(SPRINT_INTERVALS.movementPatterns).toContain("locomotion");
+      expect(SPRINT_INTERVALS.movementPatterns).toContain("sprint");
+      expect(SLED_PUSH.movementPatterns).not.toContain("sprint");
+
+      expect(SLED_PUSH.primaryAdaptation).toBe("power");
+      expect(SPRINT_INTERVALS.primaryAdaptation).toBe("conditioning");
+    });
+
+    test("28. battle_ropes vs. rope_pull: both use the generic `rope` equipment atom, but only BATTLE_ROPES genuinely requires a rigid anchor", () => {
+      const battleRopesEquipment = BATTLE_ROPES.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(battleRopesEquipment).toEqual(["rope", "rigid_anchor_support"]);
+
+      const ropePullEquipment = ROPE_PULL.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(ropePullEquipment).toEqual(["rope"]);
+      expect(ropePullEquipment).not.toContain("rigid_anchor_support");
+
+      // BATTLE_ROPES documents anti_rotation bracing; ROPE_PULL's own pulling patterns do not.
+      expect(BATTLE_ROPES.movementPatterns).toContain("anti_rotation");
+      expect(ROPE_PULL.movementPatterns).not.toContain("anti_rotation");
+    });
+
+    test("29. assault_bike_intervals vs. rowerg_intervals: identical generic cardio_machine equipment atom, but distinct movement patterns and force vectors", () => {
+      const assaultBikeEquipment = ASSAULT_BIKE_INTERVALS.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      const rowergEquipment = ROWERG_INTERVALS.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(assaultBikeEquipment).toEqual(["cardio_machine"]);
+      expect(rowergEquipment).toEqual(["cardio_machine"]);
+      expect(assaultBikeEquipment).toEqual(rowergEquipment);
+
+      // Despite the shared equipment atom, the two remain distinguished by biomechanics.
+      expect(ASSAULT_BIKE_INTERVALS.movementPatterns).toEqual(["mixed", "isometric"]);
+      expect(ROWERG_INTERVALS.movementPatterns).toEqual(["horizontal_pull", "hinge", "isometric"]);
+      expect(ASSAULT_BIKE_INTERVALS.forceVectors).toEqual(["mixed"]);
+      expect(ROWERG_INTERVALS.forceVectors).toEqual(["horizontal"]);
+    });
+
+    test("30. locomotor conditioning vs. stationary conditioning: SLED_PUSH/SPRINT_INTERVALS both carry `locomotion`; BATTLE_ROPES/ASSAULT_BIKE_INTERVALS/ROWERG_INTERVALS carry none", () => {
+      expect(SLED_PUSH.movementPatterns).toContain("locomotion");
+      expect(SPRINT_INTERVALS.movementPatterns).toContain("locomotion");
+      expect(BATTLE_ROPES.movementPatterns).not.toContain("locomotion");
+      expect(ASSAULT_BIKE_INTERVALS.movementPatterns).not.toContain("locomotion");
+      expect(ROWERG_INTERVALS.movementPatterns).not.toContain("locomotion");
+    });
+
+    test("31. exercise definition vs. interval protocol: no round, distance, work-time, rest-time, cadence, intensity or load field is ever encoded in `requirements`", () => {
+      for (const { exercise } of LOT7_EXERCISES) {
+        if (exercise.requirements === undefined) continue;
+        for (const clause of exercise.requirements.required) {
+          for (const atom of clause.items) {
+            expect(["equipment", "environment", "human_assistance"]).toContain(atom.kind);
+            expect(atom).not.toHaveProperty("rounds");
+            expect(atom).not.toHaveProperty("distance");
+            expect(atom).not.toHaveProperty("workTime");
+            expect(atom).not.toHaveProperty("restTime");
+            expect(atom).not.toHaveProperty("cadence");
+            expect(atom).not.toHaveProperty("intensity");
+            expect(atom).not.toHaveProperty("load");
+          }
+        }
+      }
+      // None of the five ExerciseDefinition objects themselves declare any prescription-layer
+      // field either — the type itself has no such member (verified structurally, not just by
+      // absence in these five instances).
+      for (const { exercise } of LOT7_EXERCISES) {
+        expect(exercise).not.toHaveProperty("rounds");
+        expect(exercise).not.toHaveProperty("workTimeSeconds");
+        expect(exercise).not.toHaveProperty("restTimeSeconds");
+      }
+    });
+  });
+
+  test("32. adding this batch never changes the previously integrated exercises, including FOOTWORK_DRILLS and FARMER_CARRY", () => {
+    const footworkInput = makeValidInput({
+      environment: makeEnvironment({ availableEquipment: [] }),
+    });
+    expect(checkExerciseEligibility(FOOTWORK_DRILLS, footworkInput).eligible).toBe(true);
+
+    const farmerCarryInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "dumbbell" }],
+        availableSpace: "large",
+      }),
+    });
+    expect(checkExerciseEligibility(FARMER_CARRY, farmerCarryInput).eligible).toBe(true);
+
+    const ropePullInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "rope" }],
+        availableSpace: "large",
+      }),
+    });
+    expect(checkExerciseEligibility(ROPE_PULL, ropePullInput).eligible).toBe(true);
   });
 });

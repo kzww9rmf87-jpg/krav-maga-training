@@ -8905,6 +8905,723 @@ export const FOOTWORK_DRILLS: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Sled Push
+// Source: 50-exercises/17_SLED_PUSH
+// -----------------------------------------------------------------------------
+
+/**
+ * First entry of the "Lot 7 — Conditionnement general" batch, migrated
+ * alongside BATTLE_ROPES/SPRINT_INTERVALS/ASSAULT_BIKE_INTERVALS/
+ * ROWERG_INTERVALS. `mobility_flow` (50-exercises/50_MOBILITY_FLOW) is
+ * explicitly EXCLUDED from this batch per the user's own instruction,
+ * pending a separate business audit confirming whether it should be
+ * represented as a single `ExerciseDefinition` at all rather than a
+ * composed protocol — not migrated here, not referenced from any
+ * `substitutionExerciseIds` below. No `exercisePrescriptionRegistry.ts`
+ * entry exists for any of the five exercises in this batch (confirmed by
+ * direct search) — a known limitation, documented without modifying that
+ * registry.
+ *
+ * "# Primary Classification: Power" (not "Combat-Specific Conditioning"
+ * like the other four entries in this batch) — a genuine divergence
+ * corroborated by "# Capability Mapping — Primary: Horizontal Force
+ * Production, Acceleration, Power Endurance" and the Biomechanical
+ * Profile's own "Velocity Profile: Explosive, Accelerative". `"power"` is
+ * used directly, matching `PUSH_PRESS`'s own identical
+ * Primary-Classification-to-`primaryAdaptation` resolution.
+ */
+export const SLED_PUSH: ExerciseDefinition = {
+  id: "sled_push",
+  name: "Sled Push",
+  module: "power",
+  primaryAdaptation: "power",
+  // "Horizontal Force Production" is the closest match for
+  // `explosive_strength` (corroborated by "Ground Reaction Force: Very
+  // High" and "Rate of Force Development: High" in the Biomechanical
+  // Profile — a genuinely distinct, separately documented metric, hence
+  // its own `rate_of_force_development` entry below, not double-counted
+  // with `explosive_strength`). "Acceleration" → acceleration (exact
+  // match). "Power Endurance" has no literal PhysicalQuality counterpart;
+  // the closest honest existing value is `repeat_effort_capacity` (the
+  // repeated-effort demand already used for HEAVY_BAG_POWER_INTERVALS's
+  // own "repeated power" resolution in Lot 6). Secondary: "Work Capacity"
+  // → general_work_capacity (exact). "Core Stability" → trunk_strength
+  // (matching FARMER_CARRY's own "Trunk Stability" resolution).
+  // "Whole-Body Coordination" → coordination. "Mechanical Robustness" →
+  // tissue_capacity (matching ROPE_CLIMB/FARMER_CARRY's own "Tendon
+  // Robustness" resolution). "Relative Strength" → relative_strength
+  // (exact match).
+  physicalQualities: [
+    "explosive_strength",
+    "rate_of_force_development",
+    "acceleration",
+    "repeat_effort_capacity",
+    "general_work_capacity",
+    "trunk_strength",
+    "coordination",
+    "tissue_capacity",
+    "relative_strength",
+  ],
+  // "# Movement Pattern — Primary: Locomotion. Secondary: Horizontal
+  // Push, Acceleration, Brace, Triple Extension." → locomotion (primary,
+  // exact match), horizontal_push (exact match). "Acceleration" is a
+  // PhysicalQuality concept, not a MovementPattern value, and is not
+  // represented here (already captured above). "Brace" → isometric.
+  // "Triple Extension" (the documented hip-knee-ankle extension chain)
+  // has no dedicated MovementPattern counterpart of its own and is not
+  // force-fitted into an unrelated value.
+  movementPatterns: ["locomotion", "horizontal_push", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Horizontal.
+  // Secondary Force Vector: Vertical Stabilization." Both quoted
+  // directly — the secondary vertical-stabilization component is a real,
+  // literally named force vector, not a MovementPattern concept.
+  forceVectors: ["horizontal", "vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          // "# Equipment Requirements — Required: Weighted Sled, Suitable
+          // Surface." Unlike BACK_SQUAT/FRONT_SQUAT's separate barbell +
+          // plates + rack atoms, this fiche names "Weighted Sled" as ONE
+          // combined required item — no separate "Plates" or "Load"
+          // heading exists anywhere in this fiche (checked directly), so
+          // only `sled` is used, not `sled` + `plates`. "Harness" and
+          // "Resistance Straps" are both explicitly Optional and are not
+          // added.
+          { kind: "equipment", equipment: "sled" },
+          // "Suitable Surface" is named directly alongside the sled under
+          // Required (not a hedge like "Recommended") — a genuine,
+          // documented surface-safety concern, matching PUSH_PRESS's own
+          // "Stable non-slip surface" precedent for `floor_safe`.
+          { kind: "environment", capability: "floor_safe" },
+          // "# Loading Profile — Typical Volume: 4-12 pushes, 10-40
+          // meters." A quantified extended-distance requirement,
+          // comparable in magnitude to FARMER_CARRY's/ROPE_PULL's own
+          // documented distances — same `"large"` tier.
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "large" },
+        ],
+      },
+    ],
+  },
+  // "# Skill Requirement: Beginner. Suitable for nearly every athlete."
+  // corroborated by "# Neurological Profile — Skill Requirement:
+  // Beginner. Learning Curve: Very Short."
+  minimumTechnicalLevel: 1,
+  // "# Neurological Profile — Motor Complexity: Low."
+  complexity: "low",
+  // No unilateral/bilateral statement exists in Exercise Identity or
+  // Movement Context (both say "Whole Body" only) — "Single-Arm Push" is
+  // named only as a documented Variation, not this exercise's own
+  // default form, matching the established discipline of not silently
+  // reclassifying a base bilateral exercise from one of its own named
+  // variations.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Quadriceps, Gluteus Maximus,
+  // Calves. Secondary Muscles: Hamstrings, Core, Anterior Deltoids,
+  // Triceps. Stabilizers: Obliques, Erector Spinae, Scapular
+  // Stabilizers." → thigh (quadriceps, hamstrings), hip (gluteus
+  // maximus), lower_leg (calves), abdomen (core, obliques), shoulder
+  // (anterior deltoids, scapular stabilizers), upper_arm (triceps),
+  // lumbar_spine (erector spinae).
+  bodyRegionsLoaded: ["thigh", "hip", "lower_leg", "abdomen", "shoulder", "upper_arm", "lumbar_spine"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute knee injury.", region: "knee", prohibitedPatterns: ["locomotion", "horizontal_push", "isometric"], absolute: true },
+    { description: "Acute hip injury.", region: "hip", prohibitedPatterns: ["locomotion", "horizontal_push", "isometric"], absolute: true },
+    { description: "Acute ankle injury.", region: "ankle", prohibitedPatterns: ["locomotion", "horizontal_push", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: Low. Metabolic Fatigue: Moderate to High." This fiche uses
+    // only "Low" (never "Very Low") for its Mechanical dimension, so the
+    // plain baseline Low=2/Moderate=3 scale applies (not the
+    // fiche-relative Very-Low=1/Low=2 convention, which only applies when
+    // both words co-occur in the same fiche). "Moderate to High" is
+    // corroborated by the Physiological Profile's own separate "Metabolic
+    // Cost: High" — resolved to the upper end, matching DEPTH_JUMP's own
+    // identical "Moderate to High" → 4 resolution.
+    types: ["neural", "muscular", "connective_tissue", "metabolic"],
+    neural: 3, // "Neuromuscular Fatigue: Moderate"
+    muscular: 2, // "Mechanical Fatigue: Low"
+    connectiveTissue: 2, // same "Mechanical Fatigue: Low" source (no distinct Connective-Tissue heading)
+    metabolic: 4, // "Metabolic Fatigue: Moderate to High", corroborated by "Metabolic Cost: High"
+    technical: 1, // fallback from "Skill Requirement: Beginner" (minimumTechnicalLevel 1)
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. The Sled Push is
+  // strongly supported for improving sprint acceleration, horizontal
+  // force production and work capacity..." — no hedging language — mapped
+  // to "Level 1 — Scientific consensus".
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate and
+  // Sambo are both named in this table but have no `CombatSport` enum
+  // counterpart and are omitted rather than force-mapped.
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 4,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // No "# Substitution Logic" section exists anywhere in this fiche
+  // (checked directly) — "Bodyweight Hill March" (Regression),
+  // "Backward Sled Push"/"Harness Push"/"Single-Arm Push" (Variations)
+  // name no exercise with its own chapter/catalog id in this repository.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Battle Ropes
+// Source: 50-exercises/46_BATTLE_ROPES.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Second entry of this batch. "# Primary Classification: Combat-Specific
+ * Conditioning" — the same framing already used for
+ * HEAVY_BAG_POWER_INTERVALS in Lot 6, hence the identical
+ * `primaryAdaptation: "conditioning"` resolution.
+ *
+ * BUSINESS DISTINCTION, explicitly verified before writing began: this
+ * fiche is NOT confused with the generic `rope` used by ROPE_CLIMB/
+ * ROPE_PULL in `65_GRIP`, nor with `rigid_anchor_support` alone. "#
+ * Equipment Requirements — Required: Battle Ropes, Anchor Point." names
+ * TWO distinct required items. "Battle Ropes" has no dedicated
+ * `EquipmentType` value of its own (no "battle_rope" entry exists in the
+ * enum); `rope` is used as the closest existing honest generic value —
+ * the same escape hatch already used for ROPE_PULL's own "Anchored Load",
+ * openly flagged as a MODEL LIMITATION rather than silently invented.
+ * "Anchor Point" is named directly under Required (not hedged behind a
+ * documented-only-for-one-variation clause the way ROPE_PULL's own
+ * "safe pulley or anchor setup" was restricted to its Vertical variation)
+ * — a genuinely, unconditionally required anchor, so `rigid_anchor_support`
+ * IS added here, unlike ROPE_PULL's own base form.
+ */
+export const BATTLE_ROPES: ExerciseDefinition = {
+  id: "battle_ropes",
+  name: "Battle Ropes",
+  module: "conditioning",
+  primaryAdaptation: "conditioning",
+  // "# Capability Mapping — Primary: Upper-Body Power Endurance, Work
+  // Capacity, Core Stability." "Upper-Body Power Endurance" → the same
+  // `repeat_effort_capacity` resolution already used for SLED_PUSH's own
+  // "Power Endurance" above. "Work Capacity" → general_work_capacity
+  // (exact). "Core Stability" → trunk_strength (matching FARMER_CARRY's
+  // own "Trunk Stability" resolution). Secondary: "Rate of Force
+  // Development" → rate_of_force_development (exact). "Shoulder
+  // Endurance" → muscular_endurance (a localized endurance quality).
+  // "Grip Endurance" → grip_strength (matching FARMER_CARRY's own "Grip
+  // Endurance" resolution). "Movement Coordination" → coordination.
+  // "Fatigue Resistance" excluded (generic, no distinct counterpart,
+  // matching this whole project's established exclusion).
+  physicalQualities: ["repeat_effort_capacity", "general_work_capacity", "trunk_strength", "rate_of_force_development", "muscular_endurance", "grip_strength", "coordination"],
+  // MODEL LIMITATION, flagged explicitly: "# Movement Pattern — Primary:
+  // Upper-Body Power Production." No MovementPattern value represents a
+  // repetitive bilateral wave-generation action of this kind — `"mixed"`
+  // is used as the closest available generic value for the PRIMARY
+  // pattern, matching HEAVY_BAG_POWER_INTERVALS's own identical
+  // resolution for an equally undocumented compound primary pattern.
+  // "Secondary: Brace, Hip Hinge, Anti-Rotation, Force Transmission,
+  // Rhythmic Coordination" → isometric (from "Brace"), hinge (from "Hip
+  // Hinge"), anti_rotation (exact match). "Force Transmission" and
+  // "Rhythmic Coordination" have no distinct MovementPattern counterpart
+  // and are already captured via `"mixed"`/`coordination` above.
+  movementPatterns: ["mixed", "isometric", "hinge", "anti_rotation"],
+  // "# Biomechanical Profile — Primary Force Vector: Vertical. Secondary
+  // Force Vector: Horizontal." — quoted directly.
+  forceVectors: ["vertical", "horizontal"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "rope" },
+          { kind: "equipment", equipment: "rigid_anchor_support" },
+        ],
+      },
+    ],
+  },
+  // No space/distance heading of any kind exists anywhere in this fiche
+  // (checked directly — battle ropes are a stationary, anchored
+  // exercise) — `sufficient_space` is therefore deliberately NOT added, a
+  // genuine checked absence, not an oversight.
+  //
+  // "# Neurological Profile — Skill Requirement: Beginner. Learning
+  // Curve: Short." (the authoritative source — the later, separately
+  // duplicated "# Skill Requirement — Suitable For: Beginners,
+  // Intermediate, Advanced, Elite" heading mirrors this same fiche's own
+  // "# Athlete Suitability" section rather than adding new
+  // difficulty-rating information.)
+  minimumTechnicalLevel: 1,
+  // "# Neurological Profile — Motor Complexity: ★★★☆☆" (3/5).
+  complexity: "moderate",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Anterior Deltoids, Posterior
+  // Deltoids, Triceps, Forearms, Core. Secondary Muscles: Latissimus
+  // Dorsi, Upper Trapezius, Gluteals, Quadriceps, Calves." → shoulder
+  // (deltoids, latissimus dorsi — matching BACK_SQUAT's/PULL_UP's own
+  // "Latissimus Dorsi" → shoulder resolution — and upper trapezius),
+  // upper_arm (triceps), forearm, abdomen (core), hip (gluteals), thigh
+  // (quadriceps), lower_leg (calves).
+  bodyRegionsLoaded: ["shoulder", "upper_arm", "forearm", "abdomen", "hip", "thigh", "lower_leg"],
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["mixed", "isometric", "hinge", "anti_rotation"], absolute: true },
+    { description: "Acute wrist injury.", region: "wrist", prohibitedPatterns: ["mixed", "isometric", "hinge", "anti_rotation"], absolute: true },
+    { description: "Acute elbow injury.", region: "elbow", prohibitedPatterns: ["mixed", "isometric", "hinge", "anti_rotation"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: ★★★★☆. Mechanical
+    // Fatigue: Moderate. Metabolic Fatigue: ★★★★★." Star ratings read
+    // directly as Rating5 values; "Moderate" (a word, not stars) uses the
+    // plain baseline scale (Moderate=3) since no "Very Low" co-occurs in
+    // this fiche.
+    types: ["neural", "muscular", "connective_tissue", "metabolic"],
+    neural: 4,
+    muscular: 3, // "Mechanical Fatigue: Moderate"
+    connectiveTissue: 3, // same "Mechanical Fatigue: Moderate" source
+    metabolic: 5,
+    technical: 1, // fallback from minimumTechnicalLevel 1
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★☆. Battle Rope training
+  // effectively improves anaerobic conditioning... Direct evidence in
+  // combat athletes remains limited, but transfer to repeated upper-body
+  // efforts is well supported." A hedged 4-star rating, matching
+  // TIBIALIS_RAISE's/WRIST_STRENGTHENING's own identical "Level 2 —
+  // Expert practice" resolution, not "Level 1".
+  evidenceLevel: "level_2",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate and
+  // Sambo are named but have no `CombatSport` enum counterpart and are
+  // omitted.
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 4,
+    brazilian_jiu_jitsu: 3,
+    judo: 4,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // No "# Substitution Logic" section exists anywhere in this fiche
+  // (checked directly) — Progressions/Regressions/Variations (Alternating
+  // Waves, Double Waves, Power Slams, Lateral Waves, Snakes, Circles,
+  // etc.) all name self-variations of Battle Ropes itself, not a distinct
+  // exercise with its own chapter/catalog id.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Sprint Intervals
+// Source: 50-exercises/47_SPRINT_INTERVALS
+// -----------------------------------------------------------------------------
+
+/**
+ * Third entry of this batch. "# Primary Classification: Combat-Specific
+ * Conditioning", the same framing as BATTLE_ROPES/HEAVY_BAG_POWER_INTERVALS
+ * above.
+ *
+ * FIRST production use of `sprinting_allowed` in this catalog, explicitly
+ * considered before writing began: "# Movement Pattern — Primary: Sprint"
+ * (the first exercise in this whole catalog whose primary pattern maps
+ * directly, cleanly to the literal `sprint` MovementPattern value) and "#
+ * Equipment Requirements — Required: Track, Field, Flat Surface" together
+ * document a genuine environment-permission gate — this exercise cannot
+ * be performed safely at maximal intent in an environment that does not
+ * support full-speed running, the same class of activity-permission
+ * concern `throwing_allowed`/`jumping_allowed` already represent for
+ * throwing/jumping exercises. `sprinting_allowed` is added, not left
+ * unused.
+ */
+export const SPRINT_INTERVALS: ExerciseDefinition = {
+  id: "sprint_intervals",
+  name: "Sprint Intervals",
+  module: "conditioning",
+  primaryAdaptation: "conditioning",
+  // "# Capability Mapping — Primary: Acceleration, Maximum Speed,
+  // Repeated Sprint Ability." → acceleration (exact), speed (from
+  // "Maximum Speed"), repeat_effort_capacity (from "Repeated Sprint
+  // Ability" — the same repeated-effort resolution already used for
+  // SLED_PUSH/BATTLE_ROPES above). Secondary: "Anaerobic Capacity" →
+  // anaerobic_capacity (exact). "Rate of Force Development" →
+  // rate_of_force_development (exact). "Movement Efficiency"/"Fatigue
+  // Resistance" excluded (generic, no distinct counterpart, matching this
+  // whole project's established exclusion).
+  physicalQualities: ["acceleration", "speed", "repeat_effort_capacity", "anaerobic_capacity", "rate_of_force_development"],
+  // "Secondary: Acceleration, Deceleration, Locomotion, Brace."
+  // Acceleration/Deceleration are PhysicalQuality concepts, not
+  // MovementPattern values, and are not represented here (already
+  // captured above). "Locomotion" → locomotion. "Brace" → isometric.
+  movementPatterns: ["sprint", "locomotion", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Horizontal.
+  // Secondary Force Vector: Vertical." — quoted directly.
+  forceVectors: ["horizontal", "vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          // See block comment above for why `sprinting_allowed` is added
+          // here — the first production use of this capability.
+          { kind: "environment", capability: "sprinting_allowed" },
+          // "Required: Track, Field, Flat Surface" — a genuine,
+          // documented surface-safety concern (an uneven or unstable
+          // running surface is a direct hamstring/calf/Achilles-strain
+          // risk, matching this fiche's own Contraindications), the same
+          // `floor_safe` resolution already used for SLED_PUSH above and
+          // PUSH_PRESS's own precedent.
+          { kind: "environment", capability: "floor_safe" },
+          // "# Loading Profile — Sprint Distance: 10-60 meters." A
+          // quantified, extended straight-line distance requirement —
+          // `"large"`, the same tier already used for SLED_PUSH/
+          // FARMER_CARRY/ROPE_PULL's own comparable documented distances,
+          // not `"open"` (which this catalog reserves for a documented
+          // "fully clear area" rear-clearance concern, not a linear
+          // running-distance magnitude — see MED_BALL_REVERSE_THROW).
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "large" },
+        ],
+      },
+    ],
+  },
+  // "No equipment beyond the environment gates above is genuinely
+  // required — "Sled" is explicitly listed under Optional (a resisted-
+  // sprint variation, not the base movement) and is not added here,
+  // matching the established discipline of excluding Optional-only items.
+  //
+  // "# Neurological Profile — Skill Requirement: Intermediate."
+  minimumTechnicalLevel: 3,
+  // "# Neurological Profile — Motor Complexity: ★★★★☆" (4/5).
+  complexity: "high",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Gluteus Maximus, Hamstrings,
+  // Quadriceps, Calves, Hip Flexors, Core. Secondary Muscles: Upper Back,
+  // Shoulders, Forearms." → hip (gluteus maximus, hip flexors), thigh
+  // (hamstrings, quadriceps), lower_leg (calves), abdomen (core), shoulder
+  // (upper back, shoulders), forearm.
+  bodyRegionsLoaded: ["hip", "thigh", "lower_leg", "abdomen", "shoulder", "forearm"],
+  contraindications: [
+    { description: "Acute hamstring injury.", region: "thigh", prohibitedPatterns: ["sprint", "locomotion", "isometric"], absolute: true },
+    { description: "Acute calf injury.", region: "lower_leg", prohibitedPatterns: ["sprint", "locomotion", "isometric"], absolute: true },
+    { description: "Acute Achilles injury.", region: "ankle", prohibitedPatterns: ["sprint", "locomotion", "isometric"], absolute: true },
+    { description: "Acute hip flexor injury.", region: "hip", prohibitedPatterns: ["sprint", "locomotion", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: ★★★★★. Mechanical
+    // Fatigue: ★★★★★. Metabolic Fatigue: ★★★★☆." Star ratings read
+    // directly.
+    types: ["neural", "muscular", "connective_tissue", "metabolic"],
+    neural: 5,
+    muscular: 5,
+    connectiveTissue: 5, // same "Mechanical Fatigue: ★★★★★" source (no distinct Connective-Tissue heading)
+    metabolic: 4,
+    technical: 3, // fallback from "Skill Requirement: Intermediate" (minimumTechnicalLevel 3)
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Repeated sprint
+  // training is strongly supported for improving acceleration, repeated
+  // high-intensity performance, anaerobic capacity and athletic
+  // performance across multiple sports." — no hedging language — mapped
+  // to "Level 1 — Scientific consensus".
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate and
+  // Sambo are named but have no `CombatSport` enum counterpart and are
+  // omitted.
+  combatSportRelevance: {
+    boxing: 4,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 3,
+    judo: 4,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Progressions" (Hill Sprints, Resisted Sprints, Reactive Starts,
+  // Flying Sprints, "Sprint to Sprawl", "Sprint to Strike") and "#
+  // Regressions" (Submaximal Sprint, Acceleration Drills, Marching
+  // Drills, Technical Sprint) name no exercise with its own
+  // chapter/catalog id in this repository — "Sprint to Sprawl"/"Sprint to
+  // Strike" are distinct compound-drill names, not standalone
+  // substitution references (the same strict name-matching discipline
+  // already applied to CHIN_UP's own "Weighted Chin-Up" in Lot 2). No
+  // "# Substitution Logic" section exists in this fiche either (checked
+  // directly).
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Assault Bike Intervals
+// Source: 50-exercises/48_ASSAULT_BIKE_INTERVALS
+// -----------------------------------------------------------------------------
+
+/**
+ * Fourth entry of this batch. "# Primary Classification: Combat-Specific
+ * Conditioning", the same framing as the other conditioning-modality
+ * entries above.
+ *
+ * "# Equipment Requirements — Required: Assault Bike, or Echo Bike." No
+ * dedicated `EquipmentType` value exists for an air-resistance bike, and
+ * this is deliberately NOT silently approximated with a plain "bicycle"
+ * concept either (no such value exists in the enum at all — there is no
+ * silent substitution to guard against, only an honest gap to document).
+ * `cardio_machine` is the closest existing generic machine-based-cardio
+ * `EquipmentType` value and is used directly, flagged here as a MODEL
+ * LIMITATION: this single generic value cannot distinguish an Assault
+ * Bike from a Rowing Ergometer (see ROWERG_INTERVALS below, which shares
+ * this exact same equipment atom) — the two remain distinguished by
+ * `movementPatterns`/`physicalQualities`/`forceVectors`, not equipment
+ * eligibility.
+ *
+ * MODEL LIMITATION, flagged explicitly: "# Biomechanical Profile —
+ * Primary Force Vector: Cyclic." No `ForceVector` value represents a
+ * continuously-cycling, non-linear force direction — `"mixed"` is used as
+ * the closest honest generic value, the same escape hatch already used
+ * for its `movementPatterns` primary pattern below.
+ */
+export const ASSAULT_BIKE_INTERVALS: ExerciseDefinition = {
+  id: "assault_bike_intervals",
+  name: "Assault Bike Intervals",
+  module: "conditioning",
+  primaryAdaptation: "conditioning",
+  // "# Capability Mapping — Primary: Anaerobic Power, Work Capacity,
+  // Aerobic Recovery." "Anaerobic Power" has no exact PhysicalQuality
+  // counterpart (only `anaerobic_capacity` exists, no distinct
+  // "anaerobic_power" value) → anaerobic_capacity, the closest honest
+  // match. "Work Capacity" → general_work_capacity (exact). "Aerobic
+  // Recovery" → aerobic_capacity (the underlying aerobic-system quality
+  // this recovery ability draws on). Secondary: "Cardiovascular Fitness"
+  // is already captured by `aerobic_capacity` above and is not
+  // double-counted. "Whole-Body Coordination" → coordination. "Fatigue
+  // Resistance"/"Training Density" excluded (generic/programming
+  // concepts, no distinct PhysicalQuality counterpart).
+  physicalQualities: ["anaerobic_capacity", "general_work_capacity", "aerobic_capacity", "coordination"],
+  // See block comment above for the "mixed" primary-pattern resolution.
+  // "Secondary: Push, Pull, Lower-Body Drive, Brace." "Push"/"Pull" carry
+  // no directional qualifier of their own in this fiche (unlike
+  // HANG_HIGH_PULL's specific "horizontal_pull") — both are already
+  // captured under the primary `"mixed"` cyclic-power resolution and are
+  // not separately force-fitted into `horizontal_push`/`horizontal_pull`.
+  // "Lower-Body Drive" has no distinct MovementPattern counterpart and is
+  // likewise already captured under `"mixed"`. "Brace" → isometric, the
+  // one secondary term with a clean, distinct existing value.
+  movementPatterns: ["mixed", "isometric"],
+  forceVectors: ["mixed"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [{ kind: "equipment", equipment: "cardio_machine" }],
+      },
+    ],
+  },
+  // No space/floor-safety language exists anywhere in this fiche (checked
+  // directly — a fixed-footprint, machine-based exercise) — neither
+  // `sufficient_space` nor `floor_safe` is added, a genuine checked
+  // absence.
+  //
+  // "# Neurological Profile — Skill Requirement: Beginner. Learning
+  // Curve: Very Short."
+  minimumTechnicalLevel: 1,
+  // "# Neurological Profile — Motor Complexity: ★★☆☆☆" (2/5).
+  complexity: "low",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Quadriceps, Gluteus Maximus,
+  // Hamstrings, Calves, Deltoids, Latissimus Dorsi, Core. Secondary
+  // Muscles: Triceps, Biceps, Forearms, Hip Flexors." → thigh
+  // (quadriceps, hamstrings), hip (gluteus maximus, hip flexors),
+  // lower_leg (calves), shoulder (deltoids, latissimus dorsi — matching
+  // BACK_SQUAT's/PULL_UP's own "Latissimus Dorsi" → shoulder
+  // resolution), abdomen (core), upper_arm (triceps, biceps), forearm.
+  bodyRegionsLoaded: ["thigh", "hip", "lower_leg", "shoulder", "abdomen", "upper_arm", "forearm"],
+  contraindications: [
+    { description: "Acute knee injury.", region: "knee", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+    // "Acute Cardiovascular Contraindications" names a systemic condition,
+    // not a localized body-region injury — no `region` value is force-fit
+    // onto it (the field is optional precisely for this case).
+    { description: "Acute cardiovascular contraindications.", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: ★★★★☆. Mechanical
+    // Fatigue: ★★☆☆☆. Metabolic Fatigue: ★★★★★." Star ratings read
+    // directly.
+    types: ["neural", "muscular", "connective_tissue", "metabolic"],
+    neural: 4,
+    muscular: 2,
+    connectiveTissue: 2, // same "Mechanical Fatigue: ★★☆☆☆" source
+    metabolic: 5,
+    technical: 1, // fallback from minimumTechnicalLevel 1
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Air-resistance
+  // cycling is strongly supported for improving anaerobic power, aerobic
+  // fitness and repeated high-intensity performance..." — no hedging
+  // language — mapped to "Level 1 — Scientific consensus".
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate and
+  // Sambo are named but have no `CombatSport` enum counterpart and are
+  // omitted.
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 4,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Progressions" names "Sprint Intervals" — an exact match, integrated
+  // in this same batch → sprint_intervals. "Longer Intervals", "Reduced
+  // Recovery", "Power Targets" and "Repeated Sprint Protocols" name no
+  // exercise with its own chapter/catalog id. "# Regressions" (Moderate
+  // Intensity, Long Recovery, Aerobic Intervals) likewise names none.
+  substitutionExerciseIds: ["sprint_intervals"],
+};
+
+// -----------------------------------------------------------------------------
+// RowErg Intervals
+// Source: 50-exercises/49_ROWERG_INTERVALS
+// -----------------------------------------------------------------------------
+
+/**
+ * Fifth and final entry of this batch. "# Primary Classification:
+ * Combat-Specific Conditioning", the same framing as the other
+ * conditioning-modality entries above.
+ *
+ * BUSINESS DISTINCTION from BARBELL_ROW/CHEST_SUPPORTED_ROW, explicitly
+ * verified before writing began: unlike those two loaded, position-fixed
+ * pulling exercises, this fiche's own Movement Pattern is "# Movement
+ * Pattern — Primary: Horizontal Pull. Secondary: Hip Hinge, Leg Drive,
+ * Brace, Whole-Body Coordination" — a continuous, machine-based,
+ * whole-body cyclical action combining leg drive with the pull, not an
+ * isolated upper-body row. This is the FIRST entry in this batch whose
+ * primary pattern maps cleanly, directly to an existing MovementPattern
+ * value (`horizontal_pull`) with no `"mixed"` escape hatch needed, unlike
+ * ASSAULT_BIKE_INTERVALS's own genuinely ambiguous "Whole-Body Cyclic
+ * Power" above.
+ *
+ * "# Equipment Requirements — Required: Concept2 RowErg, or Equivalent
+ * Rowing Ergometer." No dedicated `EquipmentType` value exists for a
+ * rowing ergometer either; `cardio_machine` is used as the same closest
+ * honest generic value already used for ASSAULT_BIKE_INTERVALS above — a
+ * shared MODEL LIMITATION, not a silent approximation (see that entry's
+ * own block comment for the full reasoning).
+ */
+export const ROWERG_INTERVALS: ExerciseDefinition = {
+  id: "rowerg_intervals",
+  name: "RowErg Intervals",
+  module: "conditioning",
+  primaryAdaptation: "conditioning",
+  // "# Capability Mapping — Primary: Whole-Body Work Capacity, Posterior
+  // Chain Endurance, Aerobic Power." → general_work_capacity (exact,
+  // from "Whole-Body Work Capacity"), muscular_endurance (from "Posterior
+  // Chain Endurance" — a localized endurance quality, matching BATTLE_
+  // ROPES's own "Shoulder Endurance" resolution), aerobic_power (exact
+  // match). Secondary: "Anaerobic Capacity" → anaerobic_capacity (exact).
+  // "Movement Coordination" → coordination. "Pulling Endurance" is
+  // already captured by `muscular_endurance` above (both name the same
+  // localized-endurance demand) and is not double-counted. "Fatigue
+  // Resistance" excluded (generic, no distinct counterpart).
+  physicalQualities: ["general_work_capacity", "muscular_endurance", "aerobic_power", "anaerobic_capacity", "coordination"],
+  // See block comment above for the clean `horizontal_pull` primary-
+  // pattern match. "Hip Hinge" → hinge. "Brace" → isometric. "Leg Drive"
+  // has no distinct MovementPattern counterpart and is not force-fitted.
+  // "Whole-Body Coordination" is already captured via `coordination`
+  // above and is not represented again here.
+  movementPatterns: ["horizontal_pull", "hinge", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Horizontal.
+  // Secondary Force Vector: Sagittal." "Sagittal" names a PLANE of
+  // motion, not a ForceVector value (no such value exists in the enum) —
+  // it is not force-fit into an unrelated ForceVector entry and is
+  // deliberately excluded here.
+  forceVectors: ["horizontal"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [{ kind: "equipment", equipment: "cardio_machine" }],
+      },
+    ],
+  },
+  // No space/floor-safety language exists anywhere in this fiche (checked
+  // directly — a fixed-footprint, machine-based exercise, same as
+  // ASSAULT_BIKE_INTERVALS above) — neither `sufficient_space` nor
+  // `floor_safe` is added.
+  //
+  // "# Neurological Profile — Skill Requirement: Beginner. Learning
+  // Curve: Short." conservatively adjusted upward by one level: the
+  // later "# Skill Requirement" heading adds an explicit caveat —
+  // "Basic rowing technique should be learned before maximal intervals" —
+  // a genuine textual signal that the BASE Beginner rating undersells the
+  // technical floor for this exercise's own prescribed maximal-intensity
+  // use, matching this whole project's established discipline of
+  // deliberate, documented conservative upward adjustments (not a full
+  // jump to "Intermediate", since this fiche never uses that word the way
+  // HEAVY_BAG_POWER_INTERVALS's own "Intermediate" rating did).
+  minimumTechnicalLevel: 2,
+  // "# Neurological Profile — Motor Complexity: ★★★☆☆" (3/5).
+  complexity: "moderate",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Quadriceps, Gluteus Maximus,
+  // Hamstrings, Latissimus Dorsi, Erector Spinae, Core. Secondary
+  // Muscles: Biceps, Forearms, Calves, Posterior Deltoids." → thigh
+  // (quadriceps, hamstrings), hip (gluteus maximus), shoulder (latissimus
+  // dorsi, posterior deltoids), lumbar_spine (erector spinae), abdomen
+  // (core), upper_arm (biceps), forearm, lower_leg (calves).
+  bodyRegionsLoaded: ["thigh", "hip", "shoulder", "lumbar_spine", "abdomen", "upper_arm", "forearm", "lower_leg"],
+  contraindications: [
+    { description: "Acute lumbar injury.", region: "lumbar_spine", prohibitedPatterns: ["horizontal_pull", "hinge", "isometric"], absolute: true },
+    { description: "Acute rib injury.", region: "ribcage", prohibitedPatterns: ["horizontal_pull", "hinge", "isometric"], absolute: true },
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["horizontal_pull", "hinge", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: ★★★★☆. Mechanical
+    // Fatigue: ★★☆☆☆. Metabolic Fatigue: ★★★★★." Star ratings read
+    // directly.
+    types: ["neural", "muscular", "connective_tissue", "metabolic"],
+    neural: 4,
+    muscular: 2,
+    connectiveTissue: 2, // same "Mechanical Fatigue: ★★☆☆☆" source
+    metabolic: 5,
+    technical: 2, // fallback from minimumTechnicalLevel 2
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. High-intensity
+  // rowing intervals effectively improve aerobic capacity, anaerobic
+  // performance and whole-body conditioning..." — no hedging language —
+  // mapped to "Level 1 — Scientific consensus".
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate and
+  // Sambo are named but have no `CombatSport` enum counterpart and are
+  // omitted.
+  combatSportRelevance: {
+    boxing: 4,
+    kickboxing: 4,
+    muay_thai: 4,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Progressions" names "Sprint Intervals" — an exact match, integrated
+  // in this same batch → sprint_intervals (the same one-directional
+  // substitution already named by ASSAULT_BIKE_INTERVALS above; neither
+  // SPRINT_INTERVALS's own Progressions/Regressions names either machine
+  // modality back, a faithfully preserved asymmetry matching the
+  // HEAVY_BAG_POWER_INTERVALS/SHADOW_BOXING precedent from Lot 6).
+  // "Longer Intervals", "Reduced Recovery", "Power Targets" and "Mixed
+  // Energy System Sessions" name no exercise with its own chapter/catalog
+  // id. "# Regressions" (Moderate Pace, Technique Intervals, Long
+  // Recovery) likewise names none.
+  substitutionExerciseIds: ["sprint_intervals"],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -10305,4 +11022,9 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   HEAVY_BAG_POWER_INTERVALS,
   SHADOW_BOXING,
   FOOTWORK_DRILLS,
+  SLED_PUSH,
+  BATTLE_ROPES,
+  SPRINT_INTERVALS,
+  ASSAULT_BIKE_INTERVALS,
+  ROWERG_INTERVALS,
 ];
