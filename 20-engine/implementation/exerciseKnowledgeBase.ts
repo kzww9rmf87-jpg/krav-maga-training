@@ -4805,6 +4805,828 @@ export const ZERCHER_CARRY: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Back Squat
+// Source: 50-exercises/01_BACK_SQUAT
+// -----------------------------------------------------------------------------
+
+/**
+ * First entry of the "Lot 1 — Force fondamentale bas du corps" batch, migrated
+ * alongside FRONT_SQUAT/TRAP_BAR_DEADLIFT/ROMANIAN_DEADLIFT/HIP_THRUST/
+ * BULGARIAN_SPLIT_SQUAT. Source is a flat, standalone file under
+ * `50-exercises/` (no chapter folder, no `00_OVERVIEW.md`/`90_COMPARISON.md`
+ * wrapper, no file extension) — a genuinely different, older documentary
+ * layer than every prior 6X-numbered chapter batch, confirmed to have no
+ * newer chapter fiche superseding it (unlike `farmer_carry`/`box_jump`/etc.).
+ * `exercisePrescriptionRegistry.ts` has a corroborating `backSquatEntry`
+ * (`moduleId: "strength"`, `requiredEquipmentCapabilities: ["barbell", "rack",
+ * "plates"]`, `laterality: "bilateral"`) — used only to corroborate, not
+ * override, per the project's established precedence.
+ *
+ * DOCUMENTATION-FORMAT LIMITATION, flagged explicitly: unlike every fiche
+ * migrated so far (62_CORE through 67_BALLISTICS), this file has NO "Space
+ * Requirement"/"Space Requirements" heading and no surface-safety language
+ * anywhere (checked directly — no occurrence of "space", "surface", "floor",
+ * or "slip" outside the unrelated coaching cue "Push the floor away").
+ * Neither `sufficient_space` nor `floor_safe` is added to `requirements` for
+ * this reason — inventing a plausible-sounding minimum would be exactly the
+ * silent approximation this project's methodology forbids. This same gap
+ * recurs identically across all six entries in this batch and is noted once
+ * here as the batch-wide documentation-format limitation.
+ *
+ * "# Equipment Requirements — Required: Barbell, Rack, Weight Plates." All
+ * three required atoms map directly to existing `EquipmentType` values.
+ * "Optional — Weightlifting Shoes, Safety Bars, Belt, Knee Sleeves" and
+ * "Safety Arms Recommended: Yes" (Safety Profile) are RECOMMENDATIONS, not
+ * requirements — "Safety Bars"/"Safety Arms" never appear under "Required",
+ * only "Optional" and "Recommended", so no `rigid_anchor_support` or other
+ * safety-equipment atom is added; a recommended safety practice is not a
+ * documented eligibility gate.
+ *
+ * "# Biomechanical Profile — Primary Force Vector: Vertical. Secondary Force
+ * Vector: Minimal Horizontal." The word "Minimal" explicitly hedges the
+ * secondary vector as immaterial — `forceVectors: ["vertical"]` only, not
+ * `["vertical", "horizontal"]`. This same "Minimal Horizontal" hedge recurs
+ * for FRONT_SQUAT and BULGARIAN_SPLIT_SQUAT below and is resolved identically
+ * each time.
+ */
+export const BACK_SQUAT: ExerciseDefinition = {
+  id: "back_squat",
+  name: "Back Squat",
+  module: "strength",
+  // "# Primary Classification: Strength" (explicit).
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Maximum Strength, Relative Strength" →
+  // absolute_strength, relative_strength (exact matches). "Secondary:
+  // Explosive Strength" → explosive_strength (exact). "Core Stability" →
+  // trunk_strength (matching this catalog's established bracing-under-load
+  // convention). "Movement Coordination" → coordination. "Mechanical
+  // Robustness" → tissue_capacity (matching PLATE_PINCH's own "Tendon
+  // Robustness" → tissue_capacity precedent). "Force Production" is generic,
+  // non-specific framing repeated across this whole batch with no distinct
+  // PhysicalQuality counterpart, and is deliberately never force-mapped
+  // anywhere in this batch — noted once here, applying uniformly below.
+  physicalQualities: ["absolute_strength", "relative_strength", "explosive_strength", "trunk_strength", "coordination", "tissue_capacity"],
+  // "# Movement Pattern — Primary: Squat." → squat. "Secondary: Brace" →
+  // isometric. "Hip Extension"/"Knee Extension"/"Ankle Plantarflexion" are
+  // joint-action-level detail already implied by `squat` itself and are not
+  // separately force-fitted into a second MovementPattern value.
+  movementPatterns: ["squat", "isometric"],
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "barbell" },
+          { kind: "equipment", equipment: "rack" },
+          { kind: "equipment", equipment: "plates" },
+        ],
+      },
+    ],
+  },
+  // "# Skill Requirement: Intermediate" — no numeric complexity level is
+  // given anywhere in this file's format (unlike AB_WHEEL's own explicit
+  // "Complexity Level: 3"); "Intermediate" is mapped to the same
+  // minimumTechnicalLevel 3 / "moderate" pairing used throughout this
+  // catalog for that exact word.
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // No "Unilateral or Bilateral" field exists in this format; "bilateral
+  // lower-body compound exercise" (Purpose) is explicit and unambiguous.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Quadriceps, Gluteus Maximus,
+  // Adductor Magnus" → thigh (quadriceps, adductor magnus), hip (gluteus
+  // maximus). Secondary Muscles (Hamstrings, Soleus, Gastrocnemius) and
+  // Stabilizers (Erector Spinae, Abdominals, Obliques, Upper Back, Hip
+  // Stabilizers) are excluded, matching this catalog's established
+  // primary-muscles-only discipline.
+  bodyRegionsLoaded: ["thigh", "hip"],
+  // "# Contraindications", quoted one item per source line. This file's
+  // format has a single flat list (no "Absolute"/"Relative" tiering the way
+  // 62_CORE's fiches sometimes split them) — treated as the hard-exclusion
+  // tier, matching the registry's own independent treatment of this same
+  // list as blocking pain/injury conditions. `region` is populated where a
+  // clean, unambiguous BodyRegion match exists.
+  contraindications: [
+    { description: "Acute knee injury.", region: "knee", prohibitedPatterns: ["squat", "isometric"], absolute: true },
+    { description: "Acute hip injury.", region: "hip", prohibitedPatterns: ["squat", "isometric"], absolute: true },
+    { description: "Acute lumbar injury.", region: "lumbar_spine", prohibitedPatterns: ["squat", "isometric"], absolute: true },
+    { description: "Severe mobility restrictions.", prohibitedPatterns: ["squat", "isometric"], absolute: true },
+    { description: "Poor bracing ability.", prohibitedPatterns: ["squat", "isometric"], absolute: true },
+    { description: "Pain during squatting.", prohibitedPatterns: ["squat", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Very High. Mechanical
+    // Fatigue: Very High. Metabolic Fatigue: Moderate." mapped via a
+    // Low=1/Moderate=2/Moderate-to-High=3/High=4/Very-High=5 word scale
+    // (this file's format uses qualitative words, not 62_CORE's X/5
+    // numbers). "Neuromuscular Fatigue" → neural. "Mechanical Fatigue" →
+    // muscular. No distinct "Connective-Tissue Fatigue" heading exists
+    // anywhere in this file's format (checked directly, and absent across
+    // this entire batch) — `connectiveTissue` is inferred FROM the same
+    // "Mechanical Fatigue" rating used for `muscular` (mechanical loading
+    // stresses both the contractile and tendon/connective structures, and
+    // this is the only available anchor), flagged here as an inference
+    // rather than a direct quote, applying identically to every entry in
+    // this batch.
+    types: ["neural", "muscular", "connective_tissue"],
+    neural: 5,
+    muscular: 5,
+    connectiveTissue: 5, // inferred from "Mechanical Fatigue: Very High" — see comment above
+    metabolic: 2,
+    technical: 3, // fallback from "Skill Requirement: Intermediate" (minimumTechnicalLevel 3)
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. The Back Squat is among
+  // the most extensively researched resistance exercises and demonstrates
+  // strong evidence..." This maps to the CAS Evidence Framework's own
+  // definition (20-engine/02_EXERCISE_KNOWLEDGE_BASE.md: "Level 1 —
+  // Scientific consensus") — a genuinely different, stronger claim than the
+  // "Level 2 — Expert practice"/"Level 3 — Internal CAS experimentation"
+  // framing used for every prior evidenceLevel-populated entry in this
+  // catalog so far. This is the first use of `"level_1"` anywhere in
+  // `EXERCISE_KNOWLEDGE_BASE`, applying identically across this whole batch
+  // given every one of its six fiches makes the same "extensively
+  // researched"/"strongly supported by current literature" claim.
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star (5 stars = 5,
+  // 1 star = 1). Savate and Sambo are named in this table but have no
+  // `CombatSport` enum counterpart and are omitted rather than force-mapped,
+  // matching the established precedent from every prior batch.
+  combatSportRelevance: {
+    boxing: 3,
+    kickboxing: 3,
+    muay_thai: 3,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 4,
+    judo: 5,
+    mma: 5,
+    krav_maga: 4,
+  },
+  // "# Progressions" names "Front Squat" → front_squat (integrated in this
+  // same batch, real catalog id). No dedicated "Substitution Logic" section
+  // exists in this file's format (unlike every 62_CORE-and-later fiche) —
+  // Progressions/Regressions/Variations are used as the substitute source
+  // instead, a genuine sourcing-convention divergence for this batch, noted
+  // once here. No other Progression/Regression/Variation name resolves to a
+  // real catalog id.
+  substitutionExerciseIds: ["front_squat"],
+};
+
+// -----------------------------------------------------------------------------
+// Front Squat
+// Source: 50-exercises/02_FRONT_SQUAT
+// -----------------------------------------------------------------------------
+
+/**
+ * Second entry of this batch. `exercisePrescriptionRegistry.ts` has a
+ * corroborating `frontSquatEntry` (`requiredEquipmentCapabilities: ["barbell",
+ * "rack", "plates"]`, `laterality: "bilateral"`).
+ *
+ * Same documentation-format limitation as BACK_SQUAT: no "Space Requirement"
+ * heading and no surface-safety language anywhere in this fiche (checked
+ * directly) — neither `sufficient_space` nor `floor_safe` is added.
+ *
+ * Central business question for this entry, central to distinguishing it
+ * from BACK_SQUAT: "Front Rack" is an anatomical BAR POSITION (the barbell
+ * rests across the anterior shoulders, held by the hands), not a distinct
+ * physical implement or equipment atom — it is represented entirely through
+ * biomechanical classification (`physicalQualities`, `bodyRegionsLoaded`,
+ * `contraindications`), never as a `requirements` gate. Required equipment
+ * remains identical to BACK_SQUAT (Barbell, Rack, Weight Plates) — the two
+ * exercises share the same physical setup and differ only in bar position
+ * and its downstream biomechanical consequences.
+ *
+ * "# Joint Profile — Secondary Joints: Thoracic Spine, Shoulders, Wrists" —
+ * a genuine divergence from BACK_SQUAT's own Secondary Joints (Thoracic
+ * Spine, Lumbar Spine, no Shoulders/Wrists) — grounds this entry's own
+ * wrist/shoulder-specific contraindications below, directly reflecting the
+ * anterior-rack position's distinct joint demand.
+ */
+export const FRONT_SQUAT: ExerciseDefinition = {
+  id: "front_squat",
+  name: "Front Squat",
+  module: "strength",
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Maximum Strength, Relative Strength" →
+  // absolute_strength, relative_strength. "Secondary: Explosive Strength" →
+  // explosive_strength. "Core Stability" → trunk_strength. "Postural
+  // Control" → stability — present here but NOT in BACK_SQUAT's own
+  // Capability Mapping (checked directly), the clearest single-field
+  // distinction between the two exercises: the anterior-rack position
+  // demands active postural/thoracic control that the back-rack position
+  // does not document. "Movement Coordination" → coordination. "Force
+  // Production" excluded, matching BACK_SQUAT's own comment. Unlike
+  // BACK_SQUAT, no "Mechanical Robustness" capability is named anywhere in
+  // this fiche (checked directly) — tissue_capacity is deliberately NOT
+  // added, a second genuine divergence from BACK_SQUAT.
+  physicalQualities: ["absolute_strength", "relative_strength", "explosive_strength", "trunk_strength", "stability", "coordination"],
+  // "# Movement Pattern — Primary: Squat." → squat. "Secondary: Brace" →
+  // isometric. "Hip Extension"/"Knee Extension"/"Thoracic Extension" are
+  // joint-action-level detail already implied by `squat` and not separately
+  // force-fitted.
+  movementPatterns: ["squat", "isometric"],
+  // "Secondary Force Vector: Minimal Horizontal" — same explicit "Minimal"
+  // hedge as BACK_SQUAT, excluded for the same reason.
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "barbell" },
+          { kind: "equipment", equipment: "rack" },
+          { kind: "equipment", equipment: "plates" },
+        ],
+      },
+    ],
+  },
+  // "# Skill Requirement: Intermediate. Adequate front rack mobility is
+  // required." — same word, same mapping as BACK_SQUAT.
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Quadriceps, Gluteus Maximus,
+  // Adductor Magnus" — identical primary-muscle list to BACK_SQUAT → thigh,
+  // hip. The two exercises' real distinctions live in `physicalQualities`,
+  // `contraindications` and Joint Profile below, not in this field — a
+  // faithful reflection of the source documentation, not an oversight.
+  bodyRegionsLoaded: ["thigh", "hip"],
+  // "# Contraindications", quoted one item per source line — genuinely
+  // different from BACK_SQUAT's own list (no knee/hip/lumbar items here;
+  // wrist/shoulder/thoracic items instead), directly grounded in this
+  // fiche's own distinct Joint Profile (see block comment above).
+  contraindications: [
+    { description: "Acute wrist injury.", region: "wrist", prohibitedPatterns: ["squat", "isometric"], absolute: true },
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["squat", "isometric"], absolute: true },
+    { description: "Thoracic mobility restrictions.", region: "thoracic_spine", prohibitedPatterns: ["squat", "isometric"], absolute: true },
+    { description: "Pain during squatting.", prohibitedPatterns: ["squat", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: High. Mechanical Fatigue:
+    // High. Metabolic Fatigue: Moderate." "Slightly lower systemic fatigue
+    // than the Back Squat" (explicit prose) corroborates High(4) < Very
+    // High(5) here relative to BACK_SQUAT's own ratings. Same
+    // muscular-shared connectiveTissue inference as BACK_SQUAT.
+    types: ["neural", "muscular", "connective_tissue"],
+    neural: 4,
+    muscular: 4,
+    connectiveTissue: 4, // inferred from "Mechanical Fatigue: High" — see BACK_SQUAT's own comment
+    metabolic: 2,
+    technical: 3, // fallback from "Skill Requirement: Intermediate"
+  },
+  // Same "★★★★★"/CAS Evidence Framework "Level 1 — Scientific consensus"
+  // resolution as BACK_SQUAT — see that entry's own comment.
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate is
+  // named in this table but has no `CombatSport` enum counterpart and is
+  // omitted rather than force-mapped, matching BACK_SQUAT's own identical
+  // exclusion.
+  combatSportRelevance: {
+    boxing: 3,
+    kickboxing: 3,
+    muay_thai: 3,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 4,
+    judo: 5,
+    mma: 5,
+    krav_maga: 4,
+  },
+  // "# Progressions"/"# Regressions"/"# Variations" name no exercise with
+  // its own catalog id anywhere in this fiche (checked directly) — "Goblet
+  // Squat", "Landmine Squat" and "Bodyweight Squat" have no dedicated
+  // chapter/catalog id. Unlike BACK_SQUAT (which names "Front Squat" in its
+  // own Progressions), this fiche does not name "Back Squat" anywhere — a
+  // genuine, faithfully-preserved asymmetry between the two entries, not a
+  // gap to "fix" by inventing a reciprocal reference.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Trap Bar Deadlift
+// Source: 50-exercises/03_TRAP_BAR_DEADLIFT
+// -----------------------------------------------------------------------------
+
+/**
+ * Third entry of this batch. `exercisePrescriptionRegistry.ts` has a
+ * corroborating `trapBarDeadliftEntry` (`requiredEquipmentCapabilities:
+ * ["trap_bar", "plates"]`, no `"rack"` and no `"barbell"` — matching this
+ * entry's own equipment resolution exactly).
+ *
+ * Same documentation-format limitation as BACK_SQUAT: no space/floor-safety
+ * language anywhere in this fiche (checked directly).
+ *
+ * Central business question, explicitly flagged before writing began: "#
+ * Equipment Requirements — Required: Trap Bar, Weight Plates." names ONLY
+ * the trap bar, never a standard barbell as an interchangeable alternative
+ * — no `any_of` equipment clause is built here. A standard barbell is never
+ * mentioned anywhere in this fiche (checked directly), so silently allowing
+ * `barbell` as an equivalent would be exactly the kind of unjustified
+ * equipment substitution this project's methodology forbids. `trap_bar` (a
+ * real, existing `EquipmentType` value) is used as the sole required
+ * implement, together with `plates`.
+ *
+ * "# Movement Pattern — Primary: Hinge. Secondary: Squat, Brace, Hip
+ * Extension, Knee Extension, Loaded Carry Pattern." Both "Hinge" AND
+ * "Squat" are explicitly named (the Philosophy section states directly:
+ * "The Trap Bar Deadlift combines the advantages of a squat and a
+ * deadlift"), so both `hinge` and `squat` are included — a genuine hybrid
+ * pattern, not an either/or choice. "Loaded Carry Pattern" is also named
+ * explicitly and literally as its own distinct secondary pattern (referring
+ * to the brief farmer-hold-like position of the loaded handles at the sides
+ * before/during the pull) — mapped directly to `carry`, honoring the
+ * fiche's own explicit wording rather than omitting it because it reads
+ * unusually for a deadlift. "Brace" → isometric.
+ */
+export const TRAP_BAR_DEADLIFT: ExerciseDefinition = {
+  id: "trap_bar_deadlift",
+  name: "Trap Bar Deadlift",
+  module: "strength",
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Maximum Strength, Relative Strength,
+  // Explosive Strength" → absolute_strength, relative_strength,
+  // explosive_strength. "Secondary: Rate of Force Development" →
+  // rate_of_force_development (exact match — the first entry in this batch
+  // to earn this quality, reflecting this fiche's own explicit "explosive
+  // power"/"acceleration" framing). "Acceleration" → acceleration (exact
+  // match). "Core Stability" → trunk_strength. "Mechanical Robustness" →
+  // tissue_capacity. "Power Production" has no distinct counterpart beyond
+  // explosive_strength/rate_of_force_development already listed and is not
+  // separately force-fitted.
+  physicalQualities: ["absolute_strength", "relative_strength", "explosive_strength", "rate_of_force_development", "acceleration", "trunk_strength", "tissue_capacity"],
+  movementPatterns: ["hinge", "squat", "isometric", "carry"],
+  // "Secondary Force Vector: Minimal Horizontal" — same explicit "Minimal"
+  // hedge as BACK_SQUAT/FRONT_SQUAT, excluded for the same reason.
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "trap_bar" },
+          { kind: "equipment", equipment: "plates" },
+        ],
+      },
+    ],
+  },
+  // "# Skill Requirement: Intermediate. Suitable for most athletes after
+  // basic instruction." — same word, same mapping as BACK_SQUAT. Note this
+  // fiche's own "Learning Curve: Short" and "Automaticity Potential: Very
+  // High" (Neurological Profile) suggest an easier practical learning
+  // experience than BACK_SQUAT/FRONT_SQUAT despite sharing the identical
+  // "Intermediate" Skill Requirement word — not force-mapped to a lower
+  // numeric level without a distinct Skill Requirement word to anchor it.
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Gluteus Maximus, Quadriceps,
+  // Hamstrings, Adductor Magnus" → hip (gluteus maximus), thigh
+  // (quadriceps, hamstrings, adductor magnus).
+  bodyRegionsLoaded: ["hip", "thigh"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute lumbar injury.", region: "lumbar_spine", prohibitedPatterns: ["hinge", "squat", "isometric", "carry"], absolute: true },
+    { description: "Acute hip injury.", region: "hip", prohibitedPatterns: ["hinge", "squat", "isometric", "carry"], absolute: true },
+    { description: "Pain during pulling.", prohibitedPatterns: ["hinge", "squat", "isometric", "carry"], absolute: true },
+    { description: "Insufficient hip mobility.", region: "hip", prohibitedPatterns: ["hinge", "squat", "isometric", "carry"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: High. Mechanical Fatigue:
+    // Moderate to High. Metabolic Fatigue: Moderate." "Lower systemic
+    // fatigue than conventional deadlifts at equivalent intensity"
+    // (explicit prose) corroborates a lower rating than ROMANIAN_DEADLIFT's
+    // own below. This fiche's own separate Biomechanical Profile heading
+    // ("Mechanical Demand: Very High") is a within-set intensity
+    // descriptor, distinct from and NOT conflated with this Fatigue
+    // Profile's own "Mechanical Fatigue: Moderate to High" (a post-set
+    // recovery-cost descriptor) — the two dimensions answer different
+    // questions and are sourced independently throughout this batch.
+    types: ["neural"],
+    neural: 4,
+    muscular: 3,
+    connectiveTissue: 3, // inferred from "Mechanical Fatigue: Moderate to High"
+    metabolic: 2,
+    technical: 3, // fallback from "Skill Requirement: Intermediate"
+  },
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star.
+  combatSportRelevance: {
+    boxing: 4,
+    kickboxing: 4,
+    muay_thai: 4,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 4,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Progressions"/"# Regressions"/"# Variations" name no exercise with
+  // its own catalog id anywhere in this fiche (checked directly) —
+  // "Kettlebell Deadlift" is not `romanian_deadlift` (a different named
+  // exercise, never called "Romanian Deadlift" in this fiche) and has no
+  // dedicated chapter/catalog id of its own.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Romanian Deadlift
+// Source: 50-exercises/04_ROMANIAN_DEADLIFT
+// -----------------------------------------------------------------------------
+
+/**
+ * Fourth entry of this batch. `exercisePrescriptionRegistry.ts` has a
+ * corroborating `romanianDeadliftEntry` (`requiredEquipmentCapabilities:
+ * ["barbell", "plates"]`, no `"rack"` — matching this entry's own equipment
+ * resolution exactly).
+ *
+ * Same documentation-format limitation as BACK_SQUAT: no space/floor-safety
+ * language anywhere in this fiche (checked directly).
+ *
+ * "# Equipment Requirements — Required: Barbell, Weight Plates. Optional:
+ * Dumbbells, Kettlebells, Straps, Belt." Dumbbells/Kettlebells are listed
+ * only as OPTIONAL accessory items here, and the fiche's own "# Variations"
+ * section separately names "Barbell"/"Dumbbell"/"Kettlebell" as distinct
+ * named variations (matching AB_WHEEL's/PUSH_PRESS's own established
+ * precedent that documented implement variations are separate exercises,
+ * not an `any_of` equivalence group for this one) — required equipment
+ * stays strictly `barbell` + `plates`, with no rack (never mentioned, not
+ * even under Optional).
+ */
+export const ROMANIAN_DEADLIFT: ExerciseDefinition = {
+  id: "romanian_deadlift",
+  name: "Romanian Deadlift",
+  module: "strength",
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Maximum Strength, Relative Strength,
+  // Posterior Chain Strength" → absolute_strength, relative_strength.
+  // "Posterior Chain Strength" is a body-region-specific strength
+  // descriptor with no distinct PhysicalQuality counterpart of its own (no
+  // "posterior_chain_strength" value exists) and is not force-fitted —
+  // already substantively covered by `bodyRegionsLoaded` below. "Secondary:
+  // Eccentric Strength" is a contraction-type-specific descriptor, not a
+  // separate quality beyond the general strength values already listed,
+  // and is not force-mapped either. "Core Stability" → trunk_strength.
+  // "Movement Coordination" → coordination. "Injury Resilience" →
+  // tissue_capacity (matching the "Mechanical Robustness" → tissue_capacity
+  // precedent used throughout this batch — a close conceptual match for a
+  // connective/tendon-capacity-flavoured quality). "Force Production"
+  // excluded, matching the whole-batch convention.
+  physicalQualities: ["absolute_strength", "relative_strength", "trunk_strength", "coordination", "tissue_capacity"],
+  // "# Movement Pattern — Primary: Hinge. Secondary: Brace, Hip Extension,
+  // Hip Flexion, Posterior Chain Loading." → hinge, isometric (from
+  // Brace). "Hip Extension"/"Hip Flexion"/"Posterior Chain Loading" are
+  // joint-action-level detail already implied by `hinge` and not separately
+  // force-fitted. Unlike TRAP_BAR_DEADLIFT, no "Squat" or "Loaded Carry
+  // Pattern" is named anywhere in this fiche (checked directly) — a
+  // genuine, textually-grounded distinction between the two deadlift
+  // variants: TRAP_BAR_DEADLIFT explicitly combines squat and hinge
+  // mechanics with a carry-like load position; ROMANIAN_DEADLIFT is a pure
+  // hip-hinge with the bar always in the hands, never positioned like a
+  // farmer-carry implement.
+  movementPatterns: ["hinge", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Vertical." No
+  // "Secondary Force Vector" heading exists in this fiche at all (checked
+  // directly, unlike BACK_SQUAT/FRONT_SQUAT/TRAP_BAR_DEADLIFT's own
+  // "Minimal Horizontal" secondary vector) — `forceVectors: ["vertical"]`
+  // with no secondary value to consider.
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "barbell" },
+          { kind: "equipment", equipment: "plates" },
+        ],
+      },
+    ],
+  },
+  // "# Skill Requirement: Intermediate. Requires consistent hinge mechanics
+  // before heavy loading." — same word, same mapping as BACK_SQUAT.
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Hamstrings, Gluteus Maximus,
+  // Adductor Magnus" → thigh (hamstrings, adductor magnus), hip (gluteus
+  // maximus).
+  bodyRegionsLoaded: ["hip", "thigh"],
+  // "# Contraindications", quoted one item per source line. "Acute
+  // Hamstring Injury" is mapped to `thigh` — no dedicated "hamstring"
+  // BodyRegion value exists, and `thigh` is the same region already used
+  // for hamstring/quadriceps/adductor musculature throughout this batch's
+  // own `bodyRegionsLoaded` mapping.
+  contraindications: [
+    { description: "Acute hamstring injury.", region: "thigh", prohibitedPatterns: ["hinge", "isometric"], absolute: true },
+    { description: "Acute lumbar injury.", region: "lumbar_spine", prohibitedPatterns: ["hinge", "isometric"], absolute: true },
+    { description: "Hip pain during hinging.", region: "hip", prohibitedPatterns: ["hinge", "isometric"], absolute: true },
+    { description: "Poor hinge mechanics.", prohibitedPatterns: ["hinge", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: High. Metabolic Fatigue: Moderate." "High local fatigue in
+    // the hamstrings" (explicit prose) corroborates the elevated
+    // `muscular`/`connectiveTissue` ratings despite a comparatively low
+    // `neural` rating — the clearest fatigue-profile distinction in this
+    // batch between a neurally-demanding lift (TRAP_BAR_DEADLIFT, BACK_SQUAT)
+    // and a locally/eccentrically-demanding one (this entry).
+    types: ["muscular", "connective_tissue"],
+    neural: 2,
+    muscular: 4,
+    connectiveTissue: 4, // inferred from "Mechanical Fatigue: High"
+    metabolic: 2,
+    technical: 3, // fallback from "Skill Requirement: Intermediate"
+  },
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star.
+  combatSportRelevance: {
+    boxing: 4,
+    kickboxing: 4,
+    muay_thai: 4,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 4,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Progressions"/"# Regressions"/"# Variations" name no exercise with
+  // its own catalog id anywhere in this fiche (checked directly).
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Hip Thrust
+// Source: 50-exercises/05_HIP_THRUST
+// -----------------------------------------------------------------------------
+
+/**
+ * Fifth entry of this batch. `exercisePrescriptionRegistry.ts` has a
+ * corroborating `hipThrustEntry` (`requiredEquipmentCapabilities: ["barbell",
+ * "bench", "plates"]` — matching this entry's own equipment resolution
+ * exactly; `role: "accessory"`, not `"primary"` — a registry-layer
+ * distinction that does not itself change this entry's own
+ * `ExerciseDefinition` fields, which have no `role` concept).
+ *
+ * Same documentation-format limitation as BACK_SQUAT: no space/floor-safety
+ * language anywhere in this fiche (checked directly).
+ *
+ * "# Equipment Requirements — Required: Barbell, Bench, Weight Plates.
+ * Optional: Resistance Bands, Hip Pad, Smith Machine." "Hip Pad" — the
+ * central business question flagged before writing began for this
+ * specific exercise — is explicitly listed under OPTIONAL, never Required:
+ * comfort/protection for the bar-on-hips contact point, not a documented
+ * eligibility gate. No `knee_protection_pad`-style dorsal/hip-contact
+ * capability is invented for it, matching the same
+ * comfort-vs-safety-required distinction already applied to AB_WHEEL's own
+ * "kneel on a pad if required for comfort" and DEAD_BUG's/HOLLOW_BODY_HOLD's
+ * optional exercise mats. "Smith Machine" is also Optional/a named
+ * "Variation", not an equivalent required implement — no `any_of` is built.
+ */
+export const HIP_THRUST: ExerciseDefinition = {
+  id: "hip_thrust",
+  name: "Hip Thrust",
+  module: "strength",
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Maximum Strength, Relative Strength,
+  // Explosive Hip Power" → absolute_strength, relative_strength,
+  // explosive_strength ("Explosive Hip Power" is a region-flavoured naming
+  // of the same underlying quality, folded into the generic value the same
+  // way FARMER_CARRY's own "Support-Grip Strength" folded into
+  // grip_strength). "Secondary: Rate of Force Development" →
+  // rate_of_force_development. "Acceleration" → acceleration. "Posterior
+  // Chain Strength" excluded, matching ROMANIAN_DEADLIFT's own identical
+  // exclusion. "Core Stability" → trunk_strength. "Mechanical Robustness" →
+  // tissue_capacity.
+  physicalQualities: ["absolute_strength", "relative_strength", "explosive_strength", "rate_of_force_development", "acceleration", "trunk_strength", "tissue_capacity"],
+  // "# Movement Pattern — Primary: Hip Hinge, Hip Extension. Secondary:
+  // Brace, Posterior Chain Loading." → hinge (from "Hip Hinge"; "Hip
+  // Extension" is the hinge's own concentric action and is not a second,
+  // distinct MovementPattern value), isometric (from Brace).
+  movementPatterns: ["hinge", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Horizontal. Secondary
+  // Force Vector: Vertical." The ONLY entry in this batch whose PRIMARY
+  // force vector is horizontal, not vertical — every squat and deadlift
+  // variant above documents a vertical primary vector; this exercise's own
+  // "Transfer of Force: Feet → Hips → Barbell" describes horizontal
+  // pelvic drive, not a vertical bar path. Unlike the "Minimal Horizontal"
+  // hedge used elsewhere in this batch, this fiche's own secondary vector
+  // ("Vertical") carries no hedging qualifier, so both vectors are kept.
+  forceVectors: ["horizontal", "vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "barbell" },
+          { kind: "equipment", equipment: "bench" },
+          { kind: "equipment", equipment: "plates" },
+        ],
+      },
+    ],
+  },
+  // "# Skill Requirement: Beginner. Suitable after basic instruction." — the
+  // ONLY entry in this batch whose Skill Requirement word is "Beginner"
+  // rather than "Intermediate", corroborated by "# Athlete Suitability —
+  // Suitable For: Beginners, Intermediate, Advanced, Elite" listing
+  // Beginners without any qualifying caveat (unlike BACK_SQUAT's own
+  // "Beginners (after instruction)" or ROMANIAN_DEADLIFT's own "Beginners
+  // after hinge pattern acquisition"). Mapped to minimumTechnicalLevel 1 /
+  // "low", matching this catalog's established Beginner → 1/"low" pairing.
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Gluteus Maximus" — the ONLY
+  // single-region primary-muscle profile in this batch (every squat/
+  // deadlift variant lists at least Quadriceps/Hamstrings alongside
+  // Gluteus Maximus) → hip only. Secondary Muscles (Hamstrings, Adductor
+  // Magnus, Quadriceps) are excluded, matching this batch's established
+  // primary-muscles-only discipline — this exercise's own Purpose section
+  // explicitly frames it as isolating "one of the most important movement
+  // functions... powerful hip extension" rather than a multi-joint
+  // compound lift, directly corroborating the narrower primary-muscle list.
+  bodyRegionsLoaded: ["hip"],
+  // "# Contraindications", quoted one item per source line — the shortest
+  // contraindication list in this batch (3 items), matching this fiche's
+  // own "Overall Risk: Low" Safety Profile rating (the lowest risk rating
+  // documented anywhere in this batch).
+  contraindications: [
+    { description: "Acute hip injury.", region: "hip", prohibitedPatterns: ["hinge", "isometric"], absolute: true },
+    { description: "Acute lumbar injury.", region: "lumbar_spine", prohibitedPatterns: ["hinge", "isometric"], absolute: true },
+    { description: "Pain during hip extension.", region: "hip", prohibitedPatterns: ["hinge", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: Moderate. Metabolic Fatigue: Moderate. Overall Fatigue Cost:
+    // Moderate. Produces a favorable stimulus-to-fatigue ratio." The ONLY
+    // entry in this batch with a flat "Moderate" rating across every
+    // Fatigue Profile dimension and no dimension reaching the ≥4 "High"
+    // threshold used elsewhere in this batch to populate `types` — `types`
+    // is therefore genuinely empty here, the most honest representation of
+    // this fiche's own explicitly "favorable stimulus-to-fatigue ratio"
+    // framing (directly corroborated by "# Recovery Profile — Typical
+    // Recovery: 24-48 hours", the shortest recovery window in this batch).
+    types: [],
+    neural: 2,
+    muscular: 2,
+    connectiveTissue: 2, // inferred from "Mechanical Fatigue: Moderate"
+    metabolic: 2,
+    technical: 1, // fallback from "Skill Requirement: Beginner" (minimumTechnicalLevel 1)
+  },
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star.
+  combatSportRelevance: {
+    boxing: 4,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 4,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Progressions"/"# Regressions"/"# Variations" name no exercise with
+  // its own catalog id anywhere in this fiche (checked directly) — "Glute
+  // Bridge" has no dedicated chapter/catalog id.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Bulgarian Split Squat
+// Source: 50-exercises/06_BULGARIAN_SPLIT_SQUAT
+// -----------------------------------------------------------------------------
+
+/**
+ * Sixth and final entry of this batch. `exercisePrescriptionRegistry.ts`
+ * has a corroborating `bulgarianSplitSquatEntry`
+ * (`requiredEquipmentCapabilities: ["bench"]` only — matching this entry's
+ * own equipment resolution exactly; `laterality: "unilateral"`,
+ * `supportedLoadingModes: ["bodyweight", "added_external_load"]`,
+ * corroborating that the bodyweight-only variation is genuinely valid).
+ *
+ * Same documentation-format limitation as BACK_SQUAT: no space/floor-safety
+ * language anywhere in this fiche (checked directly).
+ *
+ * Central business question, explicitly flagged before writing began: "#
+ * Equipment Requirements — Required: Bench. Optional: Bodyweight,
+ * Dumbbells, Kettlebells, Barbell, Safety Rack, Sandbag." Bench is the ONLY
+ * required item; every loading implement is Optional, and "#
+ * Regressions" separately names "Bodyweight Bulgarian Split Squat" as its
+ * own explicitly valid variation — `requirements` therefore gates on
+ * `bench` alone, never on any loading implement, honestly representing
+ * that the bodyweight base movement is a fully valid, documented
+ * execution of this exercise, not an under-specified edge case.
+ */
+export const BULGARIAN_SPLIT_SQUAT: ExerciseDefinition = {
+  id: "bulgarian_split_squat",
+  name: "Bulgarian Split Squat",
+  module: "strength",
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Relative Strength, Unilateral
+  // Strength, Dynamic Stability" → relative_strength, stability (from
+  // "Dynamic Stability"). "Unilateral Strength" has no distinct
+  // PhysicalQuality counterpart of its own — the unilateral nature of the
+  // exercise is represented by the dedicated `unilateral: true` field
+  // below, not force-mapped into a quality here (it would otherwise be
+  // redundant with that boolean). "Secondary: Maximum Strength" →
+  // absolute_strength. "Balance" → balance — the exact enum match, and the
+  // FIRST use of this PhysicalQuality anywhere in this catalog: no
+  // bilateral squat/deadlift/hip-hinge variant in this batch documents
+  // "Balance" as a named capability, making this the clearest single-field
+  // distinction between this entry and every bilateral exercise in this
+  // batch. "Coordination" → coordination. "Mechanical Robustness" →
+  // tissue_capacity. "Movement Control" has no distinct counterpart beyond
+  // stability/coordination already listed and is not separately
+  // force-fitted.
+  physicalQualities: ["relative_strength", "absolute_strength", "stability", "balance", "coordination", "tissue_capacity"],
+  // "# Movement Pattern — Primary: Split Squat." No dedicated
+  // `MovementPattern` value exists for a split/staggered-stance squat —
+  // `squat` is used as the closest existing match, with the unilateral,
+  // split-stance character represented through `unilateral: true` and the
+  // `balance`/`stability` qualities above rather than an invented
+  // MovementPattern value. "Secondary: Hip Extension, Knee Extension,
+  // Brace, Single-Leg Stability" → isometric (from Brace); "Single-Leg
+  // Stability" is already captured via `unilateral`/`stability`/`balance`
+  // and is not separately force-fitted into a MovementPattern value.
+  movementPatterns: ["squat", "isometric"],
+  // "Secondary Force Vector: Minimal Horizontal" — same explicit "Minimal"
+  // hedge as BACK_SQUAT/FRONT_SQUAT/TRAP_BAR_DEADLIFT, excluded for the
+  // same reason.
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [{ kind: "equipment", equipment: "bench" }],
+      },
+    ],
+  },
+  // "# Skill Requirement: Intermediate. Adequate balance and movement
+  // control are required before heavy loading." — same word, same mapping
+  // as BACK_SQUAT.
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // "unilateral lower-body compound exercise" (Purpose, explicit).
+  // `exercisePrescriptionRegistry.ts`'s own independent `laterality:
+  // "unilateral"` corroborates this directly.
+  unilateral: true,
+  // "# Muscular Profile — Primary Muscles: Quadriceps, Gluteus Maximus,
+  // Adductor Magnus" → thigh, hip.
+  bodyRegionsLoaded: ["thigh", "hip"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute knee injury.", region: "knee", prohibitedPatterns: ["squat", "isometric"], absolute: true },
+    { description: "Acute hip injury.", region: "hip", prohibitedPatterns: ["squat", "isometric"], absolute: true },
+    { description: "Severe balance deficits.", prohibitedPatterns: ["squat", "isometric"], absolute: true },
+    { description: "Pain during single-leg loading.", prohibitedPatterns: ["squat", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: Moderate. Metabolic Fatigue: Moderate to High." "Produces
+    // substantial local fatigue with relatively low systemic fatigue"
+    // (explicit prose) is descriptive color commentary, not a distinct
+    // numeric rating — the literal "Moderate"/"Moderate to High" words in
+    // the dedicated Fatigue Profile heading are used as the primary
+    // source, consistent with this batch's established
+    // quote-before-prose discipline, rather than reading the prose as
+    // overriding the explicit "Moderate" rating the way HOLLOW_BODY_HOLD's
+    // own "Decision Summary" text was allowed to override its star rating
+    // in the 62_CORE batch (no equivalent explicit override framing exists
+    // here).
+    types: [],
+    neural: 2,
+    muscular: 2,
+    connectiveTissue: 2, // inferred from "Mechanical Fatigue: Moderate"
+    metabolic: 3,
+    technical: 3, // fallback from "Skill Requirement: Intermediate"
+  },
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star — the highest
+  // combat-sport relevance profile in this batch (5 stars across every
+  // discipline except Brazilian Jiu-Jitsu), directly corroborated by this
+  // fiche's own Philosophy section: "Combat rarely occurs with both feet
+  // perfectly aligned."
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 4,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Progressions"/"# Regressions"/"# Variations" name no exercise with
+  // its own catalog id anywhere in this fiche (checked directly) — "Split
+  // Squat", "Reverse Lunge" and "Static Lunge" have no dedicated
+  // chapter/catalog id of their own.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -6175,4 +6997,10 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   DRAGON_FLAG,
   SUITCASE_CARRY,
   OVERHEAD_CARRY,
+  BACK_SQUAT,
+  FRONT_SQUAT,
+  TRAP_BAR_DEADLIFT,
+  ROMANIAN_DEADLIFT,
+  HIP_THRUST,
+  BULGARIAN_SPLIT_SQUAT,
 ];
