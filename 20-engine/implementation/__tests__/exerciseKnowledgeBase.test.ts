@@ -26,6 +26,7 @@ import {
   EXERCISE_KNOWLEDGE_BASE,
   HANG_HIGH_PULL,
   HANG_POWER_CLEAN,
+  JUMP_SHRUG,
   KNEE_JUMP,
   LATERAL_BOUND,
   MED_BALL_CHEST_PASS,
@@ -4211,6 +4212,383 @@ describe("HANG_POWER_CLEAN — Exercise Requirements Model pilot integration", (
     checkExerciseEligibility(HANG_POWER_CLEAN, input);
 
     expect(HANG_POWER_CLEAN).toEqual(exerciseSnapshot);
+    expect(input).toEqual(inputSnapshot);
+  });
+});
+
+describe("JUMP_SHRUG — Exercise Requirements Model pilot integration", () => {
+  test("1. the entry exists in the catalog", () => {
+    expect(EXERCISE_KNOWLEDGE_BASE).toContain(JUMP_SHRUG);
+  });
+
+  test("2. has a unique identifier within the catalog", () => {
+    expect(JUMP_SHRUG.id).toBe("jump_shrug");
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  test("3. respects the coexistence invariant: requiredEquipment is empty, optionalEquipment is absent", () => {
+    expect(JUMP_SHRUG.requiredEquipment).toEqual([]);
+    expect(JUMP_SHRUG.optionalEquipment).toBeUndefined();
+    expect(validateRequirementsCoexistenceInvariant(JUMP_SHRUG)).toBeNull();
+    expect(validateExerciseRequirementsStructure(JUMP_SHRUG.requirements!)).toEqual([]);
+  });
+
+  test("4. eligible with a barbell, plates, jumping allowed, a safe landing surface and sufficient space", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+
+    const result = checkExerciseEligibility(JUMP_SHRUG, input);
+
+    expect(result.eligible).toBe(true);
+    expect(result.rejectionReasons).toEqual([]);
+  });
+
+  test("5. ineligible without a barbell", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "plates" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+
+    const result = checkExerciseEligibility(JUMP_SHRUG, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+  });
+
+  test("6. ineligible without plates", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+
+    const result = checkExerciseEligibility(JUMP_SHRUG, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+  });
+
+  test("7. ineligible when jumping is not allowed", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        jumpingAllowed: false,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+
+    const result = checkExerciseEligibility(JUMP_SHRUG, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT")).toBe(true);
+  });
+
+  test("8. ineligible when the landing surface is not safe", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        jumpingAllowed: true,
+        floorSafe: false,
+        availableSpace: "moderate",
+      }),
+    });
+
+    const result = checkExerciseEligibility(JUMP_SHRUG, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT")).toBe(true);
+  });
+
+  test("9. ineligible when available space is below the documented minimum (moderate)", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+
+    const result = checkExerciseEligibility(JUMP_SHRUG, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+  });
+
+  test("10. no dependency on a rack, throwing, a wall or a partner — none are documented for this exercise", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+        throwingAllowed: false,
+        usableWall: false,
+        partnerAvailable: false,
+      }),
+    });
+
+    const result = checkExerciseEligibility(JUMP_SHRUG, input);
+
+    expect(result.eligible).toBe(true);
+    expect(result.rejectionReasons).toEqual([]);
+  });
+
+  test("11. is correctly distinguished from HANG_HIGH_PULL and HANG_POWER_CLEAN: only the genuinely jumping exercise requires jumping_allowed and a safe landing surface", () => {
+    // Only JUMP_SHRUG has a real flight phase, so only it requires jumping_allowed / safe_landing_surface
+    expect(JUMP_SHRUG.movementPatterns).toContain("jump");
+    expect(HANG_HIGH_PULL.movementPatterns).not.toContain("jump");
+    expect(HANG_POWER_CLEAN.movementPatterns).not.toContain("jump");
+
+    const jumpingBlockedInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        jumpingAllowed: false,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(JUMP_SHRUG, jumpingBlockedInput).eligible).toBe(false);
+    expect(checkExerciseEligibility(HANG_HIGH_PULL, jumpingBlockedInput).eligible).toBe(true);
+    expect(checkExerciseEligibility(HANG_POWER_CLEAN, jumpingBlockedInput).eligible).toBe(true);
+
+    // JUMP_SHRUG continues the pull (like HANG_HIGH_PULL) but never receives a catch (unlike HANG_POWER_CLEAN)
+    expect(JUMP_SHRUG.movementPatterns).toContain("vertical_pull");
+    expect(HANG_POWER_CLEAN.movementPatterns).not.toContain("vertical_pull");
+    expect(JUMP_SHRUG.movementPatterns).not.toContain("squat");
+    expect(HANG_POWER_CLEAN.movementPatterns).toContain("squat");
+
+    // Documented complexity ordering: Jump Shrug < Hang High Pull < Hang Power Clean
+    expect(JUMP_SHRUG.minimumTechnicalLevel).toBeLessThan(HANG_HIGH_PULL.minimumTechnicalLevel);
+    expect(HANG_HIGH_PULL.minimumTechnicalLevel).toBeLessThan(HANG_POWER_CLEAN.minimumTechnicalLevel);
+  });
+
+  test("12. biomechanical fields match the canonical documentation", () => {
+    expect(JUMP_SHRUG.physicalQualities).toEqual([
+      "explosive_strength",
+      "rate_of_force_development",
+      "stability",
+      "trunk_strength",
+      "grip_strength",
+      "coordination",
+    ]);
+    expect(JUMP_SHRUG.movementPatterns).toEqual(["hinge", "vertical_pull", "jump"]);
+    expect(JUMP_SHRUG.forceVectors).toEqual(["vertical"]);
+    expect(JUMP_SHRUG.unilateral).toBe(false);
+    expect(JUMP_SHRUG.bodyRegionsLoaded).toEqual(["hip", "thigh", "lower_leg", "shoulder"]);
+    expect(JUMP_SHRUG.complexity).toBe("moderate");
+    expect(JUMP_SHRUG.minimumTechnicalLevel).toBe(3);
+  });
+
+  test("13. adding this entry never changes the previously integrated exercises", () => {
+    const hangPowerCleanInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(HANG_POWER_CLEAN, hangPowerCleanInput).eligible).toBe(true);
+
+    const hangHighPullInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(HANG_HIGH_PULL, hangHighPullInput).eligible).toBe(true);
+
+    const pushPressInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }, { type: "rack" }],
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(PUSH_PRESS, pushPressInput).eligible).toBe(true);
+
+    const splitSquatJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(SPLIT_SQUAT_JUMP, splitSquatJumpInput).eligible).toBe(true);
+
+    const singleLegHopInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(SINGLE_LEG_HOP, singleLegHopInput).eligible).toBe(true);
+
+    const lateralBoundInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(LATERAL_BOUND, lateralBoundInput).eligible).toBe(true);
+
+    const kneeJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "knee_protection_pad" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(KNEE_JUMP, kneeJumpInput).eligible).toBe(true);
+
+    const broadJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(BROAD_JUMP, broadJumpInput).eligible).toBe(true);
+
+    const cmjInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: false,
+        availableSpace: "very_limited",
+      }),
+    });
+    expect(checkExerciseEligibility(COUNTERMOVEMENT_JUMP, cmjInput).eligible).toBe(true);
+
+    const boxJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "plyometric_box" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(BOX_JUMP, boxJumpInput).eligible).toBe(true);
+
+    const depthJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "plyometric_box" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(DEPTH_JUMP, depthJumpInput).eligible).toBe(true);
+
+    const chestPassInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: true,
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_CHEST_PASS, chestPassInput).eligible).toBe(true);
+
+    const slamInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "slam_ball" }],
+        throwingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_SLAM, slamInput).eligible).toBe(true);
+
+    const overheadThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_OVERHEAD_THROW, overheadThrowInput).eligible).toBe(true);
+
+    const rotationalThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: true,
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_ROTATIONAL_THROW, rotationalThrowInput).eligible).toBe(true);
+
+    const scoopTossInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_SCOOP_TOSS, scoopTossInput).eligible).toBe(true);
+
+    const shotPutThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_SHOT_PUT_THROW, shotPutThrowInput).eligible).toBe(true);
+
+    const reverseThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        floorSafe: true,
+        availableSpace: "open",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_REVERSE_THROW, reverseThrowInput).eligible).toBe(true);
+  });
+
+  test("14. the default catalog used by runEngine(input) now also contains jump_shrug", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(ids).toContain("jump_shrug");
+  });
+
+  test("15. never mutates the exercise or the input it is given during evaluation", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    const exerciseSnapshot = structuredClone(JUMP_SHRUG);
+    const inputSnapshot = structuredClone(input);
+
+    checkExerciseEligibility(JUMP_SHRUG, input);
+
+    expect(JUMP_SHRUG).toEqual(exerciseSnapshot);
     expect(input).toEqual(inputSnapshot);
   });
 });

@@ -3107,6 +3107,245 @@ export const HANG_POWER_CLEAN: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Jump Shrug
+// Source: 50-exercises/64_POWER/13_JUMP_SHRUG.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Fourth and final entry from the `64_POWER` chapter. No superseded
+ * root-level fiche exists for this exercise (checked directly) — this
+ * `64_POWER` chapter is the sole canonical documentation.
+ *
+ * Deliberately NOT copied from `HANG_HIGH_PULL` or `HANG_POWER_CLEAN`
+ * despite beginning from the identical hang position — the central
+ * business question here, exactly as flagged before any writing began, is
+ * whether the feet genuinely leave the ground or whether "jump" merely
+ * describes intent. The documentation answers this unambiguously in the
+ * affirmative, and several properties diverge accordingly:
+ *
+ * - Movement Pattern explicitly names "Loaded Jump" and "Controlled
+ *   Landing"; Biomechanical Profile: "the athlete reaches a tall position
+ *   and MAY BRIEFLY LEAVE THE GROUND"; Contraction Profile: "Brief flight
+ *   or unloading phase when the feet leave the ground"; Execution
+ *   Standard: "allow the feet to leave the ground only if it occurs
+ *   naturally" (a natural consequence of maximal extension, not a forced
+ *   or exaggerated jump, but genuine ground-leaving all the same) —
+ *   `jumping_allowed` IS added here, unlike `HANG_HIGH_PULL`/
+ *   `HANG_POWER_CLEAN`, neither of which ever leaves the ground.
+ * - "Equipment Requirements — Essential: Barbell, Weight plates, Collars,
+ *   Suitable lifting surface." Unlike `HANG_HIGH_PULL`'s/
+ *   `HANG_POWER_CLEAN`'s own genuine, checked absence of any surface
+ *   language, this fiche explicitly names a surface requirement — and
+ *   because a genuine flight/landing phase exists here (unlike its two
+ *   hang-family siblings), `safe_landing_surface` is the semantically
+ *   correct capability, not `floor_safe` (reinforced by "# Space
+ *   Requirements — ...Stable, non-slip surface" and the doc's own
+ *   Technical Failure Criteria naming "the landing is loud, unstable or
+ *   uncontrolled"). `exercisePrescriptionRegistry.ts`'s own
+ *   `requiredEquipmentCapabilities: ["barbell", "plates"]` does not
+ *   include a landing-surface capability at all — the lesson already
+ *   learned from `SPLIT_SQUAT_JUMP` (that field belongs to a different
+ *   layer and is not decisive for this model's own environmental atoms)
+ *   applies here too. No physical `rack` equipment is named anywhere in
+ *   this chapter either, matching `HANG_HIGH_PULL`'s/`HANG_POWER_CLEAN`'s
+ *   own identical equipment set (`barbell` + `plates`, `collars` omitted
+ *   for lacking an `EquipmentType` value).
+ * - "# Space Requirements — Moderate floor space..." — the literal word
+ *   "Moderate" grounds `minimumSpace: "moderate"` directly, unlike
+ *   `HANG_HIGH_PULL`'s/`HANG_POWER_CLEAN`'s own vaguer "Enough room..."
+ *   phrasing (both mapped to `"limited"`).
+ * - `movementPatterns` includes both `"vertical_pull"` (this fiche's own
+ *   Movement Pattern section names it, unlike `HANG_POWER_CLEAN`'s) and
+ *   `"jump"` (neither sibling has it) — `jump_shrug` sits biomechanically
+ *   between the two: it continues the pull like `HANG_HIGH_PULL` but adds
+ *   genuine flight, without the turnover/catch of `HANG_POWER_CLEAN`
+ *   ("differs from the Hang High Pull because the elbows do not drive
+ *   high and outside"; "differs from the Hang Power Clean because there
+ *   is no turnover or receiving phase"). No ad hoc "shrug"/
+ *   "triple_extension"/"bar_path" capability is introduced anywhere in
+ *   this file for this or any other entry.
+ * - Technical Complexity here is explicitly "Intermediate — Lower than
+ *   the Hang High Pull and Hang Power Clean. Higher than a basic
+ *   bodyweight jump" — mapped to the literal middle of the five-tier
+ *   scale (`complexity: "moderate"`), consistent with both bracketing
+ *   claims (below `HANG_HIGH_PULL`'s own "high"/4, above a basic
+ *   bodyweight jump).
+ */
+export const JUMP_SHRUG: ExerciseDefinition = {
+  id: "jump_shrug",
+  name: "Jump Shrug",
+  module: "power",
+  primaryAdaptation: "power",
+  // Secondary Classifications: "Explosive Strength" (exact label,
+  // appearing three times — the same recurring pattern as every other
+  // 64_POWER entry). Secondary Adaptations: "Rate of Force Development"
+  // (exact match), "Trunk Stiffness" (→ trunk_strength, matching
+  // HANG_HIGH_PULL's/HANG_POWER_CLEAN's own identical mapping), "Grip
+  // Strength" appearing twice (Secondary Adaptations, Capability Mapping
+  // Tertiary, → grip_strength, matching both siblings' identical
+  // inclusion). "Whole-Body Coordination" / "Intermuscular Coordination"
+  // / "Movement Coordination" (→ coordination). Capability Mapping
+  // Tertiary: "Landing Control" (→ stability, matching the same "Landing
+  // Control"/"Landing Mechanics" → stability treatment used throughout
+  // the plyometric family for every genuinely landing-capable exercise).
+  // No "Reactive" language exists anywhere in this chapter (checked
+  // directly) — reactive_strength is not added. No "Deceleration" is
+  // named as its own Secondary Adaptation or Capability Mapping item
+  // (unlike HANG_POWER_CLEAN's own explicit "Rapid Deceleration and
+  // Force Absorption"/"Deceleration and Receiving Skill") — deceleration
+  // is deliberately NOT added here, a genuine divergence reflecting that
+  // this fiche's own classification never elevates it to a named
+  // capability the way HANG_POWER_CLEAN's does. "Posterior-Chain
+  // Recruitment"/"Hip Extension Power"/"Knee Extension Power"/
+  // "Lower-Body Propulsive Power"/"Vertical Force Expression"/"Athletic
+  // Timing"/"Strength-Speed"/"Weightlifting Derivative"/"Pulling
+  // Derivative" have no distinct counterpart beyond what is already
+  // listed or are region-specific notes captured by `bodyRegionsLoaded`.
+  physicalQualities: ["explosive_strength", "rate_of_force_development", "stability", "trunk_strength", "grip_strength", "coordination"],
+  // "# Movement Pattern" (a flat list): "Hip Hinge" (→ hinge), "Vertical
+  // Pull" (→ vertical_pull), "Loaded Jump" (→ jump) — see the block
+  // comment above this export for why this three-pattern combination is
+  // genuinely distinct from both HANG_HIGH_PULL's own ["hinge",
+  // "vertical_pull"] and HANG_POWER_CLEAN's own ["hinge", "squat"].
+  // "Explosive Triple Extension" and "Controlled Landing" have no further
+  // MovementPattern counterpart beyond "jump" itself.
+  movementPatterns: ["hinge", "vertical_pull", "jump"],
+  // No dedicated "Force Vector" heading exists in this chapter (matching
+  // every other 64_POWER entry's prose-only Biomechanical Profile
+  // format), but the prose remains unambiguous: "The bar remains close to
+  // the thighs and torso and travels predominantly vertically",
+  // reinforced by "the bar moves significantly away from the body" as its
+  // own Technical Failure Criterion.
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "barbell" },
+          { kind: "equipment", equipment: "plates" },
+          { kind: "environment", capability: "jumping_allowed" },
+          { kind: "environment", capability: "safe_landing_surface" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "moderate" },
+        ],
+      },
+    ],
+  },
+  // Skill Requirement: "Intermediate". Technical Complexity: "Intermediate
+  // — Lower than the Hang High Pull and Hang Power Clean. Higher than a
+  // basic bodyweight jump." Mapped to the literal middle tier — see the
+  // block comment above this export.
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // Movement Context: "Bilateral" (explicit).
+  unilateral: false,
+  // Muscular Profile Primary Contributors (Gluteus maximus, Quadriceps,
+  // Hamstrings, Gastrocnemius, Soleus, Trapezius) → hip, thigh, lower_leg,
+  // shoulder. Unlike HANG_HIGH_PULL/HANG_POWER_CLEAN (where calves are
+  // only Secondary Contributors), Gastrocnemius and Soleus are Primary
+  // here — the genuine flight phase requires real ankle plantar-flexion
+  // drive that the two non-jumping siblings never complete, so
+  // `lower_leg` is added, a real divergence. Secondary contributors
+  // (Spinal erectors, Deep trunk musculature, Latissimus dorsi, Forearm
+  // flexors, Deltoids, Scapular stabilizers) are excluded, matching the
+  // precedent used throughout this file.
+  bodyRegionsLoaded: ["hip", "thigh", "lower_leg", "shoulder"],
+  // "# Contraindications and Restrictions — Avoid or restrict when the
+  // athlete presents:" is a single unified list here (unlike
+  // HANG_HIGH_PULL's/HANG_POWER_CLEAN's own two-tier Potential
+  // Contraindications / Potential Restrictions structure), quoted one
+  // item per source line. "insufficient technical supervision for the
+  // athlete's current skill level" is excluded — it describes a coaching/
+  // supervision availability fact, not an athlete physical or medical
+  // condition, and does not fit this model's athlete-state
+  // contraindication concept. "uncontrolled cardiovascular or
+  // neurological conditions incompatible with explosive lifting" is
+  // trimmed to its specific, actionable core ("Uncontrolled
+  // cardiovascular or neurological conditions"), matching the same
+  // trimming already applied to HANG_HIGH_PULL's/HANG_POWER_CLEAN's own
+  // "medical restriction" clauses. The separate closing sentence "Use
+  // caution when cumulative lower-body plyometric volume is already
+  // high" is excluded as a relative-tier caution note, and "Medical
+  // restrictions override performance objectives" is excluded as
+  // non-actionable here, handled generically elsewhere.
+  contraindications: [
+    { description: "Acute lower-back pain.", prohibitedPatterns: ["hinge", "vertical_pull", "jump"], absolute: true },
+    { description: "Acute hip, knee or ankle injury.", prohibitedPatterns: ["hinge", "vertical_pull", "jump"], absolute: true },
+    { description: "Inability to land safely.", prohibitedPatterns: ["hinge", "vertical_pull", "jump"], absolute: true },
+    { description: "Poor balance under loaded jumping conditions.", prohibitedPatterns: ["hinge", "vertical_pull", "jump"], absolute: true },
+    {
+      description: "Unresolved Achilles tendon or patellar tendon irritation aggravated by jumping.",
+      prohibitedPatterns: ["hinge", "vertical_pull", "jump"],
+      absolute: true,
+    },
+    {
+      description: "Inability to maintain a neutral and braced trunk during the hang.",
+      prohibitedPatterns: ["hinge", "vertical_pull", "jump"],
+      absolute: true,
+    },
+    {
+      description: "Severe grip limitation that compromises bar control.",
+      prohibitedPatterns: ["hinge", "vertical_pull", "jump"],
+      absolute: true,
+    },
+    {
+      description: "Uncontrolled cardiovascular or neurological conditions.",
+      prohibitedPatterns: ["hinge", "vertical_pull", "jump"],
+      absolute: true,
+    },
+  ],
+  fatigueProfile: {
+    // "# Physiological Cost" is the cleaner, more granular numeric
+    // source (same choice made throughout this file). Unlike
+    // HANG_HIGH_PULL/HANG_POWER_CLEAN, this fiche's own "# Fatigue
+    // Profile" has no dedicated "Technical Fatigue Sensitivity" field at
+    // all — `technical` is sourced instead from "# Technical Complexity
+    // — Intermediate" (already mapped to `complexity: "moderate"`
+    // above), the same fallback BOX_JUMP used for its own missing
+    // dedicated field. `types` excludes "technical" for the same reason
+    // BOX_JUMP's own types list excludes it despite carrying a computed
+    // value — this is a fallback-sourced rating, not a fiche-emphasized
+    // fatigue category. `types` includes "impact": Technical Failure
+    // Criteria name "the landing is loud, unstable or uncontrolled" and
+    // "the bar strikes the thighs aggressively", and Safety Profile names
+    // "Bar collision with the thighs or body". `types` includes
+    // "systemic": "Systemic Fatigue: Moderate" is a plain, unqualified
+    // rating, the same phrase and reasoning HANG_HIGH_PULL's/
+    // HANG_POWER_CLEAN's own fiches used.
+    types: ["neural", "muscular", "connective_tissue", "impact", "systemic"],
+    neural: 4, // "Neurological Cost: Moderate to high"
+    muscular: 2, // "Muscular Cost: Low to moderate"
+    metabolic: 2, // "Metabolic Cost: Low" — plain "Low", same mapping used for BROAD_JUMP's/KNEE_JUMP's/PUSH_PRESS's own plain "Low" ratings
+    connectiveTissue: 3, // "Connective-Tissue Cost: Moderate depending on load, landing quality and total jump volume"
+    technical: 3, // "Technical Complexity: Intermediate" — see comment above
+  },
+  // Same reasoning as every other entry: a real "# Evidence
+  // Classification" section exists ("Evidence Level: Moderate"), but
+  // there is still no documented crosswalk between this narrative rating
+  // and the engine's level_1/level_2/level_3 taxonomy. Left "unknown".
+  evidenceLevel: "unknown",
+  // combatSportRelevance intentionally omitted: no per-sport breakdown
+  // exists anywhere in this chapter — only the aggregate "Combat
+  // Transfer" narrative and "Relative Transfer Score — Combat-Specific
+  // Transfer: Moderate and indirect". Same omission already used for
+  // every other entry in this file.
+  // Most of this fiche's own Regression/Equivalent/Substitution Logic
+  // options ("Trap-Bar Jump", "Dumbbell Jump Shrug", "Kettlebell Jump
+  // Shrug", "clean pull or mid-thigh pull") name no exercise with its own
+  // chapter/catalog id in this repository and are therefore not
+  // referenced below. The three substitutes below ARE each named
+  // explicitly in this fiche's own dedicated "Substitution Logic"/
+  // "Regression Options" subsections AND already have their own chapter
+  // here: "Hang High Pull" ("a more complete vertical pulling action is
+  // desired"), "Hang Power Clean" ("force reception is part of the
+  // objective"), "Countermovement Jump" (named explicitly in Regression
+  // Options, matching this fiche's own "Substitute it with an unloaded
+  // jump when external loading is contraindicated" logic).
+  substitutionExerciseIds: ["hang_high_pull", "hang_power_clean", "countermovement_jump"],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -3129,4 +3368,5 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   PUSH_PRESS,
   HANG_HIGH_PULL,
   HANG_POWER_CLEAN,
+  JUMP_SHRUG,
 ];
