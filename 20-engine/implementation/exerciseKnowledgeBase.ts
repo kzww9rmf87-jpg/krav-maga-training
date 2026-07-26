@@ -2636,6 +2636,219 @@ export const PUSH_PRESS: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Hang High Pull
+// Source: 50-exercises/64_POWER/11_HANG_HIGH_PULL.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Second entry from the `64_POWER` chapter. No superseded root-level
+ * fiche exists for this exercise (unlike `PUSH_PRESS`'s own
+ * `50-exercises/15_PUSH_PRESS`) — this `64_POWER` chapter is the sole
+ * canonical documentation.
+ *
+ * Deliberately NOT copied from `PUSH_PRESS` despite the shared "loaded
+ * barbell power exercise" family resemblance — this is a PULL from a
+ * hang position, not a PRESS from a front rack, and several documented
+ * properties diverge accordingly:
+ *
+ * - "It differs from the Hang Power Clean because the bar is not received
+ *   on the shoulders." The exercise begins and ends in the hang — there
+ *   is no rack, no catch, no overhead phase. "Equipment Requirements —
+ *   Primary Equipment: Barbell, Weight plates, Secure collars." No
+ *   "Rack" is named anywhere in this chapter (checked directly), unlike
+ *   `PUSH_PRESS`'s own explicit rack requirement — matching
+ *   `exercisePrescriptionRegistry.ts`'s own independent
+ *   `requiredEquipmentCapabilities: ["barbell", "plates"]` (no `"rack"`,
+ *   unlike `PUSH_PRESS`'s `["barbell", "plates", "rack"]`). `collars` has
+ *   no corresponding `EquipmentType` value, matching the same omission
+ *   already used for `PUSH_PRESS`.
+ * - No surface-safety language exists anywhere in this chapter at all
+ *   (checked directly — zero occurrences of "surface", "non-slip",
+ *   "stable floor", "flat" or "slippery"), unlike `PUSH_PRESS`'s own
+ *   explicit "Stable non-slip surface" requirement. `floor_safe` is
+ *   therefore deliberately NOT added here — a genuine divergence, not an
+ *   oversight (this is the lesson already learned from `SPLIT_SQUAT_JUMP`
+ *   applied in the other direction: absence of equipment does not by
+ *   itself exclude an environmental atom, but a genuine, checked absence
+ *   of the environmental language itself does).
+ * - "Space Requirements — Minimum Space: Enough room to stand and move
+ *   the bar vertically without obstruction" — vaguer and narrower than
+ *   `PUSH_PRESS`'s own literal "Moderate floor space" plus "Adequate
+ *   overhead clearance" plus "Clear frontal and lateral safety area"
+ *   (this exercise never travels overhead), so `minimumSpace: "limited"`
+ *   is used here rather than `PUSH_PRESS`'s `"moderate"`.
+ * - "the athlete jumps forward or backward excessively" is listed as its
+ *   own Technical Failure Criterion — jumping is a documented FAILURE
+ *   mode here, not a required capability, reinforcing (even more
+ *   explicitly than `PUSH_PRESS`) that `jumping_allowed` has no place in
+ *   `requirements`.
+ */
+export const HANG_HIGH_PULL: ExerciseDefinition = {
+  id: "hang_high_pull",
+  name: "Hang High Pull",
+  module: "power",
+  primaryAdaptation: "power",
+  // Secondary Classifications: "Explosive Strength" (exact label,
+  // appearing three times — Secondary Classifications, Secondary
+  // Adaptations and Capability Mapping's own Primary Capability
+  // Modules, the same pattern PUSH_PRESS's own chapter used). Secondary
+  // Adaptations: "Rate of Force Development" (exact match),
+  // "Intermuscular Coordination" / Secondary Classifications "Whole-Body
+  // Coordination" / Capability Mapping Secondary "Movement Coordination"
+  // (→ coordination), "Trunk Stiffness" / Capability Mapping Secondary
+  // "Trunk Stability" (→ trunk_strength — both phrasings of the same
+  // trunk-bracing concept here, unlike PUSH_PRESS's own genuinely
+  // distinct "Trunk Stiffness" vs. "Overhead Stability" pair, so no
+  // separate "stability" quality is added — this exercise has no
+  // overhead or landing phase to ground one). "Grip Strength" appears
+  // explicitly twice (Secondary Adaptations, Capability Mapping Tertiary)
+  // — the first entry in this catalog to earn grip_strength, a genuine
+  // divergence from PUSH_PRESS, which never mentions grip as its own
+  // capability. "Posterior-Chain Recruitment"/"Posterior-Chain Strength"
+  // and "Scapular Elevation Strength" are region-specific notes captured
+  // instead by `bodyRegionsLoaded` below, not whole-body qualities.
+  // "Hip Extension Power"/"Lower-Body Propulsive Power"/"Vertical Force
+  // Expression"/"Athletic Timing"/"Strength-Speed"/"Weightlifting
+  // Derivative" have no distinct counterpart beyond what is already
+  // listed. No "Reactive" language exists anywhere in this chapter
+  // (checked directly) — reactive_strength is not added.
+  physicalQualities: ["explosive_strength", "rate_of_force_development", "trunk_strength", "grip_strength", "coordination"],
+  // "# Movement Pattern" (a flat list, matching PUSH_PRESS's own chapter
+  // format): "Hip Hinge" (→ hinge, the same enum-backed representation
+  // KNEE_JUMP/LATERAL_BOUND already established for their own "Hip
+  // Hinge"), "Vertical Pull" (→ vertical_pull — a PULL, not
+  // PUSH_PRESS's own vertical_push; this is the central business
+  // distinction the integration step was required to verify). "Explosive
+  // Triple Extension" and "Loaded Acceleration" have no MovementPattern
+  // counterpart and are not represented here.
+  movementPatterns: ["hinge", "vertical_pull"],
+  // No dedicated "Force Vector" heading exists in this chapter (matching
+  // PUSH_PRESS's own prose-only Biomechanical Profile format), but the
+  // prose is unambiguous and repeatedly reinforced throughout: "The bar
+  // should travel vertically and remain close to the body", "a close and
+  // predominantly vertical bar path", "Guide the bar vertically rather
+  // than curling it toward the chest", "Move the bar vertically"
+  // (coaching cue) — and "the bar drifts substantially away from the
+  // body" is its own Technical Failure Criterion, confirming vertical is
+  // the sole intended direction.
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "barbell" },
+          { kind: "equipment", equipment: "plates" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "limited" },
+        ],
+      },
+    ],
+  },
+  // Skill Requirement: "Overall Skill Requirement: Moderate to high".
+  // Technical Complexity — Complexity Rating: "Moderate to high"
+  // (corroborating). Both sections explicitly caution against
+  // underestimating this exercise ("It should not be classified as a
+  // low-skill exercise merely because no catch is performed"; "the
+  // exercise remains more technical than a conventional strength
+  // movement or basic jump") — a materially higher floor than
+  // PUSH_PRESS's own clean single-word "Moderate" rating, hence mapped
+  // one tier up: minimumTechnicalLevel 4, complexity "high".
+  minimumTechnicalLevel: 4,
+  complexity: "high",
+  // Movement Context: "Bilateral" (explicit). Matches
+  // exercisePrescriptionRegistry.ts's own `laterality: "bilateral"`.
+  unilateral: false,
+  // Muscular Profile Primary Contributors (Gluteus maximus, Quadriceps,
+  // Hamstrings, Trapezius) → hip, thigh, shoulder. Unlike PUSH_PRESS,
+  // Biceps brachii and Triceps brachii are only Secondary Contributors
+  // here, not Primary — no upper_arm region is added, a genuine
+  // divergence reflecting that the arms continue the bar path only after
+  // the lower body has already produced the acceleration ("Only after
+  // the lower body has produced maximal acceleration do the elbows rise
+  // outward and upward"). Secondary/Stabilizing contributors (Calves,
+  // Spinal erectors, Latissimus dorsi, Rear deltoids, Biceps brachii,
+  // Forearm and hand musculature, Abdominal wall, Deep trunk musculature,
+  // Scapular stabilizers, Hip stabilizers, Foot and ankle stabilizers,
+  // Rotator cuff) are excluded, matching the precedent used throughout
+  // this file.
+  bodyRegionsLoaded: ["hip", "thigh", "shoulder"],
+  // "# Contraindications and Restrictions — Potential Contraindications:
+  // ...", quoted one item per source line. "Uncontrolled hypertension or
+  // medical restriction against high-intensity lifting" is trimmed to
+  // its specific, actionable half ("Uncontrolled hypertension") — the
+  // generic "medical restriction against X" clause is excluded
+  // throughout this file, handled generically elsewhere by
+  // `AthleteRestriction`/`checkHardRestrictionProhibitsMovement` in
+  // `exerciseSelector.ts`. The separate "Potential Restrictions" tier
+  // (Limited ankle mobility, Poor posterior-chain tolerance, Low barbell
+  // experience, Insufficient trunk control, High concurrent lower-body
+  // fatigue, Recent heavy deadlift or sprint exposure, Shoulder
+  // discomfort during high elbow positions) is excluded entirely,
+  // matching PUSH_PRESS's own identical two-tier treatment.
+  contraindications: [
+    { description: "Acute low-back pain.", prohibitedPatterns: ["hinge", "vertical_pull"], absolute: true },
+    { description: "Acute hamstring injury.", prohibitedPatterns: ["hinge", "vertical_pull"], absolute: true },
+    { description: "Acute hip or knee injury.", prohibitedPatterns: ["hinge", "vertical_pull"], absolute: true },
+    { description: "Acute shoulder or elbow pain.", prohibitedPatterns: ["hinge", "vertical_pull"], absolute: true },
+    { description: "Severe grip limitation.", prohibitedPatterns: ["hinge", "vertical_pull"], absolute: true },
+    { description: "Inability to maintain a stable hinge position.", prohibitedPatterns: ["hinge", "vertical_pull"], absolute: true },
+    { description: "Uncontrolled hypertension.", prohibitedPatterns: ["hinge", "vertical_pull"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Physiological Cost" is the cleaner, more granular numeric
+    // source (same choice made throughout this file), corroborated by
+    // "# Fatigue Profile"'s own dimension names.
+    // `metabolic` is sourced from "Metabolic Cost: Low when correctly
+    // programmed" — near-verbatim to BOX_JUMP's/DEPTH_JUMP's own
+    // "Low when programmed correctly" (rating 1), not PUSH_PRESS's
+    // slightly different "Low when programmed for power" (rating 2), so
+    // the closer BOX_JUMP/DEPTH_JUMP match is used here.
+    // `types` includes "impact": Technical Failure Criteria and Safety
+    // Profile both name "the bar collides heavily with the thighs or
+    // pelvis" as a real, specific collision risk. `types` includes
+    // "systemic": "Systemic Fatigue: Moderate when volume and load are
+    // controlled" is a plain, unqualified "Moderate" rating (not an
+    // explicit low one), matching the same inclusion reasoning
+    // SPLIT_SQUAT_JUMP's own explicit "Systemic Demand: Moderate"
+    // received.
+    types: ["neural", "muscular", "connective_tissue", "technical", "impact", "systemic"],
+    neural: 4, // "Neurological Cost: Moderate to high", corroborated by "Neurological Fatigue: Moderate to high per high-quality repetition"
+    muscular: 3, // "Muscular Cost: Moderate", corroborated by "Local Muscular Fatigue: Moderate in the posterior chain, upper back and grip"
+    metabolic: 1, // "Metabolic Cost: Low when correctly programmed" — see comment above
+    connectiveTissue: 3, // "Joint Cost: Moderate"
+    technical: 4, // "Technical Fatigue Sensitivity: High" — the same direct field KNEE_JUMP/LATERAL_BOUND/SINGLE_LEG_HOP/PUSH_PRESS all used
+  },
+  // Same reasoning as every other entry: a real "# Evidence
+  // Classification" section exists ("Evidence Level: Moderate"), but
+  // there is still no documented crosswalk between this narrative rating
+  // and the engine's level_1/level_2/level_3 taxonomy — a single clean
+  // word is not itself a crosswalk. Left "unknown".
+  evidenceLevel: "unknown",
+  // combatSportRelevance intentionally omitted: no per-sport breakdown
+  // exists anywhere in this chapter (nor in any superseded fiche — none
+  // exists for this exercise) — only the aggregate "Combat Transfer"
+  // narrative and "Relative Transfer Score — Combat-Sport Physical
+  // Transfer: Moderate to high". Same omission already used for every
+  // other entry in this file.
+  // Most of this fiche's own Regression/Equivalent/Substitution Logic
+  // options ("Trap-Bar Jump", "Loaded Jump Squat", "Kettlebell Swing",
+  // "Clean Pull from Hang", "Hang Jump Shrug") name no exercise with its
+  // own chapter/catalog id in this repository and are therefore not
+  // referenced below. "Hang Jump Shrug" is not assumed equivalent to the
+  // separately-titled `50-exercises/64_POWER/13_JUMP_SHRUG.md` ("Jump
+  // Shrug", no "Hang" prefix) without this fiche's own text confirming
+  // it — the same discipline already applied to LATERAL_BOUND's own
+  // "Single-Leg Lateral Hop" vs. `single_leg_hop` question. The three
+  // substitutes below ARE each named explicitly in this fiche's own
+  // dedicated "Substitution Logic — Preferred substitutions by
+  // objective" subsection AND already have their own chapter here:
+  // "Medicine Ball Scoop Toss" ("For hip-dominant power"), "Broad Jump"
+  // / "Box Jump" ("For unloaded explosive power").
+  substitutionExerciseIds: ["med_ball_scoop_toss", "broad_jump", "box_jump"],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -2656,4 +2869,5 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   SINGLE_LEG_HOP,
   SPLIT_SQUAT_JUMP,
   PUSH_PRESS,
+  HANG_HIGH_PULL,
 ];
