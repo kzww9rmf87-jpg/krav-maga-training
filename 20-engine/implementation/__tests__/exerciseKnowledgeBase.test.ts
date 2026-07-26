@@ -34,6 +34,7 @@ import {
   MED_BALL_SHOT_PUT_THROW,
   MED_BALL_SLAM,
   SINGLE_LEG_HOP,
+  SPLIT_SQUAT_JUMP,
 } from "../exerciseKnowledgeBase";
 
 import { makeEnvironment, makeExercise, makeValidInput } from "./fixtures";
@@ -2982,6 +2983,303 @@ describe("SINGLE_LEG_HOP — Exercise Requirements Model pilot integration", () 
     checkExerciseEligibility(SINGLE_LEG_HOP, input);
 
     expect(SINGLE_LEG_HOP).toEqual(exerciseSnapshot);
+    expect(input).toEqual(inputSnapshot);
+  });
+});
+
+describe("SPLIT_SQUAT_JUMP — Exercise Requirements Model pilot integration", () => {
+  test("1. the entry exists in the catalog", () => {
+    expect(EXERCISE_KNOWLEDGE_BASE).toContain(SPLIT_SQUAT_JUMP);
+  });
+
+  test("2. has a unique identifier within the catalog", () => {
+    expect(SPLIT_SQUAT_JUMP.id).toBe("split_squat_jump");
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  test("3. respects the coexistence invariant: requiredEquipment is empty, optionalEquipment is absent", () => {
+    expect(SPLIT_SQUAT_JUMP.requiredEquipment).toEqual([]);
+    expect(SPLIT_SQUAT_JUMP.optionalEquipment).toBeUndefined();
+    expect(validateRequirementsCoexistenceInvariant(SPLIT_SQUAT_JUMP)).toBeNull();
+    expect(validateExerciseRequirementsStructure(SPLIT_SQUAT_JUMP.requirements!)).toEqual([]);
+  });
+
+  test("4. eligible with jumping allowed, a safe landing surface and sufficient space", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+
+    const result = checkExerciseEligibility(SPLIT_SQUAT_JUMP, input);
+
+    expect(result.eligible).toBe(true);
+    expect(result.rejectionReasons).toEqual([]);
+  });
+
+  test("5. ineligible when jumping is not allowed", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: false,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+
+    const result = checkExerciseEligibility(SPLIT_SQUAT_JUMP, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT")).toBe(true);
+  });
+
+  test("6. ineligible when the landing surface is not safe — 'Required Equipment: None' rules out physical implements only, not the Space Requirements' own Surface Requirements (Flat, Stable, Non-slip) and Setup Time's 'sufficient safe landing space' precondition", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: false,
+        availableSpace: "limited",
+      }),
+    });
+
+    const result = checkExerciseEligibility(SPLIT_SQUAT_JUMP, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT")).toBe(true);
+  });
+
+  test("7. ineligible when available space is below the documented minimum (limited)", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "very_limited",
+      }),
+    });
+
+    const result = checkExerciseEligibility(SPLIT_SQUAT_JUMP, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+  });
+
+  test("8. no dependency on a plyometric box or any other equipment", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+
+    const result = checkExerciseEligibility(SPLIT_SQUAT_JUMP, input);
+
+    expect(result.eligible).toBe(true);
+    expect(result.rejectionReasons).toEqual([]);
+  });
+
+  test("9. no dependency on throwingAllowed, a wall or a partner", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+        throwingAllowed: false,
+        usableWall: false,
+        partnerAvailable: false,
+      }),
+    });
+
+    const result = checkExerciseEligibility(SPLIT_SQUAT_JUMP, input);
+
+    expect(result.eligible).toBe(true);
+    expect(result.rejectionReasons).toEqual([]);
+  });
+
+  test("10. biomechanical fields — including bilateral laterality with an alternating staggered stance — match the canonical documentation", () => {
+    expect(SPLIT_SQUAT_JUMP.unilateral).toBe(false);
+    expect(SPLIT_SQUAT_JUMP.physicalQualities).toEqual([
+      "rate_of_force_development",
+      "reactive_strength",
+      "deceleration",
+      "stability",
+      "balance",
+      "coordination",
+    ]);
+    expect(SPLIT_SQUAT_JUMP.movementPatterns).toEqual(["jump"]);
+    expect(SPLIT_SQUAT_JUMP.forceVectors).toEqual(["vertical"]);
+    expect(SPLIT_SQUAT_JUMP.bodyRegionsLoaded).toEqual(["hip", "thigh", "lower_leg"]);
+    expect(SPLIT_SQUAT_JUMP.complexity).toBe("high");
+    expect(SPLIT_SQUAT_JUMP.minimumTechnicalLevel).toBe(4);
+  });
+
+  test("11. adding this entry never changes the previously integrated exercises", () => {
+    const singleLegHopInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(SINGLE_LEG_HOP, singleLegHopInput).eligible).toBe(true);
+
+    const lateralBoundInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(LATERAL_BOUND, lateralBoundInput).eligible).toBe(true);
+
+    const kneeJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "knee_protection_pad" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(KNEE_JUMP, kneeJumpInput).eligible).toBe(true);
+
+    const broadJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(BROAD_JUMP, broadJumpInput).eligible).toBe(true);
+
+    const cmjInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: false,
+        availableSpace: "very_limited",
+      }),
+    });
+    expect(checkExerciseEligibility(COUNTERMOVEMENT_JUMP, cmjInput).eligible).toBe(true);
+
+    const boxJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "plyometric_box" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(BOX_JUMP, boxJumpInput).eligible).toBe(true);
+
+    const depthJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "plyometric_box" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(DEPTH_JUMP, depthJumpInput).eligible).toBe(true);
+
+    const chestPassInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: true,
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_CHEST_PASS, chestPassInput).eligible).toBe(true);
+
+    const slamInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "slam_ball" }],
+        throwingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_SLAM, slamInput).eligible).toBe(true);
+
+    const overheadThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_OVERHEAD_THROW, overheadThrowInput).eligible).toBe(true);
+
+    const rotationalThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: true,
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_ROTATIONAL_THROW, rotationalThrowInput).eligible).toBe(true);
+
+    const scoopTossInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_SCOOP_TOSS, scoopTossInput).eligible).toBe(true);
+
+    const shotPutThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_SHOT_PUT_THROW, shotPutThrowInput).eligible).toBe(true);
+
+    const reverseThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        floorSafe: true,
+        availableSpace: "open",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_REVERSE_THROW, reverseThrowInput).eligible).toBe(true);
+  });
+
+  test("12. the default catalog used by runEngine(input) now also contains split_squat_jump", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(ids).toContain("split_squat_jump");
+  });
+
+  test("13. never mutates the exercise or the input it is given during evaluation", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    const exerciseSnapshot = structuredClone(SPLIT_SQUAT_JUMP);
+    const inputSnapshot = structuredClone(input);
+
+    checkExerciseEligibility(SPLIT_SQUAT_JUMP, input);
+
+    expect(SPLIT_SQUAT_JUMP).toEqual(exerciseSnapshot);
     expect(input).toEqual(inputSnapshot);
   });
 });

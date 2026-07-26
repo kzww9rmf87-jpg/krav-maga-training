@@ -2188,6 +2188,233 @@ export const SINGLE_LEG_HOP: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Split Squat Jump
+// Source: 50-exercises/63_PLYOMETRICS/16_SPLIT_SQUAT_JUMP.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Eighth and final Plyometrics-family entry for this integration pass. No
+ * superseded top-level fiche exists for this exercise (same situation as
+ * `KNEE_JUMP`/`LATERAL_BOUND`/`SINGLE_LEG_HOP`) — this `63_PLYOMETRICS`
+ * chapter is the sole canonical documentation.
+ *
+ * Deliberately NOT copied from `SINGLE_LEG_HOP` or `LATERAL_BOUND` despite
+ * the shared "unilateral-flavored bodyweight jump" family resemblance —
+ * the central business question here, exactly as flagged before any
+ * writing began, is whether this exercise is strictly unilateral or
+ * bilateral with a staggered/alternating position, and the documented
+ * answer is the latter:
+ *
+ * - Movement Context: "Alternating Unilateral" / "Staggered Stance" — a
+ *   deliberately different, compound phrase from `SINGLE_LEG_HOP`'s/
+ *   `LATERAL_BOUND`'s own clean "Unilateral" Movement Context. Every
+ *   single repetition already involves BOTH legs (one front/propulsive,
+ *   one rear/assisting, exchanging every rep) — there is no "choose a
+ *   side, then repeat" prescription unit the way `SINGLE_LEG_HOP`'s/
+ *   `LATERAL_BOUND`'s own "repetitions per side" volume works. This
+ *   matches `exercisePrescriptionRegistry.ts`'s own independent
+ *   `laterality: "bilateral"` and `volumeInterpretations:
+ *   ["total_repetitions"]` (NOT `"repetitions_per_side"`, unlike
+ *   `SINGLE_LEG_HOP`/`LATERAL_BOUND`) for this exact exercise —
+ *   `unilateral: false` here. Leg alternation itself is represented
+ *   purely through `movementPatterns`/`physicalQualities`/the exercise
+ *   description, not through `unilateral`, and is never treated as
+ *   `human_assistance` or any other requirement atom — there is nothing
+ *   for another person to do in this exercise.
+ * - "Equipment Requirements — Required Equipment: None" (bodyweight) rules
+ *   out physical implements only (no box, pad, mat, dumbbells) — it says
+ *   nothing about the landing surface itself, which is a distinct
+ *   `kind: "environment"` atom in the Exercise Requirements Model, not a
+ *   `kind: "equipment"` one. That question is answered separately by
+ *   "Space Requirements — Surface Requirements: Flat, Stable, Non-slip,
+ *   Moderately forgiving" (an unconditional list, unlike the genuinely
+ *   optional items elsewhere in this same fiche), paired with an explicit
+ *   "Avoid" list (concrete without shock-absorbing flooring, unstable
+ *   mats, slippery surfaces, crowded areas) and reinforced by "Setup
+ *   Time — The exercise can be performed immediately once sufficient
+ *   safe landing space is available." `safe_landing_surface` IS therefore
+ *   added here, matching `BOX_JUMP`/`DEPTH_JUMP`/`BROAD_JUMP`/`KNEE_JUMP`/
+ *   `LATERAL_BOUND`/`SINGLE_LEG_HOP`'s identical requirement — only its
+ *   documented location differs (grouped with space rather than
+ *   equipment), not its substance. `exercisePrescriptionRegistry.ts`'s
+ *   own `requiredEquipmentCapabilities: []` is not treated as decisive
+ *   for this Exercise Requirements Model question: that field belongs to
+ *   a different layer and does not necessarily mirror this model's own
+ *   environmental capabilities.
+ * - "Space Requirements — Recommended Area: Approximately 2 metres by 2
+ *   metres" — the same footprint as `KNEE_JUMP`'s own "2 metres by 2
+ *   metres", so `minimumSpace: "limited"` is used identically.
+ * - Biomechanical Profile — "Secondary Force Vector: Horizontal
+ *   Stabilization." Unlike `BROAD_JUMP`'s/`SINGLE_LEG_HOP`'s own genuine
+ *   secondary force-PRODUCTION components, "Stabilization" describes
+ *   resisting/controlling unwanted horizontal drift and pelvic rotation
+ *   (see "Key Biomechanical Requirement — the feet must exchange without
+ *   crossing, the pelvis must remain level") rather than a propulsive
+ *   horizontal force component — so `"horizontal"` is deliberately NOT
+ *   added to `forceVectors` here.
+ * - Secondary Classifications never name "Change-of-Direction
+ *   Preparation" anywhere in this chapter (unlike `LATERAL_BOUND`'s/
+ *   `SINGLE_LEG_HOP`'s own explicit naming of it) — `agility` is
+ *   therefore deliberately NOT added, unlike its two unilateral siblings.
+ * - "# Contraindications and Restrictions" uses the same explicit
+ *   "Absolute Contraindications" / "Relative Contraindications" headings
+ *   `SINGLE_LEG_HOP` already established, removing interpretive ambiguity
+ *   about which items belong in `contraindications` below.
+ * - "Physiological Profile — Systemic Demand: Moderate" is explicitly
+ *   present here (unlike `KNEE_JUMP`'s/`LATERAL_BOUND`'s own explicit LOW
+ *   rating, and unlike `SINGLE_LEG_HOP`'s complete silence on the
+ *   question) — "systemic" IS tagged in `fatigueProfile.types` here, a
+ *   genuine divergence from every other unilateral-family entry.
+ * - "# Evidence Classification — CAS Evidence Level: B" is a letter-grade
+ *   scale, distinct from every other chapter's narrative/star-rating
+ *   evidence language — but there is still no documented crosswalk from
+ *   this grade to the engine's level_1/level_2/level_3 taxonomy, so
+ *   `evidenceLevel` is still left "unknown", for the same reason as every
+ *   other entry in this file.
+ */
+export const SPLIT_SQUAT_JUMP: ExerciseDefinition = {
+  id: "split_squat_jump",
+  name: "Split Squat Jump",
+  module: "power",
+  primaryAdaptation: "power",
+  // Biomechanical Profile: "Rate of Force Development ★★★★☆" and
+  // Secondary Adaptations: "Unilateral Rate of Force Development" (→
+  // rate_of_force_development). Capability Mapping Secondary: "Elastic
+  // Reactivity"; Secondary Adaptations: "Elastic Energy Utilization";
+  // Neurological Profile: "Reactive Control Demand: Moderate to High" (→
+  // reactive_strength — genuinely present here, unlike KNEE_JUMP's own
+  // explicit "Reactive Demand: Low"). Capability Mapping Secondary:
+  // "Deceleration Capacity"; Secondary Adaptations: "Single-Leg
+  // Deceleration"; Secondary Classification: "Landing and Deceleration
+  // Exercise" (→ deceleration). Capability Mapping Primary: "Alternating
+  // Landing Control"; Secondary: "Hip and Pelvic Stability" (→
+  // stability). Capability Mapping Secondary / Secondary Adaptations:
+  // "Dynamic Balance" (→ balance). Capability Mapping Secondary /
+  // Secondary Adaptations: "Interlimb Coordination" (→ coordination). No
+  // "Change-of-Direction" language exists anywhere in this chapter (see
+  // the block comment above this export) — agility is NOT added, unlike
+  // LATERAL_BOUND/SINGLE_LEG_HOP. No "Trunk Stiffness"/"Trunk
+  // Organization" Capability Mapping item exists either — trunk_strength
+  // is NOT added, matching LATERAL_BOUND's/SINGLE_LEG_HOP's identical
+  // reasoning. "Ankle Stiffness"/"Left-to-Right Symmetry"/"Lower-Limb
+  // Robustness"/"Combat Footwork Support"/"Entry and Level-Change
+  // Support" have no clean PhysicalQuality match and are skipped.
+  physicalQualities: ["rate_of_force_development", "reactive_strength", "deceleration", "stability", "balance", "coordination"],
+  // Movement Pattern — Primary: "Alternating Split-Stance Jump" (→ jump).
+  // Secondary patterns here are discrete joint actions (Unilateral Hip
+  // Extension, Knee Extension, Ankle Plantar Flexion, Airborne Limb
+  // Exchange, Staggered-Stance Force Acceptance, Alternating Unilateral
+  // Stabilization) with no further MovementPattern enum counterpart — no
+  // "Hip Hinge" is named here (unlike KNEE_JUMP/LATERAL_BOUND), matching
+  // SINGLE_LEG_HOP's identical absence, so "hinge" is not added. The
+  // exercise's own name notwithstanding, this fiche's dedicated "Movement
+  // Pattern" section never names "squat" as its own pattern component
+  // either — only Execution Standard prose describes the split-squat
+  // loading position, which this file consistently does not use as a
+  // movementPatterns source (matching SINGLE_LEG_HOP's identical
+  // treatment of its own Execution Standard countermovement prose).
+  movementPatterns: ["jump"],
+  // Biomechanical Profile — "Primary Force Vector: Vertical." "Secondary
+  // Force Vector: Horizontal Stabilization" — a control/resistance
+  // concept, not a propulsive component (see the block comment above this
+  // export), so only the primary vector is represented.
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "environment", capability: "jumping_allowed" },
+          { kind: "environment", capability: "safe_landing_surface" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "limited" },
+        ],
+      },
+    ],
+  },
+  // Skill Requirement: "Overall Skill Level: Intermediate". Technical
+  // Complexity — Complexity Rating: ★★★★☆ (4 of 5), corroborated by "more
+  // complex than a bilateral squat jump and generally less complex than
+  // high-intensity unilateral bounding or advanced depth-jump variations"
+  // — the same rating and mapping KNEE_JUMP received.
+  minimumTechnicalLevel: 4,
+  complexity: "high",
+  // Movement Context: "Alternating Unilateral" / "Staggered Stance" (see
+  // the block comment above this export for the full reasoning).
+  // Matches exercisePrescriptionRegistry.ts's own `laterality: "bilateral"`
+  // and `volumeInterpretations: ["total_repetitions"]`.
+  unilateral: false,
+  // Muscular Profile Primary Muscles (Gluteus Maximus, Quadriceps,
+  // Soleus, Gastrocnemius), reinforced by Secondary Muscles' own
+  // Hamstrings, converge on the same hip/thigh/lower_leg set as every
+  // other jump entry in this file — the same primary lower-body jump
+  // musculature, not a copy. Secondary/Stabilizing contributors (Gluteus
+  // Medius, Adductor Magnus, Hip Flexors, Tibialis Anterior, Foot
+  // Intrinsics, Trunk Stabilizers, Obliques, Erector Spinae, Deep Hip
+  // Rotators, Abdominal Wall, Scapular Stabilizers) are excluded,
+  // matching the precedent used throughout this file.
+  bodyRegionsLoaded: ["hip", "thigh", "lower_leg"],
+  // "# Contraindications and Restrictions — Absolute Contraindications:
+  // ...", quoted one item per source line, excluding "Medical restriction
+  // against jumping or impact" — non-actionable here, handled generically
+  // by `AthleteRestriction`/`checkHardRestrictionProhibitsMovement` in
+  // `exerciseSelector.ts`, matching every other jump entry's identical
+  // exclusion of the same recurring phrase. The separate "Relative
+  // Contraindications" list (Recent ankle sprain, Patellar or quadriceps
+  // tendon irritation, Achilles tendon symptoms, Anterior knee pain, Hip
+  // pain under unilateral loading, Severe delayed-onset muscle soreness,
+  // Poor pelvic control, Significant left-to-right asymmetry, High acute
+  // lower-body fatigue) is excluded entirely, matching SINGLE_LEG_HOP's
+  // identical treatment of its own explicitly-labeled relative tier.
+  // "Return-to-Sport Restriction" is excluded as non-actionable here.
+  contraindications: [
+    { description: "Acute lower-limb injury.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Inability to land without pain.", prohibitedPatterns: ["jump"], absolute: true },
+    { description: "Uncontrolled balance impairment.", prohibitedPatterns: ["jump"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Physiological Cost" is the cleaner, more granular numeric source
+    // here (same choice made throughout this file). `technical` has no
+    // dedicated fatigue-specific field this time (unlike KNEE_JUMP/
+    // LATERAL_BOUND/SINGLE_LEG_HOP's own "Technical (Sensitivity to)
+    // Fatigue: High"); sourced instead from "# Technical Complexity —
+    // Complexity Rating ★★★★☆", the same substitution BOX_JUMP used for
+    // its own missing dedicated field. `types` includes "systemic" —
+    // "Physiological Profile — Systemic Demand: Moderate" is explicit
+    // here (see the block comment above this export for why this
+    // diverges from every other unilateral-family entry).
+    types: ["neural", "muscular", "connective_tissue", "technical", "impact", "systemic"],
+    neural: 4, // "Neurological Cost: Moderate to High"
+    muscular: 3, // "Muscular Cost: Moderate"
+    metabolic: 2, // "Metabolic Cost: Low during power programming" — the primary, listed programming application (power_repetition_sets); "Moderate to High during continuous sets" describes a documented but secondary variation
+    connectiveTissue: 4, // "Tendon Cost: Moderate to High", corroborated by the Joint Profile's "Joint Stress Level: Moderate to High"
+    technical: 4, // "Technical Complexity — Complexity Rating ★★★★☆" — see the block comment above this export
+  },
+  // Same reasoning as every other jump entry: a real "# Evidence
+  // Classification" section exists, here uniquely expressed as a letter
+  // grade ("CAS Evidence Level: B"), but there is still no documented
+  // crosswalk between that grade and the engine's level_1/level_2/
+  // level_3 taxonomy. Left "unknown".
+  evidenceLevel: "unknown",
+  // combatSportRelevance intentionally omitted: no per-sport breakdown
+  // exists anywhere in this chapter (nor in any superseded fiche — none
+  // exists for this exercise) — only the aggregate "Combat Transfer —
+  // Combat Relevance: High" narrative and "Relative Transfer Score —
+  // Overall Combat Transfer ★★★★☆". Same omission already used for every
+  // other jump entry in this file.
+  // Most of this fiche's own Regression/Equivalent/Substitution Logic
+  // options ("Explosive split squat without take-off", "Reverse lunge to
+  // knee drive", "Step-up with knee drive", "Squat jump", "Explosive
+  // stance switch") name no exercise with its own chapter/catalog id in
+  // this repository and are therefore not referenced below (same
+  // discipline applied throughout this file). The two substitutes below
+  // ARE each named explicitly in this fiche's own dedicated "Substitute
+  // With a Bilateral Exercise When" subsection AND already have their own
+  // chapter here: "Countermovement jump", "Box jump".
+  substitutionExerciseIds: ["countermovement_jump", "box_jump"],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -2206,4 +2433,5 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   KNEE_JUMP,
   LATERAL_BOUND,
   SINGLE_LEG_HOP,
+  SPLIT_SQUAT_JUMP,
 ];
