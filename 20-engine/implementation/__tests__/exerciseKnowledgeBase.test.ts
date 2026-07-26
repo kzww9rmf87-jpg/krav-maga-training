@@ -36,9 +36,14 @@ import {
   MED_BALL_SCOOP_TOSS,
   MED_BALL_SHOT_PUT_THROW,
   MED_BALL_SLAM,
+  PINCH_CARRY,
+  PLATE_PINCH,
   PUSH_PRESS,
+  ROPE_CLIMB,
+  ROPE_PULL,
   SINGLE_LEG_HOP,
   SPLIT_SQUAT_JUMP,
+  TOWEL_PULL_UP,
 } from "../exerciseKnowledgeBase";
 
 import { makeEnvironment, makeExercise, makeValidInput } from "./fixtures";
@@ -4590,5 +4595,586 @@ describe("JUMP_SHRUG — Exercise Requirements Model pilot integration", () => {
 
     expect(JUMP_SHRUG).toEqual(exerciseSnapshot);
     expect(input).toEqual(inputSnapshot);
+  });
+});
+
+/**
+ * `65_GRIP` chapter — Exercise Requirements Model batch integration
+ * (`towel_pull_up`, `plate_pinch`, `pinch_carry`, `rope_climb`,
+ * `rope_pull`).
+ *
+ * Structured as a `test.each` table over the five exercises for the
+ * cross-cutting checks every entry in this catalog must satisfy
+ * (catalog presence, unique id, coexistence invariant, no mutation),
+ * followed by one describe block per exercise for its own
+ * eligibility-specific scenarios (valid configuration, missing equipment,
+ * insufficient environment, absence of undocumented dependencies,
+ * biomechanical field conformance) — this avoids restating the same five
+ * assertions five times over while still giving each exercise's own
+ * requirements model direct, individual coverage. Dedicated distinction
+ * tests close the block: `plate_pinch` vs. `pinch_carry`, and
+ * `rope_climb` vs. `rope_pull`.
+ */
+describe("65_GRIP chapter — Exercise Requirements Model batch integration", () => {
+  const GRIP_EXERCISES = [
+    { exercise: TOWEL_PULL_UP, id: "towel_pull_up" },
+    { exercise: PLATE_PINCH, id: "plate_pinch" },
+    { exercise: PINCH_CARRY, id: "pinch_carry" },
+    { exercise: ROPE_CLIMB, id: "rope_climb" },
+    { exercise: ROPE_PULL, id: "rope_pull" },
+  ] as const;
+
+  test.each(GRIP_EXERCISES)("$id — 1. exists in the catalog with the expected id", ({ exercise, id }) => {
+    expect(EXERCISE_KNOWLEDGE_BASE).toContain(exercise);
+    expect(exercise.id).toBe(id);
+  });
+
+  test("2. all five ids are unique within the catalog", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const { id } of GRIP_EXERCISES) {
+      expect(ids.filter((existingId) => existingId === id)).toHaveLength(1);
+    }
+  });
+
+  test.each(GRIP_EXERCISES)(
+    "$id — 3. respects the coexistence invariant: requiredEquipment is empty, optionalEquipment is absent",
+    ({ exercise }) => {
+      expect(exercise.requiredEquipment).toEqual([]);
+      expect(exercise.optionalEquipment).toBeUndefined();
+      expect(validateRequirementsCoexistenceInvariant(exercise)).toBeNull();
+      expect(validateExerciseRequirementsStructure(exercise.requirements!)).toEqual([]);
+    },
+  );
+
+  test("4. the default catalog used by runEngine(input) now also contains all five 65_GRIP ids", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    for (const { id } of GRIP_EXERCISES) {
+      expect(ids).toContain(id);
+    }
+  });
+
+  test.each(GRIP_EXERCISES)("$id — 5. never mutates the exercise or the input it is given during evaluation", ({ exercise }) => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [
+          { type: "pull_up_bar" },
+          { type: "towel" },
+          { type: "plates" },
+          { type: "pinch_grip_implement" },
+          { type: "rope" },
+        ],
+        floorSafe: true,
+        availableSpace: "large",
+      }),
+    });
+    const exerciseSnapshot = structuredClone(exercise);
+    const inputSnapshot = structuredClone(input);
+
+    checkExerciseEligibility(exercise, input);
+
+    expect(exercise).toEqual(exerciseSnapshot);
+    expect(input).toEqual(inputSnapshot);
+  });
+
+  describe("TOWEL_PULL_UP", () => {
+    test("6. eligible with a pull-up bar, a towel and minimal space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "pull_up_bar" }, { type: "towel" }],
+          availableSpace: "very_limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(TOWEL_PULL_UP, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("7. ineligible without a pull-up bar", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "towel" }],
+          availableSpace: "very_limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(TOWEL_PULL_UP, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("8. ineligible without a towel", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "pull_up_bar" }],
+          availableSpace: "very_limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(TOWEL_PULL_UP, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("9. no dependency on floor safety, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "pull_up_bar" }, { type: "towel" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(TOWEL_PULL_UP, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("10. biomechanical fields match the canonical documentation", () => {
+      expect(TOWEL_PULL_UP.physicalQualities).toEqual(["grip_strength", "relative_strength", "stability"]);
+      expect(TOWEL_PULL_UP.movementPatterns).toEqual(["vertical_pull", "isometric"]);
+      expect(TOWEL_PULL_UP.forceVectors).toEqual(["vertical"]);
+      expect(TOWEL_PULL_UP.unilateral).toBe(false);
+      expect(TOWEL_PULL_UP.bodyRegionsLoaded).toEqual(["shoulder", "upper_arm", "forearm", "hand"]);
+      expect(TOWEL_PULL_UP.complexity).toBe("moderate");
+      expect(TOWEL_PULL_UP.minimumTechnicalLevel).toBe(3);
+    });
+  });
+
+  describe("PLATE_PINCH", () => {
+    test("11. eligible with weight plates and minimal space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "plates" }],
+          availableSpace: "very_limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(PLATE_PINCH, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("12. ineligible without weight plates", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "bodyweight" }],
+          availableSpace: "very_limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(PLATE_PINCH, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("13. no dependency on floor safety, jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "plates" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(PLATE_PINCH, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("14. biomechanical fields match the canonical documentation", () => {
+      expect(PLATE_PINCH.physicalQualities).toEqual(["grip_strength", "stability", "tissue_capacity"]);
+      expect(PLATE_PINCH.movementPatterns).toEqual(["isometric"]);
+      expect(PLATE_PINCH.forceVectors).toEqual(["not_applicable"]);
+      expect(PLATE_PINCH.unilateral).toBe(false);
+      expect(PLATE_PINCH.bodyRegionsLoaded).toEqual(["hand", "forearm"]);
+      expect(PLATE_PINCH.complexity).toBe("low");
+      expect(PLATE_PINCH.minimumTechnicalLevel).toBe(1);
+    });
+  });
+
+  describe("PINCH_CARRY", () => {
+    test("15. eligible with a pinch-grip implement and large space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "pinch_grip_implement" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(PINCH_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("16. ineligible without a pinch-grip implement", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "bodyweight" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(PINCH_CARRY, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("17. ineligible when available space is below the documented minimum (large)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "pinch_grip_implement" }],
+          availableSpace: "moderate",
+        }),
+      });
+
+      const result = checkExerciseEligibility(PINCH_CARRY, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+    });
+
+    test("18. no dependency on floor safety, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "pinch_grip_implement" }],
+          availableSpace: "large",
+          floorSafe: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(PINCH_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("19. biomechanical fields match the canonical documentation", () => {
+      expect(PINCH_CARRY.physicalQualities).toEqual(["grip_strength", "stability", "trunk_strength"]);
+      expect(PINCH_CARRY.movementPatterns).toEqual(["carry", "isometric"]);
+      expect(PINCH_CARRY.forceVectors).toEqual(["horizontal"]);
+      expect(PINCH_CARRY.unilateral).toBe(false);
+      expect(PINCH_CARRY.bodyRegionsLoaded).toEqual(["hand", "forearm"]);
+      expect(PINCH_CARRY.complexity).toBe("moderate");
+      expect(PINCH_CARRY.minimumTechnicalLevel).toBe(2);
+    });
+  });
+
+  describe("ROPE_CLIMB", () => {
+    test("20. eligible with a rope, a safe landing surface and large space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "rope" }],
+          floorSafe: true,
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(ROPE_CLIMB, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("21. ineligible without a rope", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "bodyweight" }],
+          floorSafe: true,
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(ROPE_CLIMB, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("22. ineligible when the landing surface is not safe", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "rope" }],
+          floorSafe: false,
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(ROPE_CLIMB, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT")).toBe(true);
+    });
+
+    test("23. ineligible when available space is below the documented minimum (large)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "rope" }],
+          floorSafe: true,
+          availableSpace: "moderate",
+        }),
+      });
+
+      const result = checkExerciseEligibility(ROPE_CLIMB, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+    });
+
+    test("24. no dependency on jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "rope" }],
+          floorSafe: true,
+          availableSpace: "large",
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(ROPE_CLIMB, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("25. biomechanical fields match the canonical documentation", () => {
+      expect(ROPE_CLIMB.physicalQualities).toEqual([
+        "grip_strength",
+        "relative_strength",
+        "coordination",
+        "stability",
+        "trunk_strength",
+      ]);
+      expect(ROPE_CLIMB.movementPatterns).toEqual(["vertical_pull", "isometric", "locomotion"]);
+      expect(ROPE_CLIMB.forceVectors).toEqual(["vertical"]);
+      expect(ROPE_CLIMB.unilateral).toBe(false);
+      expect(ROPE_CLIMB.bodyRegionsLoaded).toEqual(["shoulder", "upper_arm", "forearm", "hand"]);
+      expect(ROPE_CLIMB.complexity).toBe("high");
+      expect(ROPE_CLIMB.minimumTechnicalLevel).toBe(4);
+    });
+  });
+
+  describe("ROPE_PULL", () => {
+    test("26. eligible with a rope and large space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "rope" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(ROPE_PULL, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("27. ineligible without a rope", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "bodyweight" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(ROPE_PULL, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("28. ineligible when available space is below the documented minimum (large)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "rope" }],
+          availableSpace: "moderate",
+        }),
+      });
+
+      const result = checkExerciseEligibility(ROPE_PULL, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+    });
+
+    test("29. no dependency on floor safety, jumping, throwing, a wall or a partner — unlike ROPE_CLIMB, no safe landing surface is documented", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "rope" }],
+          availableSpace: "large",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(ROPE_PULL, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("30. biomechanical fields match the canonical documentation", () => {
+      expect(ROPE_PULL.physicalQualities).toEqual(["grip_strength", "stability", "trunk_strength", "general_work_capacity"]);
+      expect(ROPE_PULL.movementPatterns).toEqual(["horizontal_pull", "vertical_pull"]);
+      expect(ROPE_PULL.forceVectors).toEqual(["horizontal", "vertical"]);
+      expect(ROPE_PULL.unilateral).toBe(false);
+      expect(ROPE_PULL.bodyRegionsLoaded).toEqual(["shoulder", "upper_arm", "forearm", "hand"]);
+      expect(ROPE_PULL.complexity).toBe("moderate");
+      expect(ROPE_PULL.minimumTechnicalLevel).toBe(3);
+    });
+  });
+
+  describe("business distinctions", () => {
+    test("31. PLATE_PINCH vs. PINCH_CARRY: distinct equipment (plates vs. pinch_grip_implement), distinct space footprint, and a static hold vs. a loaded carry", () => {
+      // Equipment: "Weight Plates" only (PLATE_PINCH) vs. "Weight Plates or Pinch Blocks" (PINCH_CARRY)
+      expect(PLATE_PINCH.requirements!.required[0].items).toContainEqual({ kind: "equipment", equipment: "plates" });
+      expect(PINCH_CARRY.requirements!.required[0].items).toContainEqual({
+        kind: "equipment",
+        equipment: "pinch_grip_implement",
+      });
+      expect(PLATE_PINCH.requirements!.required[0].items).not.toContainEqual({
+        kind: "equipment",
+        equipment: "pinch_grip_implement",
+      });
+      expect(PINCH_CARRY.requirements!.required[0].items).not.toContainEqual({ kind: "equipment", equipment: "plates" });
+
+      // A pinch implement alone is not documented to satisfy PLATE_PINCH's specific "Weight Plates" requirement
+      const pinchImplementOnlyInput = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "pinch_grip_implement" }],
+          availableSpace: "large",
+        }),
+      });
+      expect(checkExerciseEligibility(PLATE_PINCH, pinchImplementOnlyInput).eligible).toBe(false);
+
+      // PINCH_CARRY documents a 10-40 metre carry distance and needs "large" space; PLATE_PINCH is a stationary hold needing only "very_limited" space
+      const plateInLimitedSpaceInput = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "plates" }],
+          availableSpace: "very_limited",
+        }),
+      });
+      expect(checkExerciseEligibility(PLATE_PINCH, plateInLimitedSpaceInput).eligible).toBe(true);
+
+      const pinchCarryInLimitedSpaceInput = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "pinch_grip_implement" }],
+          availableSpace: "very_limited",
+        }),
+      });
+      expect(checkExerciseEligibility(PINCH_CARRY, pinchCarryInLimitedSpaceInput).eligible).toBe(false);
+
+      // Static hold (isometric only) vs. loaded carry (carry + isometric)
+      expect(PLATE_PINCH.movementPatterns).toEqual(["isometric"]);
+      expect(PINCH_CARRY.movementPatterns).toContain("carry");
+      expect(PLATE_PINCH.forceVectors).toEqual(["not_applicable"]);
+      expect(PINCH_CARRY.forceVectors).not.toEqual(["not_applicable"]);
+    });
+
+    test("32. ROPE_CLIMB vs. ROPE_PULL: ROPE_CLIMB alone requires a safe landing surface, and their movement patterns are not copied from one another", () => {
+      const ropeOnlyInput = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "rope" }],
+          floorSafe: false,
+          availableSpace: "large",
+        }),
+      });
+
+      // ROPE_CLIMB has a genuine descent/fall risk from height and requires safe_landing_surface;
+      // ROPE_PULL keeps floor contact throughout and does not.
+      expect(checkExerciseEligibility(ROPE_CLIMB, ropeOnlyInput).eligible).toBe(false);
+      expect(
+        checkExerciseEligibility(ROPE_CLIMB, ropeOnlyInput).rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT"),
+      ).toBe(true);
+      expect(checkExerciseEligibility(ROPE_PULL, ropeOnlyInput).eligible).toBe(true);
+
+      // ROPE_CLIMB is a vertical pull with an isometric grip and a locomotion component (climbing);
+      // ROPE_PULL is a horizontal-or-vertical pull with repeated (non-isometric) grip — not a copy of ROPE_CLIMB's own patterns.
+      expect(ROPE_CLIMB.movementPatterns).toEqual(["vertical_pull", "isometric", "locomotion"]);
+      expect(ROPE_PULL.movementPatterns).toEqual(["horizontal_pull", "vertical_pull"]);
+      expect(ROPE_PULL.movementPatterns).not.toContain("isometric");
+      expect(ROPE_PULL.movementPatterns).not.toContain("locomotion");
+      expect(ROPE_CLIMB.movementPatterns).not.toContain("horizontal_pull");
+
+      // Documented complexity ordering: Rope Pull (Moderate) < Rope Climb (High)
+      expect(ROPE_PULL.minimumTechnicalLevel).toBeLessThan(ROPE_CLIMB.minimumTechnicalLevel);
+      expect(ROPE_PULL.complexity).toBe("moderate");
+      expect(ROPE_CLIMB.complexity).toBe("high");
+    });
+  });
+
+  test("33. adding this chapter never changes the previously integrated exercises", () => {
+    const jumpShrugInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(JUMP_SHRUG, jumpShrugInput).eligible).toBe(true);
+
+    const hangPowerCleanInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(HANG_POWER_CLEAN, hangPowerCleanInput).eligible).toBe(true);
+
+    const pushPressInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }, { type: "rack" }],
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(PUSH_PRESS, pushPressInput).eligible).toBe(true);
+
+    const boxJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "plyometric_box" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(BOX_JUMP, boxJumpInput).eligible).toBe(true);
+
+    const chestPassInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: true,
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_CHEST_PASS, chestPassInput).eligible).toBe(true);
   });
 });

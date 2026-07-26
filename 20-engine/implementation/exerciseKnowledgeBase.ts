@@ -3346,6 +3346,808 @@ export const JUMP_SHRUG: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Towel Pull-Up
+// Source: 50-exercises/65_GRIP/10_TOWEL_PULL_UP.md
+// -----------------------------------------------------------------------------
+
+/**
+ * First entry from the `65_GRIP` chapter, migrated as a single coherent
+ * batch alongside `PLATE_PINCH`/`PINCH_CARRY`/`ROPE_CLIMB`/`ROPE_PULL`.
+ * This chapter's fiches use a different structural format from every
+ * prior chapter ("Exercise Identity" — Name/Category/Primary Pattern/
+ * Secondary Pattern/Equipment/Complexity/Unilateral or Bilateral/Closed
+ * or Open Chain — rather than a "Movement Pattern"/"Movement Context"
+ * pair), but the same sourcing discipline applies throughout.
+ * `exercisePrescriptionRegistry.ts` has no entry for this exercise at all
+ * (confirmed by direct search) — a known limitation, documented here
+ * without modifying that registry.
+ *
+ * Central business question for this entry, as flagged before writing
+ * began: distinguishing the `towel` (a real, separate physical implement)
+ * from the suspension point. "Equipment: Pull-Up Bar, Towel" (Exercise
+ * Identity) names BOTH explicitly and together — "A towel is draped
+ * securely over a stable pull-up bar" (Movement Description). This is a
+ * specific, named `pull_up_bar`, not the more generic `rigid_anchor_support`
+ * (created for `Dragon Flag`'s own "Secure overhead or behind-head hand
+ * anchor" — a materially different, non-bar-specific anchor concept) —
+ * using the generic anchor type here would blur a distinction the
+ * documentation itself makes precisely. `requirements` therefore requires
+ * BOTH `pull_up_bar` AND `towel` together, matching `EquipmentType`'s own
+ * existing values for each — no ad hoc "suspension" capability is
+ * introduced.
+ *
+ * No explicit surface-safety language exists anywhere in this fiche
+ * (checked directly) — this is a hanging exercise with no floor contact
+ * during the pull, so `floor_safe`/`safe_landing_surface` are not added.
+ * "Safety Rules — Keep the landing area clear" grounds a minimal
+ * `sufficient_space` atom instead (a fall/drop clearance concern, not a
+ * surface-quality one): `minimumSpace: "very_limited"`, reflecting a
+ * single stationary hanging station, not an extended footprint.
+ *
+ * Unlike every `64_POWER` entry, this chapter's fiches carry a genuine
+ * "# Sport-Specific Relevance" section with real per-sport ratings
+ * (Brazilian Jiu-Jitsu, Judo, Wrestling, MMA, Krav Maga, "Boxing and
+ * Kickboxing" combined) — `combatSportRelevance` is therefore populated
+ * here, unlike every jump/power entry so far. Savate/Sambo/Muay Thai are
+ * never mentioned in this chapter (unlike some superseded plyometric
+ * fiches) — `muay_thai` has no rating anywhere in this chapter and is
+ * genuinely omitted, not silently invented as a middling guess. "Boxing
+ * and Kickboxing" is rated as a single combined line throughout this
+ * chapter — the same rating is applied to both `boxing` and `kickboxing`,
+ * faithfully reflecting the source's own combined framing rather than
+ * inventing two independent numbers.
+ */
+export const TOWEL_PULL_UP: ExerciseDefinition = {
+  id: "towel_pull_up",
+  name: "Towel Pull-Up",
+  // No AdaptationDomain value exists for "grip" specifically — `module`
+  // already captures this precisely via the real `"grip"` CapabilityModule
+  // (confirmed in `exercisePrescriptionRegistry.ts`'s own `pinchCarryEntry`
+  // — `moduleId: "grip"`, the only entry in this chapter with an existing
+  // registry entry). `primaryAdaptation: "maximum_strength"` is used as
+  // the closest AdaptationDomain match: every fiche in this chapter is
+  // ATP-PC/low-metabolic and strength- or tendon-capacity-framed (never
+  // "Power" the way every 64_POWER entry's own Primary Adaptation was),
+  // and AdaptationDomain has no finer-grained "grip"/"local muscular
+  // endurance" value to reach for instead.
+  module: "grip",
+  primaryAdaptation: "maximum_strength",
+  // Secondary Classifications: "Relative Strength" (exact match) +
+  // Secondary Adaptations: "Relative Upper-Body Strength" (→
+  // relative_strength — the first entry in this catalog to earn this
+  // quality). "Support Grip"/"Open-Hand Grip"/"Grip Endurance" all fall
+  // under the single grip_strength umbrella (no separate "support_grip"/
+  // "open_hand_grip" PhysicalQuality exists). Secondary Adaptations:
+  // "Shoulder Stability" (→ stability). No "Coordination" language exists
+  // anywhere in this fiche (checked directly) — unlike ROPE_CLIMB's own
+  // explicit "Whole-Body Coordination"/"Climbing Coordination" — so
+  // coordination is deliberately NOT added, a genuine divergence between
+  // these two related pulling exercises. No "Trunk Stiffness"/"Trunk
+  // Stability" Secondary Classification/Adaptation exists either (only
+  // "Trunk" Joint Actions prose — "anti-extension, anti-swing
+  // stabilization" — which this file does not use as a physicalQualities
+  // source, matching the precedent throughout) — trunk_strength is not
+  // added.
+  physicalQualities: ["grip_strength", "relative_strength", "stability"],
+  // Exercise Identity: "Primary Pattern: Vertical Pull. Secondary
+  // Pattern: Isometric Grip." → vertical_pull, isometric.
+  movementPatterns: ["vertical_pull", "isometric"],
+  // No dedicated "Force Vector" heading exists in this chapter's format,
+  // but the movement is unambiguous: the athlete "pulls the body upward".
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "pull_up_bar" },
+          { kind: "equipment", equipment: "towel" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "very_limited" },
+        ],
+      },
+    ],
+  },
+  // Exercise Identity: "Complexity: Moderate", corroborated by "#
+  // Technical Complexity — Moderate. The pulling pattern is familiar to
+  // athletes who can already perform pull-ups. However, the towel
+  // introduces... greater grip instability...".
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // Exercise Identity: "Unilateral or Bilateral: Bilateral" (explicit,
+  // unambiguous — unlike PLATE_PINCH's/PINCH_CARRY's own "Unilateral or
+  // Bilateral: Unilateral or Bilateral" framing).
+  unilateral: false,
+  // Primary Muscles: Latissimus Dorsi, Biceps Brachii, Brachialis,
+  // Brachioradialis, Finger Flexors, Forearm Flexors. No "back"/"lats"
+  // BodyRegion exists — Latissimus Dorsi is mapped to `shoulder`, the
+  // same region used throughout this file for pulling-derived
+  // shoulder-girdle contribution (matching HANG_HIGH_PULL's own
+  // Trapezius → shoulder treatment). Biceps Brachii/Brachialis/
+  // Brachioradialis → upper_arm (elbow flexors). Finger Flexors/Forearm
+  // Flexors → forearm and hand — the first entries in this catalog to use
+  // these two regions, reflecting the genuinely different (grip-first)
+  // demand of this chapter versus every prior lower-body-dominant entry.
+  // Secondary Muscles (Lower/Middle Trapezius, Rhomboids, Rear Deltoids,
+  // Rotator Cuff, Abdominal Wall, Obliques, Spinal Stabilizers) are
+  // excluded, matching the precedent used throughout this file.
+  bodyRegionsLoaded: ["shoulder", "upper_arm", "forearm", "hand"],
+  // "# Absolute Contraindications", quoted one item per source line.
+  // "an unstable pull-up station" is excluded — an equipment/setup
+  // concern, not an athlete-state condition, matching the precedent of
+  // excluding equipment-instability items throughout this file. The
+  // separate "# Relative Contraindications" section is excluded entirely,
+  // matching the same absolute-tier-only discipline used throughout this
+  // file.
+  contraindications: [
+    { description: "Acute hand or finger injury.", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+    { description: "Acute wrist injury.", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+    { description: "Acute elbow injury.", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+    { description: "Acute shoulder injury.", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+    { description: "Neurological symptoms in the upper limb.", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+    { description: "Inability to grip the towel securely.", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // This chapter's own "# Fatigue Profile" format uses four dimensions
+    // (Systemic / Local / Neurological / Connective-Tissue) and never
+    // rates metabolic fatigue or names an energy system at all (unlike
+    // the 64_POWER chapter's own explicit "Primary Energy System: ATP-PC
+    // system" framing) — `metabolic` is set to the lowest tier (1)
+    // uniformly across this entire chapter as the most conservative,
+    // minimal-assumption default, given every exercise here is a brief,
+    // local, non-conditioning effort by its fundamental nature, not a
+    // fabricated distinct fact per exercise. `technical` has no dedicated
+    // field either; sourced from this fiche's own "Complexity: Moderate"
+    // (minimumTechnicalLevel 3), the same BOX_JUMP-style fallback used
+    // throughout this file, and — matching BOX_JUMP's own precedent — is
+    // NOT tagged in `types` for being fallback-sourced rather than
+    // fiche-emphasized.
+    types: ["neural", "muscular", "connective_tissue", "systemic"],
+    neural: 3, // "Neurological Fatigue: Moderate"
+    muscular: 4, // "Local Fatigue: High"
+    metabolic: 1, // see comment above
+    connectiveTissue: 4, // "Connective-Tissue Stress: Moderate to High"
+    technical: 3, // fallback from "Complexity: Moderate" — see comment above
+  },
+  // This chapter's fiches carry no "Evidence Classification"/"Scientific
+  // Evidence" section at all (checked directly — unlike every prior
+  // chapter, which at minimum had a narrative evidence discussion). Left
+  // "unknown", an even more direct application of this file's established
+  // discipline than usual.
+  evidenceLevel: "unknown",
+  // "# Sport-Specific Relevance" — Brazilian Jiu-Jitsu: High (5); Judo:
+  // High (5); Wrestling: Moderate (3); MMA: Moderate (3); Krav Maga:
+  // Moderate (3); Boxing and Kickboxing: Low to Moderate (2, applied to
+  // both). Muay Thai is never mentioned in this chapter and is genuinely
+  // omitted, not invented.
+  combatSportRelevance: {
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    wrestling: 3,
+    mma: 3,
+    krav_maga: 3,
+    boxing: 2,
+    kickboxing: 2,
+  },
+  // "# Substitution Logic" names "Conventional Pull-Up", "Towel Hang",
+  // "Lat Pulldown With Towel", "Farmer Carry" and "Plate Pinch". "Towel
+  // Hang" and "Lat Pulldown With Towel" name no exercise with its own
+  // chapter/catalog id in this repository. "Conventional Pull-Up" →
+  // `pull_up` (`50-exercises/10_PULL_UP`, a confirmed real chapter, not
+  // yet integrated into this catalog — same "doc-backed but not yet
+  // catalogued" precedent BOX_JUMP already established for
+  // `countermovement_jump`/`knee_jump`/`single_leg_hop`). "Farmer Carry"
+  // → `farmer_carry` (`50-exercises/66_CARRIES/10_FARMER_CARRY.md`,
+  // confirmed real chapter, not yet integrated). "Plate Pinch" →
+  // `plate_pinch`, integrated in this same batch below.
+  substitutionExerciseIds: ["pull_up", "plate_pinch", "farmer_carry"],
+};
+
+// -----------------------------------------------------------------------------
+// Plate Pinch
+// Source: 50-exercises/65_GRIP/11_PLATE_PINCH.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Second entry from the `65_GRIP` chapter. No prescription-registry entry
+ * exists for this exercise (confirmed by direct search).
+ *
+ * Central business question: whether the canonical equipment should be
+ * the plain, existing `plates` `EquipmentType` or the equivalence-group
+ * `pinch_grip_implement` value. "Equipment: Weight Plates" (Exercise
+ * Identity) — this fiche names ONLY weight plates, with no "or Pinch
+ * Blocks" alternative anywhere (unlike `PINCH_CARRY`'s own explicit
+ * "Weight Plates or Pinch Blocks"). `pinch_grip_implement` exists
+ * specifically as an equivalence-group id for that documented "either
+ * implement" ambiguity (see `equipmentCapabilities.ts`'s own comment,
+ * literally naming "Pinch Carry" as its origin) — using it here, where no
+ * such ambiguity is documented, would silently broaden this exercise's
+ * real equipment requirement beyond what this fiche actually says. The
+ * plain `plates` type is therefore used, deliberately distinct from
+ * `PINCH_CARRY`'s own `pinch_grip_implement` — the two exercises earn
+ * genuinely different equipment atoms from genuinely different source
+ * text, not a copy-paste of one onto the other.
+ *
+ * "Primary Pattern: Isometric Grip. Secondary Pattern: Loaded Hold" — a
+ * static hold, not a carry (the walking "# Walking Variation" section is
+ * a documented progression, not this fiche's own base/default form,
+ * matching the "Closed or Open Chain: Open Chain" / "Movement
+ * Description" framing of a stationary hold "at the side of the body or
+ * in front of the athlete"). `forceVectors` uses `"not_applicable"` — the
+ * dedicated enum value for exactly this situation, a pure isometric
+ * resistance to gravity with no directional force PRODUCTION the way
+ * every prior entry's own genuine movement has — rather than forcing an
+ * inaccurate "downward" label onto a static hold.
+ */
+export const PLATE_PINCH: ExerciseDefinition = {
+  id: "plate_pinch",
+  name: "Plate Pinch",
+  module: "grip",
+  primaryAdaptation: "maximum_strength",
+  // Secondary Adaptations: "Wrist Stability" (also a Secondary
+  // Classification, doubly confirmed → stability). Secondary
+  // Classifications: "Tendon Capacity"; Secondary Adaptations: "Tendon
+  // Robustness" (→ tissue_capacity, exact match — the first entry in this
+  // catalog to earn this quality). "Thumb Strength"/"Finger Strength"/
+  // "Grip Endurance"/"Hand Strength" all fall under the single
+  // grip_strength umbrella. "Isometric Strength" (Secondary
+  // Classification) has no distinct PhysicalQuality counterpart beyond
+  // grip_strength itself, already listed, and is not force-fitted into a
+  // new value — it describes the CONTRACTION TYPE, already represented by
+  // `movementPatterns: ["isometric"]` below, not a separate quality.
+  physicalQualities: ["grip_strength", "stability", "tissue_capacity"],
+  // Exercise Identity: "Primary Pattern: Isometric Grip. Secondary
+  // Pattern: Loaded Hold." → isometric. "Loaded Hold" has no distinct
+  // MovementPattern counterpart beyond isometric itself.
+  movementPatterns: ["isometric"],
+  // See the block comment above this export for why "not_applicable" is
+  // used here rather than a directional value.
+  forceVectors: ["not_applicable"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "plates" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "very_limited" },
+        ],
+      },
+    ],
+  },
+  // Exercise Identity: "Complexity: Low", corroborated by "# Technical
+  // Complexity — Low. The movement is simple and easy to teach."
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  // Exercise Identity: "Unilateral or Bilateral: Unilateral or Bilateral"
+  // — this fiche documents both as equally legitimate, dedicated
+  // sections ("# Unilateral Variation" / "# Bilateral Variation"), with
+  // Bilateral framed as offering "efficient bilateral training... easier
+  // integration into general strength sessions" — the more standard
+  // default. `unilateral: false` is used, matching
+  // exercisePrescriptionRegistry.ts's own independent `laterality:
+  // "bilateral"` resolution for the identically-phrased `PINCH_CARRY`
+  // sibling (this exact fiche has no registry entry of its own, but the
+  // sibling's confirmed resolution is the strongest available precedent
+  // for the same ambiguous phrasing).
+  unilateral: false,
+  // Primary Muscles: Thumb Adductors, Thenar Musculature, Finger Flexors,
+  // Finger Adductors, Forearm Flexors → hand (thumb/finger/thenar
+  // musculature) and forearm. Unlike TOWEL_PULL_UP/ROPE_CLIMB/ROPE_PULL,
+  // no shoulder or upper_arm region is added — Deltoids/Rotator Cuff are
+  // only Secondary Muscles here, never Primary, a genuine divergence
+  // reflecting the absence of any pulling motion in this exercise.
+  bodyRegionsLoaded: ["hand", "forearm"],
+  // "# Absolute Contraindications", quoted one item per source line.
+  // "unsafe plate geometry" is excluded — an equipment/setup concern, not
+  // an athlete-state condition. The separate "# Relative
+  // Contraindications" section is excluded entirely.
+  contraindications: [
+    { description: "Acute thumb injury.", prohibitedPatterns: ["isometric"], absolute: true },
+    { description: "Acute finger injury.", prohibitedPatterns: ["isometric"], absolute: true },
+    { description: "Acute wrist injury.", prohibitedPatterns: ["isometric"], absolute: true },
+    { description: "Neurological loss of hand control.", prohibitedPatterns: ["isometric"], absolute: true },
+    { description: "Inability to pinch securely.", prohibitedPatterns: ["isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // Same chapter-wide `metabolic`/`technical` sourcing approach as
+    // TOWEL_PULL_UP (see its own fatigueProfile comment for the full
+    // reasoning). `types` excludes "systemic": "Systemic Fatigue: Low" is
+    // an explicit LOW rating (matching the same "explicit low → exclude"
+    // treatment used for KNEE_JUMP's/LATERAL_BOUND's own explicit low
+    // systemic ratings).
+    types: ["neural", "muscular", "connective_tissue"],
+    neural: 2, // "Neurological Fatigue: Low to Moderate"
+    muscular: 4, // "Local Fatigue: High"
+    metabolic: 1, // see TOWEL_PULL_UP's own fatigueProfile comment
+    connectiveTissue: 3, // "Connective-Tissue Stress: Moderate"
+    technical: 1, // fallback from "Complexity: Low" (minimumTechnicalLevel 1)
+  },
+  // Same reasoning as TOWEL_PULL_UP: no "Evidence Classification"/
+  // "Scientific Evidence" section exists anywhere in this chapter. Left
+  // "unknown".
+  evidenceLevel: "unknown",
+  // "# Sport-Specific Relevance" — Brazilian Jiu-Jitsu: Moderate to High
+  // (4); Judo: High (5); Wrestling: Moderate (3); MMA: Moderate (3); Krav
+  // Maga: Moderate (3); Boxing and Kickboxing: Low to Moderate (2, both).
+  combatSportRelevance: {
+    brazilian_jiu_jitsu: 4,
+    judo: 5,
+    wrestling: 3,
+    mma: 3,
+    krav_maga: 3,
+    boxing: 2,
+    kickboxing: 2,
+  },
+  // "# Substitution Logic" names "Towel Hang", "Farmer Carry", "Pinch
+  // Block Hold", "Gripper Work" and "Finger Extension Work". Only "Farmer
+  // Carry" has a confirmed real chapter in this repository
+  // (`50-exercises/66_CARRIES/10_FARMER_CARRY.md`, not yet integrated) —
+  // the rest name no exercise with its own chapter/catalog id.
+  substitutionExerciseIds: ["farmer_carry"],
+};
+
+// -----------------------------------------------------------------------------
+// Pinch Carry
+// Source: 50-exercises/65_GRIP/12_PINCH_CARRY.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Third entry from the `65_GRIP` chapter, and the only one of the five
+ * with an existing `exercisePrescriptionRegistry.ts` entry
+ * (`pinchCarryEntry`), used here to corroborate — not substitute for —
+ * an independent reading of the canonical documentation.
+ *
+ * "Equipment: Weight Plates or Pinch Blocks" — a genuine documented
+ * equipment alternative, unlike `PLATE_PINCH`'s own single-implement
+ * "Weight Plates" (see that export's own block comment for the full
+ * reasoning). `pinch_grip_implement` — the equivalence-group
+ * `EquipmentType` created specifically for this "Weight Plates or Pinch
+ * Blocks" pairing — is used here, matching
+ * `exercisePrescriptionRegistry.ts`'s own independent
+ * `requiredEquipmentCapabilities: ["pinch_grip_implement"]` for this
+ * exact exercise exactly.
+ *
+ * "Prescription Variables — Distance: 10 to 20 metres for strength
+ * emphasis, 20 to 40 metres for strength endurance" — a genuine,
+ * quantified extended-distance requirement, substantially larger than any
+ * prior entry's own space grounding in this catalog, hence
+ * `minimumSpace: "large"` (the first use of this tier in the whole
+ * catalog). No explicit surface-safety language exists anywhere in this
+ * fiche (checked directly) — `floor_safe`/`safe_landing_surface` are not
+ * added; "Keep the walking area clear" is a space/obstacle concern,
+ * already captured by `sufficient_space`, not a surface-quality one.
+ */
+export const PINCH_CARRY: ExerciseDefinition = {
+  id: "pinch_carry",
+  name: "Pinch Carry",
+  module: "grip",
+  primaryAdaptation: "maximum_strength",
+  // Secondary Classifications: "Trunk Stability" (exact match, unlike
+  // PLATE_PINCH — a genuine divergence reflecting the added postural
+  // demand of walking under load); Secondary Adaptations: "Anti-Lateral-
+  // Flexion Strength" (→ trunk_strength). "Wrist Stability"/"Shoulder
+  // Stability" (both sections → stability). "Pinch-Grip Strength"/
+  // "Thumb Opposition Strength"/"Finger Adduction Strength"/"Grip
+  // Endurance" fall under the single grip_strength umbrella. "Postural
+  // Control" (Secondary Adaptations) is read as reinforcing stability
+  // (already listed), not a separate balance quality — this fiche never
+  // names "Dynamic Balance" the explicit, distinct way LATERAL_BOUND's
+  // own fiche did.
+  physicalQualities: ["grip_strength", "stability", "trunk_strength"],
+  // Exercise Identity: "Primary Pattern: Loaded Carry. Secondary Pattern:
+  // Isometric Grip." → carry, isometric — note the pattern order is
+  // reversed relative to PLATE_PINCH's own "Isometric Grip" (primary)/
+  // "Loaded Hold" (secondary), reflecting that locomotion, not the grip
+  // itself, is this fiche's own defining pattern.
+  movementPatterns: ["carry", "isometric"],
+  // No dedicated "Force Vector" heading exists in this chapter's format.
+  // "Loaded Carry" being the Primary Pattern (not "Isometric Grip", which
+  // PLATE_PINCH's own doc leads with instead), the locomotor component is
+  // the defining direction: the athlete "walks for the prescribed
+  // distance or duration".
+  forceVectors: ["horizontal"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "pinch_grip_implement" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "large" },
+        ],
+      },
+    ],
+  },
+  // Exercise Identity: "Complexity: Low to Moderate", corroborated by "#
+  // Technical Complexity — Low to Moderate. The grip task is simple, but
+  // locomotion increases technical demand." Rounded up to `complexity:
+  // "moderate"` while `minimumTechnicalLevel` is kept at 2 (not 3) to
+  // preserve the "Low to Moderate" nuance — the same resolution
+  // MED_BALL_OVERHEAD_THROW's own identical "Low to Moderate" complexity
+  // phrase already established in this file.
+  minimumTechnicalLevel: 2,
+  complexity: "moderate",
+  // Exercise Identity: "Unilateral or Bilateral: Unilateral or
+  // Bilateral" — matches exercisePrescriptionRegistry.ts's own
+  // independent `laterality: "bilateral"` for this exact exercise.
+  unilateral: false,
+  // Primary Muscles: Thumb Adductors, Thenar Musculature, Finger Flexors,
+  // Finger Adductors, Forearm Flexors — identical to PLATE_PINCH's own
+  // Primary Muscles list. Despite the added locomotion, no lower-body
+  // muscle (e.g. Gluteus Medius, listed only as a Secondary Contributor
+  // for gait stabilization) is ever promoted to Primary status in this
+  // fiche's own Muscular Profile — the grip remains the dominant loaded
+  // region, matching PLATE_PINCH's own region set exactly, a genuine
+  // convergence rather than a copy.
+  bodyRegionsLoaded: ["hand", "forearm"],
+  // "# Absolute Contraindications", quoted one item per source line.
+  // "an unstable implement setup" is excluded — an equipment/setup
+  // concern, not an athlete-state condition.
+  contraindications: [
+    { description: "Acute thumb injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Acute finger injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Acute wrist injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Neurological loss of grip control.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Inability to walk safely under load.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // Same chapter-wide `metabolic`/`technical` sourcing approach as
+    // TOWEL_PULL_UP. `types` excludes "systemic": "Systemic Fatigue: Low
+    // to Moderate" straddles the established inclusion/exclusion
+    // precedent (a plain "Moderate" → include; an explicit "Low" →
+    // exclude) — treated cautiously as leaning toward exclusion here,
+    // consistent with not overclaiming a systemic-fatigue category the
+    // fiche itself hedges on.
+    types: ["neural", "muscular", "connective_tissue"],
+    neural: 2, // "Neurological Fatigue: Low to Moderate"
+    muscular: 4, // "Local Fatigue: High"
+    metabolic: 1, // see TOWEL_PULL_UP's own fatigueProfile comment
+    connectiveTissue: 3, // "Connective-Tissue Stress: Moderate"
+    technical: 2, // fallback from "Complexity: Low to Moderate" (minimumTechnicalLevel 2)
+  },
+  evidenceLevel: "unknown",
+  // "# Sport-Specific Relevance" — Brazilian Jiu-Jitsu: High (5); Judo:
+  // High (5); Wrestling: Moderate (3); MMA: Moderate (3); Krav Maga:
+  // Moderate (3); Boxing and Kickboxing: Low to Moderate (2, both).
+  combatSportRelevance: {
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    wrestling: 3,
+    mma: 3,
+    krav_maga: 3,
+    boxing: 2,
+    kickboxing: 2,
+  },
+  // "# Substitution Logic" names "Static Plate Pinch", "Farmer Carry",
+  // "Suitcase Carry", "Pinch Block Hold" and "Towel Carry or Towel Hang".
+  // "Static Plate Pinch" → `plate_pinch`, integrated in this same batch.
+  // "Farmer Carry" → `farmer_carry` (confirmed real chapter, not yet
+  // integrated). "Suitcase Carry" → `suitcase_carry`
+  // (`50-exercises/62_CORE/17_SUITCASE_CARRY.md`, confirmed real chapter,
+  // not yet integrated). "Pinch Block Hold"/"Towel Carry"/"Towel Hang"
+  // name no exercise with its own chapter/catalog id.
+  substitutionExerciseIds: ["plate_pinch", "farmer_carry", "suitcase_carry"],
+};
+
+// -----------------------------------------------------------------------------
+// Rope Climb
+// Source: 50-exercises/65_GRIP/13_ROPE_CLIMB.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Fourth entry from the `65_GRIP` chapter. No prescription-registry entry
+ * exists for this exercise (confirmed by direct search).
+ *
+ * "Equipment: Climbing Rope" — `rope` is a real, existing `EquipmentType`
+ * value, used directly; no separate `rigid_anchor_support` atom is added
+ * on top of it. The fiche's own repeated "securely anchored rope"/
+ * "professionally anchored rope" language describes a SAFETY PROPERTY of
+ * the rope setup itself, not a second, distinct physical implement the
+ * athlete interacts with independently — requiring both would
+ * artificially double-gate what is, physically, a single installed piece
+ * of climbing equipment.
+ *
+ * KNOWN MODEL LIMITATION, flagged explicitly rather than silently
+ * approximated: "# Prescription Variables — Height: ... 2 to 4 metres,
+ * full-rope climbs..." documents a genuine VERTICAL clearance requirement
+ * distinct in kind from every prior entry's own horizontal/overhead
+ * space grounding. The Exercise Requirements Model's `sufficient_space`
+ * atom is a single one-dimensional scale (`AvailableSpaceLevel`) with no
+ * way to distinguish "N metres of vertical ceiling clearance" from "N
+ * metres of horizontal floor space" — both collapse into the same
+ * generic tier. This is a real representational gap, not a cosmetic one.
+ * It does not block this exercise's integration, though: `sufficient_space`
+ * can still honestly represent "a large amount of clearance is required"
+ * even without geometric precision on which dimension, the same way
+ * `PUSH_PRESS`'s own overhead-press clearance was already represented
+ * through the identical generic mechanism. `minimumSpace: "large"` is
+ * used to reflect the genuinely greater clearance need documented here
+ * (multi-metre height plus "adequate clearance around the climbing
+ * area" plus a landing/fall-safety margin) — but any future modeling
+ * work that adds a distinct vertical-clearance capability should revisit
+ * this entry specifically.
+ *
+ * Confirmed while investigating this gap: `TrainingEnvironment` does
+ * carry a `ceilingHeightMeters?: number` field, but it is read only by
+ * `validation.ts`'s own input-bounds check (0–20 range) — it is never
+ * referenced by `EnvironmentCapability`, `ExerciseRequirementAtom`, or
+ * anywhere in `exerciseRequirements.ts`'s eligibility evaluation. No
+ * exercise can require a minimum ceiling height today regardless of this
+ * field's presence on the environment object; the gap is real, not an
+ * oversight in this file alone.
+ *
+ * "Starting Position — ...a safe landing surface..." and "Safety Rules —
+ * Use appropriate floor protection" ground a genuine `safe_landing_surface`
+ * requirement — the descent/fall risk from height makes this
+ * semantically the correct capability (not `floor_safe`), the same
+ * distinction already applied throughout the plyometric family for
+ * genuinely landing-capable exercises.
+ */
+export const ROPE_CLIMB: ExerciseDefinition = {
+  id: "rope_climb",
+  name: "Rope Climb",
+  module: "grip",
+  primaryAdaptation: "maximum_strength",
+  // Secondary Classifications: "Relative Strength" (exact, matching
+  // TOWEL_PULL_UP's own identical grounding); Secondary Adaptations:
+  // "Relative Upper-Body Strength" (→ relative_strength). Secondary
+  // Classifications: "Whole-Body Coordination"; Secondary Adaptations:
+  // "Climbing Coordination" (→ coordination — a genuine divergence from
+  // TOWEL_PULL_UP, which names no coordination language at all, reflecting
+  // the added hand-transition/foot-lock coordination demand of climbing).
+  // Secondary Adaptations: "Shoulder Stability", "Trunk Stability" (→
+  // stability, trunk_strength — the Purpose section's own "trunk
+  // stiffness" phrase corroborates the latter). "Open-Hand Grip"/"Support
+  // Grip"/"Grip Endurance" fall under the single grip_strength umbrella.
+  physicalQualities: ["grip_strength", "relative_strength", "coordination", "stability", "trunk_strength"],
+  // Exercise Identity: "Primary Pattern: Vertical Pull. Secondary
+  // Pattern: Isometric Grip and Locomotion." → vertical_pull, isometric,
+  // locomotion (all three named explicitly).
+  movementPatterns: ["vertical_pull", "isometric", "locomotion"],
+  // No dedicated "Force Vector" heading exists in this chapter's format,
+  // but the movement is unambiguous: the athlete "ascends", pulling the
+  // body upward against gravity toward "the prescribed height".
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "rope" },
+          { kind: "environment", capability: "safe_landing_surface" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "large" },
+        ],
+      },
+    ],
+  },
+  // Exercise Identity: "Complexity: High", corroborated by "# Technical
+  // Complexity — High. ... The technical requirement is substantially
+  // higher than a static hang or towel pull-up."
+  minimumTechnicalLevel: 4,
+  complexity: "high",
+  // Exercise Identity: "Unilateral or Bilateral: Alternating Bilateral"
+  // — both hands ultimately perform equal work over a full climb
+  // (alternating grip-and-pull sequencing), with no "per side"
+  // prescription unit the way a true unilateral exercise would have —
+  // the same resolution SPLIT_SQUAT_JUMP's own "Alternating Unilateral"
+  // phrase already established in this file, applied here to its
+  // "Alternating Bilateral" mirror image: `unilateral: false`.
+  unilateral: false,
+  // Primary Muscles: Latissimus Dorsi, Biceps Brachii, Brachialis,
+  // Brachioradialis, Finger Flexors, Forearm Flexors — identical to
+  // TOWEL_PULL_UP's own Primary Muscles list, a genuine convergence (both
+  // are grip-integrated vertical-pulling exercises) rather than a copy.
+  bodyRegionsLoaded: ["shoulder", "upper_arm", "forearm", "hand"],
+  // "# Absolute Contraindications", quoted one item per source line.
+  // "unstable rope anchoring" and "an unsafe climbing environment" are
+  // excluded — equipment/environment concerns already covered by
+  // `requirements`, not athlete-state contraindications.
+  contraindications: [
+    { description: "Acute hand injury.", prohibitedPatterns: ["vertical_pull", "isometric", "locomotion"], absolute: true },
+    { description: "Acute wrist injury.", prohibitedPatterns: ["vertical_pull", "isometric", "locomotion"], absolute: true },
+    { description: "Acute elbow injury.", prohibitedPatterns: ["vertical_pull", "isometric", "locomotion"], absolute: true },
+    { description: "Acute shoulder injury.", prohibitedPatterns: ["vertical_pull", "isometric", "locomotion"], absolute: true },
+    {
+      description: "Neurological symptoms in the upper limb.",
+      prohibitedPatterns: ["vertical_pull", "isometric", "locomotion"],
+      absolute: true,
+    },
+    {
+      description: "Inability to grip or descend safely.",
+      prohibitedPatterns: ["vertical_pull", "isometric", "locomotion"],
+      absolute: true,
+    },
+  ],
+  fatigueProfile: {
+    // Same chapter-wide `metabolic`/`technical` sourcing approach as
+    // TOWEL_PULL_UP. `types` includes "systemic": "Systemic Fatigue:
+    // Moderate to High" is at least as strong a signal as the plain
+    // "Moderate" ratings already included elsewhere in this file.
+    // `types` includes "impact": "Uncontrolled Descent... impact injury"
+    // is a real, explicitly named fall/collision risk (Common Errors) —
+    // the only one of this chapter's five exercises to name "impact"
+    // directly.
+    types: ["neural", "muscular", "connective_tissue", "systemic", "impact"],
+    neural: 4, // "Neurological Fatigue: Moderate to High"
+    muscular: 5, // "Local Fatigue: Very High" — the highest local-fatigue rating in this chapter, the ceiling Rating5 value
+    metabolic: 1, // see TOWEL_PULL_UP's own fatigueProfile comment
+    connectiveTissue: 4, // "Connective-Tissue Stress: High"
+    technical: 4, // fallback from "Complexity: High" (minimumTechnicalLevel 4)
+  },
+  evidenceLevel: "unknown",
+  // "# Sport-Specific Relevance" — Brazilian Jiu-Jitsu: High (5); Judo:
+  // High (5); Wrestling: Moderate to High (4); MMA: Moderate to High (4);
+  // Krav Maga: Moderate (3); Boxing and Kickboxing: Low to Moderate (2,
+  // both).
+  combatSportRelevance: {
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    wrestling: 4,
+    mma: 4,
+    krav_maga: 3,
+    boxing: 2,
+    kickboxing: 2,
+  },
+  // "# Substitution Logic" names "Towel Pull-Up", "Towel Hang", "Lat
+  // Pulldown With Rope Attachment", "Farmer Carry" and "Plate Pinch".
+  // "Towel Pull-Up"/"Plate Pinch" → integrated in this same batch.
+  // "Farmer Carry" → `farmer_carry` (confirmed real chapter, not yet
+  // integrated). "Towel Hang"/"Lat Pulldown With Rope Attachment" name no
+  // exercise with its own chapter/catalog id.
+  substitutionExerciseIds: ["towel_pull_up", "plate_pinch", "farmer_carry"],
+};
+
+// -----------------------------------------------------------------------------
+// Rope Pull
+// Source: 50-exercises/65_GRIP/14_ROPE_PULL.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Fifth and final entry from the `65_GRIP` chapter. No
+ * prescription-registry entry exists for this exercise (confirmed by
+ * direct search).
+ *
+ * Deliberately NOT copied from `ROPE_CLIMB`'s own requirements despite
+ * sharing the word "rope" — "Equipment: Climbing Rope, Sled or Anchored
+ * Load" describes a rope attached to a DRAGGED external resistance (a
+ * sled or fixed anchor point providing tension), not a fixed overhead
+ * climbing rope. The rope itself is the one constant, repeatedly named
+ * element throughout the fiche ("Use a securely anchored rope", "Inspect
+ * the rope before use"); "Sled or Anchored Load" is documented as a
+ * variable resistance-source detail rather than a strict, single
+ * additional required implement, and "Anchored Load" has no clean
+ * `EquipmentType` match of its own — `rope` alone is used as the required
+ * equipment atom, not `sled` and not an invented "anchored load" type.
+ * No `rigid_anchor_support`/overhead-anchor requirement is added either:
+ * "This variation requires a safe pulley or anchor setup" is stated only
+ * for the documented "# Vertical Rope Pull" VARIATION, not this fiche's
+ * own base/default "# Standing Rope Pull" form (described first among the
+ * variation sections, with "whole-body force transfer" as its own
+ * primary benefit).
+ *
+ * No explicit surface-safety language exists anywhere in this fiche
+ * (checked directly) — unlike ROPE_CLIMB's own explicit "safe landing
+ * surface" grounding, this is a floor-contact pulling exercise with no
+ * descent/fall risk, so `floor_safe`/`safe_landing_surface` are not
+ * added; "Keep the pulling lane clear" is a space/obstacle concern,
+ * already captured by `sufficient_space`.
+ *
+ * "Prescription Variables — Distance: 5 to 15 metres for strength
+ * emphasis, 10 to 30 metres for strength endurance" — a genuine,
+ * quantified extended-distance requirement comparable in magnitude to
+ * PINCH_CARRY's own 10–40 metre grounding, hence the same `"large"` tier.
+ */
+export const ROPE_PULL: ExerciseDefinition = {
+  id: "rope_pull",
+  name: "Rope Pull",
+  module: "grip",
+  primaryAdaptation: "maximum_strength",
+  // Secondary Adaptations: "Trunk Stability" (→ trunk_strength), "Shoulder
+  // Stability" (→ stability). "Open-Hand Grip"/"Support Grip"/"Grip
+  // Endurance"/"Open-Hand Strength"/"Support-Grip Endurance" fall under
+  // the single grip_strength umbrella. Secondary Adaptations: "Work
+  // Capacity" (exact match → general_work_capacity, the first entry in
+  // this catalog to earn this quality — reflecting this fiche's own more
+  // conditioning/endurance-oriented "Primary Adaptation: Repeated
+  // Grip-Integrated Pulling Capacity" framing, distinct from ROPE_CLIMB's
+  // own strength-framed Primary Adaptation). No "Coordination"/"Relative
+  // Strength" language exists anywhere in this fiche (checked directly)
+  // — both deliberately excluded, a genuine divergence from ROPE_CLIMB
+  // ("The movement is easier to learn than a Rope Climb because the
+  // athlete remains in contact with the floor").
+  physicalQualities: ["grip_strength", "stability", "trunk_strength", "general_work_capacity"],
+  // Exercise Identity: "Primary Pattern: Horizontal or Vertical Pull.
+  // Secondary Pattern: Repeated Grip and Hand-Over-Hand Pulling." Both
+  // pull directions are named together in the Primary Pattern field
+  // itself (not a "pick one" ambiguity — "# Standing Rope Pull" and "#
+  // Vertical Rope Pull" are both real, documented variations of the same
+  // base exercise) → horizontal_pull, vertical_pull. "Repeated Grip" is
+  // explicitly NOT "Isometric Grip" the way ROPE_CLIMB's own Secondary
+  // Pattern is — continuous hand-over-hand regripping, not a sustained
+  // static hold — so `isometric` is deliberately NOT added here, a real
+  // divergence from every other grip-hold exercise in this chapter.
+  movementPatterns: ["horizontal_pull", "vertical_pull"],
+  // No dedicated "Force Vector" heading exists in this chapter's format.
+  // Matching the same "Horizontal or Vertical Pull" duality named in the
+  // Primary Pattern field, both components are represented.
+  forceVectors: ["horizontal", "vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "rope" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "large" },
+        ],
+      },
+    ],
+  },
+  // Exercise Identity: "Complexity: Moderate", corroborated by "#
+  // Technical Complexity — Moderate. The movement is easier to learn than
+  // a Rope Climb because the athlete remains in contact with the floor."
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // Exercise Identity: "Unilateral or Bilateral: Alternating Bilateral"
+  // — same resolution as ROPE_CLIMB's own identical phrasing:
+  // `unilateral: false`.
+  unilateral: false,
+  // Primary Muscles: Latissimus Dorsi, Biceps Brachii, Brachialis,
+  // Brachioradialis, Finger Flexors, Forearm Flexors — identical to
+  // TOWEL_PULL_UP's/ROPE_CLIMB's own Primary Muscles list, the same
+  // genuine convergence (grip-integrated pulling), not a copy.
+  bodyRegionsLoaded: ["shoulder", "upper_arm", "forearm", "hand"],
+  // "# Absolute Contraindications", quoted one item per source line.
+  // "an unsafe rope or load setup" is excluded — an equipment/setup
+  // concern, not an athlete-state condition.
+  contraindications: [
+    { description: "Acute hand injury.", prohibitedPatterns: ["horizontal_pull", "vertical_pull"], absolute: true },
+    { description: "Acute wrist injury.", prohibitedPatterns: ["horizontal_pull", "vertical_pull"], absolute: true },
+    { description: "Acute elbow injury.", prohibitedPatterns: ["horizontal_pull", "vertical_pull"], absolute: true },
+    { description: "Acute shoulder injury.", prohibitedPatterns: ["horizontal_pull", "vertical_pull"], absolute: true },
+    { description: "Neurological loss of grip control.", prohibitedPatterns: ["horizontal_pull", "vertical_pull"], absolute: true },
+    { description: "Inability to maintain a stable stance.", prohibitedPatterns: ["horizontal_pull", "vertical_pull"], absolute: true },
+  ],
+  fatigueProfile: {
+    // Same chapter-wide `metabolic`/`technical` sourcing approach as
+    // TOWEL_PULL_UP. `types` includes "systemic": "Systemic Fatigue:
+    // Moderate" is a plain, unqualified rating, matching the same
+    // inclusion reasoning used throughout this file. No "impact" language
+    // exists anywhere in this fiche (checked directly) — unlike
+    // ROPE_CLIMB's own explicit "impact injury" mention — so "impact" is
+    // deliberately NOT tagged here.
+    types: ["neural", "muscular", "connective_tissue", "systemic"],
+    neural: 3, // "Neurological Fatigue: Moderate"
+    muscular: 4, // "Local Fatigue: High"
+    metabolic: 1, // see TOWEL_PULL_UP's own fatigueProfile comment
+    connectiveTissue: 4, // "Connective-Tissue Stress: Moderate to High"
+    technical: 3, // fallback from "Complexity: Moderate" (minimumTechnicalLevel 3)
+  },
+  evidenceLevel: "unknown",
+  // "# Sport-Specific Relevance" — Brazilian Jiu-Jitsu: High (5); Judo:
+  // High (5); Wrestling: Moderate to High (4); MMA: Moderate to High (4);
+  // Krav Maga: Moderate (3); Boxing and Kickboxing: Low to Moderate (2,
+  // both).
+  combatSportRelevance: {
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    wrestling: 4,
+    mma: 4,
+    krav_maga: 3,
+    boxing: 2,
+    kickboxing: 2,
+  },
+  // "# Substitution Logic" names "Rope Climb", "Towel Pull-Up", "Cable
+  // Rope Row", "Farmer Carry" and "Plate Pinch". "Rope Climb"/"Towel
+  // Pull-Up"/"Plate Pinch" → integrated in this same batch. "Farmer
+  // Carry" → `farmer_carry` (confirmed real chapter, not yet integrated).
+  // "Cable Rope Row" names no exercise with its own chapter/catalog id.
+  substitutionExerciseIds: ["rope_climb", "towel_pull_up", "plate_pinch", "farmer_carry"],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -3369,4 +4171,9 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   HANG_HIGH_PULL,
   HANG_POWER_CLEAN,
   JUMP_SHRUG,
+  TOWEL_PULL_UP,
+  PLATE_PINCH,
+  PINCH_CARRY,
+  ROPE_CLIMB,
+  ROPE_PULL,
 ];
