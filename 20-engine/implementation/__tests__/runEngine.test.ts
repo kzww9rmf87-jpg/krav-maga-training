@@ -475,7 +475,7 @@ describe("runEngine — default exercise catalog wiring", () => {
     expect(result.sessionResult.blockedModules).toEqual(["power"]);
   });
 
-  test("4. the default catalog contains all 7 integrated ballistic exercises plus box_jump, depth_jump, countermovement_jump, broad_jump, knee_jump, lateral_bound, single_leg_hop, split_squat_jump, push_press, hang_high_pull, hang_power_clean, jump_shrug and the full 65_GRIP chapter (towel_pull_up, plate_pinch, pinch_carry, rope_climb, rope_pull)", () => {
+  test("4. the default catalog contains all 7 integrated ballistic exercises plus box_jump, depth_jump, countermovement_jump, broad_jump, knee_jump, lateral_bound, single_leg_hop, split_squat_jump, push_press, hang_high_pull, hang_power_clean, jump_shrug, the full 65_GRIP chapter (towel_pull_up, plate_pinch, pinch_carry, rope_climb, rope_pull) and the full 66_CARRIES chapter (farmer_carry, front_rack_carry, sandbag_carry, zercher_carry)", () => {
     const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
 
     expect(ids).toEqual([
@@ -503,6 +503,10 @@ describe("runEngine — default exercise catalog wiring", () => {
       "pinch_carry",
       "rope_climb",
       "rope_pull",
+      "farmer_carry",
+      "front_rack_carry",
+      "sandbag_carry",
+      "zercher_carry",
     ]);
   });
 

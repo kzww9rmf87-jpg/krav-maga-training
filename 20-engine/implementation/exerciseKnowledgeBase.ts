@@ -4148,6 +4148,663 @@ export const ROPE_PULL: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Farmer Carry
+// Source: 50-exercises/66_CARRIES/10_FARMER_CARRY.md
+// -----------------------------------------------------------------------------
+
+/**
+ * First entry from the `66_CARRIES` chapter, migrated as a single coherent
+ * batch alongside `FRONT_RACK_CARRY`/`SANDBAG_CARRY`/`ZERCHER_CARRY`.
+ *
+ * LOCKED ARCHITECTURAL DECISION, resolved before any code was written:
+ * `farmer_carry` also has a fiche under `50-exercises/62_CORE/16_FARMER_CARRY.md`.
+ * That file uses the older, unstructured prose format with no "Exercise
+ * Identity" header (no `Equipment:`/`Complexity:`/`Unilateral or Bilateral:`
+ * fields at all — confirmed by direct inspection) — the same superseded
+ * shape already seen and deliberately overridden for `box_jump`,
+ * `depth_jump`, `broad_jump`, `push_press` and `hang_power_clean` earlier in
+ * this catalog. `50-exercises/66_CARRIES/10_FARMER_CARRY.md` (this file) is
+ * therefore the sole canonical source. Only ONE `farmer_carry` entry exists
+ * in `EXERCISE_KNOWLEDGE_BASE` (confirmed: no prior `farmer_carry` id exists
+ * anywhere in the catalog, including the `65_GRIP` chapter, before this
+ * batch); it is not duplicated under a "core" module. Its trunk-bracing
+ * demand is represented through `physicalQualities`/`bodyRegionsLoaded`
+ * exactly like any other exercise's trunk contribution — it does not become
+ * a second, core-flavoured copy of the same movement.
+ *
+ * `exercisePrescriptionRegistry.ts` has an entry for this exercise
+ * (`farmerCarryEntry`) with `moduleId: "grip"`, `laterality: "bilateral"`,
+ * `requiredEquipmentCapabilities: ["loaded_carry_implement"]` and
+ * `supportedLoadingModes: ["dumbbell", "kettlebell"]` — used below as
+ * corroborating, not overriding, evidence per the project's established
+ * precedence: canonical documentation governs `exerciseKnowledgeBase.ts`.
+ *
+ * Central business question for this entry: "Equipment: Dumbbells,
+ * Kettlebells, Farmer Handles, Trap Bar or Similar Implements" documents
+ * FOUR genuinely equivalent implements — corroborated by this fiche's own
+ * dedicated "# Implement Comparison" section, which gives each of the four
+ * its own subsection of advantages/limitations as interchangeable carry
+ * implements for the same movement. This is the first genuine, textually
+ * confirmed case of true equipment equivalence in this catalog since the
+ * `pinch_grip_implement` type was introduced — but unlike that case, all
+ * four alternatives already have their OWN dedicated, real `EquipmentType`
+ * values (`dumbbell`, `kettlebell`, `farmer_handle`, `trap_bar`), so no new
+ * equivalence-group type is invented. `requirements` therefore uses the
+ * model's `any_of` clause kind for the first time in this catalog — a
+ * correct, already-supported mechanism (see `evaluateRequirementClause`'s
+ * `.some(...)` handling for `any_of`), simply never previously needed
+ * because no earlier exercise documented more than one true equipment
+ * alternative without an existing equivalence type. The registry's own
+ * narrower `supportedLoadingModes: ["dumbbell", "kettlebell"]` does NOT
+ * contradict this: `LoadingMode` (a distinct, coarser prescription-layer
+ * vocabulary — see `validateCompatibility.ts`) has no `"farmer_handle"` or
+ * `"trap_bar"` value at all, so the registry's narrower set reflects a
+ * vocabulary gap in that different layer, not a business decision to
+ * exclude those two implements from this exercise.
+ */
+export const FARMER_CARRY: ExerciseDefinition = {
+  id: "farmer_carry",
+  name: "Farmer Carry",
+  module: "grip",
+  primaryAdaptation: "maximum_strength",
+  // Primary Adaptation: "Bilateral Loaded Locomotor Strength" — ends in
+  // "Strength" like every entry in the `65_GRIP` chapter's own Primary
+  // Adaptation framing; `maximum_strength` remains the closest
+  // AdaptationDomain match, not the more tempting `"robustness"` value —
+  // "robustness" never appears in this fiche's own "# Primary Adaptation"
+  // heading, only in "General Physical Preparation"/"Tendon Robustness"
+  // secondary framing and Combat Transfer prose, which this file does not
+  // use as a `primaryAdaptation` source.
+  //
+  // Secondary Classifications/Adaptations mapped: "Support Grip" / "Grip
+  // Endurance" / "Support-Grip Strength" → grip_strength. "Trunk
+  // Stability" / "Anti-Extension Strength" / "Anti-Flexion Strength" /
+  // "Whole-Body Bracing" → trunk_strength. "Postural Control" / "Shoulder
+  // Stability" / "Shoulder-Girdle Stability" / "Hip Stability" /
+  // "Postural Endurance" → stability. "Gait Integrity" / "Gait
+  // Coordination" → coordination. "Work Capacity" → general_work_capacity
+  // (exact match). "Tendon Robustness" → tissue_capacity. "Whole-Body
+  // Strength" and "General Physical Preparation" are generic, non-specific
+  // framing with no distinct PhysicalQuality counterpart and are
+  // deliberately not force-mapped.
+  physicalQualities: ["grip_strength", "trunk_strength", "stability", "coordination", "general_work_capacity", "tissue_capacity"],
+  // Exercise Identity: "Primary Pattern: Bilateral Loaded Locomotion.
+  // Secondary Pattern: Isometric Grip and Whole-Body Bracing." → carry,
+  // isometric.
+  movementPatterns: ["carry", "isometric"],
+  // No dedicated "Force Vector" heading exists in this chapter's format.
+  // The load is already positioned beside the body before the "Movement
+  // Description" begins (pickup is a distinct Starting-Position/Execution
+  // setup step, not the exercise's own defining action) — the governing
+  // action is horizontal locomotion carrying a resisted load, matching
+  // PINCH_CARRY's own identical resolution.
+  forceVectors: ["horizontal"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "any_of",
+        items: [
+          { kind: "equipment", equipment: "dumbbell" },
+          { kind: "equipment", equipment: "kettlebell" },
+          { kind: "equipment", equipment: "farmer_handle" },
+          { kind: "equipment", equipment: "trap_bar" },
+        ],
+      },
+      {
+        kind: "all_of",
+        items: [{ kind: "environment", capability: "sufficient_space", minimumSpace: "large" }],
+      },
+    ],
+  },
+  // Exercise Identity: "Complexity: Low", corroborated by "# Technical
+  // Complexity — Low. The Farmer Carry is easy to teach...".
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  // Exercise Identity: "Unilateral or Bilateral: Bilateral" (explicit,
+  // unambiguous), matching the registry's own independent
+  // `laterality: "bilateral"`.
+  unilateral: false,
+  // Primary Muscles: Finger Flexors, Forearm Flexors, Upper Trapezius,
+  // Middle Trapezius, Deltoids, Abdominal Wall, Obliques, Spinal
+  // Stabilizers, Gluteals, Quadriceps → hand + forearm (finger/forearm
+  // flexors), shoulder (trapezius/deltoids), abdomen (abdominal
+  // wall/obliques/spinal stabilizers, matching this catalog's existing
+  // abdomen-as-trunk-bracing convention), hip (gluteals), thigh
+  // (quadriceps). Secondary Muscles are excluded, matching the precedent
+  // used throughout this file.
+  bodyRegionsLoaded: ["hand", "forearm", "shoulder", "abdomen", "hip", "thigh"],
+  // "# Absolute Contraindications", quoted one item per source line.
+  // "an unsafe carry environment" is excluded — an equipment/environment
+  // setup concern, not an athlete-state condition, matching the
+  // ROPE_CLIMB precedent of excluding "an unsafe climbing environment".
+  // "inability to walk safely" IS included, matching the established
+  // precedent of treating "inability to [safety-critical sub-task]"
+  // phrases as athlete-state contraindications (see TOWEL_PULL_UP's
+  // "Inability to grip the towel securely", ROPE_CLIMB's "Inability to
+  // grip or descend safely").
+  contraindications: [
+    { description: "Acute neurological weakness.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Acute hand injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Acute shoulder injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Acute spinal injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Inability to walk safely.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // This chapter's own "# Fatigue Profile" format uses the same four
+    // dimensions (Systemic/Local/Neurological/Connective-Tissue) as
+    // `65_GRIP` and never rates metabolic fatigue directly. Unlike the
+    // GRIP chapter's uniform minimal `metabolic: 1` default, this
+    // chapter's own governing `00_OVERVIEW.md` explicitly states, as a
+    // chapter-wide trait: "Fatigue Cost ... moderate cardiovascular
+    // demand" — grounding a uniform `metabolic: 3` baseline across this
+    // whole batch instead (adjusted upward per-exercise only where an
+    // individual fiche gives stronger, exercise-specific textual
+    // grounding — see SANDBAG_CARRY). Not tagged in `types`, matching the
+    // same convention used for `technical`: the value is a documented
+    // chapter-level inference, not this specific exercise's own
+    // dedicated Fatigue Profile heading.
+    types: ["neural", "muscular", "connective_tissue", "systemic"],
+    neural: 3, // "Neurological Fatigue: Moderate"
+    muscular: 4, // "Local Fatigue: High"
+    metabolic: 3, // see comment above
+    connectiveTissue: 3, // "Connective-Tissue Stress: Moderate"
+    technical: 1, // fallback from "Complexity: Low" (minimumTechnicalLevel 1)
+  },
+  // No "Evidence Classification"/"Scientific Evidence" section exists
+  // anywhere in this chapter (checked directly). Left "unknown", matching
+  // this file's established discipline.
+  evidenceLevel: "unknown",
+  // "# Sport-Specific Relevance" — Brazilian Jiu-Jitsu: Moderate (3);
+  // Judo: Moderate to High (4); Wrestling: High (5); MMA: High (5); Krav
+  // Maga: Moderate to High (4); Boxing and Kickboxing: Moderate (3, both).
+  combatSportRelevance: {
+    brazilian_jiu_jitsu: 3,
+    judo: 4,
+    wrestling: 5,
+    mma: 5,
+    krav_maga: 4,
+    boxing: 3,
+    kickboxing: 3,
+  },
+  // "# Substitution Logic" names "Suitcase Carry", "Front Rack Carry",
+  // "Bear-Hug Carry", "Static Farmer Hold" and "Trap-Bar Carry". "Suitcase
+  // Carry" → `suitcase_carry` (`50-exercises/62_CORE/17_SUITCASE_CARRY.md`,
+  // confirmed real chapter, not yet integrated — same doc-backed-but-
+  // uncatalogued precedent already used throughout this file). "Front
+  // Rack Carry" → integrated in this same batch below. "Bear-Hug Carry",
+  // "Static Farmer Hold" and "Trap-Bar Carry" name no exercise with its
+  // own chapter/catalog id in this repository.
+  substitutionExerciseIds: ["suitcase_carry", "front_rack_carry"],
+};
+
+// -----------------------------------------------------------------------------
+// Front Rack Carry
+// Source: 50-exercises/66_CARRIES/11_FRONT_RACK_CARRY.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Second entry from the `66_CARRIES` chapter. `exercisePrescriptionRegistry.ts`
+ * has an entry (`frontRackCarryEntry`) with `moduleId: "grip"`,
+ * `laterality: "bilateral"`, `requiredEquipmentCapabilities:
+ * ["loaded_carry_implement"]` and `supportedLoadingModes: ["dumbbell",
+ * "kettlebell"]`.
+ *
+ * Central business question: this exercise's name and every doc heading
+ * ("Front Rack Carry", "front-rack position", "front-rack tolerance") name
+ * an ANATOMICAL LOAD POSITION — the load resting at the shoulders/upper
+ * torso — never the `rack` `EquipmentType` (a barbell squat/support rack).
+ * No barbell rack, stand or support of any kind is mentioned anywhere in
+ * this fiche's Equipment, Starting Position or Safety Rules — the athlete
+ * cleans or lifts the implement directly into position ("Clean or position
+ * the implement safely into the front rack"). `requirements` therefore
+ * never references the `rack` EquipmentType, consistent with the explicit
+ * instruction not to confuse the front-rack position with rack equipment.
+ *
+ * "Equipment: Kettlebells, Dumbbells, Barbell, Sandbag or Similar
+ * Front-Loaded Implements" documents FOUR genuine alternatives, each with
+ * its own dedicated subsection under "# Shoulder Demand" (Kettlebells /
+ * Dumbbells / Barbell / Sandbag) and its own named variation later in the
+ * fiche ("# Double Kettlebell Front Rack Carry", "# Barbell Front Rack
+ * Carry", "# Sandbag Front Carry") — all four map onto existing
+ * `EquipmentType` values (`kettlebell`, `dumbbell`, `barbell`, `sandbag`),
+ * so `any_of` is used again here, matching FARMER_CARRY's own resolution.
+ * The registry's narrower `["dumbbell", "kettlebell"]` set is a real,
+ * documented discrepancy in this case (unlike FARMER_CARRY's
+ * farmer_handle/trap_bar gap): `LoadingMode` DOES have both `"barbell"`
+ * and `"sandbag"` values (confirmed — `zercher_carry`'s own registry entry
+ * uses both), so this narrower registry set is not explained by a
+ * vocabulary gap. It is flagged as a genuine, non-blocking discrepancy
+ * between the registry and the canonical documentation rather than
+ * silently resolved either way.
+ *
+ * Wrist/elbow/shoulder/trunk constraints are explicit and heavily
+ * documented (see "# Joint Actions": dedicated Shoulder/Elbow/Wrist/Trunk
+ * subsections; Absolute Contraindications name acute wrist, elbow,
+ * shoulder and spinal injury by name) — reflected in `bodyRegionsLoaded`
+ * and `contraindications` below. Distinct from FARMER_CARRY, this fiche
+ * repeatedly and explicitly states grip is NOT meant to be the limiting
+ * factor ("The exercise is particularly useful when grip should not be
+ * the primary limiting factor"; CAS Engine Rules: "grip should not be the
+ * main limiting factor" appears twice) — `grip_strength` is therefore
+ * deliberately excluded from `physicalQualities`, and Finger
+ * Flexors/Forearm Flexors are absent from this fiche's own Primary
+ * Muscles list (unlike FARMER_CARRY's), corroborating the exclusion at
+ * the muscular level too.
+ */
+export const FRONT_RACK_CARRY: ExerciseDefinition = {
+  id: "front_rack_carry",
+  name: "Front Rack Carry",
+  module: "grip",
+  primaryAdaptation: "maximum_strength",
+  // Primary Adaptation: "Front-Loaded Locomotor Strength" — same
+  // "...Strength" framing as every other entry in this chapter and the
+  // `65_GRIP` chapter; `maximum_strength` used for the same reasoning.
+  //
+  // Secondary Classifications/Adaptations mapped: "Trunk Stability" /
+  // "Anterior Trunk Stability" / "Anti-Flexion Strength" / "Anti-Extension
+  // Strength" / "Whole-Body Bracing" → trunk_strength. "Postural Control"
+  // / "Shoulder Stability" / "Shoulder-Girdle Stability" / "Hip
+  // Stability" / "Postural Endurance" → stability. "Gait Integrity" /
+  // "Gait Coordination" → coordination. "Upper-Back Strength" /
+  // "Upper-Back Endurance" → muscular_endurance (the first use of this
+  // PhysicalQuality in the catalog: a real, existing value, never
+  // previously grounded by any earlier fiche's own text). "Front-Rack
+  // Tolerance" is a load-position-specific descriptor, not a generic
+  // physical capability, and is deliberately not mapped (matching the
+  // explicit instruction that load position is not itself a capability).
+  // "Breathing Under Load" has no PhysicalQuality counterpart anywhere in
+  // this enum and is left unmapped, same as every other breathing-under-
+  // compression mention across this chapter. Unlike FARMER_CARRY: no
+  // "Work Capacity" or "Tendon Robustness" Secondary Adaptation exists in
+  // this fiche (checked directly) — general_work_capacity and
+  // tissue_capacity are genuinely, correctly absent here.
+  physicalQualities: ["trunk_strength", "stability", "coordination", "muscular_endurance"],
+  // Exercise Identity: "Primary Pattern: Front-Loaded Locomotion.
+  // Secondary Pattern: Isometric Trunk and Upper-Back Stabilization." →
+  // carry, isometric.
+  movementPatterns: ["carry", "isometric"],
+  // No dedicated "Force Vector" heading exists in this chapter's format.
+  // Same resolution as FARMER_CARRY: the load is already secured in the
+  // front rack before "Movement Description" begins; the governing action
+  // is horizontal locomotion under an anteriorly resisted load.
+  forceVectors: ["horizontal"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "any_of",
+        items: [
+          { kind: "equipment", equipment: "kettlebell" },
+          { kind: "equipment", equipment: "dumbbell" },
+          { kind: "equipment", equipment: "barbell" },
+          { kind: "equipment", equipment: "sandbag" },
+        ],
+      },
+      {
+        kind: "all_of",
+        items: [{ kind: "environment", capability: "sufficient_space", minimumSpace: "large" }],
+      },
+    ],
+  },
+  // Exercise Identity: "Complexity: Moderate", corroborated by "#
+  // Technical Complexity — Moderate. The walking pattern is simple, but
+  // the rack position requires greater technical control than a low
+  // carry."
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // Exercise Identity: "Unilateral or Bilateral: Bilateral or Unilateral"
+  // — ambiguous phrasing, resolved to `unilateral: false`, matching the
+  // registry's own independent `laterality: "bilateral"` for this exact
+  // exercise (same resolution pattern already used for PLATE_PINCH/
+  // PINCH_CARRY's identically ambiguous phrasing).
+  unilateral: false,
+  // Primary Muscles: Upper Trapezius, Middle Trapezius, Rhomboids,
+  // Anterior Deltoids, Abdominal Wall, Obliques, Spinal Stabilizers,
+  // Gluteals, Quadriceps → shoulder (trapezius/rhomboids/deltoids),
+  // abdomen (abdominal wall/obliques/spinal stabilizers), hip (gluteals),
+  // thigh (quadriceps). Notably absent: hand/forearm — Finger Flexors and
+  // Forearm Flexors are not in this fiche's own Primary Muscles list at
+  // all (unlike FARMER_CARRY's), directly corroborating the deliberate
+  // exclusion of grip_strength from `physicalQualities` above.
+  bodyRegionsLoaded: ["shoulder", "abdomen", "hip", "thigh"],
+  // "# Absolute Contraindications", quoted one item per source line. All
+  // six items are athlete-state conditions (unlike ROPE_CLIMB's excluded
+  // "unsafe climbing environment", nothing here describes an
+  // equipment/setup concern) and are all included.
+  contraindications: [
+    { description: "Acute shoulder injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Acute wrist injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Acute elbow injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Acute spinal injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Inability to maintain a safe rack position.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Inability to walk safely under load.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // Same chapter-wide `metabolic`/`technical` sourcing approach as
+    // FARMER_CARRY (see its own fatigueProfile comment for the full
+    // reasoning).
+    types: ["neural", "muscular", "connective_tissue", "systemic"],
+    neural: 3, // "Neurological Fatigue: Moderate"
+    muscular: 4, // "Local Fatigue: Moderate to High"
+    metabolic: 3, // chapter-wide OVERVIEW.md baseline — see FARMER_CARRY's own comment
+    connectiveTissue: 3, // "Connective-Tissue Stress: Moderate"
+    technical: 3, // fallback from "Complexity: Moderate" (minimumTechnicalLevel 3)
+  },
+  evidenceLevel: "unknown",
+  // "# Sport-Specific Relevance" — Brazilian Jiu-Jitsu: Moderate (3);
+  // Judo: High (5); Wrestling: High (5); MMA: High (5); Krav Maga:
+  // Moderate to High (4); Boxing and Kickboxing: Moderate (3, both).
+  combatSportRelevance: {
+    brazilian_jiu_jitsu: 3,
+    judo: 5,
+    wrestling: 5,
+    mma: 5,
+    krav_maga: 4,
+    boxing: 3,
+    kickboxing: 3,
+  },
+  // "# Substitution Logic" names "Farmer Carry", "Bear-Hug Carry",
+  // "Goblet Carry", "Suitcase Carry" and "Static Front-Rack Hold". "Farmer
+  // Carry" → integrated in this same batch. "Suitcase Carry" →
+  // `suitcase_carry` (confirmed real chapter, not yet integrated).
+  // "Bear-Hug Carry", "Goblet Carry" and "Static Front-Rack Hold" name no
+  // exercise with its own chapter/catalog id.
+  substitutionExerciseIds: ["farmer_carry", "suitcase_carry"],
+};
+
+// -----------------------------------------------------------------------------
+// Sandbag Carry
+// Source: 50-exercises/66_CARRIES/12_SANDBAG_CARRY.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Third entry from the `66_CARRIES` chapter. `exercisePrescriptionRegistry.ts`
+ * has an entry (`sandbagCarryEntry`) with `moduleId: "grip"`,
+ * `laterality: "bilateral"`, `requiredEquipmentCapabilities:
+ * ["loaded_carry_implement"]` and `supportedLoadingModes: ["sandbag"]` —
+ * directly corroborating that `sandbag` is this exercise's sole equipment.
+ *
+ * "Equipment: Sandbag" — a single, unambiguous implement, unlike
+ * FARMER_CARRY/FRONT_RACK_CARRY. Although the doc names several distinct
+ * CARRY POSITIONS (bear hug, front carry, shouldered carry, front rack,
+ * offset carry — see "# Movement Description" and the dedicated "# Bear-
+ * Hug Carry" / "# Front Carry" / "# Shouldered Carry" / "# Front Rack
+ * Sandbag Carry" sections), these are documented as VARIATIONS of a single
+ * exercise performed with a single implement, not distinct equipment
+ * requirements or environmental capabilities — no capability is created
+ * for carry position, matching the explicit instruction that load
+ * position is not itself a capability.
+ */
+export const SANDBAG_CARRY: ExerciseDefinition = {
+  id: "sandbag_carry",
+  name: "Sandbag Carry",
+  module: "grip",
+  primaryAdaptation: "maximum_strength",
+  // Primary Adaptation: "Irregular-Object Loaded Locomotor Strength" —
+  // same "...Strength" framing as the rest of this chapter.
+  //
+  // Secondary Classifications/Adaptations mapped: "Trunk Stability" /
+  // "Anterior Trunk Stability" / "Anti-Flexion Strength" / "Anti-Extension
+  // Strength" / "Whole-Body Bracing" → trunk_strength. "Postural
+  // Endurance" / "Postural Control" / "Shoulder-Girdle Stability" / "Hip
+  // Stability" → stability. "Gait Integrity" / "Gait Coordination" →
+  // coordination. "Upper-Back Strength" / "Upper-Back Endurance" →
+  // muscular_endurance. "Grip and Arm Endurance" → grip_strength — unlike
+  // FRONT_RACK_CARRY/ZERCHER_CARRY, this fiche DOES document a real grip/
+  // arm endurance demand (the bear-hug and handle-carry positions require
+  // active gripping or squeezing — see "# Grip Demand": "CAS must
+  // identify whether grip or object control is intended to be the
+  // limiting factor"). "Object Control" (Secondary Classification) has no
+  // distinct PhysicalQuality counterpart of its own and is treated as
+  // already covered by `coordination` (grounded independently via Gait
+  // Coordination) rather than double-counted. No "Work Capacity" or
+  // "Tendon Robustness" Secondary Adaptation exists in this fiche
+  // (checked directly) — general_work_capacity and tissue_capacity are
+  // genuinely absent here.
+  physicalQualities: ["grip_strength", "trunk_strength", "stability", "coordination", "muscular_endurance"],
+  // Exercise Identity: "Primary Pattern: Front-Loaded or Bear-Hug Loaded
+  // Locomotion. Secondary Pattern: Object Control and Whole-Body
+  // Bracing." → carry, isometric ("Whole-Body Bracing" is the same
+  // isometric-stabilization framing used by every other entry in this
+  // chapter; "Object Control" has no distinct MovementPattern counterpart
+  // of its own and is not force-mapped to a pattern that does not
+  // genuinely describe it).
+  movementPatterns: ["carry", "isometric"],
+  // No dedicated "Force Vector" heading exists in this chapter's format.
+  // Same resolution as the rest of this chapter: horizontal locomotion
+  // under a resisted, already-secured load.
+  forceVectors: ["horizontal"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "sandbag" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "large" },
+        ],
+      },
+    ],
+  },
+  // Exercise Identity: "Complexity: Moderate", corroborated by "#
+  // Technical Complexity — Moderate. The walking pattern is simple, but
+  // the sandbag introduces irregular load behavior."
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // Exercise Identity: "Unilateral or Bilateral: Bilateral or
+  // Asymmetrical" — an ambiguous, non-strictly-unilateral phrasing (unlike
+  // a true per-side unilateral exercise), resolved to `unilateral: false`,
+  // matching the registry's own independent `laterality: "bilateral"` for
+  // this exact exercise.
+  unilateral: false,
+  // Primary Muscles: Upper Trapezius, Middle Trapezius, Rhomboids,
+  // Latissimus Dorsi, Anterior Deltoids, Biceps Brachii, Abdominal Wall,
+  // Obliques, Spinal Stabilizers, Gluteals, Quadriceps → shoulder
+  // (trapezius/rhomboids/lat dorsi/deltoids), upper_arm (Biceps Brachii —
+  // PRIMARY here, unlike FRONT_RACK_CARRY/ZERCHER_CARRY where it is only
+  // Secondary or absent, directly reflecting the bear-hug "wrap and
+  // squeeze" cue's active elbow-flexion demand), abdomen, hip, thigh.
+  bodyRegionsLoaded: ["shoulder", "upper_arm", "abdomen", "hip", "thigh"],
+  // "# Absolute Contraindications", quoted one item per source line.
+  // "an unstable or damaged sandbag" is excluded — an equipment/setup
+  // concern, matching the precedent of excluding comparable
+  // equipment-condition items elsewhere in this file.
+  contraindications: [
+    { description: "Acute spinal injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Acute shoulder injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Acute upper-limb injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Uncontrolled respiratory symptoms.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Inability to walk safely.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // Same chapter-wide `technical` sourcing approach as FARMER_CARRY.
+    // `metabolic` is raised to 4 here specifically — beyond this
+    // chapter's uniform `metabolic: 3` OVERVIEW.md baseline — because this
+    // fiche alone carries its own dedicated, exercise-specific corroborating
+    // text beyond the chapter-wide framing: "# Interaction With Other
+    // Training — Conditioning — The exercise can create a strong
+    // cardiovascular response." Not tagged in `types`, for the same reason
+    // metabolic is never tagged elsewhere in this file: the source is not
+    // this exercise's own dedicated "# Fatigue Profile" heading.
+    types: ["neural", "muscular", "connective_tissue", "systemic"],
+    neural: 3, // "Neurological Fatigue: Moderate"
+    muscular: 4, // "Local Fatigue: High"
+    metabolic: 4, // see comment above
+    connectiveTissue: 3, // "Connective-Tissue Stress: Moderate"
+    technical: 3, // fallback from "Complexity: Moderate" (minimumTechnicalLevel 3)
+  },
+  evidenceLevel: "unknown",
+  // "# Sport-Specific Relevance" — Brazilian Jiu-Jitsu: High (5); Judo:
+  // High (5); Wrestling: Very High (5 — Rating5's ceiling, same tier as
+  // "High" elsewhere); MMA: Very High (5); Krav Maga: High (5); Boxing and
+  // Kickboxing: Moderate (3, both).
+  combatSportRelevance: {
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    wrestling: 5,
+    mma: 5,
+    krav_maga: 5,
+    boxing: 3,
+    kickboxing: 3,
+  },
+  // "# Substitution Logic" names "Front Rack Carry", "Bear-Hug Carry With
+  // a Medicine Ball", "Farmer Carry", "Suitcase Carry" and "Static
+  // Sandbag Hold". "Front Rack Carry"/"Farmer Carry" → integrated in this
+  // same batch. "Suitcase Carry" → `suitcase_carry` (confirmed real
+  // chapter, not yet integrated). "Bear-Hug Carry With a Medicine Ball"
+  // and "Static Sandbag Hold" name no exercise with its own chapter/
+  // catalog id.
+  substitutionExerciseIds: ["front_rack_carry", "farmer_carry", "suitcase_carry"],
+};
+
+// -----------------------------------------------------------------------------
+// Zercher Carry
+// Source: 50-exercises/66_CARRIES/13_ZERCHER_CARRY.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Fourth and final entry from the `66_CARRIES` chapter.
+ * `exercisePrescriptionRegistry.ts` has an entry (`zercherCarryEntry`) with
+ * `moduleId: "grip"`, `laterality: "bilateral"`,
+ * `requiredEquipmentCapabilities: ["loaded_carry_implement"]` and
+ * `supportedLoadingModes: ["barbell", "sandbag"]`, with an explicit registry
+ * comment: "'axle' has no dedicated LoadingMode value and is intentionally
+ * left unrepresented rather than folded into 'barbell'". This is the exact
+ * situation described in this batch's instructions: "Equipment: Barbell,
+ * Sandbag, Axle or Similar Implement" documents three named implements, but
+ * `EquipmentType` has no `"axle"` value (confirmed by direct search) — the
+ * same registry precedent is followed here: `axle` is deliberately left
+ * unrepresented rather than approximated as `barbell`, and `requirements`
+ * uses only `barbell`/`sandbag` via `any_of`.
+ *
+ * The Zercher position (load cradled in the crooks of the elbows) is an
+ * anatomical hold, not an environmental requirement — no capability is
+ * created for it, matching the same principle already applied to
+ * FRONT_RACK_CARRY's own position.
+ *
+ * Elbow, trunk and breathing constraints are the dominant theme of this
+ * fiche: "# Joint Actions" leads with a dedicated "## Elbow" heading
+ * ("sustained flexion, isometric stabilization, load cradling"), "# Elbow
+ * and Arm Demand" is its own top-level section, and — uniquely among this
+ * chapter's four exercises — the Absolute Contraindications name "acute
+ * elbow injury" AND "acute biceps injury" explicitly, with Biceps Brachii
+ * and Brachialis both appearing as PRIMARY (not secondary) muscles. This
+ * grounds the first use of the `elbow` `BodyRegion` value anywhere in this
+ * catalog (see `bodyRegionsLoaded` below) — FRONT_RACK_CARRY's own elbow
+ * involvement is comparatively minor (one bullet among several under
+ * Joint Actions, no dedicated "Elbow and Arm Demand" section, and no
+ * elbow-specific Absolute Contraindication), so `elbow` is deliberately
+ * NOT added there, keeping the distinction between the two front-loaded
+ * carries honest rather than mechanically copied.
+ */
+export const ZERCHER_CARRY: ExerciseDefinition = {
+  id: "zercher_carry",
+  name: "Zercher Carry",
+  module: "grip",
+  primaryAdaptation: "maximum_strength",
+  // Primary Adaptation: "Anterior-Load Locomotor Strength" — same
+  // "...Strength" framing as the rest of this chapter.
+  //
+  // Secondary Classifications/Adaptations mapped: "Anti-Flexion Strength"
+  // / "Anti-Extension Strength" / "Trunk Stability" / "Anterior Trunk
+  // Stability" / "Whole-Body Bracing" → trunk_strength. "Postural
+  // Control" / "Postural Endurance" / "Shoulder-Girdle Stability" / "Hip
+  // Stability" → stability. "Gait Integrity" / "Gait Coordination" →
+  // coordination. "Upper-Back Strength" / "Upper-Back Endurance" →
+  // muscular_endurance. "Elbow-Supported Object Control" is a
+  // position-specific descriptor, not a generic capability, and is
+  // deliberately not mapped. Like FRONT_RACK_CARRY (and explicitly
+  // unlike SANDBAG_CARRY/FARMER_CARRY), this fiche states grip is not
+  // meant to be the limiting factor — "Wrist and Hand: ... minimal
+  // primary grip demand" under Joint Actions, "grip should not be the
+  // primary limiter" in both Purpose and CAS Engine Rules —
+  // `grip_strength` is deliberately excluded.
+  physicalQualities: ["trunk_strength", "stability", "coordination", "muscular_endurance"],
+  // Exercise Identity: "Primary Pattern: Front-Loaded Locomotion.
+  // Secondary Pattern: Isometric Trunk and Upper-Back Stabilization." →
+  // carry, isometric.
+  movementPatterns: ["carry", "isometric"],
+  // No dedicated "Force Vector" heading exists in this chapter's format.
+  // Same resolution as the rest of this chapter: horizontal locomotion
+  // under a resisted, already-secured load.
+  forceVectors: ["horizontal"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "any_of",
+        items: [
+          { kind: "equipment", equipment: "barbell" },
+          { kind: "equipment", equipment: "sandbag" },
+        ],
+      },
+      {
+        kind: "all_of",
+        items: [{ kind: "environment", capability: "sufficient_space", minimumSpace: "large" }],
+      },
+    ],
+  },
+  // Exercise Identity: "Complexity: Moderate", corroborated by "#
+  // Technical Complexity — Moderate. The walking pattern is simple, but
+  // the load position requires...".
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // Exercise Identity: "Unilateral or Bilateral: Bilateral" (explicit,
+  // unambiguous), matching the registry's own independent
+  // `laterality: "bilateral"`.
+  unilateral: false,
+  // Primary Muscles: Upper Trapezius, Middle Trapezius, Rhomboids,
+  // Latissimus Dorsi, Biceps Brachii, Brachialis, Abdominal Wall,
+  // Obliques, Spinal Stabilizers, Gluteals, Quadriceps → shoulder
+  // (trapezius/rhomboids/lat dorsi), upper_arm (Biceps Brachii,
+  // Brachialis — both PRIMARY, matching the elbow-cradle emphasis), elbow
+  // (see the block comment above this export for the full reasoning —
+  // the first use of this BodyRegion value in the catalog), abdomen,
+  // hip, thigh.
+  bodyRegionsLoaded: ["shoulder", "upper_arm", "elbow", "abdomen", "hip", "thigh"],
+  // "# Absolute Contraindications", quoted one item per source line. All
+  // six items are athlete-state conditions and are all included.
+  contraindications: [
+    { description: "Acute elbow injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Acute biceps injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Acute shoulder injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Acute spinal injury.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Uncontrolled respiratory symptoms.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+    { description: "Inability to walk safely under load.", prohibitedPatterns: ["carry", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // Same chapter-wide `metabolic`/`technical` sourcing approach as
+    // FARMER_CARRY.
+    types: ["neural", "muscular", "connective_tissue", "systemic"],
+    neural: 3, // "Neurological Fatigue: Moderate"
+    muscular: 4, // "Local Fatigue: High"
+    metabolic: 3, // chapter-wide OVERVIEW.md baseline — see FARMER_CARRY's own comment
+    connectiveTissue: 4, // "Connective-Tissue Stress: Moderate to High"
+    technical: 3, // fallback from "Complexity: Moderate" (minimumTechnicalLevel 3)
+  },
+  evidenceLevel: "unknown",
+  // "# Sport-Specific Relevance" — Brazilian Jiu-Jitsu: High (5); Judo:
+  // High (5); Wrestling: Very High (5); MMA: Very High (5); Krav Maga:
+  // High (5); Boxing and Kickboxing: Moderate (3, both).
+  combatSportRelevance: {
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    wrestling: 5,
+    mma: 5,
+    krav_maga: 5,
+    boxing: 3,
+    kickboxing: 3,
+  },
+  // "# Substitution Logic" names "Front Rack Carry", "Sandbag Carry",
+  // "Bear-Hug Carry", "Farmer Carry" and "Static Zercher Hold". "Front
+  // Rack Carry"/"Sandbag Carry"/"Farmer Carry" → integrated in this same
+  // batch. "Bear-Hug Carry" and "Static Zercher Hold" name no exercise
+  // with its own chapter/catalog id.
+  substitutionExerciseIds: ["front_rack_carry", "sandbag_carry", "farmer_carry"],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -4176,4 +4833,8 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   PINCH_CARRY,
   ROPE_CLIMB,
   ROPE_PULL,
+  FARMER_CARRY,
+  FRONT_RACK_CARRY,
+  SANDBAG_CARRY,
+  ZERCHER_CARRY,
 ];

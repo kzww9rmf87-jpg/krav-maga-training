@@ -24,6 +24,8 @@ import {
   COUNTERMOVEMENT_JUMP,
   DEPTH_JUMP,
   EXERCISE_KNOWLEDGE_BASE,
+  FARMER_CARRY,
+  FRONT_RACK_CARRY,
   HANG_HIGH_PULL,
   HANG_POWER_CLEAN,
   JUMP_SHRUG,
@@ -41,9 +43,11 @@ import {
   PUSH_PRESS,
   ROPE_CLIMB,
   ROPE_PULL,
+  SANDBAG_CARRY,
   SINGLE_LEG_HOP,
   SPLIT_SQUAT_JUMP,
   TOWEL_PULL_UP,
+  ZERCHER_CARRY,
 } from "../exerciseKnowledgeBase";
 
 import { makeEnvironment, makeExercise, makeValidInput } from "./fixtures";
@@ -5130,6 +5134,576 @@ describe("65_GRIP chapter — Exercise Requirements Model batch integration", ()
   });
 
   test("33. adding this chapter never changes the previously integrated exercises", () => {
+    const jumpShrugInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(JUMP_SHRUG, jumpShrugInput).eligible).toBe(true);
+
+    const hangPowerCleanInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(HANG_POWER_CLEAN, hangPowerCleanInput).eligible).toBe(true);
+
+    const pushPressInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }, { type: "rack" }],
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(PUSH_PRESS, pushPressInput).eligible).toBe(true);
+
+    const boxJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "plyometric_box" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(BOX_JUMP, boxJumpInput).eligible).toBe(true);
+
+    const chestPassInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: true,
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_CHEST_PASS, chestPassInput).eligible).toBe(true);
+  });
+});
+
+/**
+ * `66_CARRIES` chapter — Exercise Requirements Model batch integration
+ * (`farmer_carry`, `front_rack_carry`, `sandbag_carry`, `zercher_carry`).
+ *
+ * Same `test.each`-driven structure as the `65_GRIP` chapter's own batch
+ * block: cross-cutting checks parameterized over all four exercises, then
+ * one describe block per exercise for its own eligibility-specific
+ * scenarios, then dedicated business-distinction tests. `FARMER_CARRY` and
+ * `FRONT_RACK_CARRY` use `any_of` equipment clauses (multiple genuinely
+ * equivalent implements) — the eligible-configuration tests below exercise
+ * more than one alternative to confirm the `any_of` semantics genuinely
+ * work end to end, not just with a single hard-coded implement.
+ */
+describe("66_CARRIES chapter — Exercise Requirements Model batch integration", () => {
+  const CARRIES_EXERCISES = [
+    { exercise: FARMER_CARRY, id: "farmer_carry" },
+    { exercise: FRONT_RACK_CARRY, id: "front_rack_carry" },
+    { exercise: SANDBAG_CARRY, id: "sandbag_carry" },
+    { exercise: ZERCHER_CARRY, id: "zercher_carry" },
+  ] as const;
+
+  test.each(CARRIES_EXERCISES)("$id — 1. exists in the catalog with the expected id", ({ exercise, id }) => {
+    expect(EXERCISE_KNOWLEDGE_BASE).toContain(exercise);
+    expect(exercise.id).toBe(id);
+  });
+
+  test("2. all four ids are unique within the catalog, and farmer_carry appears only once", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const { id } of CARRIES_EXERCISES) {
+      expect(ids.filter((existingId) => existingId === id)).toHaveLength(1);
+    }
+    expect(ids.filter((existingId) => existingId === "farmer_carry")).toEqual(["farmer_carry"]);
+  });
+
+  test.each(CARRIES_EXERCISES)(
+    "$id — 3. respects the coexistence invariant: requiredEquipment is empty, optionalEquipment is absent",
+    ({ exercise }) => {
+      expect(exercise.requiredEquipment).toEqual([]);
+      expect(exercise.optionalEquipment).toBeUndefined();
+      expect(validateRequirementsCoexistenceInvariant(exercise)).toBeNull();
+      expect(validateExerciseRequirementsStructure(exercise.requirements!)).toEqual([]);
+    },
+  );
+
+  test("4. the default catalog used by runEngine(input) now also contains all four 66_CARRIES ids", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    for (const { id } of CARRIES_EXERCISES) {
+      expect(ids).toContain(id);
+    }
+  });
+
+  test.each(CARRIES_EXERCISES)("$id — 5. never mutates the exercise or the input it is given during evaluation", ({ exercise }) => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [
+          { type: "dumbbell" },
+          { type: "kettlebell" },
+          { type: "farmer_handle" },
+          { type: "trap_bar" },
+          { type: "barbell" },
+          { type: "sandbag" },
+        ],
+        availableSpace: "large",
+      }),
+    });
+    const exerciseSnapshot = structuredClone(exercise);
+    const inputSnapshot = structuredClone(input);
+
+    checkExerciseEligibility(exercise, input);
+
+    expect(exercise).toEqual(exerciseSnapshot);
+    expect(input).toEqual(inputSnapshot);
+  });
+
+  describe("FARMER_CARRY", () => {
+    test("6. eligible with a dumbbell alone (one of four any_of alternatives) and large space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "dumbbell" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(FARMER_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("7. eligible with farmer handles alone (a different any_of alternative) and large space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "farmer_handle" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(FARMER_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("8. ineligible without any documented implement (dumbbell, kettlebell, farmer handle or trap bar)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "bodyweight" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(FARMER_CARRY, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("9. ineligible when available space is below the documented minimum (large)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "dumbbell" }],
+          availableSpace: "moderate",
+        }),
+      });
+
+      const result = checkExerciseEligibility(FARMER_CARRY, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+    });
+
+    test("10. no dependency on floor safety, jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "dumbbell" }],
+          availableSpace: "large",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(FARMER_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("11. biomechanical fields match the canonical documentation", () => {
+      expect(FARMER_CARRY.physicalQualities).toEqual([
+        "grip_strength",
+        "trunk_strength",
+        "stability",
+        "coordination",
+        "general_work_capacity",
+        "tissue_capacity",
+      ]);
+      expect(FARMER_CARRY.movementPatterns).toEqual(["carry", "isometric"]);
+      expect(FARMER_CARRY.forceVectors).toEqual(["horizontal"]);
+      expect(FARMER_CARRY.unilateral).toBe(false);
+      expect(FARMER_CARRY.bodyRegionsLoaded).toEqual(["hand", "forearm", "shoulder", "abdomen", "hip", "thigh"]);
+      expect(FARMER_CARRY.complexity).toBe("low");
+      expect(FARMER_CARRY.minimumTechnicalLevel).toBe(1);
+    });
+  });
+
+  describe("FRONT_RACK_CARRY", () => {
+    test("12. eligible with a barbell alone (one of four any_of alternatives) and large space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "barbell" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(FRONT_RACK_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("13. ineligible without any documented implement (kettlebell, dumbbell, barbell or sandbag)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "bodyweight" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(FRONT_RACK_CARRY, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("14. ineligible when available space is below the documented minimum (large)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "kettlebell" }],
+          availableSpace: "moderate",
+        }),
+      });
+
+      const result = checkExerciseEligibility(FRONT_RACK_CARRY, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+    });
+
+    test("15. no dependency on floor safety, jumping, throwing, a wall, a partner or a squat rack — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "kettlebell" }],
+          availableSpace: "large",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(FRONT_RACK_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("16. never requires the rack EquipmentType — the front-rack position is anatomical, not equipment", () => {
+      const requiredEquipmentTypes = FRONT_RACK_CARRY.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+
+      expect(requiredEquipmentTypes).not.toContain("rack");
+      expect(requiredEquipmentTypes).toEqual(["kettlebell", "dumbbell", "barbell", "sandbag"]);
+    });
+
+    test("17. biomechanical fields match the canonical documentation", () => {
+      expect(FRONT_RACK_CARRY.physicalQualities).toEqual(["trunk_strength", "stability", "coordination", "muscular_endurance"]);
+      expect(FRONT_RACK_CARRY.movementPatterns).toEqual(["carry", "isometric"]);
+      expect(FRONT_RACK_CARRY.forceVectors).toEqual(["horizontal"]);
+      expect(FRONT_RACK_CARRY.unilateral).toBe(false);
+      expect(FRONT_RACK_CARRY.bodyRegionsLoaded).toEqual(["shoulder", "abdomen", "hip", "thigh"]);
+      expect(FRONT_RACK_CARRY.complexity).toBe("moderate");
+      expect(FRONT_RACK_CARRY.minimumTechnicalLevel).toBe(3);
+    });
+  });
+
+  describe("SANDBAG_CARRY", () => {
+    test("18. eligible with a sandbag and large space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "sandbag" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(SANDBAG_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("19. ineligible without a sandbag", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "dumbbell" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(SANDBAG_CARRY, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("20. ineligible when available space is below the documented minimum (large)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "sandbag" }],
+          availableSpace: "moderate",
+        }),
+      });
+
+      const result = checkExerciseEligibility(SANDBAG_CARRY, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+    });
+
+    test("21. no dependency on floor safety, jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "sandbag" }],
+          availableSpace: "large",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(SANDBAG_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("22. no capability is created for carry position (bear hug, front, shouldered, front rack are all the same requirements)", () => {
+      const requiredEquipmentTypes = SANDBAG_CARRY.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(requiredEquipmentTypes).toEqual(["sandbag"]);
+    });
+
+    test("23. biomechanical fields match the canonical documentation", () => {
+      expect(SANDBAG_CARRY.physicalQualities).toEqual([
+        "grip_strength",
+        "trunk_strength",
+        "stability",
+        "coordination",
+        "muscular_endurance",
+      ]);
+      expect(SANDBAG_CARRY.movementPatterns).toEqual(["carry", "isometric"]);
+      expect(SANDBAG_CARRY.forceVectors).toEqual(["horizontal"]);
+      expect(SANDBAG_CARRY.unilateral).toBe(false);
+      expect(SANDBAG_CARRY.bodyRegionsLoaded).toEqual(["shoulder", "upper_arm", "abdomen", "hip", "thigh"]);
+      expect(SANDBAG_CARRY.complexity).toBe("moderate");
+      expect(SANDBAG_CARRY.minimumTechnicalLevel).toBe(3);
+    });
+  });
+
+  describe("ZERCHER_CARRY", () => {
+    test("24. eligible with a barbell (one of two any_of alternatives) and large space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "barbell" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(ZERCHER_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("25. eligible with a sandbag (the other any_of alternative) and large space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "sandbag" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(ZERCHER_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("26. ineligible without a barbell or a sandbag", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "dumbbell" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(ZERCHER_CARRY, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("27. ineligible when available space is below the documented minimum (large)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "barbell" }],
+          availableSpace: "moderate",
+        }),
+      });
+
+      const result = checkExerciseEligibility(ZERCHER_CARRY, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+    });
+
+    test("28. no dependency on floor safety, jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "barbell" }],
+          availableSpace: "large",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(ZERCHER_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("29. does not require the axle equipment type — no such EquipmentType exists, and it is documented as a limitation, not approximated as barbell", () => {
+      const requiredEquipmentTypes = ZERCHER_CARRY.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(requiredEquipmentTypes).toEqual(["barbell", "sandbag"]);
+    });
+
+    test("30. biomechanical fields match the canonical documentation", () => {
+      expect(ZERCHER_CARRY.physicalQualities).toEqual(["trunk_strength", "stability", "coordination", "muscular_endurance"]);
+      expect(ZERCHER_CARRY.movementPatterns).toEqual(["carry", "isometric"]);
+      expect(ZERCHER_CARRY.forceVectors).toEqual(["horizontal"]);
+      expect(ZERCHER_CARRY.unilateral).toBe(false);
+      expect(ZERCHER_CARRY.bodyRegionsLoaded).toEqual(["shoulder", "upper_arm", "elbow", "abdomen", "hip", "thigh"]);
+      expect(ZERCHER_CARRY.complexity).toBe("moderate");
+      expect(ZERCHER_CARRY.minimumTechnicalLevel).toBe(3);
+    });
+  });
+
+  describe("business distinctions", () => {
+    test("31. FARMER_CARRY vs. FRONT_RACK_CARRY: distinct equipment alternatives, and only FARMER_CARRY documents grip as a primary quality", () => {
+      const farmerEquipment = FARMER_CARRY.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      const frontRackEquipment = FRONT_RACK_CARRY.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+
+      // Farmer Carry's own implements (farmer_handle, trap_bar) are not documented front-rack implements, and vice versa (barbell)
+      expect(farmerEquipment).toContain("farmer_handle");
+      expect(farmerEquipment).toContain("trap_bar");
+      expect(frontRackEquipment).not.toContain("farmer_handle");
+      expect(frontRackEquipment).not.toContain("trap_bar");
+      expect(frontRackEquipment).toContain("barbell");
+      expect(farmerEquipment).not.toContain("barbell");
+
+      // FARMER_CARRY documents genuine grip demand ("Support Grip", "Grip Endurance"); FRONT_RACK_CARRY
+      // repeatedly and explicitly states grip should not be the limiting factor.
+      expect(FARMER_CARRY.physicalQualities).toContain("grip_strength");
+      expect(FRONT_RACK_CARRY.physicalQualities).not.toContain("grip_strength");
+      expect(FARMER_CARRY.bodyRegionsLoaded).toContain("hand");
+      expect(FRONT_RACK_CARRY.bodyRegionsLoaded).not.toContain("hand");
+
+      // Documented complexity ordering: Farmer Carry (Low) < Front Rack Carry (Moderate)
+      expect(FARMER_CARRY.complexity).toBe("low");
+      expect(FRONT_RACK_CARRY.complexity).toBe("moderate");
+      expect(FARMER_CARRY.minimumTechnicalLevel).toBeLessThan(FRONT_RACK_CARRY.minimumTechnicalLevel);
+    });
+
+    test("32. SANDBAG_CARRY vs. ZERCHER_CARRY: distinct equipment (sandbag-only vs. barbell-or-sandbag any_of), and only ZERCHER_CARRY loads the elbow region", () => {
+      const sandbagEquipment = SANDBAG_CARRY.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      const zercherEquipment = ZERCHER_CARRY.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+
+      // SANDBAG_CARRY has a single mandatory equipment atom (sandbag only); ZERCHER_CARRY documents a real barbell alternative
+      expect(sandbagEquipment).toEqual(["sandbag"]);
+      expect(zercherEquipment).toEqual(["barbell", "sandbag"]);
+      const barbellOnlyInput = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "barbell" }], availableSpace: "large" }),
+      });
+      expect(checkExerciseEligibility(SANDBAG_CARRY, barbellOnlyInput).eligible).toBe(false);
+      expect(checkExerciseEligibility(ZERCHER_CARRY, barbellOnlyInput).eligible).toBe(true);
+
+      // Only ZERCHER_CARRY's own fiche grounds the elbow-crease load-bearing joint as a dedicated, primary
+      // structural concern (dedicated "Elbow and Arm Demand" section, elbow/biceps absolute contraindications);
+      // SANDBAG_CARRY's grip/arm demand is instead reflected through grip_strength and the upper_arm region.
+      expect(ZERCHER_CARRY.bodyRegionsLoaded).toContain("elbow");
+      expect(SANDBAG_CARRY.bodyRegionsLoaded).not.toContain("elbow");
+      expect(SANDBAG_CARRY.physicalQualities).toContain("grip_strength");
+      expect(ZERCHER_CARRY.physicalQualities).not.toContain("grip_strength");
+    });
+  });
+
+  test("33. adding this chapter never changes the previously integrated exercises", () => {
+    const towelPullUpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "pull_up_bar" }, { type: "towel" }],
+        availableSpace: "very_limited",
+      }),
+    });
+    expect(checkExerciseEligibility(TOWEL_PULL_UP, towelPullUpInput).eligible).toBe(true);
+
+    const pinchCarryInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "pinch_grip_implement" }],
+        availableSpace: "large",
+      }),
+    });
+    expect(checkExerciseEligibility(PINCH_CARRY, pinchCarryInput).eligible).toBe(true);
+
+    const ropeClimbInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "rope" }],
+        floorSafe: true,
+        availableSpace: "large",
+      }),
+    });
+    expect(checkExerciseEligibility(ROPE_CLIMB, ropeClimbInput).eligible).toBe(true);
+
     const jumpShrugInput = makeValidInput({
       environment: makeEnvironment({
         availableEquipment: [{ type: "barbell" }, { type: "plates" }],
