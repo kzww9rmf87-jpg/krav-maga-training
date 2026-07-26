@@ -7744,6 +7744,701 @@ export const NECK_TRAINING: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Technical Stand-Up
+// Source: 50-exercises/35_TECHNICAL_STAND_UP
+// -----------------------------------------------------------------------------
+
+/**
+ * First entry of the "Lot 5 — Ground movement et transitions" batch,
+ * migrated alongside BEAR_CRAWL/SHRIMPING/BRIDGING/TURKISH_GET_UP. No
+ * `exercisePrescriptionRegistry.ts` entry exists for any of the five
+ * exercises in this batch (confirmed by direct search for each) — a known
+ * limitation, documented here without modifying that registry.
+ *
+ * Central business question for this entry, explicitly flagged before
+ * writing began: "# Equipment Requirements — Required: Mat." Unlike
+ * TIBIALIS_RAISE/SOLEUS_RAISE/WRIST_STRENGTHENING/NECK_TRAINING in Lot 4
+ * (all genuinely equipment-free), this fiche's own Required heading names
+ * a real implement — the existing `mat` `EquipmentType` is used directly,
+ * not `floor_safe`: `mat` is a physical item the athlete places down,
+ * while `floor_safe` is an environment capability describing the floor
+ * itself — these answer different questions, and the fiche names the
+ * former, not the latter. "Optional: Training Partner, Obstacle,
+ * Protective Equipment" — Training Partner is never Required, so no
+ * `human_assistance` clause is added.
+ *
+ * No "Space Requirement" heading or quantified distance/area figure exists
+ * anywhere in this fiche (checked directly) — `sufficient_space` is not
+ * added, matching this whole documentary format's established gap.
+ *
+ * MODEL LIMITATION, flagged explicitly: "# Movement Pattern — Primary:
+ * Ground-to-Standing Transition." No `MovementPattern` value represents a
+ * whole-body ground-to-standing transition — this taxonomy has compound
+ * patterns for squat/hinge/push/pull/carry/locomotion/jump/throw/sprint
+ * families, but no dedicated slot for this specific combat-transition
+ * archetype. `"mixed"` is used for the PRIMARY pattern (the same escape
+ * hatch already used repeatedly in Lot 4), alongside `locomotion`
+ * (explicitly named as its own secondary pattern) and `isometric` (from
+ * the explicitly named "Brace" secondary pattern).
+ *
+ * DOCUMENTED TENSION, not silently resolved either way: "# Neurological
+ * Profile — Motor Complexity ★★★★★, Coordination Requirement ★★★★★,
+ * Balance Requirement ★★★★★" are all maxed out, yet the fiche's own
+ * dedicated "# Skill Requirement" heading lists "Suitable For: Beginners,
+ * Intermediate, Advanced, Elite" and the Neurological Profile's own
+ * internal "Skill Requirement: Beginner" sub-field says "Beginner" — the
+ * same dedicated-heading-governs-over-internal-ratings discipline already
+ * applied throughout this project is used here too (see LANDMINE_PRESS's
+ * own precedent in Lot 3), resolving to minimumTechnicalLevel 1 / "low"
+ * despite the maxed coordination/balance ratings — a genuine internal
+ * tension in the source fiche, surfaced here rather than silently
+ * smoothed over in either direction.
+ */
+export const TECHNICAL_STAND_UP: ExerciseDefinition = {
+  id: "technical_stand_up",
+  name: "Technical Stand-Up",
+  module: "movement",
+  // "# Primary Classification: Combat-Specific Movement" — no
+  // `AdaptationDomain` value is literally "combat-specific", but
+  // `"specific_skill"` is a direct, literal match for this exact framing
+  // (the first use of this AdaptationDomain value anywhere in this
+  // catalog) — distinct from the generic movement-quality framing used by
+  // BEAR_CRAWL/TURKISH_GET_UP below, whose own Primary Classifications
+  // never use the words "Combat-Specific".
+  primaryAdaptation: "specific_skill",
+  // "# Capability Mapping — Primary: Ground Transition Efficiency,
+  // Movement Coordination, Balance." "Ground Transition Efficiency" is
+  // generic/movement-efficiency-flavored with no distinct counterpart and
+  // is excluded, matching this whole project's established exclusion of
+  // this recurring phrase-family. "Movement Coordination" → coordination.
+  // "Balance" → balance (exact match). "Secondary: Core Stability" →
+  // trunk_strength. "Reaction Speed" has no clean PhysicalQuality
+  // counterpart — neither `speed` (raw velocity) nor `agility`
+  // (change-of-direction capacity) honestly captures a reaction-time
+  // concept, and it is deliberately not force-fitted into either.
+  // "Mobility" → mobility (exact match). "Movement Efficiency" and "Combat
+  // Readiness" excluded (generic).
+  physicalQualities: ["coordination", "balance", "trunk_strength", "mobility"],
+  // See block comment above for the full reasoning.
+  movementPatterns: ["mixed", "locomotion", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Multi-Directional" —
+  // `mixed` is a direct, literal match (the same resolution already used
+  // for WRIST_STRENGTHENING/NECK_TRAINING in Lot 4).
+  forceVectors: ["mixed"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [{ kind: "equipment", equipment: "mat" }],
+      },
+    ],
+  },
+  // See block comment above for the documented tension this resolves.
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  // No unilateral/bilateral statement exists anywhere in this fiche —
+  // the transition typically posts through one preferred arm/leg but no
+  // per-side prescription language is documented.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Core, Gluteus Maximus,
+  // Quadriceps, Shoulders, Triceps" → abdomen (Core), hip (Gluteus
+  // Maximus), thigh (Quadriceps), shoulder (Shoulders), upper_arm
+  // (Triceps) — the broadest primary-muscle spread in this batch, directly
+  // corroborated by this fiche's own "Entire Body" kinetic chain framing.
+  bodyRegionsLoaded: ["abdomen", "hip", "thigh", "shoulder", "upper_arm"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute wrist injury.", region: "wrist", prohibitedPatterns: ["mixed", "locomotion", "isometric"], absolute: true },
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["mixed", "locomotion", "isometric"], absolute: true },
+    { description: "Acute knee injury.", region: "knee", prohibitedPatterns: ["mixed", "locomotion", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Low. Mechanical Fatigue:
+    // Low. Metabolic Fatigue: Low." Unlike several Lot 4 entries, this
+    // fiche's own per-dimension vocabulary never uses "Very Low" at all
+    // (only the aggregate "Overall Fatigue Cost: Very Low" summary line
+    // does) — the baseline Low=1 mapping established throughout Lots 1–3
+    // is used directly, matching NECK_TRAINING's own identical resolution
+    // in Lot 4.
+    types: [],
+    neural: 1,
+    muscular: 1,
+    connectiveTissue: 1, // inferred from "Mechanical Fatigue: Low"
+    metabolic: 1,
+    technical: 1, // fallback from "Skill Requirement: Beginner" (minimumTechnicalLevel 1)
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Ground transition
+  // drills improve movement efficiency, coordination and combat
+  // readiness..." — mapped to the CAS Evidence Framework's "Level 1 —
+  // Scientific consensus" (20-engine/02_EXERCISE_KNOWLEDGE_BASE.md).
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Boxing's
+  // own notably low 2-star rating (the lowest documented for this
+  // discipline anywhere in this migration so far) directly reflects the
+  // absence of ground fighting in boxing. Savate/Sambo are named in this
+  // table but have no `CombatSport` enum counterpart and are omitted
+  // rather than force-mapped.
+  combatSportRelevance: {
+    boxing: 2,
+    kickboxing: 3,
+    muay_thai: 3,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" (Segmented Stand-Up, Slow Technical Repetition,
+  // Supported Technical Stand-Up) name no exercise with its own
+  // chapter/catalog id anywhere in this repository (confirmed by direct
+  // search). `substitutionExerciseIds` is genuinely empty for this entry.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Bear Crawl
+// Source: 50-exercises/37_BEAR_CRAWL
+// -----------------------------------------------------------------------------
+
+/**
+ * Second entry of this batch. No `exercisePrescriptionRegistry.ts` entry
+ * exists for `bear_crawl` (confirmed by direct search) — a known
+ * limitation, documented here without modifying that registry.
+ *
+ * "# Equipment Requirements — Required: None." A fully equipment-free
+ * exercise — `requiredEquipment: []` with no equipment atom in
+ * `requirements`.
+ *
+ * Central business question for this entry, explicitly flagged before
+ * writing began: unlike every other entry in this batch (and unlike every
+ * Lot 1–4 entry from this same documentary format), this fiche's own "#
+ * Loading Profile — Typical Volume: 3–8 sets, 10–30 meters" gives a
+ * genuine, QUANTIFIED distance figure even though no dedicated "Space
+ * Requirement" heading exists — the same kind of concrete numeric anchor
+ * already used to ground `minimumSpace: "large"` for ROPE_PULL's own
+ * "5 to 15 metres... 10 to 30 metres" distance figures in the 65_GRIP
+ * chapter. This is NOT the same as silently inventing a space requirement
+ * from vague implication — it is a directly quoted, quantified distance
+ * this exercise's own continuous locomotion genuinely requires.
+ *
+ * "# Movement Pattern — Primary: Quadrupedal Locomotion" → `locomotion`
+ * is a direct, honest match (the "quadrupedal" qualifier describes HOW the
+ * locomotion happens, not a different pattern). "Coaching Cues — Move
+ * opposite hand and foot together" describes a CONTRALATERAL gait pattern,
+ * not a unilateral one — the same contralateral-is-not-unilateral
+ * resolution already applied to DEAD_BUG in 62_CORE.
+ */
+export const BEAR_CRAWL: ExerciseDefinition = {
+  id: "bear_crawl",
+  name: "Bear Crawl",
+  module: "movement",
+  // "# Primary Classification: Athletic Development" — no direct
+  // `AdaptationDomain` match; `"movement"` is used, matching the strong
+  // "Movement Quality"/"Neuromotor Training" Secondary Classifications and
+  // the identical resolution already used for AB_WHEEL/PALLOF_PRESS/
+  // COPENHAGEN_PLANK.
+  primaryAdaptation: "movement",
+  // "# Capability Mapping — Primary: Movement Coordination, Core
+  // Stability, Shoulder Stability" → coordination, trunk_strength,
+  // stability. "Secondary: Work Capacity" → general_work_capacity (exact
+  // match). "Locomotion Efficiency" excluded (generic). "Mechanical
+  // Robustness" → tissue_capacity. "Postural Control" → stability (already
+  // listed). "Combat Readiness" excluded (generic).
+  physicalQualities: ["coordination", "trunk_strength", "stability", "general_work_capacity", "tissue_capacity"],
+  // "# Movement Pattern — Primary: Quadrupedal Locomotion" → locomotion.
+  // "Secondary: Cross-Body Coordination, Brace, Shoulder Stabilization,
+  // Hip Stabilization, Locomotion" → isometric (from Brace); the
+  // coordination/stabilization items are joint-action-level detail already
+  // captured via `physicalQualities`.
+  movementPatterns: ["locomotion", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Horizontal. Secondary
+  // Force Vector: Vertical Stabilization." No "Minimal" hedge — both are
+  // kept, matching BARBELL_ROW's own identical unhedged secondary vector
+  // in Lot 2.
+  forceVectors: ["horizontal", "vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [{ kind: "environment", capability: "sufficient_space", minimumSpace: "large" }],
+      },
+    ],
+  },
+  // "# Skill Requirement — Suitable For: Beginners, Intermediate,
+  // Advanced, Elite", corroborated by "# Neurological Profile — Skill
+  // Requirement: Beginner".
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  // Contralateral gait ("opposite hand and foot together"), not a
+  // per-side unilateral prescription — see block comment above.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Core, Anterior Deltoids,
+  // Serratus Anterior, Quadriceps, Gluteus Maximus" → abdomen (Core),
+  // shoulder (Anterior Deltoids, Serratus Anterior), thigh (Quadriceps),
+  // hip (Gluteus Maximus).
+  bodyRegionsLoaded: ["abdomen", "shoulder", "thigh", "hip"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute wrist injury.", region: "wrist", prohibitedPatterns: ["locomotion", "isometric"], absolute: true },
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["locomotion", "isometric"], absolute: true },
+    { description: "Acute knee injury.", region: "knee", prohibitedPatterns: ["locomotion", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: Low. Metabolic Fatigue: Moderate. Overall Fatigue Cost: Low
+    // to Moderate." mapped via the Low=1/Moderate=2 word scale established
+    // throughout Lots 1–4.
+    types: [],
+    neural: 2,
+    muscular: 1,
+    connectiveTissue: 1, // inferred from "Mechanical Fatigue: Low"
+    metabolic: 2,
+    technical: 1, // fallback from "Skill Requirement: Beginner"
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Quadrupedal locomotion
+  // effectively develops... integrated movement patterns relevant to
+  // athletic performance." — mapped to "Level 1 — Scientific consensus".
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate is
+  // named in this table but has no `CombatSport` enum counterpart and is
+  // omitted rather than force-mapped.
+  combatSportRelevance: {
+    boxing: 4,
+    kickboxing: 4,
+    muay_thai: 4,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" (Static Bear Hold, Short Distance Crawl, Quadruped
+  // March) name no exercise with its own chapter/catalog id anywhere in
+  // this repository (confirmed by direct search).
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Shrimping (Hip Escape)
+// Source: 50-exercises/38_SHRIMPING
+// -----------------------------------------------------------------------------
+
+/**
+ * Third entry of this batch. No `exercisePrescriptionRegistry.ts` entry
+ * exists for `shrimping` (confirmed by direct search) — a known
+ * limitation, documented here without modifying that registry.
+ *
+ * Same `mat`-required resolution as TECHNICAL_STAND_UP: "# Equipment
+ * Requirements — Required: Mat. Optional: Training Partner, Resistance
+ * Band, Obstacle." Training Partner is never Required — no
+ * `human_assistance` clause is added, directly answering the user's own
+ * instruction not to invent a partner requirement for an exercise that is
+ * genuinely solo-executable.
+ *
+ * No quantified distance/area figure exists anywhere in this fiche
+ * (unlike BEAR_CRAWL's own "10–30 meters") — `sufficient_space` is not
+ * added.
+ *
+ * MODEL LIMITATION, flagged explicitly: "# Movement Pattern — Primary:
+ * Hip Escape." No `MovementPattern` value represents this specific
+ * grappling technique — `"mixed"` is used for the PRIMARY pattern, the
+ * same escape hatch already used repeatedly in this batch and in Lot 4.
+ * "Secondary: Hip Extension, Hip Flexion, Core Rotation, Brace, Ground
+ * Locomotion" partially resolves: `rotation` (from "Core Rotation"),
+ * `locomotion` (from "Ground Locomotion", explicit), `isometric` (from
+ * "Brace") — "Hip Extension"/"Hip Flexion" have no counterpart and remain
+ * unmapped, already substantively captured via `bodyRegionsLoaded`.
+ */
+export const SHRIMPING: ExerciseDefinition = {
+  id: "shrimping",
+  name: "Shrimping (Hip Escape)",
+  module: "movement",
+  // "# Primary Classification: Combat-Specific Movement" — identical
+  // wording to TECHNICAL_STAND_UP's own Primary Classification, hence the
+  // identical `"specific_skill"` resolution.
+  primaryAdaptation: "specific_skill",
+  // "# Capability Mapping — Primary: Ground Mobility, Hip Mobility,
+  // Movement Coordination." "Ground Mobility" and "Hip Mobility" both
+  // point to the same underlying quality and are folded into a single
+  // `mobility` entry, not double-counted. "Movement Coordination" →
+  // coordination. "Secondary: Core Stability" → trunk_strength.
+  // "Positional Recovery" excluded (generic combat-specific concept, no
+  // distinct counterpart). "Movement Efficiency"/"Combat Readiness"
+  // excluded (generic). "Mechanical Robustness" → tissue_capacity.
+  physicalQualities: ["mobility", "coordination", "trunk_strength", "tissue_capacity"],
+  // See block comment above for the full reasoning.
+  movementPatterns: ["mixed", "rotation", "locomotion", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Horizontal. Secondary
+  // Force Vector: Rotational." No "Minimal" hedge — both are kept.
+  forceVectors: ["horizontal", "rotational"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [{ kind: "equipment", equipment: "mat" }],
+      },
+    ],
+  },
+  // "# Skill Requirement — Suitable For: Beginners, Intermediate,
+  // Advanced, Elite", corroborated by "# Neurological Profile — Skill
+  // Requirement: Beginner".
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  // No per-side prescription language exists anywhere in this fiche
+  // (Loading Profile: "10–20 repetitions or 20–60 seconds", never "per
+  // side") — the movement alternates sides across a set but is not
+  // documented as a per-side unilateral prescription, the same
+  // contralateral-is-not-unilateral resolution already applied to
+  // BEAR_CRAWL above and DEAD_BUG in 62_CORE.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Obliques, Rectus Abdominis,
+  // Gluteus Maximus, Hip Flexors, Hamstrings" → abdomen (Obliques, Rectus
+  // Abdominis), hip (Gluteus Maximus, Hip Flexors), thigh (Hamstrings).
+  bodyRegionsLoaded: ["abdomen", "hip", "thigh"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["mixed", "rotation", "locomotion", "isometric"], absolute: true },
+    { description: "Acute hip injury.", region: "hip", prohibitedPatterns: ["mixed", "rotation", "locomotion", "isometric"], absolute: true },
+    { description: "Acute lumbar injury.", region: "lumbar_spine", prohibitedPatterns: ["mixed", "rotation", "locomotion", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Low. Mechanical Fatigue:
+    // Low. Metabolic Fatigue: Low." Per-dimension vocabulary never uses
+    // "Very Low" (only the aggregate summary does) — baseline Low=1,
+    // matching TECHNICAL_STAND_UP's own identical resolution.
+    types: [],
+    neural: 1,
+    muscular: 1,
+    connectiveTissue: 1, // inferred from "Mechanical Fatigue: Low"
+    metabolic: 1,
+    technical: 1, // fallback from "Skill Requirement: Beginner"
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Ground locomotion
+  // drills improve movement coordination, positional recovery and
+  // sport-specific efficiency..." — mapped to "Level 1 — Scientific
+  // consensus".
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Boxing's
+  // own 1-star rating is the lowest documented for any discipline
+  // anywhere in this migration so far, directly reflecting the complete
+  // absence of ground fighting in boxing. Savate/Sambo are named in this
+  // table but have no `CombatSport` enum counterpart and are omitted
+  // rather than force-mapped.
+  combatSportRelevance: {
+    boxing: 1,
+    kickboxing: 2,
+    muay_thai: 2,
+    wrestling: 4,
+    brazilian_jiu_jitsu: 5,
+    judo: 4,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Progressions" names "Shrimp to Technical Stand-Up" — a COMPOUND
+  // drill name combining two movements, not a standalone reference to
+  // "Technical Stand-Up" as a substitute (the same discipline already
+  // applied to CHIN_UP's own "Weighted Chin-Up" in Lot 2, which was not
+  // resolved to `weighted_pull_up` for an identical reason). "#
+  // Regressions" (Segmented Hip Escape, Slow Technical Shrimp, Assisted
+  // Movement) name no exercise with its own chapter/catalog id either.
+  // `substitutionExerciseIds` is genuinely empty for this entry.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Bridging
+// Source: 50-exercises/39_BRIDGING
+// -----------------------------------------------------------------------------
+
+/**
+ * Fourth entry of this batch. No `exercisePrescriptionRegistry.ts` entry
+ * exists for `bridging` (confirmed by direct search) — a known limitation,
+ * documented here without modifying that registry.
+ *
+ * Central business question for this entry, explicitly flagged before
+ * writing began: this fiche's own "# Regressions — Static Bridge,
+ * Segmented Bridge, Glute Bridge, Hip Lift" lists the musculation-style
+ * "Glute Bridge"/"Hip Lift" as EASIER REGRESSIONS of THIS exercise, never
+ * as its own base/default identity — the canonical, default form
+ * documented here is the explosive, whole-body GRAPPLING bridge (Primary
+ * Classification: "Combat-Specific Movement"; "# Variations — ...
+ * Wrestling Bridge, BJJ Bridge, Explosive Bridge"), not a hip-thrust-style
+ * strength accessory. This distinction is preserved faithfully rather than
+ * blended: `bridging` represents the grappling escape/reversal movement,
+ * not a generic glute-bridge strength exercise.
+ *
+ * Same `mat`-required resolution as TECHNICAL_STAND_UP/SHRIMPING: "#
+ * Equipment Requirements — Required: Mat. Optional: Partner, Resistance
+ * Band, Swiss Ball." Partner is never Required — no `human_assistance`
+ * clause is added. No load of any kind is required — matching the user's
+ * own explicit instruction not to invent a charge requirement without a
+ * documentary source.
+ *
+ * MODEL LIMITATION, flagged explicitly: "# Movement Pattern — Primary:
+ * Bridge." No `MovementPattern` value represents this specific grappling
+ * technique — `"mixed"` is used for the PRIMARY pattern. "Secondary: Hip
+ * Extension, Shoulder Support, Neck Stability, Ground Transition,
+ * Rotation" partially resolves: `rotation` (exact match, corroborated by
+ * "# Variations — ... Bridge with Rotation"); "Hip Extension"/"Shoulder
+ * Support"/"Neck Stability"/"Ground Transition" have no counterpart and
+ * remain unmapped. No "Brace" language is named anywhere in this fiche's
+ * own Movement Pattern section (checked directly, unlike
+ * TECHNICAL_STAND_UP/BEAR_CRAWL/SHRIMPING above) — `isometric` is
+ * deliberately NOT added despite a fairly high Contraction Profile
+ * isometric rating, matching this whole project's established discipline
+ * of only adding it when the Movement Pattern section itself names
+ * bracing/static-hold language.
+ */
+export const BRIDGING: ExerciseDefinition = {
+  id: "bridging",
+  name: "Bridging",
+  module: "movement",
+  // "# Primary Classification: Combat-Specific Movement" — identical
+  // wording to TECHNICAL_STAND_UP/SHRIMPING, hence the identical
+  // `"specific_skill"` resolution.
+  primaryAdaptation: "specific_skill",
+  // "# Capability Mapping — Primary: Hip Power, Ground Mobility,
+  // Positional Escape." "Hip Power" → explosive_strength, directly
+  // grounded by "# Biomechanical Profile — Rate of Force Development:
+  // High", "# Velocity Profile: Explosive" and the "Explosive Bridge"
+  // progression — a genuine, textually-strong match, not a stretch.
+  // "Ground Mobility" → mobility. "Positional Escape" excluded (generic
+  // combat-specific concept, matching the "Positional Recovery" exclusion
+  // already established for SHRIMPING above). "Secondary: Core Stability"
+  // → trunk_strength. "Neck Stability" → stability. "Movement
+  // Coordination" → coordination. "Mechanical Robustness" →
+  // tissue_capacity. "Ground Transition Efficiency" excluded (generic).
+  physicalQualities: ["explosive_strength", "mobility", "trunk_strength", "stability", "coordination", "tissue_capacity"],
+  // See block comment above for the full reasoning.
+  movementPatterns: ["mixed", "rotation"],
+  // "# Biomechanical Profile — Primary Force Vector: Vertical. Secondary
+  // Force Vector: Horizontal." No "Minimal" hedge — both are kept.
+  forceVectors: ["vertical", "horizontal"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [{ kind: "equipment", equipment: "mat" }],
+      },
+    ],
+  },
+  // "# Skill Requirement — Suitable For: Beginners, Intermediate,
+  // Advanced, Elite", corroborated by "# Neurological Profile — Skill
+  // Requirement: Beginner".
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  // "# Variations — ... Single-Leg Bridge" names single-leg execution as
+  // a documented but non-default variation — the bilateral base form is
+  // the default, matching this catalog's established "variations aren't
+  // the base form" discipline.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Gluteus Maximus, Hamstrings,
+  // Erector Spinae, Core" → hip (Gluteus Maximus), thigh (Hamstrings),
+  // abdomen (Erector Spinae, Core — matching FARMER_CARRY's own
+  // established "Spinal Stabilizers" → abdomen trunk-muscle convention).
+  bodyRegionsLoaded: ["hip", "thigh", "abdomen"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute cervical injury.", region: "neck", prohibitedPatterns: ["mixed", "rotation"], absolute: true },
+    { description: "Acute lumbar injury.", region: "lumbar_spine", prohibitedPatterns: ["mixed", "rotation"], absolute: true },
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["mixed", "rotation"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Low. Mechanical Fatigue:
+    // Low. Metabolic Fatigue: Low." Per-dimension vocabulary never uses
+    // "Very Low" — baseline Low=1, matching TECHNICAL_STAND_UP's/
+    // SHRIMPING's own identical resolution.
+    types: [],
+    neural: 1,
+    muscular: 1,
+    connectiveTissue: 1, // inferred from "Mechanical Fatigue: Low"
+    metabolic: 1,
+    technical: 1, // fallback from "Skill Requirement: Beginner"
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Ground bridging
+  // drills effectively improve hip power, posterior-chain activation,
+  // movement coordination and positional escape mechanics..." — mapped to
+  // "Level 1 — Scientific consensus".
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star — a
+  // strikingly low striking-sport profile (Boxing 1 star, matching
+  // SHRIMPING's own identical rating) alongside a maximal grappling
+  // profile, the clearest discipline-specificity split documented in this
+  // batch.
+  combatSportRelevance: {
+    boxing: 1,
+    kickboxing: 2,
+    muay_thai: 2,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Progressions" names "Bridge to Technical Stand-Up" — the same
+  // compound-drill-name pattern already excluded for SHRIMPING's own
+  // "Shrimp to Technical Stand-Up" above, not a standalone substitute
+  // reference. "# Regressions" (Static Bridge, Segmented Bridge, Glute
+  // Bridge, Hip Lift) name no exercise with its own chapter/catalog id in
+  // this repository — "Glute Bridge"/"Hip Lift" are documented regressions
+  // of THIS exercise, not separate catalog entries.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Turkish Get-Up
+// Source: 50-exercises/40_TURKISH_GET_UP
+// -----------------------------------------------------------------------------
+
+/**
+ * Fifth and final entry of this batch. No `exercisePrescriptionRegistry.ts`
+ * entry exists for `turkish_get_up` (confirmed by direct search) — a known
+ * limitation, documented here without modifying that registry.
+ *
+ * Central business question for this entry, explicitly flagged before
+ * writing began: "# Equipment Requirements — Required: Kettlebell, or
+ * Dumbbell. Optional: Sandbag, Barbell." A genuine literal "or" in the
+ * Required heading, matching CHEST_SUPPORTED_ROW's own established
+ * precedent in Lot 2 — `any_of[kettlebell, dumbbell]`. "# Regressions —
+ * Segmented Get-Up, Bodyweight Get-Up, Half Get-Up" lists "Bodyweight
+ * Get-Up" as a documented REGRESSION, not the base/default form — unlike
+ * BULGARIAN_SPLIT_SQUAT in Lot 1 (where the bodyweight variant WAS the
+ * base form), the loaded version is this exercise's own canonical
+ * identity, and the requirement genuinely gates on real load.
+ *
+ * Notably, unlike TECHNICAL_STAND_UP/SHRIMPING/BRIDGING above (all of
+ * which explicitly require a Mat), this fiche names NO mat anywhere —
+ * not even as Optional (checked directly). This is preserved as a
+ * faithful, real textual difference rather than "corrected" for
+ * consistency with the other ground-transition entries in this batch.
+ *
+ * DOCUMENTED, DELIBERATE UPWARD ADJUSTMENT: "# Skill Requirement:
+ * Intermediate" is the plain, unhedged word, which this catalog's
+ * established convention would normally map to minimumTechnicalLevel 3 /
+ * "moderate". This entry deliberately departs from that default mapping:
+ * "# Neurological Profile — Motor Complexity ★★★★★, Coordination
+ * Requirement ★★★★★, Balance Requirement ★★★★★, ... Learning Curve: Long"
+ * — the FIRST "Long" learning curve encountered anywhere in this
+ * migration (every other exercise so far tops out at "Moderate") — and
+ * "Mechanical Demand ★★★★★"/"Neuromuscular Demand ★★★★★" are both maxed,
+ * an unprecedented density of 5-star ratings. "# Athlete Suitability —
+ * Suitable For: Intermediate, Advanced, Elite. Beginners after technical
+ * instruction" also notably excludes Beginners from the direct list,
+ * unlike every other exercise in this batch. Mapped to
+ * minimumTechnicalLevel 4 / "high" — a conservative, safety-oriented
+ * upward rounding directly grounded in this convergent evidence, the same
+ * kind of adjustment already established for MED_BALL_SCOOP_TOSS
+ * (rounding "Low to Moderate" up) and DRAGON_FLAG (Level 5 in 62_CORE) —
+ * not an invented constraint.
+ */
+export const TURKISH_GET_UP: ExerciseDefinition = {
+  id: "turkish_get_up",
+  name: "Turkish Get-Up",
+  module: "movement",
+  // "# Primary Classification: Integrated Athletic Movement" — a
+  // genuinely different framing from TECHNICAL_STAND_UP/SHRIMPING/
+  // BRIDGING's own literal "Combat-Specific Movement" wording (this fiche
+  // never uses that phrase) — `primaryAdaptation: "movement"` is used
+  // instead of `"specific_skill"`, matching BEAR_CRAWL's own resolution
+  // for general athletic-development framing.
+  primaryAdaptation: "movement",
+  // "# Capability Mapping — Primary: Whole-Body Coordination, Shoulder
+  // Stability, Core Stability" → coordination, stability, trunk_strength.
+  // "Secondary: Mobility" → mobility. "Balance" → balance. "Movement
+  // Efficiency" excluded (generic). "Robustness" → tissue_capacity (the
+  // closest structural/connective-capacity concept for a bare "Robustness"
+  // claim). "Motor Control" → coordination (already listed, redundant).
+  physicalQualities: ["coordination", "stability", "trunk_strength", "mobility", "balance", "tissue_capacity"],
+  // "# Movement Pattern — Primary: Ground-to-Standing Transition" — the
+  // same primary pattern as TECHNICAL_STAND_UP, resolved identically to
+  // `mixed` (see that entry's own block comment for the full reasoning).
+  // "Secondary: Shoulder Stabilization, Hip Extension, Lunge, Rotation,
+  // Brace, Carry" → isometric (from Brace), rotation (exact match), carry
+  // (exact match, explicitly named), squat (from "Lunge" — a
+  // unilateral, split-stance knee-bend pattern with no dedicated
+  // MovementPattern value of its own, resolved to the closest generic
+  // match, the same resolution already used for BULGARIAN_SPLIT_SQUAT's
+  // own "Split Squat" in Lot 1). "Shoulder Stabilization" is
+  // joint-action-level detail already captured via `physicalQualities`.
+  movementPatterns: ["mixed", "isometric", "rotation", "carry", "squat"],
+  // "# Biomechanical Profile — Primary Force Vector: Multi-Directional" →
+  // mixed (the same direct, literal match already used for
+  // TECHNICAL_STAND_UP above and WRIST_STRENGTHENING/NECK_TRAINING in Lot
+  // 4).
+  forceVectors: ["mixed"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "any_of",
+        items: [
+          { kind: "equipment", equipment: "kettlebell" },
+          { kind: "equipment", equipment: "dumbbell" },
+        ],
+      },
+    ],
+  },
+  // See block comment above for the full reasoning behind this deliberate
+  // upward adjustment.
+  minimumTechnicalLevel: 4,
+  complexity: "high",
+  // "# Movement Context — ... Unilateral" (explicit).
+  unilateral: true,
+  // "# Muscular Profile — Primary Muscles: Core, Gluteus Maximus,
+  // Quadriceps, Deltoids, Rotator Cuff, Obliques" → abdomen (Core,
+  // Obliques), hip (Gluteus Maximus), thigh (Quadriceps), shoulder
+  // (Deltoids, Rotator Cuff).
+  bodyRegionsLoaded: ["abdomen", "hip", "thigh", "shoulder"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["mixed", "isometric", "rotation", "carry", "squat"], absolute: true },
+    { description: "Acute wrist injury.", region: "wrist", prohibitedPatterns: ["mixed", "isometric", "rotation", "carry", "squat"], absolute: true },
+    { description: "Acute hip injury.", region: "hip", prohibitedPatterns: ["mixed", "isometric", "rotation", "carry", "squat"], absolute: true },
+    { description: "Acute lumbar injury.", region: "lumbar_spine", prohibitedPatterns: ["mixed", "isometric", "rotation", "carry", "squat"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: Low. Metabolic Fatigue: Low. Overall Fatigue Cost: Low."
+    types: [],
+    neural: 2,
+    muscular: 1,
+    connectiveTissue: 1, // inferred from "Mechanical Fatigue: Low"
+    metabolic: 1,
+    technical: 4, // fallback from the deliberately adjusted minimumTechnicalLevel 4 (see block comment above)
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★☆. ... although direct
+  // evidence in elite combat athletes remains more limited than for
+  // traditional strength exercises." The FIRST 4-star, explicitly hedged
+  // rating outside Lot 4 (matching TIBIALIS_RAISE's/WRIST_STRENGTHENING's
+  // own identical resolution) — mapped to "Level 2 — Expert practice", not
+  // "Level 1".
+  evidenceLevel: "level_2",
+  // "# Transfer to Combat Sports" table, quoted star-for-star — a maximal
+  // 5-star rating across every discipline, matching
+  // ROTATOR_CUFF_TRAINING's/WRIST_STRENGTHENING's own identical uniform
+  // profile in Lot 4.
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" (Segmented Get-Up, Bodyweight Get-Up, Half Get-Up)
+  // name no distinct catalog exercise — "Bodyweight Get-Up" is the
+  // unloaded regression of this same exercise, not a separate entry (see
+  // block comment above).
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -9136,4 +9831,9 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   ROTATOR_CUFF_TRAINING,
   WRIST_STRENGTHENING,
   NECK_TRAINING,
+  TECHNICAL_STAND_UP,
+  BEAR_CRAWL,
+  SHRIMPING,
+  BRIDGING,
+  TURKISH_GET_UP,
 ];

@@ -22,8 +22,10 @@ import {
   AB_WHEEL,
   BACK_SQUAT,
   BARBELL_ROW,
+  BEAR_CRAWL,
   BENCH_PRESS,
   BOX_JUMP,
+  BRIDGING,
   BROAD_JUMP,
   BULGARIAN_SPLIT_SQUAT,
   CHEST_SUPPORTED_ROW,
@@ -68,13 +70,16 @@ import {
   ROPE_PULL,
   ROTATOR_CUFF_TRAINING,
   SANDBAG_CARRY,
+  SHRIMPING,
   SINGLE_LEG_HOP,
   SOLEUS_RAISE,
   SPLIT_SQUAT_JUMP,
   SUITCASE_CARRY,
+  TECHNICAL_STAND_UP,
   TIBIALIS_RAISE,
   TOWEL_PULL_UP,
   TRAP_BAR_DEADLIFT,
+  TURKISH_GET_UP,
   WEIGHTED_PULL_UP,
   WRIST_STRENGTHENING,
   ZERCHER_CARRY,
@@ -9030,5 +9035,492 @@ describe("Lot 4 — Chaine posterieure et robustness — Exercise Requirements M
       }),
     });
     expect(checkExerciseEligibility(WEIGHTED_PULL_UP, weightedPullUpInput).eligible).toBe(true);
+  });
+});
+
+
+describe("Lot 5 — Ground movement et transitions — Exercise Requirements Model batch integration", () => {
+  const LOT5_EXERCISES = [
+    { exercise: TECHNICAL_STAND_UP, id: "technical_stand_up" },
+    { exercise: BEAR_CRAWL, id: "bear_crawl" },
+    { exercise: SHRIMPING, id: "shrimping" },
+    { exercise: BRIDGING, id: "bridging" },
+    { exercise: TURKISH_GET_UP, id: "turkish_get_up" },
+  ] as const;
+
+  test.each(LOT5_EXERCISES)("$id — 1. exists in the catalog with the expected id", ({ exercise, id }) => {
+    expect(EXERCISE_KNOWLEDGE_BASE).toContain(exercise);
+    expect(exercise.id).toBe(id);
+  });
+
+  test("2. all five ids are unique within the catalog, and no prior id (e.g. nordic_hamstring_curl) is duplicated", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const { id } of LOT5_EXERCISES) {
+      expect(ids.filter((existingId) => existingId === id)).toHaveLength(1);
+    }
+    expect(ids.filter((existingId) => existingId === "nordic_hamstring_curl")).toEqual(["nordic_hamstring_curl"]);
+  });
+
+  test.each(LOT5_EXERCISES)(
+    "$id — 3. respects the coexistence invariant: requiredEquipment is empty, optionalEquipment is absent",
+    ({ exercise }) => {
+      expect(exercise.requiredEquipment).toEqual([]);
+      expect(exercise.optionalEquipment).toBeUndefined();
+      expect(validateRequirementsCoexistenceInvariant(exercise)).toBeNull();
+      expect(validateExerciseRequirementsStructure(exercise.requirements!)).toEqual([]);
+    },
+  );
+
+  test("4. the default catalog used by runEngine(input) now also contains all five Lot 5 ids", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    for (const { id } of LOT5_EXERCISES) {
+      expect(ids).toContain(id);
+    }
+  });
+
+  test.each(LOT5_EXERCISES)("$id — 5. never mutates the exercise or the input it is given during evaluation", ({ exercise }) => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "mat" }, { type: "kettlebell" }, { type: "dumbbell" }],
+        floorSafe: true,
+        availableSpace: "large",
+      }),
+    });
+    const exerciseSnapshot = structuredClone(exercise);
+    const inputSnapshot = structuredClone(input);
+
+    checkExerciseEligibility(exercise, input);
+
+    expect(exercise).toEqual(exerciseSnapshot);
+    expect(input).toEqual(inputSnapshot);
+  });
+
+  describe("TECHNICAL_STAND_UP", () => {
+    test("6. eligible with a mat", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "mat" }] }),
+      });
+
+      const result = checkExerciseEligibility(TECHNICAL_STAND_UP, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("7. ineligible without a mat", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(TECHNICAL_STAND_UP, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("8. no dependency on space, floor safety (beyond the mat itself), jumping, throwing, a wall or a partner — no separate floor_safe or sufficient_space atom is documented", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "mat" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(TECHNICAL_STAND_UP, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("9. biomechanical fields match the canonical documentation", () => {
+      expect(TECHNICAL_STAND_UP.physicalQualities).toEqual(["coordination", "balance", "trunk_strength", "mobility"]);
+      expect(TECHNICAL_STAND_UP.movementPatterns).toEqual(["mixed", "locomotion", "isometric"]);
+      expect(TECHNICAL_STAND_UP.forceVectors).toEqual(["mixed"]);
+      expect(TECHNICAL_STAND_UP.unilateral).toBe(false);
+      expect(TECHNICAL_STAND_UP.bodyRegionsLoaded).toEqual(["abdomen", "hip", "thigh", "shoulder", "upper_arm"]);
+      expect(TECHNICAL_STAND_UP.complexity).toBe("low");
+      expect(TECHNICAL_STAND_UP.minimumTechnicalLevel).toBe(1);
+      expect(TECHNICAL_STAND_UP.evidenceLevel).toBe("level_1");
+      expect(TECHNICAL_STAND_UP.primaryAdaptation).toBe("specific_skill");
+    });
+  });
+
+  describe("BEAR_CRAWL", () => {
+    test("10. eligible with no declared equipment and large space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [], availableSpace: "large" }),
+      });
+
+      const result = checkExerciseEligibility(BEAR_CRAWL, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("11. ineligible when available space is below the documented minimum (large)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [], availableSpace: "moderate" }),
+      });
+
+      const result = checkExerciseEligibility(BEAR_CRAWL, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+    });
+
+    test("12. no dependency on floor safety, jumping, throwing, a wall or a partner — no floor_safe atom is documented", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "large",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(BEAR_CRAWL, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("13. biomechanical fields match the canonical documentation", () => {
+      expect(BEAR_CRAWL.physicalQualities).toEqual([
+        "coordination",
+        "trunk_strength",
+        "stability",
+        "general_work_capacity",
+        "tissue_capacity",
+      ]);
+      expect(BEAR_CRAWL.movementPatterns).toEqual(["locomotion", "isometric"]);
+      expect(BEAR_CRAWL.forceVectors).toEqual(["horizontal", "vertical"]);
+      expect(BEAR_CRAWL.unilateral).toBe(false);
+      expect(BEAR_CRAWL.bodyRegionsLoaded).toEqual(["abdomen", "shoulder", "thigh", "hip"]);
+      expect(BEAR_CRAWL.complexity).toBe("low");
+      expect(BEAR_CRAWL.minimumTechnicalLevel).toBe(1);
+      expect(BEAR_CRAWL.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("SHRIMPING", () => {
+    test("14. eligible with a mat", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "mat" }] }),
+      });
+
+      const result = checkExerciseEligibility(SHRIMPING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("15. ineligible without a mat", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(SHRIMPING, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("16. no dependency on space, floor safety (beyond the mat itself), jumping, throwing, a wall or a partner — solo-executable, no partner requirement", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "mat" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(SHRIMPING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("17. biomechanical fields match the canonical documentation", () => {
+      expect(SHRIMPING.physicalQualities).toEqual(["mobility", "coordination", "trunk_strength", "tissue_capacity"]);
+      expect(SHRIMPING.movementPatterns).toEqual(["mixed", "rotation", "locomotion", "isometric"]);
+      expect(SHRIMPING.forceVectors).toEqual(["horizontal", "rotational"]);
+      expect(SHRIMPING.unilateral).toBe(false);
+      expect(SHRIMPING.bodyRegionsLoaded).toEqual(["abdomen", "hip", "thigh"]);
+      expect(SHRIMPING.complexity).toBe("low");
+      expect(SHRIMPING.minimumTechnicalLevel).toBe(1);
+      expect(SHRIMPING.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("BRIDGING", () => {
+    test("18. eligible with a mat", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "mat" }] }),
+      });
+
+      const result = checkExerciseEligibility(BRIDGING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("19. ineligible without a mat", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(BRIDGING, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("20. no dependency on space, floor safety (beyond the mat itself), jumping, throwing, a wall or a partner, and no load is required", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "mat" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(BRIDGING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("21. biomechanical fields match the canonical documentation", () => {
+      expect(BRIDGING.physicalQualities).toEqual([
+        "explosive_strength",
+        "mobility",
+        "trunk_strength",
+        "stability",
+        "coordination",
+        "tissue_capacity",
+      ]);
+      expect(BRIDGING.movementPatterns).toEqual(["mixed", "rotation"]);
+      expect(BRIDGING.forceVectors).toEqual(["vertical", "horizontal"]);
+      expect(BRIDGING.unilateral).toBe(false);
+      expect(BRIDGING.bodyRegionsLoaded).toEqual(["hip", "thigh", "abdomen"]);
+      expect(BRIDGING.complexity).toBe("low");
+      expect(BRIDGING.minimumTechnicalLevel).toBe(1);
+      expect(BRIDGING.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("TURKISH_GET_UP", () => {
+    test("22. eligible with a kettlebell alone (one of two any_of alternatives)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "kettlebell" }] }),
+      });
+
+      const result = checkExerciseEligibility(TURKISH_GET_UP, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("23. eligible with a dumbbell alone (the other any_of alternative)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "dumbbell" }] }),
+      });
+
+      const result = checkExerciseEligibility(TURKISH_GET_UP, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("24. ineligible without a kettlebell or dumbbell — the documented bodyweight get-up is a regression, not this exercise's base form", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(TURKISH_GET_UP, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("25. no dependency on space, floor safety, jumping, throwing, a wall or a partner — unlike TECHNICAL_STAND_UP/SHRIMPING/BRIDGING, no mat is documented at all", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "kettlebell" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(TURKISH_GET_UP, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("26. biomechanical fields match the canonical documentation", () => {
+      expect(TURKISH_GET_UP.physicalQualities).toEqual([
+        "coordination",
+        "stability",
+        "trunk_strength",
+        "mobility",
+        "balance",
+        "tissue_capacity",
+      ]);
+      expect(TURKISH_GET_UP.movementPatterns).toEqual(["mixed", "isometric", "rotation", "carry", "squat"]);
+      expect(TURKISH_GET_UP.forceVectors).toEqual(["mixed"]);
+      expect(TURKISH_GET_UP.unilateral).toBe(true);
+      expect(TURKISH_GET_UP.bodyRegionsLoaded).toEqual(["abdomen", "hip", "thigh", "shoulder"]);
+      // The only entry in this batch with a deliberately adjusted, elevated technical level.
+      expect(TURKISH_GET_UP.complexity).toBe("high");
+      expect(TURKISH_GET_UP.minimumTechnicalLevel).toBe(4);
+      expect(TURKISH_GET_UP.evidenceLevel).toBe("level_2");
+    });
+  });
+
+  describe("business distinctions", () => {
+    test("27. TECHNICAL_STAND_UP vs. TURKISH_GET_UP: both a ground-to-standing transition, but distinct equipment, technical level and evidence rating", () => {
+      // Both share the same primary movement-pattern resolution (mixed, from the identical
+      // "Ground-to-Standing Transition" primary pattern documented in both fiches).
+      expect(TECHNICAL_STAND_UP.movementPatterns).toContain("mixed");
+      expect(TURKISH_GET_UP.movementPatterns).toContain("mixed");
+
+      // TECHNICAL_STAND_UP requires only a mat; TURKISH_GET_UP requires a real external load and
+      // documents no mat at all.
+      const standUpEquipment = TECHNICAL_STAND_UP.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      const getUpEquipment = TURKISH_GET_UP.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(standUpEquipment).toEqual(["mat"]);
+      expect(getUpEquipment).toEqual(expect.arrayContaining(["kettlebell", "dumbbell"]));
+      expect(getUpEquipment).not.toContain("mat");
+
+      // TURKISH_GET_UP is markedly more technically demanding.
+      expect(TURKISH_GET_UP.minimumTechnicalLevel).toBeGreaterThan(TECHNICAL_STAND_UP.minimumTechnicalLevel);
+      expect(TURKISH_GET_UP.unilateral).toBe(true);
+      expect(TECHNICAL_STAND_UP.unilateral).toBe(false);
+    });
+
+    test("28. BEAR_CRAWL vs. static core exercises: continuous displacement, not a fixed position", () => {
+      expect(BEAR_CRAWL.movementPatterns).toContain("locomotion");
+      expect(AB_WHEEL.movementPatterns).not.toContain("locomotion");
+      expect(HOLLOW_BODY_HOLD.movementPatterns).not.toContain("locomotion");
+
+      // BEAR_CRAWL genuinely requires a large, quantified travel distance ("large"); the static
+      // HOLLOW_BODY_HOLD's own space requirement (from 62_CORE) tops out at the lowest tier
+      // ("very_limited"), reflecting a single stationary position rather than real displacement.
+      const bearCrawlSpace = BEAR_CRAWL.requirements!.required
+        .flatMap((clause) => clause.items)
+        .find((atom) => atom.kind === "environment" && atom.capability === "sufficient_space");
+      const hollowBodyHoldSpace = HOLLOW_BODY_HOLD.requirements!.required
+        .flatMap((clause) => clause.items)
+        .find((atom) => atom.kind === "environment" && atom.capability === "sufficient_space");
+      expect(bearCrawlSpace).toMatchObject({ minimumSpace: "large" });
+      expect(hollowBodyHoldSpace).toMatchObject({ minimumSpace: "very_limited" });
+    });
+
+    test("29. SHRIMPING vs. BRIDGING: both mat-required combat-specific ground movements, but distinct primary force vector and capability emphasis", () => {
+      expect(SHRIMPING.requirements).toEqual(BRIDGING.requirements);
+      expect(SHRIMPING.primaryAdaptation).toBe("specific_skill");
+      expect(BRIDGING.primaryAdaptation).toBe("specific_skill");
+
+      // SHRIMPING is primarily horizontal ground displacement; BRIDGING is primarily a vertical,
+      // explosive hip-drive movement.
+      expect(SHRIMPING.forceVectors![0]).toBe("horizontal");
+      expect(BRIDGING.forceVectors![0]).toBe("vertical");
+
+      // Only BRIDGING documents explosive_strength (grounded in its own "Rate of Force
+      // Development: High" and "Explosive Bridge" progression); only SHRIMPING documents mobility
+      // as its own primary capability (Ground Mobility + Hip Mobility).
+      expect(BRIDGING.physicalQualities).toContain("explosive_strength");
+      expect(SHRIMPING.physicalQualities).not.toContain("explosive_strength");
+    });
+
+    test("30. ground locomotion vs. ground-to-standing transition: TURKISH_GET_UP documents no locomotion component at all, unlike the pure ground-locomotion exercises in this batch", () => {
+      for (const groundLocomotionExercise of [BEAR_CRAWL, SHRIMPING]) {
+        expect(groundLocomotionExercise.movementPatterns).toContain("locomotion");
+      }
+      // TECHNICAL_STAND_UP's own fiche explicitly names "Locomotion" as a secondary movement
+      // pattern (in addition to its own primary ground-to-standing transition) — it genuinely
+      // documents locomotion, unlike TURKISH_GET_UP, whose own fiche never names it at all.
+      expect(TECHNICAL_STAND_UP.movementPatterns).toContain("locomotion");
+      expect(TURKISH_GET_UP.movementPatterns).not.toContain("locomotion");
+    });
+
+    test("31. equipment-free exercises vs. loaded TURKISH_GET_UP: only TURKISH_GET_UP genuinely requires an external implement in this batch", () => {
+      expect(BEAR_CRAWL.requirements!.required.flatMap((c) => c.items).some((atom) => atom.kind === "equipment")).toBe(
+        false,
+      );
+      for (const matOnlyExercise of [TECHNICAL_STAND_UP, SHRIMPING, BRIDGING]) {
+        const equipment = matOnlyExercise
+          .requirements!.required.flatMap((c) => c.items)
+          .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+          .map((atom) => atom.equipment);
+        expect(equipment).toEqual(["mat"]);
+      }
+
+      const getUpEquipment = TURKISH_GET_UP.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(getUpEquipment.length).toBeGreaterThan(0);
+      expect(getUpEquipment).not.toContain("mat");
+    });
+  });
+
+  test("32. adding this batch never changes the previously integrated exercises, including NORDIC_HAMSTRING_CURL and BENCH_PRESS", () => {
+    const nordicInput = makeValidInput({
+      environment: makeEnvironment({ availableEquipment: [{ type: "other" }], partnerAvailable: false }),
+    });
+    expect(checkExerciseEligibility(NORDIC_HAMSTRING_CURL, nordicInput).eligible).toBe(true);
+
+    const benchPressInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "bench" }, { type: "rack" }, { type: "plates" }],
+      }),
+    });
+    expect(checkExerciseEligibility(BENCH_PRESS, benchPressInput).eligible).toBe(true);
+
+    const abWheelInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "other" }],
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(AB_WHEEL, abWheelInput).eligible).toBe(true);
+
+    const farmerCarryInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "dumbbell" }],
+        availableSpace: "large",
+      }),
+    });
+    expect(checkExerciseEligibility(FARMER_CARRY, farmerCarryInput).eligible).toBe(true);
   });
 });
