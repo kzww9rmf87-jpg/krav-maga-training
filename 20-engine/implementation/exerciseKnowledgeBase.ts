@@ -2849,6 +2849,264 @@ export const HANG_HIGH_PULL: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Hang Power Clean
+// Source: 50-exercises/64_POWER/12_HANG_POWER_CLEAN.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Third entry from the `64_POWER` chapter. No prescription-registry entry
+ * exists for this exercise yet (`exercisePrescriptionRegistry.ts` has not
+ * integrated `hang_power_clean` — confirmed by direct search), so unlike
+ * every other entry in this file there is no independent equipment/
+ * laterality corroboration available from that layer; the canonical
+ * documentation is the sole source here. A superseded root-level
+ * `50-exercises/25_HANG_POWER_CLEAN` document also exists (it does carry
+ * a per-sport "Transfer to Combat Sports" table this canonical chapter
+ * does not — the same situation as every other superseded fiche in this
+ * file), and the same project-wide convention (the numbered `64_POWER`
+ * chapter version is authoritative) is followed here too.
+ *
+ * Deliberately NOT copied from `HANG_HIGH_PULL` despite beginning from the
+ * identical hang position — the defining difference is the CATCH: "The
+ * Hang Power Clean differs from the Hang High Pull because the bar is
+ * received on the shoulders in a front-rack position rather than
+ * continued upward with the elbows." `"front rack"` here is an
+ * anatomical/postural term (where the bar rests across the front of the
+ * shoulders during the catch) — it is NOT the physical equipment item
+ * `rack` (a stand used to hold a barbell at a starting height), and the
+ * two must not be confused. Several documented properties diverge from
+ * `HANG_HIGH_PULL` accordingly:
+ *
+ * - "Equipment Requirements — Primary Equipment: Barbell, Weight plates,
+ *   Secure collars." No physical `rack` equipment is named anywhere in
+ *   this chapter (checked directly) — the exercise begins and ends in the
+ *   hang, exactly like `HANG_HIGH_PULL`, and the front-rack catch is a
+ *   body position, not a piece of equipment to load or unload from. No
+ *   `rack` equipment atom is added, matching `HANG_HIGH_PULL`'s own
+ *   identical equipment set exactly (`barbell` + `plates`, no `rack`,
+ *   `collars` omitted for lacking an `EquipmentType` value).
+ * - No surface-safety language exists anywhere in this chapter either
+ *   (checked directly — zero occurrences of "surface", "non-slip",
+ *   "stable floor", "flat" or "slippery"), matching `HANG_HIGH_PULL`'s
+ *   own identical, checked absence — `floor_safe` is not added.
+ * - "Space Requirements — Minimum Space: Enough room to stand, extend and
+ *   receive the bar in the front rack without obstruction" mirrors
+ *   `HANG_HIGH_PULL`'s own "Enough room to stand and move the bar
+ *   vertically without obstruction" almost verbatim, with the added catch
+ *   clause describing a postural change within the same standing station
+ *   rather than a materially larger footprint — `minimumSpace: "limited"`
+ *   is kept the same as `HANG_HIGH_PULL`, absent any genuine
+ *   distinguishing magnitude signal (neither fiche uses a quantifier word
+ *   like "Moderate" the way `PUSH_PRESS`'s own Space Requirements does).
+ * - `reactive_strength`, `deceleration` and `stability` are all added
+ *   here — none were added for `HANG_HIGH_PULL`, which has no catch phase
+ *   to ground them: "High reactive and deceleration demand during the
+ *   catch", "Deceleration and Receiving Skill" (Capability Mapping's own
+ *   Primary Capability Module), "Positional Stability Under Load" /
+ *   "Front-Rack Stability" (Secondary Adaptations).
+ * - `movementPatterns` uses `"squat"` for the catch (the doc's own
+ *   Biomechanical Profile and Execution Standard repeatedly name a
+ *   literal "quarter-squat" receiving position), not `"vertical_pull"` —
+ *   this fiche's own dedicated "# Movement Pattern" section names "Rapid
+ *   Turnover" and "Receiving and Deceleration" instead of "Vertical
+ *   Pull" for the upper-body action (unlike `HANG_HIGH_PULL`'s own
+ *   Movement Pattern section, which does name "Vertical Pull"), so
+ *   `vertical_pull` is deliberately NOT carried over here.
+ * - Skill Requirement and Technical Complexity are both a clean, explicit
+ *   "High" — but the same chapter repeatedly and explicitly states this
+ *   exercise EXCEEDS `HANG_HIGH_PULL`'s own complexity ("more technically
+ *   demanding than either the Hang High Pull or the Jump Shrug", "the
+ *   highest technical-readiness threshold in the Power category", "the
+ *   highest-complexity exercise in the Power category, exceeding the
+ *   Hang High Pull, Push Press and Jump Shrug"). A plain word-for-word
+ *   "High" → `minimumTechnicalLevel: 4` mapping (identical to
+ *   `HANG_HIGH_PULL`'s own rating) would erase this fiche's own explicit,
+ *   repeated, structured claim that the two are NOT equivalent in
+ *   difficulty — so `complexity: "very_high"` / `minimumTechnicalLevel: 5`
+ *   is used instead, the first use of this file's top complexity tier,
+ *   directly earned by this specific comparative documentation rather
+ *   than assumed.
+ * - No ad hoc "catch"/"turnover"/"receiving" capability is introduced
+ *   anywhere in this file — turnover speed, bar height, catch depth and
+ *   receiving mechanics remain entirely in this comment, the biomechanical
+ *   fields above and the (untouched) prescription layer, never in
+ *   `requirements`.
+ */
+export const HANG_POWER_CLEAN: ExerciseDefinition = {
+  id: "hang_power_clean",
+  name: "Hang Power Clean",
+  module: "power",
+  primaryAdaptation: "power",
+  // Secondary Classifications: "Explosive Strength" (exact label,
+  // appearing three times — the same recurring pattern as PUSH_PRESS's
+  // and HANG_HIGH_PULL's own chapters). Secondary Adaptations: "Rate of
+  // Force Development" (exact match). Neurological Profile: "High
+  // reactive and deceleration demand during the catch"; Velocity
+  // Profile: "maximal reactive speed during the turnover" (→
+  // reactive_strength — see the block comment above this export for why
+  // this diverges from HANG_HIGH_PULL). Secondary Adaptations: "Rapid
+  // Deceleration and Force Absorption"; Capability Mapping Primary:
+  // "Deceleration and Receiving Skill" (→ deceleration). Secondary
+  // Adaptations: "Positional Stability Under Load", "Front-Rack
+  // Stability"; Capability Mapping Secondary: "Trunk Stability" (→
+  // stability). Secondary Adaptations: "Trunk Stiffness" (→
+  // trunk_strength, matching HANG_HIGH_PULL's own identical mapping).
+  // "Grip Strength" appears twice (Secondary Adaptations, Capability
+  // Mapping Tertiary), matching HANG_HIGH_PULL's own identical inclusion
+  // (→ grip_strength). "Whole-Body Coordination" / "Intermuscular
+  // Coordination" / "Movement Coordination" (→ coordination). "Front-Rack
+  // Mobility" (Capability Mapping Secondary only, never listed as a
+  // Secondary Adaptation the way HANG_HIGH_PULL's "Grip Strength" is) is
+  // read as a prerequisite note, not a trained outcome quality, and is
+  // deliberately NOT added as `mobility` — no such distinction exists for
+  // any other Capability-Mapping-only item elsewhere in this file either.
+  // "Posterior-Chain Recruitment"/"Posterior-Chain Strength" and
+  // "Hip Extension Power"/"Lower-Body Propulsive Power"/"Athletic Timing"/
+  // "Strength-Speed"/"Weightlifting Derivative"/"Receiving Power" have no
+  // distinct counterpart beyond what is already listed or are
+  // region-specific notes captured by `bodyRegionsLoaded` instead.
+  physicalQualities: [
+    "explosive_strength",
+    "rate_of_force_development",
+    "reactive_strength",
+    "deceleration",
+    "stability",
+    "trunk_strength",
+    "grip_strength",
+    "coordination",
+  ],
+  // "# Movement Pattern" (a flat list): "Hip Hinge" (→ hinge, matching
+  // HANG_HIGH_PULL's own identical mapping), "Receiving and Deceleration"
+  // (→ squat — the doc's own Biomechanical Profile and Execution Standard
+  // both explicitly name a literal "quarter-squat" receiving position:
+  // "arriving in a quarter-squat...", "Absorb the impact with a
+  // coordinated bend of the hips, knees and ankles into a quarter-
+  // squat..."). "Explosive Triple Extension", "Rapid Turnover" and
+  // "Loaded Acceleration" have no MovementPattern counterpart. See the
+  // block comment above this export for why "vertical_pull" is
+  // deliberately NOT carried over from HANG_HIGH_PULL.
+  movementPatterns: ["hinge", "squat"],
+  // No dedicated "Force Vector" heading exists in this chapter (matching
+  // every other 64_POWER entry's prose-only Biomechanical Profile
+  // format), but the prose remains unambiguous: "The bar should travel
+  // vertically and remain close to the body throughout the extension",
+  // reinforced by "the bar drifts substantially away from the body during
+  // the pull" as its own Technical Failure Criterion.
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "barbell" },
+          { kind: "equipment", equipment: "plates" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "limited" },
+        ],
+      },
+    ],
+  },
+  // Skill Requirement: "Overall Skill Requirement: High". Technical
+  // Complexity — Complexity Rating: "High", but see the block comment
+  // above this export for why this maps to the top tier
+  // (minimumTechnicalLevel 5, complexity "very_high") rather than the
+  // same "high"/4 HANG_HIGH_PULL received for its own "Moderate to high"
+  // rating — this fiche's own repeated, explicit comparative claims
+  // ("exceeding the Hang High Pull, Push Press and Jump Shrug") require
+  // it.
+  minimumTechnicalLevel: 5,
+  complexity: "very_high",
+  // Movement Context: "Bilateral" (explicit).
+  unilateral: false,
+  // Muscular Profile Primary Contributors (Gluteus maximus, Quadriceps,
+  // Hamstrings, Trapezius, Deltoids) → hip, thigh, shoulder — the same
+  // region set HANG_HIGH_PULL earned, even though Deltoids is newly
+  // Primary here (reflecting the added front-rack catch load) and
+  // Trapezius already covers "shoulder" for both entries. Secondary/
+  // Stabilizing contributors (Calves, Spinal erectors, Latissimus dorsi,
+  // Rear deltoids, Forearm and hand musculature, Triceps brachii,
+  // Abdominal wall, Deep trunk musculature, Scapular stabilizers, Hip
+  // stabilizers, Foot and ankle stabilizers, Rotator cuff, Wrist flexors
+  // and extensors) are excluded, matching the precedent used throughout
+  // this file — "wrist" is not added despite the doc's extensive wrist-
+  // tolerance discussion, since Wrist flexors and extensors are only a
+  // Stabilizing Contributor, never Primary.
+  bodyRegionsLoaded: ["hip", "thigh", "shoulder"],
+  // "# Contraindications and Restrictions — Potential Contraindications:
+  // ...", quoted one item per source line. "Uncontrolled hypertension or
+  // medical restriction against high-intensity lifting" is trimmed to
+  // its specific, actionable half ("Uncontrolled hypertension"), matching
+  // HANG_HIGH_PULL's own identical treatment of the same recurring
+  // clause. The separate "Potential Restrictions" tier (Limited
+  // front-rack or wrist mobility, Limited ankle mobility, Poor
+  // posterior-chain tolerance, Low barbell experience, Insufficient
+  // trunk control, High concurrent lower-body fatigue, Recent heavy
+  // deadlift or sprint exposure, Shoulder discomfort during the catch
+  // position) is excluded entirely, matching the same two-tier discipline
+  // used throughout this file.
+  contraindications: [
+    { description: "Acute low-back pain.", prohibitedPatterns: ["hinge", "squat"], absolute: true },
+    { description: "Acute hamstring injury.", prohibitedPatterns: ["hinge", "squat"], absolute: true },
+    { description: "Acute hip, knee or ankle injury.", prohibitedPatterns: ["hinge", "squat"], absolute: true },
+    { description: "Acute shoulder, elbow or wrist pain.", prohibitedPatterns: ["hinge", "squat"], absolute: true },
+    { description: "Inability to achieve a stable front-rack position.", prohibitedPatterns: ["hinge", "squat"], absolute: true },
+    { description: "Severe grip limitation.", prohibitedPatterns: ["hinge", "squat"], absolute: true },
+    { description: "Inability to maintain a stable hinge position.", prohibitedPatterns: ["hinge", "squat"], absolute: true },
+    { description: "Uncontrolled hypertension.", prohibitedPatterns: ["hinge", "squat"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Physiological Cost" is the cleaner, more granular numeric
+    // source (same choice made throughout this file), corroborated by
+    // "# Fatigue Profile"'s own dimension names. `metabolic` uses the
+    // "Low to moderate" range rating (2), not HANG_HIGH_PULL's plain
+    // "Low" (1) — this fiche's own Metabolic Cost is explicitly a wider
+    // range, reflecting the added turnover/catch/stand phases. `technical`
+    // is sourced from "Technical Fatigue Sensitivity: Very high" — the
+    // strongest fatigue-sensitivity language anywhere in this catalog,
+    // mapped to the ceiling rating (5), one full point above every other
+    // entry's own "High" → 4 mapping. `types` includes "impact": Technical
+    // Failure Criteria and Safety Profile both name "the catch produces a
+    // hard, uncontrolled collision with the shoulders" / "Bar collision
+    // with the shoulders, chin or chest". `types` includes "systemic":
+    // "Systemic Fatigue: Moderate when volume and load are controlled" is
+    // the exact same phrase HANG_HIGH_PULL's own fiche uses, with the
+    // same inclusion reasoning.
+    types: ["neural", "muscular", "connective_tissue", "technical", "impact", "systemic"],
+    neural: 4, // "Neurological Cost: High"
+    muscular: 4, // "Muscular Cost: Moderate to high" — higher than HANG_HIGH_PULL's own plain "Moderate" (3)
+    metabolic: 2, // "Metabolic Cost: Low to moderate when correctly programmed" — see comment above
+    connectiveTissue: 4, // "Joint Cost: Moderate to high, particularly at the wrists, shoulders and knees"
+    technical: 5, // "Technical Fatigue Sensitivity: Very high" — see comment above
+  },
+  // Same reasoning as every other entry: a real "# Evidence
+  // Classification" section exists ("Evidence Level: Moderate"), but
+  // there is still no documented crosswalk between this narrative rating
+  // and the engine's level_1/level_2/level_3 taxonomy. Left "unknown".
+  evidenceLevel: "unknown",
+  // combatSportRelevance intentionally omitted: no per-sport breakdown
+  // exists anywhere in this canonical chapter — only the aggregate
+  // "Combat Transfer" narrative and "Relative Transfer Score —
+  // Combat-Sport Physical Transfer: Moderate to high". The superseded
+  // root-level `50-exercises/25_HANG_POWER_CLEAN` document does carry a
+  // per-sport "Transfer to Combat Sports" table, but it is not this
+  // exercise's canonical documentation and is not used here (same
+  // situation as every other superseded fiche in this file).
+  // Most of this fiche's own Regression/Equivalent/Substitution Logic
+  // options ("Clean Pull from Hang", "Trap-Bar Jump", "Loaded Jump
+  // Squat", "Muscle Clean", "Tall-Catch Clean Drill") name no exercise
+  // with its own chapter/catalog id in this repository and are therefore
+  // not referenced below. The four substitutes below ARE each named
+  // explicitly in this fiche's own dedicated "Substitution Logic —
+  // Preferred substitutions by objective" subsection AND already have
+  // their own chapter here: "Hang High Pull" ("For explosive pulling
+  // power without a catch"), "Front Squat" ("For front-rack tolerance
+  // development" — `50-exercises/02_FRONT_SQUAT`, not yet integrated into
+  // this catalog but a confirmed, real chapter), "Broad Jump"/"Box Jump"
+  // ("For unloaded explosive power").
+  substitutionExerciseIds: ["hang_high_pull", "front_squat", "broad_jump", "box_jump"],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -2870,4 +3128,5 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   SPLIT_SQUAT_JUMP,
   PUSH_PRESS,
   HANG_HIGH_PULL,
+  HANG_POWER_CLEAN,
 ];

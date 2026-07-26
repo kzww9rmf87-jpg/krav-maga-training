@@ -25,6 +25,7 @@ import {
   DEPTH_JUMP,
   EXERCISE_KNOWLEDGE_BASE,
   HANG_HIGH_PULL,
+  HANG_POWER_CLEAN,
   KNEE_JUMP,
   LATERAL_BOUND,
   MED_BALL_CHEST_PASS,
@@ -3886,6 +3887,330 @@ describe("HANG_HIGH_PULL — Exercise Requirements Model pilot integration", () 
     checkExerciseEligibility(HANG_HIGH_PULL, input);
 
     expect(HANG_HIGH_PULL).toEqual(exerciseSnapshot);
+    expect(input).toEqual(inputSnapshot);
+  });
+});
+
+describe("HANG_POWER_CLEAN — Exercise Requirements Model pilot integration", () => {
+  test("1. the entry exists in the catalog", () => {
+    expect(EXERCISE_KNOWLEDGE_BASE).toContain(HANG_POWER_CLEAN);
+  });
+
+  test("2. has a unique identifier within the catalog", () => {
+    expect(HANG_POWER_CLEAN.id).toBe("hang_power_clean");
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  test("3. respects the coexistence invariant: requiredEquipment is empty, optionalEquipment is absent", () => {
+    expect(HANG_POWER_CLEAN.requiredEquipment).toEqual([]);
+    expect(HANG_POWER_CLEAN.optionalEquipment).toBeUndefined();
+    expect(validateRequirementsCoexistenceInvariant(HANG_POWER_CLEAN)).toBeNull();
+    expect(validateExerciseRequirementsStructure(HANG_POWER_CLEAN.requirements!)).toEqual([]);
+  });
+
+  test("4. eligible with a barbell, plates and sufficient space", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        availableSpace: "limited",
+      }),
+    });
+
+    const result = checkExerciseEligibility(HANG_POWER_CLEAN, input);
+
+    expect(result.eligible).toBe(true);
+    expect(result.rejectionReasons).toEqual([]);
+  });
+
+  test("5. ineligible without a barbell", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "plates" }],
+        availableSpace: "limited",
+      }),
+    });
+
+    const result = checkExerciseEligibility(HANG_POWER_CLEAN, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+  });
+
+  test("6. ineligible without plates", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }],
+        availableSpace: "limited",
+      }),
+    });
+
+    const result = checkExerciseEligibility(HANG_POWER_CLEAN, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+  });
+
+  test("7. ineligible when available space is below the documented minimum (limited)", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        availableSpace: "very_limited",
+      }),
+    });
+
+    const result = checkExerciseEligibility(HANG_POWER_CLEAN, input);
+
+    expect(result.eligible).toBe(false);
+    expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+  });
+
+  test("8. no dependency on a rack, a safe floor, jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        availableSpace: "limited",
+        floorSafe: false,
+        jumpingAllowed: false,
+        throwingAllowed: false,
+        usableWall: false,
+        partnerAvailable: false,
+      }),
+    });
+
+    const result = checkExerciseEligibility(HANG_POWER_CLEAN, input);
+
+    expect(result.eligible).toBe(true);
+    expect(result.rejectionReasons).toEqual([]);
+  });
+
+  test("9. is correctly distinguished from HANG_HIGH_PULL: same requirements shape, but the catch/receiving phase changes its biomechanical fields", () => {
+    // Same equipment/environment requirements shape (both begin from the hang, neither needs a rack or a documented surface)
+    expect(HANG_POWER_CLEAN.requirements).toEqual(HANG_HIGH_PULL.requirements);
+
+    // The catch is a squat-received position, not a continued pull
+    expect(HANG_POWER_CLEAN.movementPatterns).toContain("squat");
+    expect(HANG_POWER_CLEAN.movementPatterns).not.toContain("vertical_pull");
+    expect(HANG_HIGH_PULL.movementPatterns).toContain("vertical_pull");
+    expect(HANG_HIGH_PULL.movementPatterns).not.toContain("squat");
+
+    // Only the catch-bearing exercise earns receiving-related qualities
+    expect(HANG_POWER_CLEAN.physicalQualities).toContain("reactive_strength");
+    expect(HANG_POWER_CLEAN.physicalQualities).toContain("deceleration");
+    expect(HANG_POWER_CLEAN.physicalQualities).toContain("stability");
+    expect(HANG_HIGH_PULL.physicalQualities).not.toContain("reactive_strength");
+    expect(HANG_HIGH_PULL.physicalQualities).not.toContain("deceleration");
+    expect(HANG_HIGH_PULL.physicalQualities).not.toContain("stability");
+
+    // The documented receiving skill makes this the more complex exercise
+    expect(HANG_POWER_CLEAN.complexity).toBe("very_high");
+    expect(HANG_HIGH_PULL.complexity).toBe("high");
+    expect(HANG_POWER_CLEAN.minimumTechnicalLevel).toBeGreaterThan(HANG_HIGH_PULL.minimumTechnicalLevel);
+  });
+
+  test("10. biomechanical fields match the canonical documentation", () => {
+    expect(HANG_POWER_CLEAN.physicalQualities).toEqual([
+      "explosive_strength",
+      "rate_of_force_development",
+      "reactive_strength",
+      "deceleration",
+      "stability",
+      "trunk_strength",
+      "grip_strength",
+      "coordination",
+    ]);
+    expect(HANG_POWER_CLEAN.movementPatterns).toEqual(["hinge", "squat"]);
+    expect(HANG_POWER_CLEAN.forceVectors).toEqual(["vertical"]);
+    expect(HANG_POWER_CLEAN.unilateral).toBe(false);
+    expect(HANG_POWER_CLEAN.bodyRegionsLoaded).toEqual(["hip", "thigh", "shoulder"]);
+    expect(HANG_POWER_CLEAN.complexity).toBe("very_high");
+    expect(HANG_POWER_CLEAN.minimumTechnicalLevel).toBe(5);
+  });
+
+  test("11. adding this entry never changes the previously integrated exercises", () => {
+    const hangHighPullInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(HANG_HIGH_PULL, hangHighPullInput).eligible).toBe(true);
+
+    const pushPressInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }, { type: "rack" }],
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(PUSH_PRESS, pushPressInput).eligible).toBe(true);
+
+    const splitSquatJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(SPLIT_SQUAT_JUMP, splitSquatJumpInput).eligible).toBe(true);
+
+    const singleLegHopInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(SINGLE_LEG_HOP, singleLegHopInput).eligible).toBe(true);
+
+    const lateralBoundInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(LATERAL_BOUND, lateralBoundInput).eligible).toBe(true);
+
+    const kneeJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "knee_protection_pad" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(KNEE_JUMP, kneeJumpInput).eligible).toBe(true);
+
+    const broadJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(BROAD_JUMP, broadJumpInput).eligible).toBe(true);
+
+    const cmjInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [],
+        jumpingAllowed: true,
+        floorSafe: false,
+        availableSpace: "very_limited",
+      }),
+    });
+    expect(checkExerciseEligibility(COUNTERMOVEMENT_JUMP, cmjInput).eligible).toBe(true);
+
+    const boxJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "plyometric_box" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(BOX_JUMP, boxJumpInput).eligible).toBe(true);
+
+    const depthJumpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "plyometric_box" }],
+        jumpingAllowed: true,
+        floorSafe: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(DEPTH_JUMP, depthJumpInput).eligible).toBe(true);
+
+    const chestPassInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: true,
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_CHEST_PASS, chestPassInput).eligible).toBe(true);
+
+    const slamInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "slam_ball" }],
+        throwingAllowed: true,
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_SLAM, slamInput).eligible).toBe(true);
+
+    const overheadThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_OVERHEAD_THROW, overheadThrowInput).eligible).toBe(true);
+
+    const rotationalThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+        usableWall: true,
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_ROTATIONAL_THROW, rotationalThrowInput).eligible).toBe(true);
+
+    const scoopTossInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        availableSpace: "moderate",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_SCOOP_TOSS, scoopTossInput).eligible).toBe(true);
+
+    const shotPutThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_SHOT_PUT_THROW, shotPutThrowInput).eligible).toBe(true);
+
+    const reverseThrowInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "medicine_ball" }, { type: "open_space" }],
+        throwingAllowed: true,
+        floorSafe: true,
+        availableSpace: "open",
+      }),
+    });
+    expect(checkExerciseEligibility(MED_BALL_REVERSE_THROW, reverseThrowInput).eligible).toBe(true);
+  });
+
+  test("12. the default catalog used by runEngine(input) now also contains hang_power_clean", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(ids).toContain("hang_power_clean");
+  });
+
+  test("13. never mutates the exercise or the input it is given during evaluation", () => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+        availableSpace: "limited",
+      }),
+    });
+    const exerciseSnapshot = structuredClone(HANG_POWER_CLEAN);
+    const inputSnapshot = structuredClone(input);
+
+    checkExerciseEligibility(HANG_POWER_CLEAN, input);
+
+    expect(HANG_POWER_CLEAN).toEqual(exerciseSnapshot);
     expect(input).toEqual(inputSnapshot);
   });
 });
