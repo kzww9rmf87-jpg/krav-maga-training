@@ -38,11 +38,13 @@ import {
   DRAGON_FLAG,
   EXERCISE_KNOWLEDGE_BASE,
   FARMER_CARRY,
+  FOOTWORK_DRILLS,
   FRONT_RACK_CARRY,
   FRONT_SQUAT,
   HANG_HIGH_PULL,
   HANG_POWER_CLEAN,
   HANGING_LEG_RAISE,
+  HEAVY_BAG_POWER_INTERVALS,
   HIP_THRUST,
   HOLLOW_BODY_HOLD,
   JUMP_SHRUG,
@@ -70,6 +72,7 @@ import {
   ROPE_PULL,
   ROTATOR_CUFF_TRAINING,
   SANDBAG_CARRY,
+  SHADOW_BOXING,
   SHRIMPING,
   SINGLE_LEG_HOP,
   SOLEUS_RAISE,
@@ -9498,6 +9501,347 @@ describe("Lot 5 — Ground movement et transitions — Exercise Requirements Mod
       environment: makeEnvironment({ availableEquipment: [{ type: "other" }], partnerAvailable: false }),
     });
     expect(checkExerciseEligibility(NORDIC_HAMSTRING_CURL, nordicInput).eligible).toBe(true);
+
+    const benchPressInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "bench" }, { type: "rack" }, { type: "plates" }],
+      }),
+    });
+    expect(checkExerciseEligibility(BENCH_PRESS, benchPressInput).eligible).toBe(true);
+
+    const abWheelInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "other" }],
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(AB_WHEEL, abWheelInput).eligible).toBe(true);
+
+    const farmerCarryInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "dumbbell" }],
+        availableSpace: "large",
+      }),
+    });
+    expect(checkExerciseEligibility(FARMER_CARRY, farmerCarryInput).eligible).toBe(true);
+  });
+});
+
+
+describe("Lot 6 — Combat striking et deplacements — Exercise Requirements Model batch integration", () => {
+  const LOT6_EXERCISES = [
+    { exercise: HEAVY_BAG_POWER_INTERVALS, id: "heavy_bag_power_intervals" },
+    { exercise: SHADOW_BOXING, id: "shadow_boxing" },
+    { exercise: FOOTWORK_DRILLS, id: "footwork_drills" },
+  ] as const;
+
+  test.each(LOT6_EXERCISES)("$id — 1. exists in the catalog with the expected id", ({ exercise, id }) => {
+    expect(EXERCISE_KNOWLEDGE_BASE).toContain(exercise);
+    expect(exercise.id).toBe(id);
+  });
+
+  test("2. all three ids are unique within the catalog, and no prior id (e.g. turkish_get_up) is duplicated", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const { id } of LOT6_EXERCISES) {
+      expect(ids.filter((existingId) => existingId === id)).toHaveLength(1);
+    }
+    expect(ids.filter((existingId) => existingId === "turkish_get_up")).toEqual(["turkish_get_up"]);
+  });
+
+  test.each(LOT6_EXERCISES)(
+    "$id — 3. respects the coexistence invariant: requiredEquipment is empty, optionalEquipment is absent",
+    ({ exercise }) => {
+      expect(exercise.requiredEquipment).toEqual([]);
+      expect(exercise.optionalEquipment).toBeUndefined();
+      expect(validateRequirementsCoexistenceInvariant(exercise)).toBeNull();
+      // SHADOW_BOXING and FOOTWORK_DRILLS document no required equipment, environment or human
+      // assistance at all — `requirements` is genuinely omitted for those two.
+      if (exercise.requirements !== undefined) {
+        expect(validateExerciseRequirementsStructure(exercise.requirements)).toEqual([]);
+      }
+    },
+  );
+
+  test("4. the default catalog used by runEngine(input) now also contains all three Lot 6 ids", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    for (const { id } of LOT6_EXERCISES) {
+      expect(ids).toContain(id);
+    }
+  });
+
+  test.each(LOT6_EXERCISES)("$id — 5. never mutates the exercise or the input it is given during evaluation", ({ exercise }) => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "heavy_bag" }, { type: "other" }],
+        availableSpace: "large",
+      }),
+    });
+    const exerciseSnapshot = structuredClone(exercise);
+    const inputSnapshot = structuredClone(input);
+
+    checkExerciseEligibility(exercise, input);
+
+    expect(exercise).toEqual(exerciseSnapshot);
+    expect(input).toEqual(inputSnapshot);
+  });
+
+  describe("HEAVY_BAG_POWER_INTERVALS", () => {
+    test("6. eligible with a heavy bag and the 'other' gloves/hand-wraps placeholder", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "heavy_bag" }, { type: "other" }] }),
+      });
+
+      const result = checkExerciseEligibility(HEAVY_BAG_POWER_INTERVALS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("7. ineligible without a heavy bag", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "other" }] }),
+      });
+
+      const result = checkExerciseEligibility(HEAVY_BAG_POWER_INTERVALS, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("8. ineligible without the gloves/hand-wraps placeholder", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "heavy_bag" }] }),
+      });
+
+      const result = checkExerciseEligibility(HEAVY_BAG_POWER_INTERVALS, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("9. no dependency on space, floor safety, jumping, throwing, a wall or a partner — no such requirement is documented, and no invented 'striking_allowed' capability was added", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "heavy_bag" }, { type: "other" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(HEAVY_BAG_POWER_INTERVALS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("10. biomechanical fields match the canonical documentation", () => {
+      expect(HEAVY_BAG_POWER_INTERVALS.physicalQualities).toEqual([
+        "explosive_strength",
+        "anaerobic_capacity",
+        "rate_of_force_development",
+        "repeat_effort_capacity",
+        "coordination",
+        "general_work_capacity",
+      ]);
+      expect(HEAVY_BAG_POWER_INTERVALS.movementPatterns).toEqual(["mixed", "rotation", "locomotion", "isometric"]);
+      expect(HEAVY_BAG_POWER_INTERVALS.forceVectors).toEqual(["mixed"]);
+      expect(HEAVY_BAG_POWER_INTERVALS.unilateral).toBe(false);
+      expect(HEAVY_BAG_POWER_INTERVALS.bodyRegionsLoaded).toEqual(["whole_body"]);
+      expect(HEAVY_BAG_POWER_INTERVALS.complexity).toBe("moderate");
+      expect(HEAVY_BAG_POWER_INTERVALS.minimumTechnicalLevel).toBe(3);
+      expect(HEAVY_BAG_POWER_INTERVALS.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("SHADOW_BOXING", () => {
+    test("11. eligible with no declared equipment at all", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(SHADOW_BOXING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("12. no dependency on space, floor safety, jumping, throwing, a wall or a partner", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(SHADOW_BOXING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("13. declares no `requirements` object at all, and no contraindication was invented beyond the fiche's own literal 'None'", () => {
+      expect(SHADOW_BOXING.requirements).toBeUndefined();
+      expect(SHADOW_BOXING.contraindications).toEqual([]);
+    });
+
+    test("14. biomechanical fields match the canonical documentation", () => {
+      expect(SHADOW_BOXING.physicalQualities).toEqual(["coordination", "balance"]);
+      expect(SHADOW_BOXING.movementPatterns).toEqual(["mixed", "locomotion", "rotation"]);
+      expect(SHADOW_BOXING.forceVectors).toEqual(["mixed"]);
+      expect(SHADOW_BOXING.unilateral).toBe(false);
+      expect(SHADOW_BOXING.bodyRegionsLoaded).toEqual(["whole_body"]);
+      expect(SHADOW_BOXING.complexity).toBe("low");
+      expect(SHADOW_BOXING.minimumTechnicalLevel).toBe(1);
+      expect(SHADOW_BOXING.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("FOOTWORK_DRILLS", () => {
+    test("15. eligible with no declared equipment at all — cones are documented only as optional", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(FOOTWORK_DRILLS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("16. no dependency on space, floor safety, jumping, throwing, a wall or a partner", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(FOOTWORK_DRILLS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("17. declares no `requirements` object at all — nothing is documented as required", () => {
+      expect(FOOTWORK_DRILLS.requirements).toBeUndefined();
+    });
+
+    test("18. biomechanical fields match the canonical documentation", () => {
+      expect(FOOTWORK_DRILLS.physicalQualities).toEqual(["balance", "speed", "coordination", "agility", "acceleration"]);
+      expect(FOOTWORK_DRILLS.movementPatterns).toEqual(["locomotion", "rotation"]);
+      expect(FOOTWORK_DRILLS.forceVectors).toEqual(["mixed"]);
+      expect(FOOTWORK_DRILLS.unilateral).toBe(false);
+      expect(FOOTWORK_DRILLS.bodyRegionsLoaded).toEqual(["lower_leg", "thigh", "hip"]);
+      expect(FOOTWORK_DRILLS.complexity).toBe("low");
+      expect(FOOTWORK_DRILLS.minimumTechnicalLevel).toBe(1);
+      expect(FOOTWORK_DRILLS.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("business distinctions", () => {
+    test("19. HEAVY_BAG_POWER_INTERVALS vs. SHADOW_BOXING: same striking-family primary pattern, but radically different equipment and fatigue profile", () => {
+      // Both resolve their own "Striking" primary pattern to `mixed`.
+      expect(HEAVY_BAG_POWER_INTERVALS.movementPatterns).toContain("mixed");
+      expect(SHADOW_BOXING.movementPatterns).toContain("mixed");
+
+      // Only HEAVY_BAG_POWER_INTERVALS requires physical equipment and documents a bracing/impact
+      // isometric component; SHADOW_BOXING requires nothing and documents no isometric pattern.
+      expect(HEAVY_BAG_POWER_INTERVALS.requirements!.required.length).toBeGreaterThan(0);
+      expect(SHADOW_BOXING.requirements).toBeUndefined();
+      expect(HEAVY_BAG_POWER_INTERVALS.movementPatterns).toContain("isometric");
+      expect(SHADOW_BOXING.movementPatterns).not.toContain("isometric");
+
+      // HEAVY_BAG_POWER_INTERVALS carries a markedly higher fatigue cost.
+      expect(HEAVY_BAG_POWER_INTERVALS.fatigueProfile.neural).toBeGreaterThan(SHADOW_BOXING.fatigueProfile.neural);
+      expect(HEAVY_BAG_POWER_INTERVALS.fatigueProfile.metabolic).toBeGreaterThan(SHADOW_BOXING.fatigueProfile.metabolic);
+      expect(HEAVY_BAG_POWER_INTERVALS.minimumTechnicalLevel).toBeGreaterThan(SHADOW_BOXING.minimumTechnicalLevel);
+    });
+
+    test("20. SHADOW_BOXING vs. FOOTWORK_DRILLS: both equipment-free and 'All Levels', but distinct primary movement pattern and body-region specificity", () => {
+      expect(SHADOW_BOXING.requirements).toBeUndefined();
+      expect(FOOTWORK_DRILLS.requirements).toBeUndefined();
+      expect(SHADOW_BOXING.minimumTechnicalLevel).toBe(FOOTWORK_DRILLS.minimumTechnicalLevel);
+
+      // SHADOW_BOXING's own primary pattern needs the `mixed` escape hatch (Striking); FOOTWORK_DRILLS
+      // resolves cleanly to `locomotion` with no escape hatch needed at all.
+      expect(SHADOW_BOXING.movementPatterns).toContain("mixed");
+      expect(FOOTWORK_DRILLS.movementPatterns).not.toContain("mixed");
+      expect(FOOTWORK_DRILLS.movementPatterns).toContain("locomotion");
+
+      // FOOTWORK_DRILLS names specific real muscles (lower_leg/thigh/hip); SHADOW_BOXING's own
+      // fiche only ever frames itself as "Entire Kinetic Chain" (whole_body).
+      expect(SHADOW_BOXING.bodyRegionsLoaded).toEqual(["whole_body"]);
+      expect(FOOTWORK_DRILLS.bodyRegionsLoaded).toEqual(["lower_leg", "thigh", "hip"]);
+    });
+
+    test("21. striking with equipment vs. striking without equipment: only HEAVY_BAG_POWER_INTERVALS genuinely requires a physical implement", () => {
+      const heavyBagEquipment = HEAVY_BAG_POWER_INTERVALS.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(heavyBagEquipment).toEqual(["heavy_bag", "other"]);
+      expect(SHADOW_BOXING.requiredEquipment).toEqual([]);
+      expect(SHADOW_BOXING.requirements).toBeUndefined();
+
+      // Both are striking-family exercises with an identical combat-sport relevance profile,
+      // despite the equipment difference.
+      expect(HEAVY_BAG_POWER_INTERVALS.combatSportRelevance).toEqual(SHADOW_BOXING.combatSportRelevance);
+    });
+
+    test("22. power intervals vs. technical locomotion: HEAVY_BAG_POWER_INTERVALS carries real anaerobic/repeat-effort demand; FOOTWORK_DRILLS does not", () => {
+      expect(HEAVY_BAG_POWER_INTERVALS.physicalQualities).toEqual(
+        expect.arrayContaining(["anaerobic_capacity", "repeat_effort_capacity"]),
+      );
+      expect(FOOTWORK_DRILLS.physicalQualities).not.toContain("anaerobic_capacity");
+      expect(FOOTWORK_DRILLS.physicalQualities).not.toContain("repeat_effort_capacity");
+
+      // FOOTWORK_DRILLS documents agility/acceleration, both absent from HEAVY_BAG_POWER_INTERVALS's
+      // own physicalQualities.
+      expect(FOOTWORK_DRILLS.physicalQualities).toEqual(expect.arrayContaining(["agility", "acceleration"]));
+      expect(HEAVY_BAG_POWER_INTERVALS.physicalQualities).not.toContain("agility");
+
+      // FOOTWORK_DRILLS documents markedly higher combat-sport relevance for grappling
+      // disciplines, unlike the purely striking-specific HEAVY_BAG_POWER_INTERVALS.
+      expect(FOOTWORK_DRILLS.combatSportRelevance!.wrestling!).toBeGreaterThan(
+        HEAVY_BAG_POWER_INTERVALS.combatSportRelevance!.wrestling!,
+      );
+    });
+
+    test("23. genuinely necessary environment requirements vs. simple preferences: only HEAVY_BAG_POWER_INTERVALS gates on real equipment in this batch", () => {
+      // "Timer" (round/interval structuring) and "Gloves"/"Hand Wraps" recommendations for the
+      // other two exercises are never turned into eligibility gates — SHADOW_BOXING's own
+      // "Optional: Mirror, Timer, Resistance Bands..." and FOOTWORK_DRILLS's own "Optional: Cones,
+      // Agility Ladder..." remain simple preferences, never requirements.
+      expect(SHADOW_BOXING.requirements).toBeUndefined();
+      expect(FOOTWORK_DRILLS.requirements).toBeUndefined();
+
+      // HEAVY_BAG_POWER_INTERVALS's own Required heading names real, unhedged implements — a
+      // genuine necessity, not a preference.
+      expect(HEAVY_BAG_POWER_INTERVALS.requirements!.required.length).toBeGreaterThan(0);
+    });
+  });
+
+  test("24. adding this batch never changes the previously integrated exercises, including TURKISH_GET_UP and BENCH_PRESS", () => {
+    const getUpInput = makeValidInput({
+      environment: makeEnvironment({ availableEquipment: [{ type: "kettlebell" }] }),
+    });
+    expect(checkExerciseEligibility(TURKISH_GET_UP, getUpInput).eligible).toBe(true);
 
     const benchPressInput = makeValidInput({
       environment: makeEnvironment({

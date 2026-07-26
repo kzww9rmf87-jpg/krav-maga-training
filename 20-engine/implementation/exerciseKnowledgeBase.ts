@@ -8439,6 +8439,472 @@ export const TURKISH_GET_UP: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Heavy Bag Power Intervals
+// Source: 50-exercises/27_HEAVY_BAG_POWER_INTERVALS
+// -----------------------------------------------------------------------------
+
+/**
+ * First entry of the "Lot 6 — Combat striking et deplacements" batch,
+ * migrated alongside SHADOW_BOXING/FOOTWORK_DRILLS. No
+ * `exercisePrescriptionRegistry.ts` entry exists for any of the three
+ * exercises in this batch (confirmed by direct search for each) — a known
+ * limitation, documented here without modifying that registry.
+ *
+ * HONESTY NOTE, explicitly considered per the user's own instruction: this
+ * fiche documents an interval STRUCTURE ("# Loading Profile — Typical
+ * Duration: 3–8 rounds. Work: 10–30 seconds. Recovery: 30–90 seconds")
+ * layered onto a single, coherent striking movement against a fixed
+ * implement (the heavy bag). Unlike a genuine multi-movement family
+ * (compare ROTATOR_CUFF_TRAINING/WRIST_STRENGTHENING in Lot 4, which
+ * aggregate several NAMED distinct sub-movements), this fiche has ONE
+ * governing Exercise Identity, Equipment Requirements, Movement Pattern
+ * and Contraindications set — it is prescribed as a single coherent unit
+ * (matching the precedent already set by ROPE_CLIMB/ROPE_PULL's own
+ * interval-capable grip work in 65_GRIP). It is integrated as ONE
+ * `ExerciseDefinition`, not fragmented. The round/work/rest timing
+ * structure itself is PRESCRIPTION-layer detail (dosage, not the
+ * exercise's own identity) and is deliberately kept entirely out of
+ * `requirements`, matching the user's own explicit instruction.
+ *
+ * KNOWN MODEL LIMITATION, flagged explicitly: this exercise inherently
+ * requires striking to be permitted in the training environment, but
+ * `EnvironmentCapability` has no `"striking_allowed"` value — only
+ * `throwing_allowed`/`jumping_allowed`/`sprinting_allowed` exist for
+ * comparable activity-permission gates. No new capability is invented
+ * here (the user's own instructions require a demonstrated business
+ * blocker before extending the type model, and a single batch's need does
+ * not by itself establish one) — the gap is left undisguised rather than
+ * papered over with an unrelated existing capability.
+ *
+ * "# Equipment Requirements — Required: Heavy Bag, Gloves, Hand Wraps,
+ * Timer." Four items, all under Required with no hedging language (unlike
+ * BACK_SQUAT's own "Safety Arms Recommended: Yes", a genuine
+ * recommendation-only phrasing). `heavy_bag` is an existing, exact
+ * `EquipmentType` match. "Timer" is a PRESCRIPTION/programming tool for
+ * structuring rounds — not physical equipment the athlete interacts with
+ * during the movement itself — and is deliberately excluded from
+ * `requirements` for the same reason round/rest timing is excluded (see
+ * the block comment above). "Gloves" and "Hand Wraps" are genuine,
+ * real protective equipment with no dedicated `EquipmentType` value of
+ * their own; `"other"` is used as a single flagged placeholder covering
+ * both collectively (declaring two separate `other` atoms would be
+ * functionally indistinguishable, since eligibility only checks for the
+ * PRESENCE of a type, not a counted consumption of it) — the same
+ * honest-escape-hatch pattern already established for AB_WHEEL/
+ * WEIGHTED_PULL_UP/LANDMINE_PRESS/NORDIC_HAMSTRING_CURL.
+ */
+export const HEAVY_BAG_POWER_INTERVALS: ExerciseDefinition = {
+  id: "heavy_bag_power_intervals",
+  name: "Heavy Bag Power Intervals",
+  module: "conditioning",
+  // "# Primary Classification: Combat-Specific Conditioning" — the literal
+  // word "Conditioning" maps directly to the real `"conditioning"`
+  // AdaptationDomain value, a genuinely different framing from
+  // TECHNICAL_STAND_UP/SHRIMPING/BRIDGING's own "Combat-Specific Movement"
+  // (→ `"specific_skill"`) in Lot 5.
+  primaryAdaptation: "conditioning",
+  // "# Capability Mapping — Primary: Combat Power, Anaerobic Power,
+  // Technical Power." "Combat Power" → explosive_strength, directly
+  // grounded by "Rate of Force Development: ★★★★★" and "Velocity Profile:
+  // Maximum Power". "Anaerobic Power" → anaerobic_capacity (exact match,
+  // corroborated by "Metabolic Cost: ★★★★★" and "Primary Energy System:
+  // ATP-PC, Anaerobic Glycolysis"). "Technical Power" has no distinct
+  // counterpart beyond explosive_strength already listed and is not
+  // double-counted. "Secondary: Rate of Force Development" →
+  // rate_of_force_development (exact match). "Coordination" →
+  // coordination. "Movement Efficiency" excluded (generic, matching this
+  // whole project's established exclusion). "Work Capacity" →
+  // general_work_capacity (exact match). "Mental Resilience" has no
+  // PhysicalQuality counterpart (a psychological/mental-toughness concept,
+  // not a physical quality) and is not force-fitted. The round-interval
+  // structure ("3–8 rounds", "Progression: Round Duration... Strike
+  // Density") directly corroborates `repeat_effort_capacity` — the
+  // closest existing quality for a "repeated power" demand, though no
+  // literal "repeated_power" value exists in this enum.
+  physicalQualities: ["explosive_strength", "anaerobic_capacity", "rate_of_force_development", "repeat_effort_capacity", "coordination", "general_work_capacity"],
+  // MODEL LIMITATION, flagged explicitly: "# Movement Pattern — Primary:
+  // Striking." No `MovementPattern` value represents a strike — this
+  // taxonomy has no punch/kick pattern of its own, and `throw` would
+  // misrepresent a strike (which retains the limb on contact, unlike a
+  // release). `"mixed"` is used as the closest available generic value
+  // for the PRIMARY pattern. "Secondary: Rotation, Footwork, Acceleration,
+  // Deceleration, Bracing, Reactive Movement" → rotation (exact match),
+  // locomotion (from "Footwork"), isometric (from "Bracing" — the genuine
+  // impact-absorption/recoil-resistance demand of striking a real heavy
+  // bag). "Acceleration"/"Deceleration" are PhysicalQuality concepts, not
+  // MovementPattern values, and are not represented here. "Reactive
+  // Movement" has no distinct counterpart and is already captured via
+  // `"mixed"`.
+  movementPatterns: ["mixed", "rotation", "locomotion", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Multi-Directional" →
+  // mixed (a direct, literal match).
+  forceVectors: ["mixed"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "heavy_bag" },
+          { kind: "equipment", equipment: "other" }, // flagged placeholder for "Gloves"/"Hand Wraps" — see block comment above
+        ],
+      },
+    ],
+  },
+  // "# Skill Requirement: Intermediate. Basic striking mechanics required
+  // before maximal power work."
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // No unilateral/bilateral statement exists anywhere in this fiche —
+  // striking alternates sides continuously but is not documented as a
+  // per-side prescription.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Entire Kinetic Chain, Lower
+  // Body, Core, Shoulders, Arms, Forearms." Unlike fiches that name
+  // specific individual muscles (e.g. "Gluteus Maximus", "Quadriceps"),
+  // this fiche uses generic whole-body region language throughout,
+  // explicitly opening with "Entire Kinetic Chain" — `whole_body` (a real
+  // BodyRegion value) is used as the single honest representation, rather
+  // than fabricating a specific muscle-by-muscle region breakdown the
+  // source itself never provides.
+  bodyRegionsLoaded: ["whole_body"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute hand injury.", region: "hand", prohibitedPatterns: ["mixed", "rotation", "locomotion", "isometric"], absolute: true },
+    { description: "Acute wrist injury.", region: "wrist", prohibitedPatterns: ["mixed", "rotation", "locomotion", "isometric"], absolute: true },
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["mixed", "rotation", "locomotion", "isometric"], absolute: true },
+    { description: "Acute concussion.", region: "head", prohibitedPatterns: ["mixed", "rotation", "locomotion", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: ★★★★★. Mechanical
+    // Fatigue: Moderate. Metabolic Fatigue: ★★★★★." This fiche uses direct
+    // 1–5 star ratings (not the Low/Moderate/High word ladder used
+    // elsewhere in this documentary format) — read directly as Rating5
+    // values. "Mechanical Fatigue: Moderate" (a word, not stars) is mapped
+    // via the same baseline Low=1/Moderate=2 scale established throughout
+    // Lots 1–5. `connectiveTissue` shares the same "Mechanical Fatigue"
+    // source as `muscular` (no distinct "Connective-Tissue Fatigue"
+    // heading exists in this format).
+    types: ["neural", "metabolic"],
+    neural: 5,
+    muscular: 2,
+    connectiveTissue: 2, // inferred from "Mechanical Fatigue: Moderate"
+    metabolic: 5,
+    technical: 3, // fallback from "Skill Requirement: Intermediate" (minimumTechnicalLevel 3)
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Heavy bag interval
+  // training demonstrates strong evidence for improving combat-specific
+  // power, anaerobic conditioning, striking efficiency..." — mapped to the
+  // CAS Evidence Framework's "Level 1 — Scientific consensus"
+  // (20-engine/02_EXERCISE_KNOWLEDGE_BASE.md).
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Notably low
+  // grappling relevance (Wrestling 2, BJJ 1, Judo 1) — the inverse profile
+  // from SHRIMPING/BRIDGING in Lot 5, directly reflecting genuine
+  // discipline-specificity rather than a generic "combat" rating. Savate
+  // is named in this table but has no `CombatSport` enum counterpart and
+  // is omitted rather than force-mapped.
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 2,
+    brazilian_jiu_jitsu: 1,
+    judo: 1,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" names "Shadow Boxing" (exact name match) →
+  // shadow_boxing (integrated in this same batch, real catalog id).
+  // "Technical Bag Work", "Light Bag Work" and "Reduced Intensity" name no
+  // exercise with its own chapter/catalog id.
+  substitutionExerciseIds: ["shadow_boxing"],
+};
+
+// -----------------------------------------------------------------------------
+// Shadow Boxing
+// Source: 50-exercises/28_SHADOW_BOXING
+// -----------------------------------------------------------------------------
+
+/**
+ * Second entry of this batch. "# Equipment Requirements — Required: None."
+ * A fully equipment-free exercise — `requiredEquipment: []` with no
+ * `requirements` object at all: no space/floor/human-assistance
+ * requirement is documented either (no "Space Requirement" heading, no
+ * quantified distance/area figure, and "# Progressions — ... Partner
+ * Shadow" names partner practice as a documented but non-default
+ * PROGRESSION, never a base-form requirement, directly answering the
+ * user's own instruction not to invent a partner requirement).
+ *
+ * Central business distinction from HEAVY_BAG_POWER_INTERVALS, explicitly
+ * flagged before writing began: this fiche's own "# Movement Pattern —
+ * Secondary" list (Footwork, Rotation, Guard Recovery, Defensive Movement,
+ * Reactive Positioning) never names "Brace"/"Bracing" — unlike
+ * HEAVY_BAG_POWER_INTERVALS's own explicit "Bracing" secondary pattern
+ * (the real impact-absorption demand of striking an actual heavy bag).
+ * `isometric` is therefore deliberately NOT added here — Shadow Boxing has
+ * no bag to absorb force from and no real recoil resistance to brace
+ * against, a genuine, textually-grounded biomechanical difference between
+ * the two exercises, not an oversight.
+ *
+ * "# Neurological Profile — Skill Requirement: All Levels" and "#
+ * Athlete Suitability — Suitable For: All athletes, All ages, All
+ * competitive levels" — a distinct phrasing from the Beginner/Intermediate
+ * word ladder used throughout this project so far. Read as the lowest
+ * entry floor (minimumTechnicalLevel 1 / "low"), corroborated by "Learning
+ * Curve: Unlimited" (mastery has no ceiling, but the floor for starting is
+ * minimal).
+ *
+ * "# Contraindications — None. Except acute injury preventing movement."
+ * The literal word "None", with only a generic, non-specific caveat too
+ * vague to encode as a body-region-tagged `ExerciseContraindication` —
+ * `contraindications: []` is used, the same empty-array resolution already
+ * established for DEAD_BUG/HOLLOW_BODY_HOLD in 62_CORE (both documented
+ * only a "Relative" tier with no "Absolute" heading at all) — here the
+ * fiche goes even further and states no specific contraindication
+ * whatsoever.
+ */
+export const SHADOW_BOXING: ExerciseDefinition = {
+  id: "shadow_boxing",
+  name: "Shadow Boxing",
+  module: "movement",
+  // "# Primary Classification: Combat-Specific Technique" — a third
+  // distinct "Combat-Specific X" framing in this migration (Lot 5's own
+  // trio said "Combat-Specific Movement"; HEAVY_BAG_POWER_INTERVALS above
+  // says "Combat-Specific Conditioning"). "Technique" maps most literally
+  // to `"specific_skill"`, matching the Lot 5 resolution for an even more
+  // skill/technique-specific framing.
+  primaryAdaptation: "specific_skill",
+  // "# Capability Mapping — Primary: Technical Skill, Movement
+  // Coordination, Motor Control." "Technical Skill" has no distinct
+  // PhysicalQuality counterpart (a skill-level descriptor, not a physical
+  // quality) and is not force-fitted. "Movement Coordination"/"Motor
+  // Control" both fold into a single `coordination` entry, not
+  // double-counted. "Secondary: Reaction Speed" excluded (no clean
+  // `speed`/`agility` match, matching TECHNICAL_STAND_UP's own identical
+  // exclusion in Lot 5). "Balance" → balance (exact match). "Timing" and
+  // "Rhythm" have no PhysicalQuality counterpart and are not force-fitted.
+  // "Movement Efficiency"/"Spatial Awareness" excluded (generic/cognitive,
+  // no distinct counterpart).
+  physicalQualities: ["coordination", "balance"],
+  // MODEL LIMITATION, flagged explicitly: "# Movement Pattern — Primary:
+  // Striking" resolves to `mixed`, the same resolution already used for
+  // HEAVY_BAG_POWER_INTERVALS above. "Secondary: Footwork, Rotation, Guard
+  // Recovery, Defensive Movement, Reactive Positioning" → locomotion (from
+  // "Footwork"), rotation (exact match); "Guard Recovery"/"Defensive
+  // Movement"/"Reactive Positioning" are tactical/defensive concepts with
+  // no MovementPattern counterpart and are already captured via `"mixed"`.
+  // See block comment above for why `isometric` is deliberately absent.
+  movementPatterns: ["mixed", "locomotion", "rotation"],
+  // "# Biomechanical Profile — Primary Force Vector: Multi-Directional" →
+  // mixed.
+  forceVectors: ["mixed"],
+  requiredEquipment: [],
+  // No `requirements` object — nothing is documented as required (see
+  // block comment above).
+  // See block comment above for the "All Levels"/"Unlimited Learning
+  // Curve" resolution.
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Entire Kinetic Chain" — the
+  // same generic whole-body framing as HEAVY_BAG_POWER_INTERVALS above →
+  // whole_body.
+  bodyRegionsLoaded: ["whole_body"],
+  // See block comment above for why this array is genuinely empty.
+  contraindications: [],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Low. Mechanical Fatigue:
+    // Very Low. Metabolic Fatigue: Low." Unlike several exercises in Lots
+    // 4–5, this fiche's own vocabulary mixes "Low" (Neuromuscular,
+    // Metabolic, Psychological) AND "Very Low" (Mechanical) at the
+    // dimension level within the SAME fiche — the fiche-relative
+    // Very-Low=1/Low=2 convention established in Lot 4 applies here.
+    types: [],
+    neural: 2,
+    muscular: 1,
+    connectiveTissue: 1, // inferred from "Mechanical Fatigue: Very Low"
+    metabolic: 2,
+    technical: 1, // fallback from minimumTechnicalLevel 1
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Motor imagery,
+  // deliberate practice and technical repetition are strongly supported
+  // for improving motor learning, movement efficiency and skill
+  // acquisition." — mapped to "Level 1 — Scientific consensus".
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star — identical
+  // to HEAVY_BAG_POWER_INTERVALS's own table (both are striking-specific
+  // exercises sharing the same discipline-relevance profile).
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 2,
+    brazilian_jiu_jitsu: 1,
+    judo: 1,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" (Slow Technical Shadow, Single Technique, Mirror
+  // Shadow, "Footwork Only") name no exercise with its own chapter/catalog
+  // id — "Footwork Only" is a distinct phrase from "Footwork Drills"
+  // (integrated in this same batch), the same strict name-matching
+  // discipline already applied to CHIN_UP's own "Weighted Chin-Up" in Lot
+  // 2 (a modified name is not silently resolved to a differently-named
+  // catalog id). Despite HEAVY_BAG_POWER_INTERVALS's own Regressions
+  // naming "Shadow Boxing" as its own substitute, this fiche never names
+  // "Heavy Bag"/"Heavy Bag Power Intervals" anywhere in its own
+  // Progressions/Regressions/Variations sections (checked directly) — the
+  // same faithfully-preserved one-directional asymmetry already
+  // documented elsewhere in this catalog.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Footwork Drills
+// Source: 50-exercises/29_FOOTWORK_DRILLS
+// -----------------------------------------------------------------------------
+
+/**
+ * Third and final entry of this batch. "# Equipment Requirements —
+ * Required: None. Optional: Cones, Agility Ladder, Markers, Reaction
+ * Lights, Mirror." Cones/markers are explicitly Optional, never Required
+ * — the fully bodyweight, no-equipment execution is this exercise's own
+ * default, valid form, directly answering the user's own instruction not
+ * to invent a cone requirement when floor references or no equipment at
+ * all constitute a documented valid version. No `requirements` object is
+ * added at all — no space/floor-safety language or quantified distance
+ * figure exists anywhere in this fiche either (checked directly).
+ *
+ * Central business distinction from HEAVY_BAG_POWER_INTERVALS/
+ * SHADOW_BOXING above, explicitly flagged before writing began: this is
+ * the FIRST exercise in this batch whose primary movement pattern maps
+ * cleanly, directly to an existing `MovementPattern` value — "# Movement
+ * Pattern — Primary: Locomotion" needs no `"mixed"` escape hatch at all,
+ * unlike the striking-based primary patterns of the other two entries.
+ * This exercise is pure multidirectional displacement, never striking
+ * itself — no combat-contact requirement of any kind is documented or
+ * invented here, matching the user's own explicit instruction not to
+ * invent a combat requirement for a drill that remains fully executable
+ * without any strike.
+ */
+export const FOOTWORK_DRILLS: ExerciseDefinition = {
+  id: "footwork_drills",
+  name: "Footwork Drills",
+  module: "movement",
+  // "# Primary Classification: Combat-Specific Technique" — identical
+  // wording to SHADOW_BOXING's own Primary Classification, hence the
+  // identical `"specific_skill"` resolution.
+  primaryAdaptation: "specific_skill",
+  // "# Capability Mapping — Primary: Movement Efficiency, Balance, Foot
+  // Speed, Coordination." "Movement Efficiency" excluded (generic).
+  // "Balance" → balance (exact match). "Foot Speed" → speed (a
+  // region-flavoured restatement of the same underlying quality, folded
+  // into the closest generic value, matching this whole project's
+  // established convention for this kind of phrase). "Coordination" →
+  // coordination. "Secondary: Agility" → agility (exact match — the first
+  // use of this PhysicalQuality value anywhere in this catalog).
+  // "Acceleration" → acceleration (exact match). "Reaction Speed" excluded
+  // (matching SHADOW_BOXING's/TECHNICAL_STAND_UP's own identical
+  // exclusion). "Spatial Awareness"/"Technical Precision" excluded (no
+  // distinct PhysicalQuality counterpart — cognitive/skill-level
+  // concepts, not physical qualities).
+  physicalQualities: ["balance", "speed", "coordination", "agility", "acceleration"],
+  // "# Movement Pattern — Primary: Locomotion" → locomotion (exact,
+  // direct match — see block comment above). "Secondary: Acceleration,
+  // Deceleration, Lateral Movement, Rotation, Pivoting, Balance" →
+  // rotation (from "Rotation"/"Pivoting", both resolving to the same
+  // value, not double-counted). "Acceleration"/"Deceleration"/"Balance"
+  // are PhysicalQuality concepts already captured above, not
+  // MovementPattern values. "Lateral Movement" has no dedicated
+  // MovementPattern counterpart of its own (`anti_lateral_flexion` is
+  // about RESISTING trunk lateral flexion, a materially different concept
+  // from producing lateral gait displacement) and is not force-fitted —
+  // already substantively captured by the primary `locomotion` pattern
+  // itself, which this fiche's own "# Variations — Forward/Backward,
+  // Lateral, Pivoting, Circling..." frames as directional variants of the
+  // same underlying locomotion pattern, not distinct patterns of their
+  // own.
+  movementPatterns: ["locomotion", "rotation"],
+  // "# Biomechanical Profile — Primary Force Vector: Multi-Directional" →
+  // mixed (a direct, literal match, even though `movementPatterns` above
+  // needed no `"mixed"` escape hatch — the two fields answer different
+  // questions and are sourced independently).
+  forceVectors: ["mixed"],
+  requiredEquipment: [],
+  // No `requirements` object — nothing is documented as required (see
+  // block comment above).
+  // "# Skill Requirement — Suitable For: Beginners, Intermediate,
+  // Advanced, Elite", corroborated by "# Neurological Profile — Skill
+  // Requirement: All Levels" — the same resolution already used for
+  // SHADOW_BOXING above.
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Calves, Quadriceps, Hamstrings,
+  // Gluteals" — unlike HEAVY_BAG_POWER_INTERVALS/SHADOW_BOXING's own
+  // generic "Entire Kinetic Chain" framing, this fiche names specific,
+  // real muscles → lower_leg (Calves), thigh (Quadriceps, Hamstrings),
+  // hip (Gluteals). Secondary Muscles (Hip Flexors, Core, Foot Intrinsic
+  // Muscles) are excluded, matching this catalog's established
+  // primary-muscles-only discipline.
+  bodyRegionsLoaded: ["lower_leg", "thigh", "hip"],
+  // "# Contraindications", quoted one item per source line. "Acute
+  // Lower-Limb Injury" spans multiple possible joints (hip/knee/ankle)
+  // without naming a specific one — left without a `region` tag rather
+  // than arbitrarily narrowing it to a single BodyRegion value the fiche
+  // itself does not specify. "Severe Balance Deficit" is a
+  // neurological/vestibular condition, not a body-region injury, and
+  // carries no region either.
+  contraindications: [
+    { description: "Acute lower-limb injury.", prohibitedPatterns: ["locomotion", "rotation"], absolute: true },
+    { description: "Severe balance deficit.", prohibitedPatterns: ["locomotion", "rotation"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Low. Mechanical Fatigue:
+    // Low. Metabolic Fatigue: Low." Per-dimension vocabulary never uses
+    // "Very Low" (only the aggregate "Overall Fatigue Cost: ★★★★★ Very
+    // Low" summary line does) — the baseline Low=1 mapping established
+    // throughout Lots 1–3 and reused for several Lot 5 entries is used
+    // directly here.
+    types: [],
+    neural: 1,
+    muscular: 1,
+    connectiveTissue: 1, // inferred from "Mechanical Fatigue: Low"
+    metabolic: 1,
+    technical: 1, // fallback from minimumTechnicalLevel 1
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Movement-specific
+  // footwork practice is strongly supported for improving agility,
+  // coordination, balance and sport-specific movement efficiency..." —
+  // mapped to "Level 1 — Scientific consensus".
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star — notably
+  // HIGHER grappling relevance than HEAVY_BAG_POWER_INTERVALS/
+  // SHADOW_BOXING above (Wrestling 5 vs. 2, BJJ 3 vs. 1, Judo 4 vs. 1),
+  // directly reflecting footwork's universal value across both striking
+  // and grappling disciplines, unlike the two purely striking-specific
+  // exercises above. Savate is named in this table but has no
+  // `CombatSport` enum counterpart and is omitted rather than
+  // force-mapped.
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 3,
+    judo: 4,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" (Slow Technical Footwork, Linear Movement, Single
+  // Pattern Repetition, Mirror Walking) name no exercise with its own
+  // chapter/catalog id anywhere in this repository (confirmed by direct
+  // search). `substitutionExerciseIds` is genuinely empty for this entry.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -9836,4 +10302,7 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   SHRIMPING,
   BRIDGING,
   TURKISH_GET_UP,
+  HEAVY_BAG_POWER_INTERVALS,
+  SHADOW_BOXING,
+  FOOTWORK_DRILLS,
 ];
