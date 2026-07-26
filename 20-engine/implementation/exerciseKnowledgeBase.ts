@@ -9622,6 +9622,687 @@ export const ROWERG_INTERVALS: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Sprawl
+// Source: 50-exercises/30_SPRAWL
+// -----------------------------------------------------------------------------
+
+/**
+ * First entry of the "Lot 8 — Combat lutte et grappling debout" batch,
+ * migrated alongside PUMMELING/WALL_WRESTLING/GRIP_FIGHTING/SHOT_ENTRIES.
+ * `mobility_flow` remains definitively excluded from
+ * `EXERCISE_KNOWLEDGE_BASE` (qualified as a composed sequence belonging to
+ * a future CAS protocol-level model, not this batch) — not referenced,
+ * not reintroduced, no new type added for it. No
+ * `exercisePrescriptionRegistry.ts` entry exists for any of the five
+ * exercises in this batch (confirmed by direct search) — a known
+ * limitation, documented without modifying that registry.
+ *
+ * "# Primary Classification: Combat-Specific Movement" — the same framing
+ * already used for TECHNICAL_STAND_UP in Lot 5, hence the identical
+ * `primaryAdaptation: "specific_skill"` resolution.
+ *
+ * SOLO-VS-PARTNER DECISION, explicitly verified before writing began: "#
+ * Equipment Requirements — Required: Mat. Optional: Reaction Lights,
+ * **Partner**, Heavy Bag, Timer." Partner is explicitly Optional, never
+ * Required — "Standard Sprawl" is this fiche's own base/default Variation,
+ * with "Partner Sprawl"/"Reactive Sprawl" named separately as their own
+ * distinct, non-default Variations. No `human_assistance` clause is added
+ * — a genuinely valid solo drill, matching SHOT_ENTRIES's own identical
+ * resolution below.
+ */
+export const SPRAWL: ExerciseDefinition = {
+  id: "sprawl",
+  name: "Sprawl",
+  module: "movement",
+  primaryAdaptation: "specific_skill",
+  // "# Capability Mapping — Primary: Reactive Power, Movement Speed,
+  // Ground Transition Efficiency." "Reactive Power" → reactive_strength,
+  // corroborated by "Stretch-Shortening Cycle: ★★★★★" in the Contraction
+  // Profile. "Movement Speed" → speed. "Ground Transition Efficiency"
+  // excluded (generic, matching TECHNICAL_STAND_UP's own identical
+  // exclusion). "Rate of Force Development: ★★★★★" is a separately
+  // documented Biomechanical Profile metric, not merely restated Capability
+  // Mapping language, and earns its own entry. Secondary: "Anaerobic
+  // Power" → anaerobic_capacity (matching this whole project's established
+  // resolution for this exact recurring phrase). "Core Stability" →
+  // trunk_strength. "Coordination" → coordination. "Movement Efficiency"/
+  // "Combat Readiness" excluded (generic).
+  physicalQualities: ["reactive_strength", "rate_of_force_development", "speed", "anaerobic_capacity", "trunk_strength", "coordination"],
+  // MODEL LIMITATION, flagged explicitly: "# Movement Pattern — Primary:
+  // Hip Projection." No MovementPattern value represents this compound,
+  // explosive hip-back-and-down ground-transition action — `"mixed"` is
+  // used as the closest honest generic value for the PRIMARY pattern,
+  // the same escape hatch already used for TECHNICAL_STAND_UP's own
+  // "Ground Transition" primary pattern in Lot 5. "Secondary: Ground
+  // Transition, Horizontal Force Production, Brace, Rapid Recovery,
+  // Reactive Movement" — "Ground Transition" is already captured under
+  // `"mixed"` above. "Horizontal Force Production" is a PhysicalQuality/
+  // ForceVector concept, not a MovementPattern value, and lives in
+  // `forceVectors` below instead. "Brace" → isometric. "Rapid Recovery"
+  // and "Reactive Movement" have no distinct MovementPattern counterpart
+  // of their own (already captured via `reactive_strength` above) and are
+  // not force-fitted.
+  movementPatterns: ["mixed", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Horizontal.
+  // Secondary Force Vector: Vertical." — quoted directly.
+  forceVectors: ["horizontal", "vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          // "Required: Mat" — the same ground-contact safety resolution
+          // already used for TECHNICAL_STAND_UP/BEAR_CRAWL/TURKISH_GET_UP
+          // in Lot 5 (a literal, named "Mat" item, not a generic
+          // `floor_safe` surface-quality concern).
+          { kind: "equipment", equipment: "mat" },
+        ],
+      },
+    ],
+  },
+  // No space heading of any kind exists anywhere in this fiche (checked
+  // directly) — `sufficient_space` is deliberately NOT added, a genuine
+  // checked absence.
+  //
+  // "# Skill Requirement: Intermediate. Basic takedown defense mechanics
+  // should be mastered before maximal-speed repetitions." — the same
+  // "Intermediate, mastery-before-maximal-effort" phrasing already
+  // resolved to level 3 for HEAVY_BAG_POWER_INTERVALS in Lot 6.
+  minimumTechnicalLevel: 3,
+  // "# Neurological Profile — Motor Complexity: ★★★★★" (5/5).
+  complexity: "very_high",
+  // No unilateral/bilateral statement exists anywhere in this fiche
+  // (Movement Context says "Whole Body" only) — a symmetric, bilateral
+  // action by its own nature.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Quadriceps, Gluteus Maximus,
+  // Hamstrings, Core, Anterior Deltoids. Secondary Muscles: Triceps,
+  // Chest, Hip Flexors, Calves, Neck." → thigh (quadriceps, hamstrings),
+  // hip (gluteus maximus, hip flexors), abdomen (core), shoulder
+  // (anterior deltoids), upper_arm (triceps), chest, lower_leg (calves),
+  // neck.
+  bodyRegionsLoaded: ["thigh", "hip", "abdomen", "shoulder", "upper_arm", "chest", "lower_leg", "neck"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+    { description: "Acute wrist injury.", region: "wrist", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+    { description: "Acute lumbar injury.", region: "lumbar_spine", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+    { description: "Acute cervical injury.", region: "cervical_spine", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: ★★★★★. Mechanical
+    // Fatigue: Moderate. Metabolic Fatigue: ★★★★★." Star ratings read
+    // directly; "Moderate" (a word, not stars) uses the plain baseline
+    // scale (Moderate=3) since no "Very Low" co-occurs in this fiche.
+    types: ["neural", "muscular", "connective_tissue", "metabolic"],
+    neural: 5,
+    muscular: 3, // "Mechanical Fatigue: Moderate"
+    connectiveTissue: 3, // same "Mechanical Fatigue: Moderate" source
+    metabolic: 5,
+    technical: 3, // fallback from minimumTechnicalLevel 3
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Repeated sprawls
+  // effectively develop combat-specific anaerobic conditioning..." — no
+  // hedging language — mapped to "Level 1 — Scientific consensus".
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate and
+  // Sambo are named but have no `CombatSport` enum counterpart and are
+  // omitted.
+  combatSportRelevance: {
+    boxing: 3,
+    kickboxing: 4,
+    muay_thai: 4,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 4,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Progressions"/"# Variations" name "Sprawl to Shot" — a distinct
+  // compound drill name, not a standalone substitution reference to
+  // `shot_entries` (the same strict name-matching discipline already
+  // applied to CHIN_UP's own "Weighted Chin-Up" in Lot 2). "Sprawl to
+  // Sprint"/"Sprawl to Heavy Bag"/"Sprawl to Combination" likewise name
+  // no exercise with its own chapter/catalog id. No "# Substitution
+  // Logic" section exists in this fiche either (checked directly).
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Pummeling
+// Source: 50-exercises/31_PUMMELING
+// -----------------------------------------------------------------------------
+
+/**
+ * Second entry of this batch. "# Primary Classification: Combat-Specific
+ * Technique" — the same framing already used for SHADOW_BOXING in Lot 6,
+ * hence the identical `primaryAdaptation: "specific_skill"` resolution.
+ *
+ * FIRST production use of `human_assistance: "partner"` as the SOLE,
+ * unconditional required atom in this whole catalog, explicitly verified
+ * before writing began: "# Equipment Requirements — Required: Training
+ * Partner." No hedge, no `any_of` alternative — every single named
+ * Variation in this fiche (Double Underhook Battle, Single Underhook,
+ * Overhook Recovery, Wall Pummeling, Reactive Pummeling, Eyes Closed
+ * Pummeling) is inherently two-person; no solo form is documented
+ * anywhere (checked directly). This is a genuinely indivisible
+ * two-partner drill, not a preference — unlike every prior use of
+ * `human_assistance` in this catalog (always inside an `any_of` clause
+ * alongside an equipment/environment alternative, e.g.
+ * MED_BALL_ROTATIONAL_THROW's own `usable_wall` OR `partner`,
+ * NORDIC_HAMSTRING_CURL's own `other` OR `partner`).
+ */
+export const PUMMELING: ExerciseDefinition = {
+  id: "pummeling",
+  name: "Pummeling",
+  module: "movement",
+  primaryAdaptation: "specific_skill",
+  // "# Capability Mapping — Primary: Clinch Control, Motor Coordination,
+  // Tactile Awareness." "Clinch Control" excluded (a tactical/skill
+  // outcome, not itself a PhysicalQuality). "Motor Coordination" →
+  // coordination. "Tactile Awareness" excluded (a sensory/proprioceptive
+  // concept with no PhysicalQuality counterpart). Secondary: "Balance" →
+  // balance (exact). "Postural Stability" → stability. "Movement
+  // Efficiency" excluded (generic). "Grip Endurance" → grip_strength
+  // (matching FARMER_CARRY's/BATTLE_ROPES's own "Grip Endurance"
+  // resolution). "Decision Speed" excluded (cognitive, no counterpart).
+  physicalQualities: ["coordination", "balance", "stability", "grip_strength"],
+  // MODEL LIMITATION, flagged explicitly: "# Movement Pattern — Primary:
+  // Clinch Fighting." No MovementPattern value represents this tactical
+  // positional-control action — `"mixed"` is used as the closest honest
+  // generic value for the PRIMARY pattern. "Secondary: Underhook
+  // Fighting, Overhook Control, Rotation, Postural Control, Footwork,
+  // Pressure Management" → rotation (exact match), locomotion (from
+  // "Footwork"). "Underhook Fighting"/"Overhook Control"/"Postural
+  // Control"/"Pressure Management" have no distinct MovementPattern
+  // counterpart and are already captured via `"mixed"`/`stability` above.
+  // "# Contraction Profile — Isometric: ★★★★★" is a separately, strongly
+  // documented metric (the maximal rating in this whole profile) — a
+  // genuine, grounded addition, not force-fitted from the Movement
+  // Pattern heading alone.
+  movementPatterns: ["mixed", "rotation", "locomotion", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Multi-Directional" →
+  // mixed (the same resolution already used for HEAVY_BAG_POWER_INTERVALS/
+  // TECHNICAL_STAND_UP).
+  forceVectors: ["mixed"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [{ kind: "human_assistance", assistance: "partner" }],
+      },
+    ],
+  },
+  // "Wrestling Mat" is explicitly Optional (not Required) — this fiche's
+  // own indoor/outdoor-agnostic standing clinch drill never documents a
+  // ground-contact safety concern of its own (unlike SPRAWL/SHOT_ENTRIES
+  // above), so no `mat`/`floor_safe` atom is added. No space heading of
+  // any kind exists either (checked directly) — `sufficient_space` is
+  // deliberately NOT added.
+  //
+  // "# Neurological Profile — Skill Requirement: Intermediate. Requires
+  // understanding of basic clinch mechanics."
+  minimumTechnicalLevel: 3,
+  // "# Neurological Profile — Motor Complexity: ★★★★★" (5/5).
+  complexity: "very_high",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Deltoids, Latissimus Dorsi,
+  // Biceps, Forearms, Core. Secondary Muscles: Gluteals, Quadriceps,
+  // Hamstrings, Neck, Hip Stabilizers." → shoulder (deltoids, latissimus
+  // dorsi — matching BACK_SQUAT's/PULL_UP's own "Latissimus Dorsi" →
+  // shoulder resolution), upper_arm (biceps), forearm, abdomen (core),
+  // hip (gluteals, hip stabilizers), thigh (quadriceps, hamstrings), neck.
+  bodyRegionsLoaded: ["shoulder", "upper_arm", "forearm", "abdomen", "hip", "thigh", "neck"],
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["mixed", "rotation", "locomotion", "isometric"], absolute: true },
+    { description: "Acute cervical injury.", region: "cervical_spine", prohibitedPatterns: ["mixed", "rotation", "locomotion", "isometric"], absolute: true },
+    { description: "Acute elbow injury.", region: "elbow", prohibitedPatterns: ["mixed", "rotation", "locomotion", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: Low. Metabolic Fatigue: Moderate." Plain baseline scale
+    // (Low=2/Moderate=3) applies — no "Very Low" co-occurs in this fiche.
+    types: ["neural", "muscular", "connective_tissue", "metabolic"],
+    neural: 3,
+    muscular: 2, // "Mechanical Fatigue: Low"
+    connectiveTissue: 2, // same "Mechanical Fatigue: Low" source
+    metabolic: 3,
+    technical: 3, // fallback from minimumTechnicalLevel 3
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Partner-based clinch
+  // drills effectively improve motor learning, positional awareness, grip
+  // endurance and sport-specific coordination..." — no hedging language —
+  // mapped to "Level 1 — Scientific consensus".
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate and
+  // Sambo are named but have no `CombatSport` enum counterpart and are
+  // omitted.
+  combatSportRelevance: {
+    boxing: 1,
+    kickboxing: 3,
+    muay_thai: 5,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Variations" names "Wall Pummeling" — a distinct compound variation
+  // name of THIS fiche's own, not a standalone reference to
+  // `wall_wrestling` (a separate chapter with its own Equipment
+  // Requirements, Contraindications and combat-sport-relevance profile —
+  // the strict name-matching discipline is not relaxed simply because the
+  // two share the word "Wall"). No other Progression/Regression/Variation
+  // names a standalone exercise with its own chapter/catalog id. No "#
+  // Substitution Logic" section exists in this fiche either.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Wall Wrestling
+// Source: 50-exercises/32_WALL_WRESTLING
+// -----------------------------------------------------------------------------
+
+/**
+ * Third entry of this batch. "# Primary Classification: Combat-Specific
+ * Technique", the same framing as PUMMELING above.
+ *
+ * WALL-OR-CAGE DECISION, explicitly verified before writing began: "#
+ * Equipment Requirements — Required: Training Partner, Wall or MMA Cage."
+ * TWO distinct required items, both unconditional. The legacy `"wall"`
+ * `EquipmentType` member is deliberately NOT used here — this Exercise
+ * Requirements Model already has a dedicated `usable_wall`
+ * `EnvironmentCapability` (used throughout `67_BALLISTICS` for wall-based
+ * throw alternatives), and it is reused directly. No dedicated "cage"
+ * concept is created: this taxonomy simply does not distinguish a padded
+ * wall from an MMA cage, and `usable_wall` is used to represent only the
+ * common biomechanical function both share (a vertical, resistant surface
+ * an opponent can be driven and controlled against) — an openly
+ * documented MODEL LIMITATION, not a silent conflation. Since the fiche
+ * names BOTH the partner AND the wall/cage as unconditionally Required
+ * (not an "either/or" alternative the way `usable_wall`/`partner` are
+ * combined in `any_of` for the ballistic throws), both atoms are placed
+ * together inside a single `all_of` clause here.
+ */
+export const WALL_WRESTLING: ExerciseDefinition = {
+  id: "wall_wrestling",
+  name: "Wall Wrestling",
+  module: "movement",
+  primaryAdaptation: "specific_skill",
+  // "# Capability Mapping — Primary: Positional Control, Pressure
+  // Generation, Clinch Efficiency." "Positional Control"/"Clinch
+  // Efficiency" excluded (tactical/skill outcomes, no PhysicalQuality
+  // counterpart). "Pressure Generation" and the Secondary "Strength
+  // Endurance" both describe the same sustained force-application demand
+  // and are collapsed into a single `muscular_endurance` entry, not
+  // double-counted. Secondary: "Grip Endurance" → grip_strength. "Movement
+  // Coordination" → coordination. "Decision Speed" excluded (cognitive).
+  // "Mechanical Robustness" → tissue_capacity (matching SLED_PUSH's/
+  // ROPE_CLIMB's own "Mechanical/Tendon Robustness" resolution).
+  physicalQualities: ["muscular_endurance", "grip_strength", "coordination", "tissue_capacity"],
+  // MODEL LIMITATION, flagged explicitly: "# Movement Pattern — Primary:
+  // Wall Clinch." No MovementPattern value represents this constrained
+  // positional-control action — `"mixed"` is used as the closest honest
+  // generic value for the PRIMARY pattern. "Secondary: Pressure,
+  // Pummeling, Footwork, Level Changes, Takedown Entries, Postural
+  // Control" → isometric (from "Pressure", corroborated by "# Contraction
+  // Profile — Isometric: ★★★★★"), locomotion (from "Footwork").
+  // "Pummeling" is already captured under `"mixed"` above and is not
+  // separately represented (it names the SAME tactical concept
+  // PUMMELING's own entry documents, not a distinct MovementPattern
+  // value). "Level Changes" is an ambiguous combat-jargon term with no
+  // single honest MovementPattern match and is not force-fitted into
+  // `squat`/`hinge`. "Takedown Entries" is deliberately NOT represented
+  // here either — that is SHOT_ENTRIES's own dedicated domain below, and
+  // conflating the two would misrepresent this fiche's own standing-
+  // clinch focus. "Postural Control" excluded (captured via
+  // `muscular_endurance`/`coordination` above).
+  movementPatterns: ["mixed", "isometric", "locomotion"],
+  // "# Biomechanical Profile — Primary Force Vector: Horizontal.
+  // Secondary Force Vector: Multi-Directional" → horizontal, mixed.
+  forceVectors: ["horizontal", "mixed"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "human_assistance", assistance: "partner" },
+          // See block comment above for why `usable_wall` (not a "wall"
+          // `EquipmentType`, not an invented "cage" concept) represents
+          // this fiche's own "Wall or MMA Cage" requirement.
+          { kind: "environment", capability: "usable_wall" },
+        ],
+      },
+    ],
+  },
+  // No space heading of any kind exists anywhere in this fiche (checked
+  // directly) — `sufficient_space` is deliberately NOT added.
+  //
+  // "# Neurological Profile — Skill Requirement: Intermediate. Requires
+  // basic clinch mechanics."
+  minimumTechnicalLevel: 3,
+  // "# Neurological Profile — Motor Complexity: ★★★★★" (5/5).
+  complexity: "very_high",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Gluteals, Quadriceps,
+  // Hamstrings, Core, Latissimus Dorsi, Forearms. Secondary Muscles:
+  // Deltoids, Trapezius, Biceps, Neck, Calves, Hip Stabilizers." → hip
+  // (gluteals, hip stabilizers), thigh (quadriceps, hamstrings), abdomen
+  // (core), shoulder (latissimus dorsi, deltoids, trapezius), forearm,
+  // upper_arm (biceps), neck, lower_leg (calves).
+  bodyRegionsLoaded: ["hip", "thigh", "abdomen", "shoulder", "forearm", "upper_arm", "neck", "lower_leg"],
+  contraindications: [
+    { description: "Acute cervical injury.", region: "cervical_spine", prohibitedPatterns: ["mixed", "isometric", "locomotion"], absolute: true },
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["mixed", "isometric", "locomotion"], absolute: true },
+    { description: "Acute knee injury.", region: "knee", prohibitedPatterns: ["mixed", "isometric", "locomotion"], absolute: true },
+    // "Acute Concussion" — same `head` region resolution already used for
+    // HEAVY_BAG_POWER_INTERVALS in Lot 6.
+    { description: "Acute concussion.", region: "head", prohibitedPatterns: ["mixed", "isometric", "locomotion"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: ★★★★★. Mechanical
+    // Fatigue: Moderate. Metabolic Fatigue: ★★★★★." Star ratings read
+    // directly; "Moderate" uses the plain baseline scale.
+    types: ["neural", "muscular", "connective_tissue", "metabolic"],
+    neural: 5,
+    muscular: 3, // "Mechanical Fatigue: Moderate"
+    connectiveTissue: 3, // same "Mechanical Fatigue: Moderate" source
+    metabolic: 5,
+    technical: 3, // fallback from minimumTechnicalLevel 3
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Constraint-based
+  // partner drills effectively improve combat-specific conditioning..." —
+  // no hedging language — mapped to "Level 1 — Scientific consensus".
+  evidenceLevel: "level_1",
+  combatSportRelevance: {
+    boxing: 1,
+    kickboxing: 3,
+    muay_thai: 5,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Variations" names "Double Underhook Battle" — the same shared
+  // variation-vocabulary overlap already noted for PUMMELING above, not a
+  // standalone substitution reference (this fiche's own "Double Underhook
+  // Battle" is a Wall-Wrestling-specific variation, not `pummeling`
+  // itself). No other Progression/Regression/Variation names a standalone
+  // exercise with its own chapter/catalog id. No "# Substitution Logic"
+  // section exists in this fiche either.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Grip Fighting
+// Source: 50-exercises/33_GRIP_FIGHTING
+// -----------------------------------------------------------------------------
+
+/**
+ * Fourth entry of this batch. "# Primary Classification: Combat-Specific
+ * Technique", the same framing as PUMMELING/WALL_WRESTLING above.
+ *
+ * BUSINESS DISTINCTION from PLATE_PINCH/TOWEL_PULL_UP/ROPE_PULL/
+ * WRIST_STRENGTHENING, explicitly verified before writing began: those
+ * four are isolated grip/forearm-STRENGTH exercises — solo, equipment-
+ * gated (`pinch_grip_implement`/`towel`/`rope`/`other`), with a
+ * `maximum_strength` or `robustness` `primaryAdaptation` and no partner
+ * requirement anywhere in their own documentation. Grip Fighting is the
+ * opposite profile in every one of those dimensions: "# Equipment
+ * Requirements — Required: Training Partner" (no physical grip implement
+ * at all — Gi/No-Gi Clothing/Grip Trainer/Resistance Bands are all
+ * explicitly Optional), a `specific_skill` `primaryAdaptation`, and every
+ * named Variation (Gi Grip Fighting, No-Gi Hand Fighting, One-Hand Only,
+ * Reaction Commands, Wall Grip Fighting) is inherently two-person — no
+ * solo form is documented anywhere (checked directly). This is sport
+ * grip-FIGHTING (a tactile, reactive, opponent-facing combat skill), not
+ * isolated grip-strength training, and the two are never conflated.
+ */
+export const GRIP_FIGHTING: ExerciseDefinition = {
+  id: "grip_fighting",
+  name: "Grip Fighting",
+  module: "movement",
+  primaryAdaptation: "specific_skill",
+  // "# Capability Mapping — Primary: Grip Dominance, Reaction Speed,
+  // Tactile Awareness." "Grip Dominance" excluded (a tactical outcome —
+  // distinct from the separately, explicitly named Secondary "Grip
+  // Strength" below, which IS a genuine PhysicalQuality). "Reaction
+  // Speed" excluded (no clean speed/agility match, matching
+  // TECHNICAL_STAND_UP's/PUMMELING's own established exclusion). "Tactile
+  // Awareness" excluded (sensory, no counterpart). Secondary: "Grip
+  // Strength" → grip_strength (exact match). "Decision Making" excluded
+  // (cognitive). "Movement Coordination" → coordination. "Distance
+  // Management"/"Technical Precision" excluded (tactical/skill
+  // descriptors, no PhysicalQuality counterpart).
+  physicalQualities: ["grip_strength", "coordination"],
+  // MODEL LIMITATION, flagged explicitly: "# Movement Pattern — Primary:
+  // Hand Fighting." No MovementPattern value represents this tactile
+  // hand-control action — `"mixed"` is used as the closest honest generic
+  // value for the PRIMARY pattern. "Secondary: Grip Acquisition, Grip
+  // Breaking, Push-Pull, Footwork, Postural Control, Distance Management"
+  // → locomotion (from "Footwork"). "Grip Acquisition"/"Grip
+  // Breaking"/"Postural Control"/"Distance Management" have no distinct
+  // MovementPattern counterpart and are already captured via
+  // `"mixed"`/`coordination` above. "Push-Pull" carries no directional
+  // qualifier of its own (the same ambiguity already excluded for
+  // ASSAULT_BIKE_INTERVALS's own "Push, Pull" in Lot 7) and is not
+  // force-fitted into `horizontal_push`/`horizontal_pull`. "# Contraction
+  // Profile — Isometric: ★★★★★" is a separately, strongly documented
+  // metric (sustained grip-holding/blocking) and earns its own `isometric`
+  // entry, the same treatment already given to PUMMELING/WALL_WRESTLING
+  // above.
+  movementPatterns: ["mixed", "isometric", "locomotion"],
+  // "# Biomechanical Profile — Primary Force Vector: Multi-Directional" →
+  // mixed.
+  forceVectors: ["mixed"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [{ kind: "human_assistance", assistance: "partner" }],
+      },
+    ],
+  },
+  // No space heading of any kind exists anywhere in this fiche (checked
+  // directly) — `sufficient_space` is deliberately NOT added. Gi/No-Gi
+  // clothing and a Grip Trainer are all explicitly Optional — no
+  // equipment atom is added.
+  //
+  // "# Neurological Profile — Skill Requirement: Intermediate. Learning
+  // Curve: Continuous." (the authoritative source — the later, separately
+  // duplicated "# Skill Requirement — Suitable For: Beginners,
+  // Intermediate, Advanced, Elite" heading mirrors this fiche's own "#
+  // Athlete Suitability" section rather than adding new difficulty-rating
+  // information, the same duplication pattern already resolved for
+  // BATTLE_ROPES/GRIP_FIGHTING's own sibling entries in this batch).
+  minimumTechnicalLevel: 3,
+  // "# Neurological Profile — Motor Complexity: ★★★★★" (5/5).
+  complexity: "very_high",
+  // "One-Hand Only" is named only as a documented Variation, not this
+  // exercise's own default bilateral form.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Forearm Flexors, Forearm
+  // Extensors, Biceps, Deltoids, Latissimus Dorsi, Core. Secondary
+  // Muscles: Neck, Trapezius, Hip Stabilizers." → forearm, upper_arm
+  // (biceps), shoulder (deltoids, latissimus dorsi, trapezius), abdomen
+  // (core), neck, hip (hip stabilizers).
+  bodyRegionsLoaded: ["forearm", "upper_arm", "shoulder", "abdomen", "neck", "hip"],
+  contraindications: [
+    { description: "Acute finger injury.", region: "finger", prohibitedPatterns: ["mixed", "isometric", "locomotion"], absolute: true },
+    { description: "Acute wrist injury.", region: "wrist", prohibitedPatterns: ["mixed", "isometric", "locomotion"], absolute: true },
+    { description: "Acute elbow injury.", region: "elbow", prohibitedPatterns: ["mixed", "isometric", "locomotion"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: Low. Metabolic Fatigue: Moderate." Plain baseline scale
+    // (Low=2/Moderate=3) applies.
+    types: ["neural", "muscular", "connective_tissue", "metabolic"],
+    neural: 3,
+    muscular: 2, // "Mechanical Fatigue: Low"
+    connectiveTissue: 2, // same "Mechanical Fatigue: Low" source
+    metabolic: 3,
+    technical: 3, // fallback from minimumTechnicalLevel 3
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Partner-based grip
+  // fighting drills improve grip endurance, tactile perception, motor
+  // coordination and decision-making..." — no hedging language — mapped
+  // to "Level 1 — Scientific consensus".
+  evidenceLevel: "level_1",
+  combatSportRelevance: {
+    boxing: 1,
+    kickboxing: 2,
+    muay_thai: 3,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 4,
+  },
+  // "# Progressions" names "Grip to Throw"/"Grip to Shot" — distinct
+  // compound drill names, not standalone substitution references
+  // ("Grip to Shot" ≠ `shot_entries`, the same strict name-matching
+  // discipline applied throughout this batch). "# Variations" names "Wall
+  // Grip Fighting" — again a distinct compound name of this fiche's own,
+  // not `wall_wrestling`. No other Progression/Regression/Variation names
+  // a standalone exercise with its own chapter/catalog id, and no "#
+  // Substitution Logic" section exists in this fiche either.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Shot Entries
+// Source: 50-exercises/36_SHOT_ENTRIES
+// -----------------------------------------------------------------------------
+
+/**
+ * Fifth and final entry of this batch. "# Primary Classification:
+ * Combat-Specific Movement" — the same framing already used for SPRAWL
+ * above, hence the identical `primaryAdaptation: "specific_skill"`
+ * resolution.
+ *
+ * SOLO-VS-PARTNER DECISION, explicitly verified before writing began: "#
+ * Equipment Requirements — Required: Mat. Optional: **Partner**, Reaction
+ * Lights, Cones, Coach Commands" and "# Movement Context — ... Partner or
+ * Solo" (an explicit, literal statement that both forms are valid) plus
+ * "# Regressions — ... Penetration Step Only" (a documented, named SOLO
+ * technical drill). No `human_assistance` clause is added — the same
+ * resolution already used for SPRAWL above, and directly answering the
+ * user's own instruction not to invent a partner-vs-equipment alternative
+ * where the fiche itself never poses one: partner here is purely an
+ * optional resistance addition ("# Progressions — ... Partner
+ * Resistance"), never a gating condition.
+ */
+export const SHOT_ENTRIES: ExerciseDefinition = {
+  id: "shot_entries",
+  name: "Shot Entries",
+  module: "movement",
+  primaryAdaptation: "specific_skill",
+  // "# Capability Mapping — Primary: Explosive Entry, Acceleration,
+  // Movement Efficiency." "Explosive Entry" → explosive_strength,
+  // corroborated by "Stretch-Shortening Cycle: ★★★★★" and "Rate of Force
+  // Development: ★★★★★" in the Contraction/Biomechanical Profiles (the
+  // latter a separately documented metric, earning its own entry).
+  // "Acceleration" → acceleration (exact). "Movement Efficiency" excluded
+  // (generic). Secondary: "Balance" → balance (exact). "Coordination" →
+  // coordination. "Ground Transition" excluded (generic, matching
+  // TECHNICAL_STAND_UP's/SPRAWL's own identical exclusion). "Reactive
+  // Speed"/"Combat Readiness" excluded (no clean counterpart, matching
+  // this whole batch's established exclusion of these recurring phrases).
+  physicalQualities: ["explosive_strength", "rate_of_force_development", "acceleration", "balance", "coordination"],
+  // MODEL LIMITATION, flagged explicitly: "# Movement Pattern — Primary:
+  // Penetration Step." No MovementPattern value represents this explosive
+  // level-change-and-close-distance action — `"mixed"` is used as the
+  // closest honest generic value for the PRIMARY pattern, the same escape
+  // hatch already used for SPRAWL's own "Hip Projection" above. "Secondary:
+  // Level Change, Acceleration, Brace, Hip Drive, Forward Projection" →
+  // isometric (from "Brace"). "Level Change" is an ambiguous combat-jargon
+  // term with no honest single MovementPattern match (the same exclusion
+  // already applied to WALL_WRESTLING's own "Level Changes" above) and is
+  // not force-fitted into `squat`. "Acceleration" is a PhysicalQuality
+  // concept, not a MovementPattern value, and lives above instead. "Hip
+  // Drive" is already captured under `"mixed"` (the same governing action
+  // as the primary pattern) and is not separately represented. "Forward
+  // Projection" lives in `forceVectors` below, not here.
+  movementPatterns: ["mixed", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Horizontal.
+  // Secondary Force Vector: Vertical." — quoted directly.
+  forceVectors: ["horizontal", "vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          // "Required: Mat" — the same ground-contact safety resolution
+          // already used for SPRAWL above.
+          { kind: "equipment", equipment: "mat" },
+        ],
+      },
+    ],
+  },
+  // No space heading of any kind exists anywhere in this fiche (checked
+  // directly) — `sufficient_space` is deliberately NOT added.
+  //
+  // "# Skill Requirement: Intermediate. Requires mastery of basic
+  // wrestling stance and level changes."
+  minimumTechnicalLevel: 3,
+  // "# Neurological Profile — Motor Complexity: ★★★★★" (5/5).
+  complexity: "very_high",
+  // "Single Leg Entry" is named only as a documented Variation, not this
+  // exercise's own default bilateral form.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Quadriceps, Gluteus Maximus,
+  // Hamstrings, Calves, Core. Secondary Muscles: Hip Flexors, Deltoids,
+  // Triceps, Forearms, Neck." → thigh (quadriceps, hamstrings), hip
+  // (gluteus maximus, hip flexors), lower_leg (calves), abdomen (core),
+  // shoulder (deltoids), upper_arm (triceps), forearm, neck.
+  bodyRegionsLoaded: ["thigh", "hip", "lower_leg", "abdomen", "shoulder", "upper_arm", "forearm", "neck"],
+  contraindications: [
+    { description: "Acute knee injury.", region: "knee", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+    { description: "Acute hip injury.", region: "hip", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+    { description: "Acute lumbar injury.", region: "lumbar_spine", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: Moderate. Metabolic Fatigue: Moderate." Plain baseline
+    // scale (Moderate=3) applies throughout.
+    types: ["neural", "muscular", "connective_tissue", "metabolic"],
+    neural: 3,
+    muscular: 3,
+    connectiveTissue: 3, // same "Mechanical Fatigue: Moderate" source
+    metabolic: 3,
+    technical: 3, // fallback from minimumTechnicalLevel 3
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Repeated penetration
+  // drills improve explosive acceleration, movement coordination and
+  // wrestling-specific performance..." — no hedging language — mapped to
+  // "Level 1 — Scientific consensus".
+  evidenceLevel: "level_1",
+  combatSportRelevance: {
+    boxing: 1,
+    kickboxing: 2,
+    muay_thai: 2,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 4,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Variations" names "Wall Entry" — a distinct compound drill name,
+  // not a standalone substitution reference to `wall_wrestling` (the same
+  // strict name-matching discipline applied throughout this batch). No
+  // other Progression/Regression/Variation names a standalone exercise
+  // with its own chapter/catalog id, and no "# Substitution Logic"
+  // section exists in this fiche either.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -11027,4 +11708,9 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   SPRINT_INTERVALS,
   ASSAULT_BIKE_INTERVALS,
   ROWERG_INTERVALS,
+  SPRAWL,
+  PUMMELING,
+  WALL_WRESTLING,
+  GRIP_FIGHTING,
+  SHOT_ENTRIES,
 ];

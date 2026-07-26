@@ -43,6 +43,7 @@ import {
   FOOTWORK_DRILLS,
   FRONT_RACK_CARRY,
   FRONT_SQUAT,
+  GRIP_FIGHTING,
   HANG_HIGH_PULL,
   HANG_POWER_CLEAN,
   HANGING_LEG_RAISE,
@@ -68,6 +69,7 @@ import {
   PINCH_CARRY,
   PLATE_PINCH,
   PULL_UP,
+  PUMMELING,
   PUSH_PRESS,
   ROMANIAN_DEADLIFT,
   ROPE_CLIMB,
@@ -76,11 +78,13 @@ import {
   ROWERG_INTERVALS,
   SANDBAG_CARRY,
   SHADOW_BOXING,
+  SHOT_ENTRIES,
   SHRIMPING,
   SINGLE_LEG_HOP,
   SLED_PUSH,
   SOLEUS_RAISE,
   SPLIT_SQUAT_JUMP,
+  SPRAWL,
   SPRINT_INTERVALS,
   SUITCASE_CARRY,
   TECHNICAL_STAND_UP,
@@ -88,6 +92,7 @@ import {
   TOWEL_PULL_UP,
   TRAP_BAR_DEADLIFT,
   TURKISH_GET_UP,
+  WALL_WRESTLING,
   WEIGHTED_PULL_UP,
   WRIST_STRENGTHENING,
   ZERCHER_CARRY,
@@ -10359,5 +10364,459 @@ describe("Lot 7 — Conditionnement general — Exercise Requirements Model batc
       }),
     });
     expect(checkExerciseEligibility(ROPE_PULL, ropePullInput).eligible).toBe(true);
+  });
+});
+
+describe("Lot 8 — Combat lutte et grappling debout — Exercise Requirements Model batch integration", () => {
+  const LOT8_EXERCISES = [
+    { exercise: SPRAWL, id: "sprawl" },
+    { exercise: PUMMELING, id: "pummeling" },
+    { exercise: WALL_WRESTLING, id: "wall_wrestling" },
+    { exercise: GRIP_FIGHTING, id: "grip_fighting" },
+    { exercise: SHOT_ENTRIES, id: "shot_entries" },
+  ] as const;
+
+  test.each(LOT8_EXERCISES)("$id — 1. exists in the catalog with the expected id", ({ exercise, id }) => {
+    expect(EXERCISE_KNOWLEDGE_BASE).toContain(exercise);
+    expect(exercise.id).toBe(id);
+  });
+
+  test("2. all five ids are unique within the catalog, and no prior id (e.g. rowerg_intervals) is duplicated", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const { id } of LOT8_EXERCISES) {
+      expect(ids.filter((existingId) => existingId === id)).toHaveLength(1);
+    }
+    expect(ids.filter((existingId) => existingId === "rowerg_intervals")).toEqual(["rowerg_intervals"]);
+  });
+
+  test.each(LOT8_EXERCISES)(
+    "$id — 3. respects the coexistence invariant: requiredEquipment is empty, optionalEquipment is absent",
+    ({ exercise }) => {
+      expect(exercise.requiredEquipment).toEqual([]);
+      expect(exercise.optionalEquipment).toBeUndefined();
+      expect(validateRequirementsCoexistenceInvariant(exercise)).toBeNull();
+      expect(validateExerciseRequirementsStructure(exercise.requirements!)).toEqual([]);
+    },
+  );
+
+  test("4. the default catalog used by runEngine(input) now also contains all five Lot 8 ids", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    for (const { id } of LOT8_EXERCISES) {
+      expect(ids).toContain(id);
+    }
+  });
+
+  test.each(LOT8_EXERCISES)("$id — 5. never mutates the exercise or the input it is given during evaluation", ({ exercise }) => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "mat" }],
+        usableWall: true,
+        partnerAvailable: true,
+      }),
+    });
+    const exerciseSnapshot = structuredClone(exercise);
+    const inputSnapshot = structuredClone(input);
+
+    checkExerciseEligibility(exercise, input);
+
+    expect(exercise).toEqual(exerciseSnapshot);
+    expect(input).toEqual(inputSnapshot);
+  });
+
+  describe("SPRAWL", () => {
+    test("6. eligible with a mat, no partner needed", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "mat" }], partnerAvailable: false }),
+      });
+
+      const result = checkExerciseEligibility(SPRAWL, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("7. ineligible without a mat", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(SPRAWL, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("8. no dependency on a wall, sufficient_space, jumping or throwing — none is documented", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "mat" }],
+          availableSpace: "very_limited",
+          usableWall: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(SPRAWL, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+      expect(SPRAWL.requirements!.required.flatMap((c) => c.items).some((a) => a.kind === "human_assistance")).toBe(false);
+    });
+
+    test("9. biomechanical fields match the canonical documentation", () => {
+      expect(SPRAWL.movementPatterns).toEqual(["mixed", "isometric"]);
+      expect(SPRAWL.forceVectors).toEqual(["horizontal", "vertical"]);
+      expect(SPRAWL.unilateral).toBe(false);
+      expect(SPRAWL.complexity).toBe("very_high");
+      expect(SPRAWL.minimumTechnicalLevel).toBe(3);
+      expect(SPRAWL.module).toBe("movement");
+      expect(SPRAWL.primaryAdaptation).toBe("specific_skill");
+      expect(SPRAWL.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("PUMMELING", () => {
+    test("10. eligible with a partner and no equipment at all", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [], partnerAvailable: true }),
+      });
+
+      const result = checkExerciseEligibility(PUMMELING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("11. ineligible without a partner — no solo version is invented", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [], partnerAvailable: false }),
+      });
+
+      const result = checkExerciseEligibility(PUMMELING, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "OTHER")).toBe(true);
+    });
+
+    test("12. no dependency on a wall, a mat, sufficient_space, jumping or throwing — the partner alone does not bypass anything, and none of these is documented", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "very_limited",
+          usableWall: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          floorSafe: false,
+          partnerAvailable: true,
+        }),
+      });
+
+      const result = checkExerciseEligibility(PUMMELING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("13. biomechanical fields match the canonical documentation", () => {
+      expect(PUMMELING.movementPatterns).toEqual(["mixed", "rotation", "locomotion", "isometric"]);
+      expect(PUMMELING.forceVectors).toEqual(["mixed"]);
+      expect(PUMMELING.unilateral).toBe(false);
+      expect(PUMMELING.complexity).toBe("very_high");
+      expect(PUMMELING.minimumTechnicalLevel).toBe(3);
+      expect(PUMMELING.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("WALL_WRESTLING", () => {
+    test("14. eligible with both a partner and a usable wall", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [], partnerAvailable: true, usableWall: true }),
+      });
+
+      const result = checkExerciseEligibility(WALL_WRESTLING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("15. ineligible without a partner, and ineligible without a usable wall", () => {
+      const withoutPartner = checkExerciseEligibility(
+        WALL_WRESTLING,
+        makeValidInput({ environment: makeEnvironment({ partnerAvailable: false, usableWall: true }) }),
+      );
+      expect(withoutPartner.eligible).toBe(false);
+      expect(withoutPartner.rejectionReasons.some((r) => r.code === "OTHER")).toBe(true);
+
+      const withoutWall = checkExerciseEligibility(
+        WALL_WRESTLING,
+        makeValidInput({ environment: makeEnvironment({ partnerAvailable: true, usableWall: false }) }),
+      );
+      expect(withoutWall.eligible).toBe(false);
+      expect(withoutWall.rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT")).toBe(true);
+    });
+
+    test("16. no dependency on a mat, sufficient_space, jumping or throwing — none is documented, and no legacy 'wall' EquipmentType is used", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "very_limited",
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          partnerAvailable: true,
+          usableWall: true,
+        }),
+      });
+
+      const result = checkExerciseEligibility(WALL_WRESTLING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+
+      const equipmentAtoms = WALL_WRESTLING.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment");
+      expect(equipmentAtoms).toEqual([]);
+    });
+
+    test("17. biomechanical fields match the canonical documentation", () => {
+      expect(WALL_WRESTLING.movementPatterns).toEqual(["mixed", "isometric", "locomotion"]);
+      expect(WALL_WRESTLING.forceVectors).toEqual(["horizontal", "mixed"]);
+      expect(WALL_WRESTLING.unilateral).toBe(false);
+      expect(WALL_WRESTLING.complexity).toBe("very_high");
+      expect(WALL_WRESTLING.minimumTechnicalLevel).toBe(3);
+      expect(WALL_WRESTLING.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("GRIP_FIGHTING", () => {
+    test("18. eligible with a partner and no equipment at all", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [], partnerAvailable: true }),
+      });
+
+      const result = checkExerciseEligibility(GRIP_FIGHTING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("19. ineligible without a partner — no solo version is invented", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [], partnerAvailable: false }),
+      });
+
+      const result = checkExerciseEligibility(GRIP_FIGHTING, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "OTHER")).toBe(true);
+    });
+
+    test("20. no dependency on a wall, a mat, sufficient_space, jumping or throwing — none is documented", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "very_limited",
+          usableWall: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          partnerAvailable: true,
+        }),
+      });
+
+      const result = checkExerciseEligibility(GRIP_FIGHTING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("21. biomechanical fields match the canonical documentation", () => {
+      expect(GRIP_FIGHTING.movementPatterns).toEqual(["mixed", "isometric", "locomotion"]);
+      expect(GRIP_FIGHTING.forceVectors).toEqual(["mixed"]);
+      expect(GRIP_FIGHTING.unilateral).toBe(false);
+      expect(GRIP_FIGHTING.complexity).toBe("very_high");
+      expect(GRIP_FIGHTING.minimumTechnicalLevel).toBe(3);
+      expect(GRIP_FIGHTING.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("SHOT_ENTRIES", () => {
+    test("22. eligible with a mat, no partner needed", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "mat" }], partnerAvailable: false }),
+      });
+
+      const result = checkExerciseEligibility(SHOT_ENTRIES, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("23. ineligible without a mat", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(SHOT_ENTRIES, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("24. no dependency on a wall, sufficient_space, jumping or throwing — none is documented, and partner is never made mandatory despite being a valid optional resistance addition", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "mat" }],
+          availableSpace: "very_limited",
+          usableWall: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(SHOT_ENTRIES, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+      expect(SHOT_ENTRIES.requirements!.required.flatMap((c) => c.items).some((a) => a.kind === "human_assistance")).toBe(false);
+    });
+
+    test("25. biomechanical fields match the canonical documentation", () => {
+      expect(SHOT_ENTRIES.movementPatterns).toEqual(["mixed", "isometric"]);
+      expect(SHOT_ENTRIES.forceVectors).toEqual(["horizontal", "vertical"]);
+      expect(SHOT_ENTRIES.unilateral).toBe(false);
+      expect(SHOT_ENTRIES.complexity).toBe("very_high");
+      expect(SHOT_ENTRIES.minimumTechnicalLevel).toBe(3);
+      expect(SHOT_ENTRIES.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("business distinctions", () => {
+    test("26. sprawl vs. shot_entries: both are mat-only, partner-free drills, but diverge in physicalQualities and contraindications", () => {
+      const sprawlHumanAssistance = SPRAWL.requirements!.required.flatMap((c) => c.items).filter((a) => a.kind === "human_assistance");
+      const shotEntriesHumanAssistance = SHOT_ENTRIES.requirements!.required
+        .flatMap((c) => c.items)
+        .filter((a) => a.kind === "human_assistance");
+      expect(sprawlHumanAssistance).toEqual([]);
+      expect(shotEntriesHumanAssistance).toEqual([]);
+
+      // SPRAWL is a defensive reaction (reactive_strength/anaerobic_capacity); SHOT_ENTRIES is an
+      // offensive entry (explosive_strength/balance) — distinct physicalQualities sets.
+      expect(SPRAWL.physicalQualities).toContain("reactive_strength");
+      expect(SHOT_ENTRIES.physicalQualities).not.toContain("reactive_strength");
+      expect(SHOT_ENTRIES.physicalQualities).toContain("balance");
+      expect(SPRAWL.physicalQualities).not.toContain("balance");
+
+      // SPRAWL's own contraindications include cervical/wrist (landing-on-hands risk);
+      // SHOT_ENTRIES's own include knee/hip (level-change/penetration risk) instead.
+      const sprawlRegions = SPRAWL.contraindications.map((c) => c.region);
+      const shotEntriesRegions = SHOT_ENTRIES.contraindications.map((c) => c.region);
+      expect(sprawlRegions).toContain("cervical_spine");
+      expect(shotEntriesRegions).not.toContain("cervical_spine");
+      expect(shotEntriesRegions).toContain("knee");
+      expect(sprawlRegions).not.toContain("knee");
+    });
+
+    test("27. pummeling vs. grip_fighting: both require a partner and no equipment, but only PUMMELING documents a rotation pattern", () => {
+      expect(PUMMELING.requiredEquipment).toEqual([]);
+      expect(GRIP_FIGHTING.requiredEquipment).toEqual([]);
+
+      const pummelingHasPartner = PUMMELING.requirements!.required
+        .flatMap((c) => c.items)
+        .some((a) => a.kind === "human_assistance" && a.assistance === "partner");
+      const gripFightingHasPartner = GRIP_FIGHTING.requirements!.required
+        .flatMap((c) => c.items)
+        .some((a) => a.kind === "human_assistance" && a.assistance === "partner");
+      expect(pummelingHasPartner).toBe(true);
+      expect(gripFightingHasPartner).toBe(true);
+
+      // PUMMELING's own clinch-fighting nature documents `rotation` (underhook/overhook
+      // exchanges); GRIP_FIGHTING's own hand-fighting nature does not.
+      expect(PUMMELING.movementPatterns).toContain("rotation");
+      expect(GRIP_FIGHTING.movementPatterns).not.toContain("rotation");
+    });
+
+    test("28. wall_wrestling vs. pummeling: only WALL_WRESTLING requires a second, environmental atom (usable_wall) alongside the partner", () => {
+      const wallWrestlingAtomKinds = WALL_WRESTLING.requirements!.required.flatMap((c) => c.items).map((a) => a.kind);
+      const pummelingAtomKinds = PUMMELING.requirements!.required.flatMap((c) => c.items).map((a) => a.kind);
+
+      expect(wallWrestlingAtomKinds).toEqual(["human_assistance", "environment"]);
+      expect(pummelingAtomKinds).toEqual(["human_assistance"]);
+
+      // No legacy "wall" EquipmentType is used anywhere in this batch.
+      const wallWrestlingEquipment = WALL_WRESTLING.requirements!.required
+        .flatMap((c) => c.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(wallWrestlingEquipment).not.toContain("wall");
+    });
+
+    test("29. grip_fighting vs. the physical grip exercises already integrated (plate_pinch, towel_pull_up, rope_pull): sport hand-fighting vs. isolated grip strength", () => {
+      expect(GRIP_FIGHTING.primaryAdaptation).toBe("specific_skill");
+      expect(PLATE_PINCH.primaryAdaptation).not.toBe("specific_skill");
+      expect(TOWEL_PULL_UP.primaryAdaptation).not.toBe("specific_skill");
+      expect(ROPE_PULL.primaryAdaptation).not.toBe("specific_skill");
+
+      // GRIP_FIGHTING requires a partner and no physical equipment; the three physical grip
+      // exercises require a physical implement and no partner at all.
+      const gripFightingHasPartner = GRIP_FIGHTING.requirements!.required
+        .flatMap((c) => c.items)
+        .some((a) => a.kind === "human_assistance");
+      expect(gripFightingHasPartner).toBe(true);
+      expect(GRIP_FIGHTING.requirements!.required.flatMap((c) => c.items).some((a) => a.kind === "equipment")).toBe(false);
+
+      for (const exercise of [PLATE_PINCH, TOWEL_PULL_UP, ROPE_PULL]) {
+        const hasPartner = (exercise.requirements?.required ?? [])
+          .flatMap((c) => c.items)
+          .some((a) => a.kind === "human_assistance");
+        expect(hasPartner).toBe(false);
+        const hasEquipment = (exercise.requirements?.required ?? [])
+          .flatMap((c) => c.items)
+          .some((a) => a.kind === "equipment");
+        expect(hasEquipment).toBe(true);
+      }
+    });
+
+    test("30. solo drills vs. partner-required drills: SPRAWL/SHOT_ENTRIES carry no human_assistance atom; PUMMELING/WALL_WRESTLING/GRIP_FIGHTING all do", () => {
+      const soloExercises = [SPRAWL, SHOT_ENTRIES];
+      const partnerExercises = [PUMMELING, WALL_WRESTLING, GRIP_FIGHTING];
+
+      for (const exercise of soloExercises) {
+        const hasPartner = exercise.requirements!.required.flatMap((c) => c.items).some((a) => a.kind === "human_assistance");
+        expect(hasPartner).toBe(false);
+      }
+      for (const exercise of partnerExercises) {
+        const hasPartner = exercise.requirements!.required.flatMap((c) => c.items).some((a) => a.kind === "human_assistance");
+        expect(hasPartner).toBe(true);
+      }
+    });
+
+    test("31. human requirements vs. environmental requirements: only WALL_WRESTLING combines both kinds in the same clause", () => {
+      for (const exercise of [PUMMELING, GRIP_FIGHTING]) {
+        const kinds = exercise.requirements!.required.flatMap((c) => c.items).map((a) => a.kind);
+        expect(kinds).toEqual(["human_assistance"]);
+      }
+      const wallWrestlingKinds = WALL_WRESTLING.requirements!.required.flatMap((c) => c.items).map((a) => a.kind);
+      expect(wallWrestlingKinds).toContain("human_assistance");
+      expect(wallWrestlingKinds).toContain("environment");
+    });
+  });
+
+  test("32. adding this batch never changes the previously integrated exercises, including ROWERG_INTERVALS and FARMER_CARRY", () => {
+    const rowergInput = makeValidInput({
+      environment: makeEnvironment({ availableEquipment: [{ type: "cardio_machine" }] }),
+    });
+    expect(checkExerciseEligibility(ROWERG_INTERVALS, rowergInput).eligible).toBe(true);
+
+    const farmerCarryInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "dumbbell" }],
+        availableSpace: "large",
+      }),
+    });
+    expect(checkExerciseEligibility(FARMER_CARRY, farmerCarryInput).eligible).toBe(true);
   });
 });
