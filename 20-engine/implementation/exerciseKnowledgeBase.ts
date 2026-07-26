@@ -4808,6 +4808,1336 @@ export const ZERCHER_CARRY: ExerciseDefinition = {
 // Catalog
 // -----------------------------------------------------------------------------
 
+// -----------------------------------------------------------------------------
+// Ab Wheel Rollout
+// Source: 50-exercises/62_CORE/10_AB_WHEEL.md
+// -----------------------------------------------------------------------------
+
+/**
+ * First entry from the `62_CORE` chapter, migrated as a single coherent
+ * batch alongside PALLOF_PRESS/DEAD_BUG/HOLLOW_BODY_HOLD/HANGING_LEG_RAISE/
+ * DRAGON_FLAG/SUITCASE_CARRY/OVERHEAD_CARRY. No `exercisePrescriptionRegistry.ts`
+ * entry exists for `ab_wheel` (confirmed by direct search) — a known
+ * limitation, documented here without modifying that registry.
+ *
+ * `62_CORE/16_FARMER_CARRY.md` also exists in this chapter but is NOT a
+ * source for anything in this batch: `farmer_carry` is already integrated
+ * with `50-exercises/66_CARRIES/10_FARMER_CARRY.md` as its sole canonical
+ * source (see that entry's own locked-decision comment). `62_CORE`'s own
+ * Farmer Carry fiche is superseded prose, deliberately not re-read here,
+ * matching the precedent already established for that id.
+ *
+ * KNOWN MODEL LIMITATION, flagged explicitly rather than silently
+ * approximated: "Equipment Requirements — Required Equipment: Ab Wheel."
+ * `EquipmentType` has no `ab_wheel` member. "Acceptable Alternatives —
+ * Barbell with rotating plates, Stability Ball, Suspension Trainer, Sliding
+ * Discs, Towels on a suitable surface" are explicitly framed by the fiche
+ * itself as NOT equivalent implementations ("An alternative must therefore
+ * be treated as a separate variation rather than an identical
+ * implementation") — so no `any_of` equivalence group is built from them
+ * either, matching `PUSH_PRESS`'s own precedent of not force-fitting
+ * documented "alternative implement" language into an equivalence atom
+ * when the source itself denies equivalence. The only remaining option
+ * without inventing a new `EquipmentType` value is the catch-all `"other"`
+ * member — used here, but this is a real, flagged precision loss: the
+ * engine cannot distinguish "the athlete owns an Ab Wheel" from "the
+ * athlete owns some unrelated, unlisted implement" when evaluating this
+ * requirement. This is an honest, visible use of the existing escape
+ * hatch, not a silent approximation, and it should be revisited if a
+ * dedicated `ab_wheel` `EquipmentType` is ever added.
+ *
+ * "Standard Setup — 1. Place the Ab Wheel on a stable, non-slip surface."
+ * grounds a genuine `floor_safe` atom (not `safe_landing_surface`: no
+ * jump or landing phase exists anywhere in this fiche), matching
+ * `PUSH_PRESS`'s own identical "stable non-slip surface" → `floor_safe`
+ * resolution. "Kneel on a pad if required for comfort" (Standard Setup
+ * #2) is explicit COMFORT language, not a safety requirement — no
+ * `knee_protection_pad` atom is added, the same safety-required-vs-
+ * comfort-optional distinction applied to `DEAD_BUG`/`HOLLOW_BODY_HOLD`
+ * below. "Space Requirement: Low" grounds `minimumSpace: "limited"`,
+ * matching this file's own established "Low" → `"limited"` mapping.
+ *
+ * "Force Vector" has no dedicated heading in this chapter's own template,
+ * but "Biomechanical Profile — Primary Force Direction: Anterior and
+ * downward relative to the athlete" is explicit and literal —
+ * `forceVectors: ["forward", "downward"]`.
+ */
+export const AB_WHEEL: ExerciseDefinition = {
+  id: "ab_wheel",
+  name: "Ab Wheel Rollout",
+  module: "core",
+  // Primary Adaptation Domain: "Movement" (explicit). Secondary Adaptation
+  // Domains: "Robustness", "Strength" → robustness, maximum_strength (the
+  // closest AdaptationDomain match for "Strength"; AdaptationDomain has no
+  // plain "strength" value).
+  primaryAdaptation: "movement",
+  secondaryAdaptations: ["robustness", "maximum_strength"],
+  // Capability Mapping — Primary: "Anti-Extension Strength", "Dynamic
+  // Trunk Control" → trunk_strength. "Postural Organization" → stability.
+  // Secondary: "Shoulder Stability" → stability (already listed).
+  // "Latissimus-to-Trunk Coordination" → coordination. "Force
+  // Transmission" (named repeatedly throughout every fiche in this
+  // chapter as connective narrative, never as its own distinct trainable
+  // quality) has no PhysicalQuality counterpart and is deliberately never
+  // force-mapped anywhere in this batch — noted once here, applying
+  // uniformly to every entry below. "Controlled Eccentric Strength" /
+  // "Position Maintenance Under Long Leverage" / "Serratus Anterior
+  // Function" / "Whole-Body Bracing" have no distinct counterpart beyond
+  // trunk_strength/stability already listed.
+  physicalQualities: ["trunk_strength", "stability", "coordination"],
+  // Primary Classification — Primary Movement Pattern: "Anti-Extension" →
+  // anti_extension. Secondary Movement Patterns: "Brace" → isometric.
+  // "Shoulder Flexion" / "Dynamic Plank" / "Force Transmission" have no
+  // clean MovementPattern counterpart and are not force-fitted.
+  movementPatterns: ["anti_extension", "isometric"],
+  forceVectors: ["forward", "downward"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      { kind: "all_of", items: [{ kind: "equipment", equipment: "other" }] },
+      {
+        kind: "all_of",
+        items: [
+          { kind: "environment", capability: "floor_safe" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "limited" },
+        ],
+      },
+    ],
+  },
+  // Technical Complexity: "Complexity Level: 3 — Intermediate".
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // No explicit "Unilateral or Bilateral" field exists in this chapter's
+  // own template (checked directly) — inferred from the symmetric,
+  // two-handed rollout described throughout Standard Setup/Execution,
+  // with no per-side prescription language anywhere in this fiche.
+  unilateral: false,
+  // Primary Muscular Contributors only (matching FARMER_CARRY's own
+  // established precedent of excluding Secondary Muscular Contributors):
+  // Rectus Abdominis, Internal/External Obliques, Transversus Abdominis →
+  // abdomen. Latissimus Dorsi, Serratus Anterior → shoulder.
+  bodyRegionsLoaded: ["abdomen", "shoulder"],
+  // "# Contraindications — Hard Exclusions", quoted one item per source
+  // line. Temporary Exclusions/Precautions are not represented, matching
+  // this file's own established convention of only representing the
+  // hard-exclusion tier as `ExerciseContraindication` entries.
+  contraindications: [
+    { description: "Acute unexplained low-back pain.", prohibitedPatterns: ["anti_extension", "isometric"], absolute: true },
+    { description: "Radiating pain.", prohibitedPatterns: ["anti_extension", "isometric"], absolute: true },
+    { description: "Neurological symptoms.", prohibitedPatterns: ["anti_extension", "isometric"], absolute: true },
+    { description: "Acute abdominal or inguinal pain.", prohibitedPatterns: ["anti_extension", "isometric"], absolute: true },
+    {
+      description: "Recent abdominal surgery without appropriate clearance.",
+      prohibitedPatterns: ["anti_extension", "isometric"],
+      absolute: true,
+    },
+    {
+      description: "Acute shoulder injury preventing supported flexion.",
+      prohibitedPatterns: ["anti_extension", "isometric"],
+      absolute: true,
+    },
+    {
+      description: "Acute wrist or elbow injury preventing safe loading.",
+      prohibitedPatterns: ["anti_extension", "isometric"],
+      absolute: true,
+    },
+    { description: "Dizziness during exertion.", prohibitedPatterns: ["anti_extension", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Cost Profile": Neural Cost 2/5, Muscular Cost 3/5,
+    // Connective-Tissue Cost 2/5, Metabolic Cost 1/5. No "Systemic"
+    // fatigue language exists anywhere in this fiche (checked directly) —
+    // excluded from `types`.
+    types: ["neural", "muscular", "connective_tissue"],
+    neural: 2,
+    muscular: 3,
+    metabolic: 1,
+    connectiveTissue: 2,
+    technical: 3, // fallback from "Complexity Level: 3" (minimumTechnicalLevel 3)
+  },
+  // "# Scientific Evidence Position — Evidence Classification: Level 2 —
+  // Supported Exercise Application".
+  evidenceLevel: "level_2",
+  // "# Transfer by Discipline": Boxing/Kickboxing/Muay Thai/Wrestling/
+  // Brazilian Jiu-Jitsu/MMA/Krav Maga: High (5); Judo: Moderate (3).
+  // Savate/Sambo are named in this table but have no `CombatSport` enum
+  // counterpart and are omitted rather than force-mapped.
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 3,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Substitution Rules — Preferred substitution order": "Barbell
+  // Rollout" / "Stability Ball Rollout" / "Suspension Trainer Fallout" /
+  // "Body Saw" / "Long-Lever Plank" name no exercise with its own
+  // chapter/catalog id. "Hollow Body Hold" → hollow_body_hold, "Dead Bug"
+  // → dead_bug (both integrated in this same batch).
+  substitutionExerciseIds: ["hollow_body_hold", "dead_bug"],
+};
+
+// -----------------------------------------------------------------------------
+// Pallof Press
+// Source: 50-exercises/62_CORE/11_PALLOF_PRESS.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Second entry from this batch. `exercisePrescriptionRegistry.ts` has an
+ * entry (`pallofPressEntry`) with `moduleId: "core"`, `laterality:
+ * "bilateral"`, `requiredEquipmentCapabilities: ["cable_or_band_resistance"]`
+ * and `supportedLoadingModes: ["cable", "resistance_band"]` — used as
+ * corroborating, not overriding, evidence, per this file's established
+ * precedence (canonical documentation governs `exerciseKnowledgeBase.ts`).
+ *
+ * "Equipment Requirements — Required Equipment: One of the following:
+ * Cable Machine, Resistance Band." → `any_of` [cable_machine,
+ * resistance_band], both real, existing `EquipmentType` values. No
+ * separate `rigid_anchor_support` atom is added on top of either: unlike
+ * `DRAGON_FLAG`'s own fiche (which lists a stable support AND a separate
+ * "Secure overhead or behind-head hand anchor" as two distinct required
+ * items), this fiche's own "Equipment Requirements" section lists only
+ * the two resistance-source alternatives above and never names a third,
+ * separate anchor requirement — "Anchor security must be verified" (Band
+ * Resistance Limitations) is a setup-quality caution about the chosen
+ * resistance source itself, not a second required implement. This matches
+ * `ROPE_PULL`'s own identical precedent of NOT adding an anchor atom when
+ * the fiche's own Equipment Requirements section never lists one
+ * separately.
+ *
+ * No `floor_safe`/`safe_landing_surface` language exists anywhere in this
+ * fiche (checked directly — "Space Requirement: Low" is the only
+ * environmental line) — a genuine divergence from `AB_WHEEL`'s own
+ * explicit "stable, non-slip surface" grounding, faithfully NOT carried
+ * over here. `minimumSpace: "limited"` matches this file's own "Low" →
+ * `"limited"` convention.
+ *
+ * "Biomechanical Profile — Primary Force Direction: Lateral relative to
+ * the athlete" (the resistance/rotational-torque direction the athlete
+ * resists, the defining demand of an anti-rotation exercise) grounds
+ * `forceVectors: ["lateral"]` directly.
+ *
+ * No explicit "Unilateral or Bilateral" field exists in this fiche's own
+ * Exercise Identity section (checked directly), but `exercisePrescriptionRegistry.ts`
+ * gives `laterality: "bilateral"` explicitly, corroborated by "Standard
+ * Execution — 11. Complete the prescribed work on both sides" (both sides
+ * are always trained within the same prescription, not a single-sided
+ * specialization) — the same "alternating bilateral" reasoning already
+ * used for `ROPE_CLIMB`. `unilateral: false`.
+ */
+export const PALLOF_PRESS: ExerciseDefinition = {
+  id: "pallof_press",
+  name: "Pallof Press",
+  module: "core",
+  // Primary Adaptation Domain: "Movement" (explicit). Secondary Adaptation
+  // Domains: "Robustness", "Strength" → robustness, maximum_strength.
+  primaryAdaptation: "movement",
+  secondaryAdaptations: ["robustness", "maximum_strength"],
+  // Capability Mapping — Primary: "Anti-Rotation Strength", "Trunk
+  // Stability Under Asymmetric Force" → trunk_strength. "Postural
+  // Organization" → stability. Secondary: "Stance Control", "Pelvic
+  // Stability", "Scapular Control", "Frontal-Plane Stability" → stability
+  // (already listed). "Upper- and Lower-Body Coordination" →
+  // coordination. "Force Transmission" not mapped, per the convention
+  // established at AB_WHEEL above.
+  physicalQualities: ["trunk_strength", "stability", "coordination"],
+  // Primary Movement Pattern: "Anti-Rotation" → anti_rotation. Secondary:
+  // "Horizontal Press" → horizontal_push. "Brace" → isometric. "Postural
+  // Control" / "Force Transmission" / "Stance Stability" have no distinct
+  // counterpart beyond what is already listed.
+  movementPatterns: ["anti_rotation", "horizontal_push", "isometric"],
+  forceVectors: ["lateral"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "any_of",
+        items: [
+          { kind: "equipment", equipment: "cable_machine" },
+          { kind: "equipment", equipment: "resistance_band" },
+        ],
+      },
+      { kind: "all_of", items: [{ kind: "environment", capability: "sufficient_space", minimumSpace: "limited" }] },
+    ],
+  },
+  // Technical Complexity: "Complexity Level: 2 — Basic to Intermediate".
+  minimumTechnicalLevel: 2,
+  complexity: "low",
+  unilateral: false,
+  // Primary Muscular Contributors only: Internal/External Obliques,
+  // Transversus Abdominis, Rectus Abdominis, Multifidus, Spinal
+  // Stabilizers → abdomen. Gluteus Medius, Gluteus Maximus → hip.
+  bodyRegionsLoaded: ["abdomen", "hip"],
+  // "# Contraindications — Hard Exclusions", quoted one item per source
+  // line.
+  contraindications: [
+    {
+      description: "Acute unexplained spinal pain.",
+      prohibitedPatterns: ["anti_rotation", "horizontal_push", "isometric"],
+      absolute: true,
+    },
+    {
+      description: "Acute abdominal or inguinal pain.",
+      prohibitedPatterns: ["anti_rotation", "horizontal_push", "isometric"],
+      absolute: true,
+    },
+    { description: "Neurological symptoms.", prohibitedPatterns: ["anti_rotation", "horizontal_push", "isometric"], absolute: true },
+    {
+      description: "Acute shoulder injury preventing the prescribed press.",
+      prohibitedPatterns: ["anti_rotation", "horizontal_push", "isometric"],
+      absolute: true,
+    },
+    {
+      description: "Inability to stand or kneel safely.",
+      prohibitedPatterns: ["anti_rotation", "horizontal_push", "isometric"],
+      absolute: true,
+    },
+    {
+      description: "Dizziness during standing exertion.",
+      prohibitedPatterns: ["anti_rotation", "horizontal_push", "isometric"],
+      absolute: true,
+    },
+    {
+      description: "Acute pain caused by trunk stabilization.",
+      prohibitedPatterns: ["anti_rotation", "horizontal_push", "isometric"],
+      absolute: true,
+    },
+  ],
+  fatigueProfile: {
+    // "# Cost Profile": Neural Cost 1/5 ("Low"), Muscular Cost 2/5 ("Low
+    // to moderate"), Connective-Tissue Cost 1/5 ("Low"), Metabolic Cost
+    // 1/5 ("Low"), Technical Cost 2/5 ("Low to moderate"). Following this
+    // file's established "plain 'Low' → exclude, 'Low to moderate' →
+    // include" convention (see `PLATE_PINCH`'s own systemic-fatigue
+    // comment), only `muscular` (the sole "Low to moderate" rating) is
+    // included in `types` — this is a genuinely very-low-fatigue
+    // exercise, consistent with "Estimated Recovery Cost: Less than 24
+    // hours" and the fiche's own "Stimulus-to-Fatigue Profile" framing of
+    // "relatively low: neural fatigue, muscular damage, metabolic cost,
+    // and recovery demand".
+    types: ["muscular"],
+    neural: 1,
+    muscular: 2,
+    metabolic: 1,
+    connectiveTissue: 1,
+    technical: 2, // fallback from "Complexity Level: 2" (minimumTechnicalLevel 2)
+  },
+  // "# Scientific Evidence Position — Evidence Classification: Level 2 —
+  // Supported Exercise Application".
+  evidenceLevel: "level_2",
+  // "# Transfer by Discipline": every listed discipline rated "High" —
+  // Boxing, Kickboxing, Muay Thai, Wrestling, Brazilian Jiu-Jitsu, Judo,
+  // MMA, Krav Maga (Savate/Sambo omitted, no `CombatSport` counterpart).
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Substitution Rules — Preferred substitution order": "Cable or Band
+  // Anti-Rotation Hold" / "Alternative Pallof Position" / "Offset Carry" /
+  // "Bird Dog Row" / "Side Plank" name no exercise with its own
+  // chapter/catalog id. "Suitcase Carry" → suitcase_carry (integrated in
+  // this same batch). "Dead Bug With Asymmetric Resistance" (Substitution
+  // Rules) / "Dead Bug With Band Resistance" (Equivalent Substitutions)
+  // both describe a banded variant of the base exercise, not a separate
+  // catalog id — mapped to `dead_bug`, the only real id this fiche's own
+  // "Dead Bug" language can resolve to.
+  substitutionExerciseIds: ["suitcase_carry", "dead_bug"],
+};
+
+// -----------------------------------------------------------------------------
+// Dead Bug
+// Source: 50-exercises/62_CORE/12_DEAD_BUG.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Third entry from this batch. No `exercisePrescriptionRegistry.ts` entry
+ * exists for `dead_bug` (confirmed by direct search) — a known
+ * limitation, documented here without modifying that registry.
+ *
+ * "# Equipment Requirements — Required: Floor Space. Optional: Exercise
+ * Mat, Resistance Band, Light Dumbbell, Light Kettlebell, Stability Ball,
+ * Wall." "Floor Space" is not a physical implement — it has no
+ * `EquipmentType` counterpart and is represented instead through the
+ * `sufficient_space` environment atom below. Every other listed item is
+ * explicitly OPTIONAL, not required — `requiredEquipment: []` and no
+ * equipment atom is added to `requirements`, honestly reflecting that
+ * this base exercise needs no physical implement at all. No "non-slip"/
+ * "stable surface"/floor-safety language exists anywhere in this fiche
+ * (checked directly) — unlike `AB_WHEEL`'s own explicit grounding,
+ * "Exercise Mat" here is named only as an OPTIONAL item alongside
+ * Resistance Band/Dumbbell/Kettlebell/Stability Ball, i.e. comfort/
+ * loading equipment, not a safety requirement — `floor_safe` is
+ * deliberately NOT added. "Space Requirements: Minimal" grounds
+ * `minimumSpace: "very_limited"`, matching this file's own established
+ * "Minimal"/single-station → `"very_limited"` convention (see
+ * `TOWEL_PULL_UP`).
+ *
+ * `DEAD_BUG` and `HOLLOW_BODY_HOLD` below share this IDENTICAL
+ * `requirements` shape (`sufficient_space: "very_limited"` only, no
+ * equipment, no floor_safe) — deliberately: both fiches document the
+ * identical "Required: Floor Space / Optional: [comfort/loading
+ * equipment] / Space Requirements: Minimal" structure. The two exercises
+ * are correctly distinguished elsewhere (`primaryAdaptation` — "Movement"
+ * here vs. "Robustness" for Hollow Body Hold; `physicalQualities` —
+ * `muscular_endurance` present only for Hollow Body Hold, whose own
+ * Capability Mapping names "Trunk Strength Endurance" as a distinct
+ * Primary Capability, a term this fiche's own Capability Mapping never
+ * uses; `movementPatterns` — `mixed` present only here, for the dynamic
+ * contralateral limb action Hollow Body Hold's own static hold does not
+ * have; and `fatigueProfile`/`contraindications`), never through the
+ * environmental/equipment gating, which the source documentation gives no
+ * basis to differentiate.
+ *
+ * "# Contraindications and Restrictions" contains ONLY a "Relative
+ * Contraindications" list — no "Absolute Contraindications" section
+ * exists anywhere in this fiche (checked directly), unlike every other
+ * entry in this batch and every prior entry in this file. This file's own
+ * established convention (see `AB_WHEEL`/`PALLOF_PRESS` above and every
+ * prior chapter) represents ONLY the hard-exclusion/absolute tier as
+ * `ExerciseContraindication` entries — "Relative Contraindications" and
+ * "Precautions" tiers are never represented, because `ExerciseContraindication.absolute`
+ * is a strict boolean with no partial-caution value to hold them
+ * faithfully. Since this fiche documents no hard-exclusion tier at all
+ * (consistent with "Safety Profile — Overall Risk: Very Low", the lowest
+ * risk rating of any exercise in this batch), `contraindications: []` is
+ * used — the first empty contraindications array in this catalog, and a
+ * deliberate, faithful reflection of the source's own structure rather
+ * than an omission.
+ *
+ * No dedicated "Force Vector" heading exists, but "Biomechanical Profile
+ * — Primary Force Vector: Anterior-to-Posterior Trunk Control" describes
+ * a stabilization concept, not a spatial movement direction; "Secondary
+ * Force Vector: Longitudinal Limb Leverage" plus the fiche's own
+ * "Contralateral" framing (the arm and leg move away from the trunk
+ * simultaneously, in different directions, on alternating sides) is best
+ * represented by the dedicated `"mixed"` `ForceVector` value rather than
+ * a single directional label.
+ */
+export const DEAD_BUG: ExerciseDefinition = {
+  id: "dead_bug",
+  name: "Dead Bug",
+  module: "core",
+  // "# Primary Adaptation: Movement" (explicit). "# Secondary Adaptations:
+  // Robustness, Trunk Endurance, Breathing Control, Contralateral
+  // Coordination, Force Transmission" — only "Robustness" has a direct
+  // AdaptationDomain counterpart; the rest are finer capability-level
+  // concepts with no AdaptationDomain match and are not force-mapped.
+  primaryAdaptation: "movement",
+  secondaryAdaptations: ["robustness"],
+  // "# Capability Mapping — Primary: Trunk Control, Anti-Extension
+  // Capacity, Lumbopelvic Stability" → trunk_strength. "Secondary:
+  // Contralateral Coordination" → coordination. "Breathing Under
+  // Tension" / "Pelvic Control" / "Ribcage Control" → trunk_strength
+  // (already listed). "Proximal Stability" → stability.
+  physicalQualities: ["trunk_strength", "coordination", "stability"],
+  // "# Movement Pattern — Primary: Anti-Extension" → anti_extension.
+  // "Secondary: Brace" → isometric. "Contralateral Limb Movement" →
+  // mixed (arm and leg move in different directions simultaneously, on
+  // alternating sides — no single directional MovementPattern value
+  // represents this). "Lumbopelvic Control" / "Force Transmission" have
+  // no distinct counterpart beyond what is already listed.
+  movementPatterns: ["anti_extension", "isometric", "mixed"],
+  forceVectors: ["mixed"],
+  requiredEquipment: [],
+  requirements: {
+    required: [{ kind: "all_of", items: [{ kind: "environment", capability: "sufficient_space", minimumSpace: "very_limited" }] }],
+  },
+  // "# Technical Complexity — Level 2 — Basic Technique".
+  minimumTechnicalLevel: 2,
+  complexity: "low",
+  // No explicit "Unilateral or Bilateral" field exists in this fiche's own
+  // template (checked directly). "# Loading Profile — Repetitions: 5–10
+  // per side" prescribes equal work on both sides within the same set
+  // (not a single-sided specialization), and "# Movement Context —
+  // Contralateral" names the alternating-sides structure directly — the
+  // same "alternating bilateral" reasoning already used for `ROPE_CLIMB`.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Transversus Abdominis, Rectus
+  // Abdominis, Internal Obliques, External Obliques" → abdomen only.
+  bodyRegionsLoaded: ["abdomen"],
+  // See the block comment above this export for why this array is empty:
+  // this fiche documents only a "Relative Contraindications" tier, never
+  // an "Absolute"/hard-exclusion tier.
+  contraindications: [],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue ★☆☆☆☆, Mechanical
+    // Fatigue Very Low, Metabolic Fatigue ★☆☆☆☆, Psychological Fatigue
+    // Very Low, Overall Fatigue Cost Very Low." Every dimension is rated
+    // at the lowest available level — `types` is therefore genuinely
+    // empty, the most honest representation of a documented "Very Low"
+    // cost across every axis. "# Physiological Cost" gives the numeric
+    // Rating5 values used below: Neural Cost 1/5, Muscular Cost 2/5,
+    // Connective Tissue Cost 1/5, Metabolic Cost 1/5.
+    types: [],
+    neural: 1,
+    muscular: 2,
+    metabolic: 1,
+    connectiveTissue: 1,
+    technical: 2, // fallback from "Complexity Level: 2" (minimumTechnicalLevel 2)
+  },
+  // "# Evidence Classification — Evidence Level: Level 2 — Expert
+  // Practice".
+  evidenceLevel: "level_2",
+  // "# Relative Transfer Score — Krav Maga ★★★☆☆". This chapter's newer
+  // fiche format (`DEAD_BUG` through `OVERHEAD_CARRY`) gives only a
+  // single combined "Combat Sports" rating plus one named discipline
+  // ("Krav Maga"), never a full per-discipline breakdown the way
+  // `AB_WHEEL`/`PALLOF_PRESS`'s own "Transfer by Discipline" table does —
+  // only the one directly named discipline is populated, rather than
+  // inventing numbers for every other `CombatSport` value from the
+  // generic "Combat Sports" figure.
+  combatSportRelevance: { krav_maga: 3 },
+  // "# Substitution Logic" and "# CAS Selection Logic" name no specific
+  // alternative exercise anywhere in this fiche (checked directly) — both
+  // sections are framed entirely as conditions, not named substitutes.
+  // "# Equivalent Options" (Bird Dog, Bear Plank Hold, Front Plank, Body
+  // Saw Regression, Supine Alternating March) and "# Regression Options"
+  // name no exercise with its own chapter/catalog id either.
+  // `substitutionExerciseIds` is genuinely empty for this entry — the
+  // only one of this batch's 8 exercises with no derivable id from its
+  // own source text.
+};
+
+// -----------------------------------------------------------------------------
+// Hollow Body Hold
+// Source: 50-exercises/62_CORE/13_HOLLOW_BODY_HOLD.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Fourth entry from this batch. `exercisePrescriptionRegistry.ts` has an
+ * entry (`hollowBodyHoldEntry`) with `moduleId: "core"`, `laterality:
+ * "bilateral"` and `requiredEquipmentCapabilities: ["open_space"]` —
+ * corroborating, not overriding, this entry's own `requiredEquipment: []`
+ * / space-only `requirements`.
+ *
+ * See `DEAD_BUG`'s own block comment above for the full reasoning behind
+ * this entry's identical `requirements` shape and the business
+ * distinction between the two exercises.
+ *
+ * "# Contraindications and Restrictions" again contains ONLY a "Relative
+ * Contraindications" list, with no "Absolute Contraindications" section
+ * (checked directly) — `contraindications: []`, matching `DEAD_BUG`'s own
+ * identical structural situation.
+ *
+ * "# Contraction Profile — Isometric ★★★★★, Concentric ★☆☆☆☆, Eccentric
+ * ★☆☆☆☆, Stretch-Shortening Cycle: None" and "# Velocity Profile —
+ * Static, Position-Dominant, No Ballistic Intent" together describe a
+ * purely static hold with no directional force PRODUCTION — the same
+ * situation already resolved for `PLATE_PINCH` using the dedicated
+ * `"not_applicable"` `ForceVector` value, used identically here. This is
+ * also the entry's clearest structural distinction from `DEAD_BUG`, whose
+ * own Contraction Profile shows genuine (if slow) reciprocal limb
+ * movement and therefore earns `"mixed"` instead.
+ */
+export const HOLLOW_BODY_HOLD: ExerciseDefinition = {
+  id: "hollow_body_hold",
+  name: "Hollow Body Hold",
+  module: "core",
+  // "# Primary Adaptation: Robustness" (explicit) — a genuine divergence
+  // from DEAD_BUG's own "Movement" Primary Adaptation, reflecting this
+  // fiche's own static-endurance framing versus DEAD_BUG's motor-control
+  // framing. "# Secondary Adaptations: Anti-Extension Strength,
+  // Anterior-Chain Endurance, Whole-Body Tension, Ribcage–Pelvis Control,
+  // Force Transmission" — none of these have a direct AdaptationDomain
+  // counterpart (unlike DEAD_BUG's own plain "Robustness" secondary
+  // line) — `secondaryAdaptations` is omitted.
+  primaryAdaptation: "robustness",
+  // "# Capability Mapping — Primary: Anti-Extension Capacity, Trunk
+  // Strength Endurance, Whole-Body Tension" → trunk_strength,
+  // muscular_endurance ("Trunk Strength Endurance" is a distinct named
+  // Primary Capability in THIS fiche with no equivalent in DEAD_BUG's own
+  // Capability Mapping — the direct textual source of the two exercises'
+  // key business distinction). "Secondary: Lumbopelvic Stability,
+  // Ribcage Control" → trunk_strength (already listed). "Proximal
+  // Stability" → stability.
+  physicalQualities: ["trunk_strength", "muscular_endurance", "stability"],
+  // "# Movement Pattern — Primary: Anti-Extension" → anti_extension.
+  // "Secondary: Brace, Isometric Trunk Flexion, Whole-Body Tension" →
+  // isometric. No "mixed"/dynamic-limb-movement pattern is added — see
+  // the block comment above for why this is the key structural
+  // distinction from DEAD_BUG.
+  movementPatterns: ["anti_extension", "isometric"],
+  forceVectors: ["not_applicable"],
+  requiredEquipment: [],
+  requirements: {
+    required: [{ kind: "all_of", items: [{ kind: "environment", capability: "sufficient_space", minimumSpace: "very_limited" }] }],
+  },
+  // "# Technical Complexity — Level 2 — Basic Technique".
+  minimumTechnicalLevel: 2,
+  complexity: "low",
+  // No explicit "Unilateral or Bilateral" field exists; `exercisePrescriptionRegistry.ts`
+  // gives `laterality: "bilateral"` directly, matching this fiche's own
+  // fully symmetric hold position (both arms/legs positioned
+  // symmetrically, no per-side prescription anywhere).
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Rectus Abdominis, Transversus
+  // Abdominis, Internal Obliques, External Obliques" → abdomen only.
+  bodyRegionsLoaded: ["abdomen"],
+  // See DEAD_BUG's own block comment above: this fiche documents only a
+  // "Relative Contraindications" tier, never an "Absolute" tier.
+  contraindications: [],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue ★★☆☆☆, Mechanical
+    // Fatigue Low, Metabolic Fatigue ★★☆☆☆, Overall Fatigue Cost Low" —
+    // but "# Decision Summary" explicitly overrides a blanket "Low"
+    // reading for the muscular dimension specifically: "The Hollow Body
+    // Hold can create substantial local trunk fatigue despite a low
+    // systemic recovery cost." `muscular` is therefore included in
+    // `types` on this direct textual corroboration; `neural`/`metabolic`/
+    // `connectiveTissue` are not, having no equivalent contradicting
+    // text. "# Physiological Cost" gives the numeric values: Neural Cost
+    // 2/5, Muscular Cost 3/5, Connective Tissue Cost 1/5, Metabolic Cost
+    // 2/5.
+    types: ["muscular"],
+    neural: 2,
+    muscular: 3,
+    metabolic: 2,
+    connectiveTissue: 1,
+    technical: 2, // fallback from "Complexity Level: 2" (minimumTechnicalLevel 2)
+  },
+  // "# Evidence Classification — Evidence Level: Level 2 — Expert
+  // Practice".
+  evidenceLevel: "level_2",
+  // "# Relative Transfer Score — Krav Maga ★★★☆☆". See DEAD_BUG's own
+  // comment above for why only this one discipline is populated.
+  combatSportRelevance: { krav_maga: 3 },
+  // "# Equivalent Options" names "Dead Bug" first → dead_bug (integrated
+  // in this same batch, real catalog id). "Front Plank" / "Bear Plank
+  // Hold" / "Body Saw Regression" / "Reverse Crunch Iso Hold" name no
+  // exercise with its own chapter/catalog id. "# Substitution Logic" is
+  // condition-only and names no further alternative.
+  substitutionExerciseIds: ["dead_bug"],
+};
+
+// -----------------------------------------------------------------------------
+// Hanging Leg Raise
+// Source: 50-exercises/62_CORE/14_HANGING_LEG_RAISE.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Fifth entry from this batch. No `exercisePrescriptionRegistry.ts` entry
+ * exists for `hanging_leg_raise` (confirmed by direct search) — a known
+ * limitation, documented here without modifying that registry.
+ *
+ * "# Equipment Requirements — Required: Stable pull-up bar or equivalent
+ * overhead structure." The specific, named `pull_up_bar` `EquipmentType`
+ * is used directly, matching `TOWEL_PULL_UP`'s own precedent of preferring
+ * the specific named type over the more generic `rigid_anchor_support`
+ * (created for a materially different, non-bar-specific overhead anchor —
+ * see `DRAGON_FLAG` below) whenever the fiche itself names a bar
+ * specifically, which this one does.
+ *
+ * "# Space Requirements — Vertical clearance sufficient for full
+ * suspension. Horizontal clearance sufficient to avoid contact during
+ * minor body movement. Stable non-slip landing area. No nearby objects
+ * within leg-swing range." No numeric distance is given (unlike the
+ * carry family's own metre-based grounding) — this describes a single
+ * stationary hanging station, matching `TOWEL_PULL_UP`'s own identical
+ * "very_limited" resolution for the same kind of fixed-point suspension
+ * exercise. "Stable non-slip landing area" is a DISTINCT, separately
+ * listed space-requirement bullet here (unlike `TOWEL_PULL_UP`'s own
+ * fiche, which only said "Keep the landing area clear" — a pure
+ * clearance concern, not a surface-safety one) — combined with "Primary
+ * Safety Concerns... Grip failure" as an explicitly named risk, this
+ * grounds a genuine `safe_landing_surface` atom (an unplanned-fall/
+ * grip-failure risk from height, the same semantic category already used
+ * for `ROPE_CLIMB`), added here where `TOWEL_PULL_UP` had no equivalent
+ * textual basis for it.
+ *
+ * "Biomechanical Profile — Primary Force Vector: Inferior-to-Superior Leg
+ * Movement Against Gravity" is explicit and literal — `forceVectors:
+ * ["upward"]`.
+ */
+export const HANGING_LEG_RAISE: ExerciseDefinition = {
+  id: "hanging_leg_raise",
+  name: "Hanging Leg Raise",
+  module: "core",
+  // "# Primary Adaptation: Robustness" (explicit). "# Secondary
+  // Adaptations: Anterior-Core Strength, Dynamic Anti-Extension Capacity,
+  // Posterior Pelvic Control, Hip-Flexion Strength, Grip Endurance,
+  // Active Shoulder Stability" — none map cleanly to a distinct
+  // AdaptationDomain value; `secondaryAdaptations` is omitted.
+  primaryAdaptation: "robustness",
+  // "# Capability Mapping — Primary: Dynamic Trunk Strength, Anterior-Core
+  // Capacity, Pelvic Control" → trunk_strength. "Secondary: Grip
+  // Endurance" → grip_strength. "Shoulder-Girdle Stability" → stability.
+  // "Anti-Extension Capacity" → trunk_strength (already listed).
+  // "Whole-Body Coordination" → coordination. "Hip-Flexor Strength" has
+  // no distinct PhysicalQuality counterpart (no "hip strength" enum
+  // value exists) and is not force-fitted.
+  physicalQualities: ["trunk_strength", "grip_strength", "stability", "coordination"],
+  // "# Movement Pattern — Primary: Trunk Flexion." MovementPattern has no
+  // plain "flexion" value — its `anti_flexion` member represents
+  // RESISTING flexion, the opposite concept from this exercise's own
+  // concentric, actively produced trunk/hip flexion — using it here would
+  // be a direct mislabel. Combined with "Secondary: Hip Flexion,
+  // Posterior Pelvic Tilt", the honest representation of this
+  // multi-joint concentric action (with no single MovementPattern value
+  // covering it) is `"mixed"`. "Active Hang" / "Anti-Swing Control" →
+  // isometric (shoulder-girdle and grip stabilization throughout).
+  movementPatterns: ["mixed", "isometric"],
+  forceVectors: ["upward"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "pull_up_bar" },
+          { kind: "environment", capability: "safe_landing_surface" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "very_limited" },
+        ],
+      },
+    ],
+  },
+  // "# Technical Complexity — Level 4 — Advanced Technique."
+  minimumTechnicalLevel: 4,
+  complexity: "high",
+  // No explicit "Unilateral or Bilateral" field exists; both hands hang
+  // from the bar and both legs move together throughout (no per-side
+  // prescription anywhere in this fiche) — a genuinely bilateral
+  // movement.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Rectus Abdominis, External
+  // Obliques, Internal Obliques, Iliopsoas, Rectus Femoris" → abdomen
+  // (Rectus Abdominis, External/Internal Obliques), hip (Iliopsoas), thigh
+  // (Rectus Femoris). Forearm/grip/shoulder musculature is listed only
+  // under Secondary Muscles and is excluded, matching this file's
+  // established primary-only convention (even though grip/shoulder
+  // demand is real and separately captured through `physicalQualities`
+  // and `contraindications` below).
+  bodyRegionsLoaded: ["abdomen", "hip", "thigh"],
+  // "# Contraindications and Restrictions — Absolute Contraindications",
+  // quoted one item per source line. "Unstable or unsafe overhead
+  // equipment" is excluded — an equipment/environment concern already
+  // captured by `requirements`, matching this file's established
+  // exclusion of equivalent "unsafe [setup]" phrases elsewhere (e.g.
+  // `ROPE_CLIMB`/`FARMER_CARRY`). "Relative Contraindications" are not
+  // represented, matching this file's convention throughout.
+  contraindications: [
+    { description: "Acute shoulder injury preventing hanging.", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+    {
+      description: "Acute elbow, wrist or hand injury preventing safe grip.",
+      prohibitedPatterns: ["mixed", "isometric"],
+      absolute: true,
+    },
+    { description: "Severe grip impairment.", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+    { description: "Acute abdominal injury.", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Physiological Cost" uses a different category template than
+    // DEAD_BUG/HOLLOW_BODY_HOLD's own Neural/Muscular/Connective/
+    // Metabolic split: "Global Fatigue ★★☆☆☆, Local Trunk Fatigue
+    // ★★★★☆, Grip Fatigue ★★★☆☆, Shoulder-Girdle Fatigue ★★★☆☆, Joint
+    // Stress ★★☆☆☆, Recovery Cost ★★☆☆☆." Mapped as: "Global Fatigue" →
+    // neural (the closest available proxy for overall CNS/systemic
+    // demand in this template, applied identically for DRAGON_FLAG
+    // below); "Local Trunk Fatigue" → muscular; "Joint Stress" →
+    // connectiveTissue. No explicit metabolic line exists in this
+    // section — "# Physiological Profile — Metabolic Cost ★★★☆☆" (an
+    // earlier section in this same fiche) is used instead.
+    // `types` includes ratings explicitly at or above "Moderate": muscular
+    // (4, "Local Trunk Fatigue" high), metabolic (3), and the dedicated
+    // "grip" fatigue signal is real and explicitly named ("Grip Fatigue
+    // ★★★☆☆") but `FatigueType`'s own "grip" member is never used
+    // anywhere else in this catalog even for equally grip-dominant
+    // entries (FARMER_CARRY, PINCH_CARRY, ROPE_CLIMB) — not introduced
+    // here either, to stay consistent with that established (if
+    // unwritten) precedent; the grip-fatigue signal is instead captured
+    // through `physicalQualities: ["grip_strength", ...]` above. `neural`
+    // (2) and `connectiveTissue` (2, "Joint Stress ★★☆☆☆") are excluded
+    // from `types`, both below the "Moderate" threshold.
+    types: ["muscular", "metabolic"],
+    neural: 2,
+    muscular: 4,
+    metabolic: 3,
+    connectiveTissue: 2,
+    technical: 4, // fallback from "Complexity Level: 4" (minimumTechnicalLevel 4)
+  },
+  // "# Evidence Classification — Evidence Level: Level 2 — Expert
+  // Practice".
+  evidenceLevel: "level_2",
+  // "# Relative Transfer Score — Krav Maga ★★★☆☆". See DEAD_BUG's own
+  // comment above for why only this one discipline is populated.
+  combatSportRelevance: { krav_maga: 3 },
+  // "# Substitution Logic — Preferred Substitutions by Limitation" names
+  // "Dead Bug" → dead_bug and "Hollow Body Hold" → hollow_body_hold (both
+  // integrated in this same batch). "Captain's Chair Knee Raise" /
+  // "Reverse Crunch" / "Lying Leg Raise" / "Ab-Strap Knee Raise" /
+  // "Hanging Knee Raise" / "Partial-Range Leg Raise" / "Bent-Knee
+  // Supported Raise" name no exercise with its own chapter/catalog id.
+  substitutionExerciseIds: ["dead_bug", "hollow_body_hold"],
+};
+
+// -----------------------------------------------------------------------------
+// Dragon Flag
+// Source: 50-exercises/62_CORE/15_DRAGON_FLAG.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Sixth entry from this batch. `exercisePrescriptionRegistry.ts` has an
+ * entry (`dragonFlagEntry`) with `moduleId: "core"`, `laterality:
+ * "bilateral"` and `requiredEquipmentCapabilities: ["bench",
+ * "rigid_anchor_support"]` — a direct, exact corroboration of this
+ * entry's own two-atom equipment requirement below, independently
+ * confirming the reading of "# Equipment Requirements — Required: Stable
+ * bench, fixed post or equivalent rigid support" AND "Secure overhead or
+ * behind-head hand anchor" as two SEPARATE required items, not one. The
+ * fiche's own Execution Standard ("Grip the bench, post or handles behind
+ * the head") shows these can sometimes be satisfied by the same physical
+ * object in practice, but the Equipment Requirements section documents
+ * them as two distinct required bullets and the registry corroborates
+ * treating them as two distinct atoms — `bench` (the existing,
+ * real `EquipmentType` value, used directly since "bench" is the first
+ * and most concrete of the "bench, fixed post or equivalent" options; no
+ * separate "post" `EquipmentType` exists and none is invented) AND
+ * `rigid_anchor_support` (the generic anchor type, correctly used here —
+ * this is precisely the "materially different, non-bar-specific anchor
+ * concept" the type was created for, per `TOWEL_PULL_UP`'s own comment).
+ *
+ * "# Space Requirements — Horizontal clearance for full body length.
+ * Stable non-slip support. Clear area around the feet and hips.
+ * Sufficient room to lower without contact with nearby equipment." "Full
+ * body length" clearance is a real, single-station-but-body-sized claim,
+ * comparable in magnitude to `PUSH_PRESS`'s own "Moderate floor space"
+ * grounding — `minimumSpace: "moderate"`. "Stable non-slip support"
+ * describes the required BENCH's own stability (already gated by
+ * requiring the `bench` equipment atom itself), not a separate open-floor
+ * contact concern the way `AB_WHEEL`'s/`SUITCASE_CARRY`'s own "non-slip
+ * surface" language does (the athlete's back rests on the bench, not
+ * directly on the floor) — `floor_safe` is deliberately NOT added.
+ *
+ * "Biomechanical Profile — Primary Force Vector: Gravitational Extension
+ * Torque Acting on the Whole-Body Lever" names gravity explicitly as the
+ * primary force — `forceVectors: ["downward"]`. "Secondary Force Vector:
+ * Upper-Body Pull Against the Fixed Anchor" names a direction relative to
+ * an anchor whose own position ("overhead or behind-head") is itself
+ * variable per this fiche's own language, too ambiguous to resolve to a
+ * single spatial value — not added, consistent with this file's
+ * established practice of leaning conservative under genuine ambiguity.
+ */
+export const DRAGON_FLAG: ExerciseDefinition = {
+  id: "dragon_flag",
+  name: "Dragon Flag",
+  module: "core",
+  // "# Primary Adaptation: Robustness" (explicit). "# Secondary
+  // Adaptations: Anterior-Core Strength, Dynamic Anti-Extension Capacity,
+  // Posterior Pelvic Control, Whole-Body Rigidity, Shoulder-Girdle
+  // Stability, Long-Lever Eccentric Strength" — none map cleanly to a
+  // distinct AdaptationDomain value; `secondaryAdaptations` is omitted.
+  primaryAdaptation: "robustness",
+  // "# Capability Mapping — Primary: Advanced Anti-Extension Strength,
+  // Anterior-Core Capacity, Whole-Body Tension" → trunk_strength.
+  // "Secondary: Posterior Pelvic Control, Eccentric Trunk Strength,
+  // Body-Line Control" → trunk_strength (already listed).
+  // "Shoulder-Girdle Stability" → stability. "Force Transmission" not
+  // mapped, per the convention established at AB_WHEEL above.
+  physicalQualities: ["trunk_strength", "stability"],
+  // "# Movement Pattern — Primary: Dynamic Anti-Extension" →
+  // anti_extension. "Secondary: Posterior Pelvic Tilt, Trunk Flexion
+  // Isometric, Shoulder Extension Isometric, Whole-Body Bracing" →
+  // isometric.
+  movementPatterns: ["anti_extension", "isometric"],
+  forceVectors: ["downward"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "bench" },
+          { kind: "equipment", equipment: "rigid_anchor_support" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "moderate" },
+        ],
+      },
+    ],
+  },
+  // "# Technical Complexity — Level 5 — Highly Advanced Technique."
+  minimumTechnicalLevel: 5,
+  complexity: "very_high",
+  // No explicit "Unilateral or Bilateral" field exists; the body moves as
+  // a single rigid, symmetric lever throughout (no per-side prescription
+  // anywhere in this fiche) — a genuinely bilateral movement.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Rectus Abdominis, External
+  // Obliques, Internal Obliques, Transversus Abdominis" → abdomen only.
+  bodyRegionsLoaded: ["abdomen"],
+  // "# Contraindications and Restrictions — Absolute Contraindications",
+  // quoted one item per source line. "Unstable bench or anchor" is
+  // excluded — an equipment/environment concern already captured by
+  // `requirements`.
+  contraindications: [
+    { description: "Acute cervical injury.", prohibitedPatterns: ["anti_extension", "isometric"], absolute: true },
+    {
+      description: "Acute shoulder injury preventing safe anchoring.",
+      prohibitedPatterns: ["anti_extension", "isometric"],
+      absolute: true,
+    },
+    { description: "Acute abdominal injury.", prohibitedPatterns: ["anti_extension", "isometric"], absolute: true },
+    {
+      description: "Recent abdominal or spinal surgery without clearance.",
+      prohibitedPatterns: ["anti_extension", "isometric"],
+      absolute: true,
+    },
+  ],
+  fatigueProfile: {
+    // "# Physiological Cost — Global Fatigue ★★☆☆☆, Local Trunk Fatigue
+    // ★★★★★, Grip Fatigue ★★☆☆☆, Shoulder-Girdle Fatigue ★★★☆☆, Joint
+    // Stress ★★★☆☆, Recovery Cost ★★★☆☆." Mapped identically to
+    // HANGING_LEG_RAISE above: "Global Fatigue" → neural, "Local Trunk
+    // Fatigue" → muscular, "Joint Stress" → connectiveTissue. No
+    // explicit metabolic line exists in this section — "# Physiological
+    // Profile — Metabolic Cost ★★☆☆☆" (an earlier section) is used
+    // instead. `types` includes muscular (5, "Very High" — the highest
+    // local-fatigue rating of any entry in this batch) and
+    // connectiveTissue (3, "Joint Stress ★★★☆☆", at the "Moderate"
+    // threshold). `neural` (2) and `metabolic` (2) are excluded, both
+    // below that threshold; `grip` (2/5, and genuinely minor for this
+    // exercise — only a light behind-the-head hand anchor, not a
+    // sustained loaded grip) is not introduced as a `types` tag, per the
+    // same reasoning given at HANGING_LEG_RAISE above.
+    types: ["muscular", "connective_tissue"],
+    neural: 2,
+    muscular: 5,
+    metabolic: 2,
+    connectiveTissue: 3,
+    technical: 5, // fallback from "Complexity Level: 5" (minimumTechnicalLevel 5)
+  },
+  // "# Evidence Classification — Evidence Level: Level 3 — Established
+  // Practice."
+  evidenceLevel: "level_3",
+  // "# Relative Transfer Score — Krav Maga ★★★☆☆". See DEAD_BUG's own
+  // comment above for why only this one discipline is populated.
+  combatSportRelevance: { krav_maga: 3 },
+  // "# Substitution Logic — Preferred Substitutions by Limitation" names
+  // "Dead Bug" → dead_bug, "Hollow Body Hold" → hollow_body_hold and "Ab
+  // Wheel Rollout" → ab_wheel (all three integrated in this same batch).
+  // "Reverse Crunch" / "Tuck Dragon Flag" / "Band-Assisted Dragon Flag" /
+  // "Body Saw" / "Long-Lever Plank" name no exercise with its own
+  // chapter/catalog id.
+  substitutionExerciseIds: ["dead_bug", "hollow_body_hold", "ab_wheel"],
+};
+
+// -----------------------------------------------------------------------------
+// Suitcase Carry
+// Source: 50-exercises/62_CORE/17_SUITCASE_CARRY.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Seventh entry from this batch. `farmer_carry` is already integrated
+ * with `50-exercises/66_CARRIES/10_FARMER_CARRY.md` as its sole canonical
+ * source — reported as already covered, not touched here. `suitcase_carry`
+ * itself has never had a catalog entry anywhere before this batch
+ * (confirmed by direct search for `id: "suitcase_carry"` across this
+ * file, prior to this change) and `66_CARRIES` does not document it
+ * either (that chapter only covers Farmer/Front-Rack/Sandbag/Zercher
+ * Carry) — `62_CORE/17_SUITCASE_CARRY.md` is therefore this id's own sole
+ * canonical source, with no duplicate-source conflict to resolve.
+ *
+ * `exercisePrescriptionRegistry.ts` has an entry (`suitcaseCarryEntry`)
+ * with `moduleId: "grip"`, `laterality: "unilateral"`,
+ * `requiredEquipmentCapabilities: ["loaded_carry_implement"]` and
+ * `supportedLoadingModes: ["dumbbell", "kettlebell"]` — corroborating,
+ * not overriding, evidence, per this file's established precedence.
+ * `module: "grip"` (not `"core"`) is used directly, matching
+ * `FARMER_CARRY`'s own identical resolution of the same "# Module
+ * Classification — Loaded Carry Exercises... may implement the Core
+ * module [or] the Carry module" ambiguity documented in this chapter's
+ * own `00_OVERVIEW.md`: `CapabilityModule` has no dedicated `"carry"`
+ * value, `"grip"` is the closest real value, and the registry corroborates
+ * it directly for this id too.
+ *
+ * "# Equipment Requirements — Preferred Equipment: Heavy Dumbbell or
+ * Kettlebell. Acceptable Equipment: Farmer Carry Handle, Loadable
+ * Suitcase Implement, Sandbag with Secure Handle, Purpose-Built Carry
+ * Device." Only items with a real, existing `EquipmentType` counterpart
+ * are used: `dumbbell`, `kettlebell`, `farmer_handle`, `sandbag`.
+ * "Loadable Suitcase Implement" and "Purpose-Built Carry Device" have no
+ * `EquipmentType` match and are not force-fitted, matching `FARMER_CARRY`'s
+ * own established discipline of only including alternatives that already
+ * have their own real `EquipmentType` value.
+ *
+ * "# Space Requirements — Minimum Space: Approximately 8–10 metres...
+ * Preferred Space: 15–30 metres... Surface Requirement: Stable, dry and
+ * non-slip." The metre-based distance is comparable in magnitude to
+ * `ROPE_PULL`'s own "5 to 15 metres... 10 to 30 metres" grounding —
+ * `minimumSpace: "large"`. "Surface Requirement: Stable, dry and
+ * non-slip" is a genuine open-floor safety property for a WALKING
+ * exercise with no jump/landing phase — the same `floor_safe` resolution
+ * already used for `PUSH_PRESS`'s own identical "Stable non-slip
+ * surface" language.
+ *
+ * "Biomechanical Profile — Primary Force Vector: Vertical Gravitational
+ * Load Through One Hand" → vertical. "Secondary Force Vector: Lateral
+ * Bending and Rotational Torque Acting on the Trunk and Pelvis" →
+ * lateral, rotational.
+ */
+export const SUITCASE_CARRY: ExerciseDefinition = {
+  id: "suitcase_carry",
+  name: "Suitcase Carry",
+  module: "grip",
+  // "# Primary Adaptation: Robustness" (explicit). "# Secondary
+  // Adaptations: Anti-Lateral-Flexion Strength, Anti-Rotation Capacity,
+  // Grip Strength, Pelvic Stability, Shoulder-Girdle Stability, Postural
+  // Endurance, Loaded Gait Capacity, Asymmetrical Force Transmission" —
+  // none map cleanly to a distinct AdaptationDomain value;
+  // `secondaryAdaptations` is omitted.
+  primaryAdaptation: "robustness",
+  // "# Capability Mapping — Primary: Anti-Lateral-Flexion Capacity, Trunk
+  // Stiffness" → trunk_strength. "Unilateral Loaded Carry Capacity" →
+  // general_work_capacity, matching FARMER_CARRY's own "Work Capacity" →
+  // general_work_capacity precedent. "Secondary: Grip Strength" →
+  // grip_strength (exact). "Pelvic Control", "Shoulder-Girdle Stability",
+  // "Postural Control" → stability. "Gait Integrity" → coordination,
+  // matching FARMER_CARRY's own identical "Gait Integrity"/"Gait
+  // Coordination" → coordination mapping. "Force Transmission" not
+  // mapped, per the convention established at AB_WHEEL above.
+  physicalQualities: ["trunk_strength", "general_work_capacity", "grip_strength", "stability", "coordination"],
+  // "# Movement Pattern — Primary: Unilateral Loaded Locomotion" → carry
+  // (matching FARMER_CARRY's own choice to represent loaded locomotion
+  // through `carry` alone, without a separate `locomotion` pattern).
+  // "Secondary: Anti-Lateral Flexion, Anti-Rotation" → anti_lateral_flexion,
+  // anti_rotation (both exact, direct MovementPattern matches).
+  // "Isometric Shoulder Depression, Whole-Body Bracing" → isometric.
+  movementPatterns: ["carry", "anti_lateral_flexion", "anti_rotation", "isometric"],
+  forceVectors: ["vertical", "lateral", "rotational"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "any_of",
+        items: [
+          { kind: "equipment", equipment: "dumbbell" },
+          { kind: "equipment", equipment: "kettlebell" },
+          { kind: "equipment", equipment: "farmer_handle" },
+          { kind: "equipment", equipment: "sandbag" },
+        ],
+      },
+      {
+        kind: "all_of",
+        items: [
+          { kind: "environment", capability: "floor_safe" },
+          { kind: "environment", capability: "sufficient_space", minimumSpace: "large" },
+        ],
+      },
+    ],
+  },
+  // "# Technical Complexity" gives no single "Level N — Label" line
+  // (unlike every other entry in this batch) — only a breakdown ("Setup
+  // Complexity: Low, Execution Complexity: Moderate, Coaching
+  // Requirement: Moderate, Error Visibility: High, Self-Correction
+  // Potential: Moderate to High"). "Execution Complexity: Moderate" is
+  // used as the closest available single proxy, since it most directly
+  // describes the difficulty of performing the movement itself (as
+  // opposed to setup or coaching load).
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // "# Movement Pattern — Primary: Unilateral Loaded Locomotion"
+  // (explicit), corroborated by `exercisePrescriptionRegistry.ts`'s own
+  // `laterality: "unilateral"`.
+  unilateral: true,
+  // "# Muscular Profile — Primary Muscles: Obliques, Quadratus Lumborum,
+  // Transversus Abdominis, Erector Spinae, Finger Flexors, Wrist Flexors,
+  // Middle Trapezius, Lower Trapezius, Rhomboids" → abdomen (Obliques,
+  // Quadratus Lumborum, Transversus Abdominis, Erector Spinae), forearm
+  // (Wrist Flexors), hand (Finger Flexors), shoulder (Middle/Lower
+  // Trapezius, Rhomboids).
+  bodyRegionsLoaded: ["abdomen", "forearm", "hand", "shoulder"],
+  // "# Contraindications and Restrictions — Absolute Contraindications",
+  // quoted one item per source line.
+  contraindications: [
+    {
+      description: "Acute hand or finger injury preventing secure grip.",
+      prohibitedPatterns: ["carry", "anti_lateral_flexion", "anti_rotation", "isometric"],
+      absolute: true,
+    },
+    {
+      description: "Acute foot or ankle injury preventing stable walking.",
+      prohibitedPatterns: ["carry", "anti_lateral_flexion", "anti_rotation", "isometric"],
+      absolute: true,
+    },
+    {
+      description: "Acute spinal pain aggravated by asymmetrical loading.",
+      prohibitedPatterns: ["carry", "anti_lateral_flexion", "anti_rotation", "isometric"],
+      absolute: true,
+    },
+    {
+      description: "Inability to safely pick up or lower the implement.",
+      prohibitedPatterns: ["carry", "anti_lateral_flexion", "anti_rotation", "isometric"],
+      absolute: true,
+    },
+  ],
+  fatigueProfile: {
+    // "# Physiological Cost" uses a word-based scale, not stars:
+    // "Neuromuscular Cost: Moderate to High, Metabolic Cost: Low to
+    // Moderate, Musculoskeletal Cost: Moderate, Grip Cost: Moderate to
+    // High on the loaded side, Recovery Cost: Low to Moderate." Mapped
+    // using this file's established word → Rating5 scale (Low=1, Low to
+    // Moderate=2, Moderate=3, Moderate to High=4, High=5): neural = 4
+    // ("Neuromuscular Cost"), muscular = 3 ("Musculoskeletal Cost").
+    // No dedicated connective-tissue cost line exists in this section —
+    // "# Joint Profile — Joint Stress Profile — Spinal Stress: Moderate
+    // and asymmetrical" (the primary trunk-loading joint concern of this
+    // whole chapter) is used as the closest proxy: connectiveTissue = 3.
+    // `types` includes neural (4), muscular (3) and connectiveTissue (3),
+    // all at or above "Moderate"; metabolic (2, "Low to Moderate") is
+    // excluded, matching this file's established straddling-hedge
+    // convention. The explicitly named "Grip Cost: Moderate to High" is
+    // not introduced as a `types: ["grip"]` tag, for the same reasoning
+    // given at HANGING_LEG_RAISE above (captured instead through
+    // `physicalQualities: ["grip_strength", ...]`).
+    types: ["neural", "muscular", "connective_tissue"],
+    neural: 4,
+    muscular: 3,
+    metabolic: 2,
+    connectiveTissue: 3,
+    technical: 3, // fallback from "Execution Complexity: Moderate" (minimumTechnicalLevel 3)
+  },
+  // "# Evidence Classification — Evidence Level: Moderate." No numbered
+  // "Level N" classification is given anywhere in this fiche (checked
+  // directly) — unlike every other entry in this batch, which each state
+  // an explicit "Level 2"/"Level 3" line. A bare word rating without a
+  // numeral does not correspond to any real `EvidenceLevel` enum value
+  // and is not guess-mapped to one; `"unknown"` is used, matching this
+  // file's own established practice (see FARMER_CARRY) of using
+  // `"unknown"` whenever no explicit Evidence Classification numeral
+  // exists.
+  evidenceLevel: "unknown",
+  // "# Relative Transfer Score — General Combat Transfer ★★★★☆, Trunk
+  // Robustness Transfer ★★★★★, Grip Transfer ★★★★☆, Pelvic Stability
+  // Transfer ★★★★☆, Shoulder Stability Transfer ★★★☆☆, Sport-Specific
+  // Technical Transfer ★★☆☆☆." Unlike DEAD_BUG/HOLLOW_BODY_HOLD/
+  // HANGING_LEG_RAISE/DRAGON_FLAG above, this carry-family fiche gives no
+  // "Krav Maga" line or any other single-discipline rating at all — every
+  // category here is a combined capability-transfer score, not a
+  // per-discipline one. `combatSportRelevance` is therefore genuinely
+  // omitted rather than invented from an unrelated combined figure — the
+  // first entry in this batch with no derivable combat-sport data.
+  //
+  // "# Substitution Logic — Preferred Substitution Hierarchy" names
+  // "Pallof Press" → pallof_press and "Farmer Carry" → farmer_carry (the
+  // latter already integrated, not part of this batch). "Lighter Suitcase
+  // Carry" / "Suitcase Hold" / "Offset Trap-Bar Carry" / "Side Plank" name
+  // no exercise with its own chapter/catalog id.
+  substitutionExerciseIds: ["pallof_press", "farmer_carry"],
+};
+
+// -----------------------------------------------------------------------------
+// Overhead Carry
+// Source: 50-exercises/62_CORE/18_OVERHEAD_CARRY.md
+// -----------------------------------------------------------------------------
+
+/**
+ * Eighth and final entry from this batch. `overhead_carry` has never had
+ * a catalog entry anywhere before this batch (confirmed by direct search
+ * for `id: "overhead_carry"` prior to this change), and `66_CARRIES` does
+ * not document it either — `62_CORE/18_OVERHEAD_CARRY.md` is therefore
+ * its own sole canonical source, with no duplicate-source conflict.
+ *
+ * `exercisePrescriptionRegistry.ts` has an entry (`overheadCarryEntry`)
+ * with `moduleId: "grip"`, `laterality: "bilateral"`,
+ * `requiredEquipmentCapabilities: ["loaded_carry_implement"]` and
+ * `supportedLoadingModes: ["dumbbell", "kettlebell"]` — `module: "grip"`
+ * used here for the same reason given at SUITCASE_CARRY above.
+ *
+ * "# Equipment Requirements — Minimum: One dumbbell or kettlebell.
+ * Optional: Two dumbbells, Two kettlebells, Barbell, Trap bar frame with
+ * overhead attachment, Sandbag, Specialized carry handles." This fiche
+ * uses a genuinely different structure from SUITCASE_CARRY's own
+ * "Preferred"/"Acceptable" framing (where every listed item was a valid
+ * BASE-level alternative): here, only the two items under "Minimum" are
+ * the floor requirement — everything under "Optional" is an enhanced
+ * variation BEYOND the minimum, not an equally valid base substitute.
+ * `any_of` [dumbbell, kettlebell] therefore represents ONLY the Minimum
+ * tier, deliberately excluding barbell/sandbag/trap-bar-frame even though
+ * each has a real `EquipmentType` counterpart — including them would
+ * misrepresent this fiche's own explicit Minimum/Optional split as
+ * SUITCASE_CARRY's flatter Preferred/Acceptable one.
+ *
+ * "# Space Requirements — Minimum: A clear walking lane of approximately
+ * 5 metres. Preferred: 10–30 metres of unobstructed space." Comparable in
+ * magnitude to SUITCASE_CARRY's/ROPE_PULL's own metre-based grounding —
+ * `minimumSpace: "large"`. No "non-slip"/"stable"/"dry" surface language
+ * exists anywhere in this fiche (checked directly) — a genuine divergence
+ * from SUITCASE_CARRY's own explicit "Surface Requirement: Stable, dry
+ * and non-slip" — `floor_safe` is deliberately NOT added here.
+ *
+ * KNOWN MODEL LIMITATION, flagged explicitly rather than silently
+ * approximated: despite being an OVERHEAD carry, this specific fiche's
+ * own "# Space Requirements" section gives no numeric or qualitative
+ * ceiling/vertical-clearance language at all (unlike `ROPE_CLIMB`'s own
+ * explicit "2 to 4 metres" height grounding) — there is no textual
+ * quote here to ground an extra clearance-specific tier bump the way
+ * `ROPE_CLIMB` earned one. The BACKGROUND model gap already documented at
+ * `ROPE_CLIMB` still applies regardless: `EnvironmentCapability` has no
+ * ceiling-height atom at all, and `TrainingEnvironment.ceilingHeightMeters`
+ * is never read by `exerciseRequirements.ts`'s eligibility evaluation. An
+ * athlete could therefore be found eligible for this exercise in an
+ * environment with genuinely insufficient overhead clearance to extend an
+ * implement fully overhead, and the model has no atom capable of
+ * detecting that — a real, unresolved gap, left undisguised rather than
+ * papered over with an inflated `minimumSpace` tier not actually grounded
+ * in this fiche's own text.
+ *
+ * "Biomechanical Profile — Primary Force Vector: Vertical Gravitational
+ * Load Through the Overhead Implement" → vertical. "Secondary Force
+ * Vector: Extension and Rotational Torque Acting on the Shoulder Girdle
+ * and Trunk" → rotational.
+ *
+ * `unilateral`: "# Equipment Requirements — Minimum: One dumbbell or
+ * kettlebell" read alone could suggest a unilaterally loaded base form,
+ * but `exercisePrescriptionRegistry.ts`'s own `laterality: "bilateral"`
+ * plus this fiche's own "# Progression Options — Progress from Bilateral
+ * to Unilateral Loading" (explicitly framing unilateral loading as a
+ * later ADVANCEMENT, not the starting form) together corroborate
+ * `unilateral: false` — the single-implement "Minimum" is read as an
+ * equipment-availability floor, not a laterality statement.
+ */
+export const OVERHEAD_CARRY: ExerciseDefinition = {
+  id: "overhead_carry",
+  name: "Overhead Carry",
+  module: "grip",
+  // "# Primary Adaptation: Robustness" (explicit). "# Secondary
+  // Adaptations: Overhead Shoulder Stability, Scapular Control,
+  // Anti-Extension Capacity, Trunk Stiffness, Grip Endurance, Postural
+  // Endurance, Loaded Gait Capacity, Whole-Body Force Transmission" —
+  // none map cleanly to a distinct AdaptationDomain value;
+  // `secondaryAdaptations` is omitted.
+  primaryAdaptation: "robustness",
+  // "# Capability Mapping — Primary: Overhead Stability Capacity,
+  // Shoulder-Girdle Robustness, Trunk Stiffness" → stability,
+  // trunk_strength. "Secondary: Scapular Control, Postural Control" →
+  // stability (already listed). "Grip Strength" → grip_strength (exact).
+  // "Gait Integrity" → coordination, matching FARMER_CARRY's/
+  // SUITCASE_CARRY's own identical mapping. "Anti-Extension Capacity" →
+  // trunk_strength (already listed). "Force Transmission" not mapped,
+  // per the convention established at AB_WHEEL above.
+  physicalQualities: ["stability", "trunk_strength", "grip_strength", "coordination"],
+  // "# Movement Pattern — Primary: Overhead Loaded Locomotion" → carry.
+  // "Secondary: Anti-Extension" → anti_extension (exact). "Scapular
+  // Upward Rotation, Isometric Shoulder Stabilization, Whole-Body
+  // Bracing" → isometric.
+  movementPatterns: ["carry", "anti_extension", "isometric"],
+  forceVectors: ["vertical", "rotational"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "any_of",
+        items: [
+          { kind: "equipment", equipment: "dumbbell" },
+          { kind: "equipment", equipment: "kettlebell" },
+        ],
+      },
+      { kind: "all_of", items: [{ kind: "environment", capability: "sufficient_space", minimumSpace: "large" }] },
+    ],
+  },
+  // "# Technical Complexity — ★★★★☆" (no "Level N" numeral or word label
+  // exists in this section, unlike every other entry in this batch — the
+  // 4-star rating is used directly as the most specific field available,
+  // taking priority over the coarser "# Skill Requirement — Intermediate"
+  // label elsewhere in this fiche).
+  minimumTechnicalLevel: 4,
+  complexity: "high",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Serratus Anterior, Rotator
+  // Cuff, Deltoids, Trapezius, Obliques, Transverse Abdominis" → shoulder
+  // (Serratus Anterior, Rotator Cuff, Deltoids, Trapezius), abdomen
+  // (Obliques, Transverse Abdominis).
+  bodyRegionsLoaded: ["shoulder", "abdomen"],
+  // "# Contraindications and Restrictions — Avoid or restrict when the
+  // athlete presents:" — this fiche uses a single flat list with no
+  // "Absolute"/"Relative" heading split at all (unlike DEAD_BUG/
+  // HOLLOW_BODY_HOLD's own "Relative-only" structure or HANGING_LEG_RAISE/
+  // DRAGON_FLAG/SUITCASE_CARRY's own explicit two-tier split). Read as
+  // this fiche's own functional equivalent of a hard-exclusion list (the
+  // items are not hedged with "relative"/"caution" language), quoted one
+  // item per source line, all `absolute: true`. The final, separately
+  // hedged sentence — "Use unilateral loading cautiously when
+  // asymmetrical spinal symptoms are present" — is excluded, matching
+  // this file's convention of never representing caution-only guidance as
+  // a hard contraindication.
+  contraindications: [
+    { description: "Acute shoulder pain.", prohibitedPatterns: ["carry", "anti_extension", "isometric"], absolute: true },
+    {
+      description: "Recent shoulder dislocation or instability.",
+      prohibitedPatterns: ["carry", "anti_extension", "isometric"],
+      absolute: true,
+    },
+    { description: "Painful overhead range of motion.", prohibitedPatterns: ["carry", "anti_extension", "isometric"], absolute: true },
+    {
+      description: "Significant limitation in shoulder flexion.",
+      prohibitedPatterns: ["carry", "anti_extension", "isometric"],
+      absolute: true,
+    },
+    { description: "Uncontrolled scapular winging.", prohibitedPatterns: ["carry", "anti_extension", "isometric"], absolute: true },
+    { description: "Acute cervical symptoms.", prohibitedPatterns: ["carry", "anti_extension", "isometric"], absolute: true },
+    {
+      description: "Upper-limb neurological symptoms.",
+      prohibitedPatterns: ["carry", "anti_extension", "isometric"],
+      absolute: true,
+    },
+    {
+      description: "Inability to maintain rib-cage and pelvic alignment overhead.",
+      prohibitedPatterns: ["carry", "anti_extension", "isometric"],
+      absolute: true,
+    },
+    { description: "Inadequate grip security.", prohibitedPatterns: ["carry", "anti_extension", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Physiological Cost — Neuromuscular Cost: Moderate to High,
+    // Metabolic Cost: Low to Moderate, Orthopaedic Cost: Moderate,
+    // Recovery Cost: Low to Moderate." No dedicated, separate muscular
+    // ("local") cost line exists anywhere in this fiche (checked
+    // directly) — unlike SUITCASE_CARRY's own separate "Musculoskeletal
+    // Cost" line, this fiche never splits neural from muscular cost, so
+    // `muscular` shares the same "Neuromuscular Cost: Moderate to High"
+    // value used for `neural`. "Orthopaedic Cost" → connectiveTissue.
+    // `types` includes neural (4), muscular (4, shared value) and
+    // connectiveTissue (3, "Moderate"), all at or above "Moderate";
+    // metabolic (2, "Low to Moderate") is excluded, matching this file's
+    // established straddling-hedge convention.
+    types: ["neural", "muscular", "connective_tissue"],
+    neural: 4,
+    muscular: 4,
+    metabolic: 2,
+    connectiveTissue: 3,
+    technical: 4, // fallback from the 4-star Technical Complexity rating (minimumTechnicalLevel 4)
+  },
+  // "# Evidence Classification — Exercise Category Evidence: Moderate,
+  // Direct Combat-Sport Evidence: Limited, Biomechanical Rationale:
+  // Strong, Practical Coaching Support: Strong." No numbered "Level N"
+  // classification is given anywhere in this fiche (checked directly) —
+  // matching SUITCASE_CARRY's own identical situation, `"unknown"` is
+  // used rather than guess-mapping a word rating to a numeral.
+  evidenceLevel: "unknown",
+  // "# Relative Transfer Score — General Athletic Transfer ★★★★☆,
+  // Combat-Sport Transfer ★★★☆☆, Shoulder-Robustness Transfer ★★★★★,
+  // Core-Stability Transfer ★★★★☆, Grip Transfer ★★★☆☆." No "Krav Maga"
+  // line or any other single-discipline rating exists anywhere in this
+  // fiche (checked directly) — matching SUITCASE_CARRY's own identical
+  // situation, `combatSportRelevance` is genuinely omitted rather than
+  // invented from the combined "Combat-Sport Transfer" figure.
+  //
+  // "# Substitution Logic — Preferred substitutions include" names
+  // "Front-Rack Carry" → front_rack_carry (already integrated, not part
+  // of this batch), "Farmer Carry" → farmer_carry (already integrated)
+  // and "Suitcase Carry" → suitcase_carry (integrated in this same
+  // batch). "Landmine Carry" / "Static Overhead Hold" name no exercise
+  // with its own chapter/catalog id.
+  substitutionExerciseIds: ["front_rack_carry", "farmer_carry", "suitcase_carry"],
+};
+
+
 export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   MED_BALL_CHEST_PASS,
   MED_BALL_SLAM,
@@ -4837,4 +6167,12 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   FRONT_RACK_CARRY,
   SANDBAG_CARRY,
   ZERCHER_CARRY,
+  AB_WHEEL,
+  PALLOF_PRESS,
+  DEAD_BUG,
+  HOLLOW_BODY_HOLD,
+  HANGING_LEG_RAISE,
+  DRAGON_FLAG,
+  SUITCASE_CARRY,
+  OVERHEAD_CARRY,
 ];

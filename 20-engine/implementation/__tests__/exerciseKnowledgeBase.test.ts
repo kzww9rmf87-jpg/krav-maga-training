@@ -19,15 +19,20 @@ import {
   validateRequirementsCoexistenceInvariant,
 } from "../exerciseRequirements";
 import {
+  AB_WHEEL,
   BOX_JUMP,
   BROAD_JUMP,
   COUNTERMOVEMENT_JUMP,
+  DEAD_BUG,
   DEPTH_JUMP,
+  DRAGON_FLAG,
   EXERCISE_KNOWLEDGE_BASE,
   FARMER_CARRY,
   FRONT_RACK_CARRY,
   HANG_HIGH_PULL,
   HANG_POWER_CLEAN,
+  HANGING_LEG_RAISE,
+  HOLLOW_BODY_HOLD,
   JUMP_SHRUG,
   KNEE_JUMP,
   LATERAL_BOUND,
@@ -38,6 +43,8 @@ import {
   MED_BALL_SCOOP_TOSS,
   MED_BALL_SHOT_PUT_THROW,
   MED_BALL_SLAM,
+  OVERHEAD_CARRY,
+  PALLOF_PRESS,
   PINCH_CARRY,
   PLATE_PINCH,
   PUSH_PRESS,
@@ -46,6 +53,7 @@ import {
   SANDBAG_CARRY,
   SINGLE_LEG_HOP,
   SPLIT_SQUAT_JUMP,
+  SUITCASE_CARRY,
   TOWEL_PULL_UP,
   ZERCHER_CARRY,
 } from "../exerciseKnowledgeBase";
@@ -5750,5 +5758,873 @@ describe("66_CARRIES chapter — Exercise Requirements Model batch integration",
       }),
     });
     expect(checkExerciseEligibility(MED_BALL_CHEST_PASS, chestPassInput).eligible).toBe(true);
+  });
+});
+
+
+/**
+ * `62_CORE` chapter — Exercise Requirements Model batch integration
+ * (`ab_wheel`, `pallof_press`, `dead_bug`, `hollow_body_hold`,
+ * `hanging_leg_raise`, `dragon_flag`, `suitcase_carry`, `overhead_carry`).
+ *
+ * `farmer_carry` is the ninth exercise named in this chapter's own
+ * `00_OVERVIEW.md` inventory but is NOT part of this batch: it is already
+ * integrated with `50-exercises/66_CARRIES/10_FARMER_CARRY.md` as its sole
+ * canonical source (see `FARMER_CARRY`'s own locked-decision comment in
+ * `exerciseKnowledgeBase.ts`) — asserted explicitly by test 2 below.
+ *
+ * Same `test.each`-driven structure as the `65_GRIP`/`66_CARRIES` chapters'
+ * own batch blocks: cross-cutting checks parameterized over all eight
+ * exercises, then one describe block per exercise for its own
+ * eligibility-specific scenarios, then dedicated business-distinction
+ * tests.
+ */
+describe("62_CORE chapter — Exercise Requirements Model batch integration", () => {
+  const CORE_EXERCISES = [
+    { exercise: AB_WHEEL, id: "ab_wheel" },
+    { exercise: PALLOF_PRESS, id: "pallof_press" },
+    { exercise: DEAD_BUG, id: "dead_bug" },
+    { exercise: HOLLOW_BODY_HOLD, id: "hollow_body_hold" },
+    { exercise: HANGING_LEG_RAISE, id: "hanging_leg_raise" },
+    { exercise: DRAGON_FLAG, id: "dragon_flag" },
+    { exercise: SUITCASE_CARRY, id: "suitcase_carry" },
+    { exercise: OVERHEAD_CARRY, id: "overhead_carry" },
+  ] as const;
+
+  test.each(CORE_EXERCISES)("$id — 1. exists in the catalog with the expected id", ({ exercise, id }) => {
+    expect(EXERCISE_KNOWLEDGE_BASE).toContain(exercise);
+    expect(exercise.id).toBe(id);
+  });
+
+  test("2. all eight ids are unique within the catalog, and farmer_carry (already integrated, not part of this batch) still appears only once", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const { id } of CORE_EXERCISES) {
+      expect(ids.filter((existingId) => existingId === id)).toHaveLength(1);
+    }
+    expect(ids.filter((existingId) => existingId === "farmer_carry")).toEqual(["farmer_carry"]);
+  });
+
+  test.each(CORE_EXERCISES)(
+    "$id — 3. respects the coexistence invariant: requiredEquipment is empty, optionalEquipment is absent",
+    ({ exercise }) => {
+      expect(exercise.requiredEquipment).toEqual([]);
+      expect(exercise.optionalEquipment).toBeUndefined();
+      expect(validateRequirementsCoexistenceInvariant(exercise)).toBeNull();
+      expect(validateExerciseRequirementsStructure(exercise.requirements!)).toEqual([]);
+    },
+  );
+
+  test("4. the default catalog used by runEngine(input) now also contains all eight 62_CORE ids", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    for (const { id } of CORE_EXERCISES) {
+      expect(ids).toContain(id);
+    }
+  });
+
+  test.each(CORE_EXERCISES)("$id — 5. never mutates the exercise or the input it is given during evaluation", ({ exercise }) => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [
+          { type: "other" },
+          { type: "cable_machine" },
+          { type: "resistance_band" },
+          { type: "pull_up_bar" },
+          { type: "bench" },
+          { type: "rigid_anchor_support" },
+          { type: "dumbbell" },
+          { type: "kettlebell" },
+          { type: "farmer_handle" },
+          { type: "sandbag" },
+        ],
+        floorSafe: true,
+        availableSpace: "large",
+      }),
+    });
+    const exerciseSnapshot = structuredClone(exercise);
+    const inputSnapshot = structuredClone(input);
+
+    checkExerciseEligibility(exercise, input);
+
+    expect(exercise).toEqual(exerciseSnapshot);
+    expect(input).toEqual(inputSnapshot);
+  });
+
+  describe("AB_WHEEL", () => {
+    test("6. eligible with the 'other' equipment placeholder, a safe floor and limited space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "other" }],
+          floorSafe: true,
+          availableSpace: "limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(AB_WHEEL, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("7. ineligible without any declared equipment", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          floorSafe: true,
+          availableSpace: "limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(AB_WHEEL, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("8. ineligible when the floor is not declared safe", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "other" }],
+          floorSafe: false,
+          availableSpace: "limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(AB_WHEEL, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT")).toBe(true);
+    });
+
+    test("9. ineligible when available space is below the documented minimum (limited)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "other" }],
+          floorSafe: true,
+          availableSpace: "very_limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(AB_WHEEL, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+    });
+
+    test("10. no dependency on jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "other" }],
+          floorSafe: true,
+          availableSpace: "limited",
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(AB_WHEEL, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("11. biomechanical fields match the canonical documentation", () => {
+      expect(AB_WHEEL.physicalQualities).toEqual(["trunk_strength", "stability", "coordination"]);
+      expect(AB_WHEEL.movementPatterns).toEqual(["anti_extension", "isometric"]);
+      expect(AB_WHEEL.forceVectors).toEqual(["forward", "downward"]);
+      expect(AB_WHEEL.unilateral).toBe(false);
+      expect(AB_WHEEL.bodyRegionsLoaded).toEqual(["abdomen", "shoulder"]);
+      expect(AB_WHEEL.complexity).toBe("moderate");
+      expect(AB_WHEEL.minimumTechnicalLevel).toBe(3);
+    });
+  });
+
+  describe("PALLOF_PRESS", () => {
+    test("12. eligible with a cable machine alone (one of two any_of alternatives) and limited space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "cable_machine" }],
+          availableSpace: "limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(PALLOF_PRESS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("13. eligible with a resistance band alone (the other any_of alternative) and limited space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "resistance_band" }],
+          availableSpace: "limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(PALLOF_PRESS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("14. ineligible without a cable machine or resistance band", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "bodyweight" }],
+          availableSpace: "limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(PALLOF_PRESS, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("15. ineligible when available space is below the documented minimum (limited)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "cable_machine" }],
+          availableSpace: "very_limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(PALLOF_PRESS, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+    });
+
+    test("16. no dependency on floor safety, jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "cable_machine" }],
+          availableSpace: "limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(PALLOF_PRESS, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("17. biomechanical fields match the canonical documentation", () => {
+      expect(PALLOF_PRESS.physicalQualities).toEqual(["trunk_strength", "stability", "coordination"]);
+      expect(PALLOF_PRESS.movementPatterns).toEqual(["anti_rotation", "horizontal_push", "isometric"]);
+      expect(PALLOF_PRESS.forceVectors).toEqual(["lateral"]);
+      expect(PALLOF_PRESS.unilateral).toBe(false);
+      expect(PALLOF_PRESS.bodyRegionsLoaded).toEqual(["abdomen", "hip"]);
+      expect(PALLOF_PRESS.complexity).toBe("low");
+      expect(PALLOF_PRESS.minimumTechnicalLevel).toBe(2);
+    });
+  });
+
+  describe("DEAD_BUG", () => {
+    test("18. eligible with very_limited space and no declared equipment", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "very_limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(DEAD_BUG, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("19. requires no equipment atom at all — the documented 'Floor Space' requirement is represented purely through sufficient_space", () => {
+      const requiredEquipmentTypes = DEAD_BUG.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(requiredEquipmentTypes).toEqual([]);
+    });
+
+    test("20. the documented space minimum is already the lowest AvailableSpaceLevel tier (very_limited) — no insufficient-space scenario can be constructed, unlike every other exercise in this batch", () => {
+      const spaceClause = DEAD_BUG.requirements!.required
+        .flatMap((clause) => clause.items)
+        .find((atom) => atom.kind === "environment" && atom.capability === "sufficient_space");
+      expect(spaceClause).toEqual({ kind: "environment", capability: "sufficient_space", minimumSpace: "very_limited" });
+    });
+
+    test("21. no dependency on floor safety, jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(DEAD_BUG, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("22. biomechanical fields match the canonical documentation", () => {
+      expect(DEAD_BUG.physicalQualities).toEqual(["trunk_strength", "coordination", "stability"]);
+      expect(DEAD_BUG.movementPatterns).toEqual(["anti_extension", "isometric", "mixed"]);
+      expect(DEAD_BUG.forceVectors).toEqual(["mixed"]);
+      expect(DEAD_BUG.unilateral).toBe(false);
+      expect(DEAD_BUG.bodyRegionsLoaded).toEqual(["abdomen"]);
+      expect(DEAD_BUG.complexity).toBe("low");
+      expect(DEAD_BUG.minimumTechnicalLevel).toBe(2);
+      expect(DEAD_BUG.contraindications).toEqual([]);
+    });
+  });
+
+  describe("HOLLOW_BODY_HOLD", () => {
+    test("23. eligible with very_limited space and no declared equipment", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "very_limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(HOLLOW_BODY_HOLD, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("24. requires no equipment atom at all, identically to DEAD_BUG", () => {
+      const requiredEquipmentTypes = HOLLOW_BODY_HOLD.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(requiredEquipmentTypes).toEqual([]);
+    });
+
+    test("25. the documented space minimum is already the lowest AvailableSpaceLevel tier (very_limited), identically to DEAD_BUG", () => {
+      const spaceClause = HOLLOW_BODY_HOLD.requirements!.required
+        .flatMap((clause) => clause.items)
+        .find((atom) => atom.kind === "environment" && atom.capability === "sufficient_space");
+      expect(spaceClause).toEqual({ kind: "environment", capability: "sufficient_space", minimumSpace: "very_limited" });
+    });
+
+    test("26. no dependency on floor safety, jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(HOLLOW_BODY_HOLD, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("27. biomechanical fields match the canonical documentation", () => {
+      expect(HOLLOW_BODY_HOLD.physicalQualities).toEqual(["trunk_strength", "muscular_endurance", "stability"]);
+      expect(HOLLOW_BODY_HOLD.movementPatterns).toEqual(["anti_extension", "isometric"]);
+      expect(HOLLOW_BODY_HOLD.forceVectors).toEqual(["not_applicable"]);
+      expect(HOLLOW_BODY_HOLD.unilateral).toBe(false);
+      expect(HOLLOW_BODY_HOLD.bodyRegionsLoaded).toEqual(["abdomen"]);
+      expect(HOLLOW_BODY_HOLD.complexity).toBe("low");
+      expect(HOLLOW_BODY_HOLD.minimumTechnicalLevel).toBe(2);
+      expect(HOLLOW_BODY_HOLD.contraindications).toEqual([]);
+    });
+  });
+
+  describe("HANGING_LEG_RAISE", () => {
+    test("28. eligible with a pull-up bar, a safe landing surface and very_limited space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "pull_up_bar" }],
+          floorSafe: true,
+          availableSpace: "very_limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(HANGING_LEG_RAISE, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("29. ineligible without a pull-up bar", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          floorSafe: true,
+          availableSpace: "very_limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(HANGING_LEG_RAISE, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("30. ineligible without a declared safe landing surface (grip-failure fall risk)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "pull_up_bar" }],
+          floorSafe: false,
+          availableSpace: "very_limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(HANGING_LEG_RAISE, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT")).toBe(true);
+    });
+
+    test("31. the documented space minimum is already the lowest AvailableSpaceLevel tier (very_limited) — matching a single stationary hanging station, not an extended footprint", () => {
+      const spaceClause = HANGING_LEG_RAISE.requirements!.required
+        .flatMap((clause) => clause.items)
+        .find((atom) => atom.kind === "environment" && atom.capability === "sufficient_space");
+      expect(spaceClause).toEqual({ kind: "environment", capability: "sufficient_space", minimumSpace: "very_limited" });
+    });
+
+    test("32. no dependency on jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "pull_up_bar" }],
+          floorSafe: true,
+          availableSpace: "very_limited",
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(HANGING_LEG_RAISE, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("33. biomechanical fields match the canonical documentation", () => {
+      expect(HANGING_LEG_RAISE.physicalQualities).toEqual(["trunk_strength", "grip_strength", "stability", "coordination"]);
+      expect(HANGING_LEG_RAISE.movementPatterns).toEqual(["mixed", "isometric"]);
+      expect(HANGING_LEG_RAISE.forceVectors).toEqual(["upward"]);
+      expect(HANGING_LEG_RAISE.unilateral).toBe(false);
+      expect(HANGING_LEG_RAISE.bodyRegionsLoaded).toEqual(["abdomen", "hip", "thigh"]);
+      expect(HANGING_LEG_RAISE.complexity).toBe("high");
+      expect(HANGING_LEG_RAISE.minimumTechnicalLevel).toBe(4);
+    });
+  });
+
+  describe("DRAGON_FLAG", () => {
+    test("34. eligible with a bench, a rigid anchor support and moderate space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "bench" }, { type: "rigid_anchor_support" }],
+          availableSpace: "moderate",
+        }),
+      });
+
+      const result = checkExerciseEligibility(DRAGON_FLAG, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("35. ineligible without a bench, even with a rigid anchor support present", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "rigid_anchor_support" }],
+          availableSpace: "moderate",
+        }),
+      });
+
+      const result = checkExerciseEligibility(DRAGON_FLAG, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("36. ineligible without a rigid anchor support, even with a bench present", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "bench" }],
+          availableSpace: "moderate",
+        }),
+      });
+
+      const result = checkExerciseEligibility(DRAGON_FLAG, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("37. ineligible when available space is below the documented minimum (moderate)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "bench" }, { type: "rigid_anchor_support" }],
+          availableSpace: "limited",
+        }),
+      });
+
+      const result = checkExerciseEligibility(DRAGON_FLAG, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+    });
+
+    test("38. no dependency on floor safety, jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "bench" }, { type: "rigid_anchor_support" }],
+          availableSpace: "moderate",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(DRAGON_FLAG, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("39. biomechanical fields match the canonical documentation", () => {
+      expect(DRAGON_FLAG.physicalQualities).toEqual(["trunk_strength", "stability"]);
+      expect(DRAGON_FLAG.movementPatterns).toEqual(["anti_extension", "isometric"]);
+      expect(DRAGON_FLAG.forceVectors).toEqual(["downward"]);
+      expect(DRAGON_FLAG.unilateral).toBe(false);
+      expect(DRAGON_FLAG.bodyRegionsLoaded).toEqual(["abdomen"]);
+      expect(DRAGON_FLAG.complexity).toBe("very_high");
+      expect(DRAGON_FLAG.minimumTechnicalLevel).toBe(5);
+    });
+  });
+
+  describe("SUITCASE_CARRY", () => {
+    test("40. eligible with a dumbbell alone (one of four any_of alternatives), a safe floor and large space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "dumbbell" }],
+          floorSafe: true,
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(SUITCASE_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("41. eligible with a sandbag alone (a different any_of alternative)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "sandbag" }],
+          floorSafe: true,
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(SUITCASE_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("42. ineligible without any documented implement (dumbbell, kettlebell, farmer handle or sandbag)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "bodyweight" }],
+          floorSafe: true,
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(SUITCASE_CARRY, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("43. ineligible when the floor is not declared safe", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "dumbbell" }],
+          floorSafe: false,
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(SUITCASE_CARRY, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "UNSAFE_ENVIRONMENT")).toBe(true);
+    });
+
+    test("44. ineligible when available space is below the documented minimum (large)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "dumbbell" }],
+          floorSafe: true,
+          availableSpace: "moderate",
+        }),
+      });
+
+      const result = checkExerciseEligibility(SUITCASE_CARRY, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+    });
+
+    test("45. no dependency on jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "dumbbell" }],
+          floorSafe: true,
+          availableSpace: "large",
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(SUITCASE_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("46. biomechanical fields match the canonical documentation", () => {
+      expect(SUITCASE_CARRY.physicalQualities).toEqual([
+        "trunk_strength",
+        "general_work_capacity",
+        "grip_strength",
+        "stability",
+        "coordination",
+      ]);
+      expect(SUITCASE_CARRY.movementPatterns).toEqual(["carry", "anti_lateral_flexion", "anti_rotation", "isometric"]);
+      expect(SUITCASE_CARRY.forceVectors).toEqual(["vertical", "lateral", "rotational"]);
+      expect(SUITCASE_CARRY.unilateral).toBe(true);
+      expect(SUITCASE_CARRY.bodyRegionsLoaded).toEqual(["abdomen", "forearm", "hand", "shoulder"]);
+      expect(SUITCASE_CARRY.complexity).toBe("moderate");
+      expect(SUITCASE_CARRY.minimumTechnicalLevel).toBe(3);
+      expect(SUITCASE_CARRY.combatSportRelevance).toBeUndefined();
+    });
+  });
+
+  describe("OVERHEAD_CARRY", () => {
+    test("47. eligible with a dumbbell alone (one of two any_of alternatives) and large space", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "dumbbell" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(OVERHEAD_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("48. eligible with a kettlebell alone (the other any_of alternative)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "kettlebell" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(OVERHEAD_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("49. ineligible without a dumbbell or kettlebell — a barbell alone is not documented as a Minimum-tier alternative", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "barbell" }],
+          availableSpace: "large",
+        }),
+      });
+
+      const result = checkExerciseEligibility(OVERHEAD_CARRY, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("50. ineligible when available space is below the documented minimum (large)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "dumbbell" }],
+          availableSpace: "moderate",
+        }),
+      });
+
+      const result = checkExerciseEligibility(OVERHEAD_CARRY, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "INSUFFICIENT_SPACE")).toBe(true);
+    });
+
+    test("51. no dependency on floor safety, jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "dumbbell" }],
+          availableSpace: "large",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(OVERHEAD_CARRY, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("52. biomechanical fields match the canonical documentation", () => {
+      expect(OVERHEAD_CARRY.physicalQualities).toEqual(["stability", "trunk_strength", "grip_strength", "coordination"]);
+      expect(OVERHEAD_CARRY.movementPatterns).toEqual(["carry", "anti_extension", "isometric"]);
+      expect(OVERHEAD_CARRY.forceVectors).toEqual(["vertical", "rotational"]);
+      expect(OVERHEAD_CARRY.unilateral).toBe(false);
+      expect(OVERHEAD_CARRY.bodyRegionsLoaded).toEqual(["shoulder", "abdomen"]);
+      expect(OVERHEAD_CARRY.complexity).toBe("high");
+      expect(OVERHEAD_CARRY.minimumTechnicalLevel).toBe(4);
+      expect(OVERHEAD_CARRY.combatSportRelevance).toBeUndefined();
+    });
+  });
+
+  describe("business distinctions", () => {
+    test("53. DEAD_BUG vs. HOLLOW_BODY_HOLD: identical requirements, but distinct adaptation, endurance quality, movement dynamism and force vector", () => {
+      // Both fiches document an identical "Required: Floor Space / Optional: [comfort equipment] /
+      // Space Requirements: Minimal" structure — the engine cannot and should not differentiate
+      // eligibility between them.
+      expect(DEAD_BUG.requirements).toEqual(HOLLOW_BODY_HOLD.requirements);
+
+      // DEAD_BUG is framed as motor control (Primary Adaptation: Movement); HOLLOW_BODY_HOLD is
+      // framed as static-endurance robustness (Primary Adaptation: Robustness), the direct source
+      // of the two exercises' key business distinction.
+      expect(DEAD_BUG.primaryAdaptation).toBe("movement");
+      expect(HOLLOW_BODY_HOLD.primaryAdaptation).toBe("robustness");
+      expect(HOLLOW_BODY_HOLD.physicalQualities).toContain("muscular_endurance");
+      expect(DEAD_BUG.physicalQualities).not.toContain("muscular_endurance");
+
+      // DEAD_BUG is a dynamic, reciprocal contralateral-limb movement (mixed movement pattern and
+      // force vector); HOLLOW_BODY_HOLD is a purely static hold with no directional force production.
+      expect(DEAD_BUG.movementPatterns).toContain("mixed");
+      expect(HOLLOW_BODY_HOLD.movementPatterns).not.toContain("mixed");
+      expect(DEAD_BUG.forceVectors).toEqual(["mixed"]);
+      expect(HOLLOW_BODY_HOLD.forceVectors).toEqual(["not_applicable"]);
+    });
+
+    test("54. PALLOF_PRESS vs. the other anti-extension exercises: the only entry in this batch with anti_rotation, not anti_extension, as its primary movement pattern", () => {
+      expect(PALLOF_PRESS.movementPatterns).toContain("anti_rotation");
+      expect(PALLOF_PRESS.movementPatterns).not.toContain("anti_extension");
+
+      for (const antiExtensionExercise of [AB_WHEEL, DEAD_BUG, HOLLOW_BODY_HOLD, DRAGON_FLAG, OVERHEAD_CARRY]) {
+        expect(antiExtensionExercise.movementPatterns).toContain("anti_extension");
+        expect(antiExtensionExercise.movementPatterns).not.toContain("anti_rotation");
+      }
+
+      // PALLOF_PRESS is gated by a cable machine or resistance band; none of the anti-extension
+      // exercises in this batch document either as a requirement.
+      const pallofEquipment = PALLOF_PRESS.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(pallofEquipment).toEqual(["cable_machine", "resistance_band"]);
+    });
+
+    test("55. SUITCASE_CARRY vs. FARMER_CARRY vs. OVERHEAD_CARRY: distinct laterality, distinct movement patterns, and distinct equipment sets", () => {
+      // Laterality: only SUITCASE_CARRY is unilateral.
+      expect(SUITCASE_CARRY.unilateral).toBe(true);
+      expect(FARMER_CARRY.unilateral).toBe(false);
+      expect(OVERHEAD_CARRY.unilateral).toBe(false);
+
+      // Movement patterns: only SUITCASE_CARRY documents anti-lateral-flexion/anti-rotation;
+      // only OVERHEAD_CARRY documents anti-extension as part of its carry pattern.
+      expect(SUITCASE_CARRY.movementPatterns).toEqual(expect.arrayContaining(["anti_lateral_flexion", "anti_rotation"]));
+      expect(FARMER_CARRY.movementPatterns).not.toEqual(expect.arrayContaining(["anti_lateral_flexion", "anti_rotation"]));
+      expect(OVERHEAD_CARRY.movementPatterns).toContain("anti_extension");
+      expect(FARMER_CARRY.movementPatterns).not.toContain("anti_extension");
+      expect(SUITCASE_CARRY.movementPatterns).not.toContain("anti_extension");
+
+      // Equipment: OVERHEAD_CARRY's Minimum tier is strictly dumbbell-or-kettlebell only (no
+      // farmer_handle/trap_bar/sandbag alternative, unlike FARMER_CARRY/SUITCASE_CARRY).
+      const overheadEquipment = OVERHEAD_CARRY.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(overheadEquipment).toEqual(["dumbbell", "kettlebell"]);
+
+      const suitcaseEquipment = SUITCASE_CARRY.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(suitcaseEquipment).toContain("farmer_handle");
+      expect(overheadEquipment).not.toContain("farmer_handle");
+
+      // Only SUITCASE_CARRY documents an explicit floor_safe requirement in this trio.
+      const hasFloorSafe = (exercise: typeof SUITCASE_CARRY) =>
+        exercise.requirements!.required
+          .flatMap((clause) => clause.items)
+          .some((atom) => atom.kind === "environment" && atom.capability === "floor_safe");
+      expect(hasFloorSafe(SUITCASE_CARRY)).toBe(true);
+      expect(hasFloorSafe(OVERHEAD_CARRY)).toBe(false);
+    });
+  });
+
+  test("56. adding this chapter never changes the previously integrated exercises, including FARMER_CARRY", () => {
+    const farmerCarryInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "dumbbell" }],
+        availableSpace: "large",
+      }),
+    });
+    expect(checkExerciseEligibility(FARMER_CARRY, farmerCarryInput).eligible).toBe(true);
+
+    const towelPullUpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "pull_up_bar" }, { type: "towel" }],
+        availableSpace: "very_limited",
+      }),
+    });
+    expect(checkExerciseEligibility(TOWEL_PULL_UP, towelPullUpInput).eligible).toBe(true);
+
+    const ropeClimbInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "rope" }],
+        floorSafe: true,
+        availableSpace: "large",
+      }),
+    });
+    expect(checkExerciseEligibility(ROPE_CLIMB, ropeClimbInput).eligible).toBe(true);
   });
 });
