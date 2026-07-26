@@ -21,9 +21,12 @@ import {
 import {
   AB_WHEEL,
   BACK_SQUAT,
+  BARBELL_ROW,
   BOX_JUMP,
   BROAD_JUMP,
   BULGARIAN_SPLIT_SQUAT,
+  CHEST_SUPPORTED_ROW,
+  CHIN_UP,
   COUNTERMOVEMENT_JUMP,
   DEAD_BUG,
   DEPTH_JUMP,
@@ -51,6 +54,7 @@ import {
   PALLOF_PRESS,
   PINCH_CARRY,
   PLATE_PINCH,
+  PULL_UP,
   PUSH_PRESS,
   ROMANIAN_DEADLIFT,
   ROPE_CLIMB,
@@ -61,6 +65,7 @@ import {
   SUITCASE_CARRY,
   TOWEL_PULL_UP,
   TRAP_BAR_DEADLIFT,
+  WEIGHTED_PULL_UP,
   ZERCHER_CARRY,
 } from "../exerciseKnowledgeBase";
 
@@ -7300,5 +7305,585 @@ describe("Lot 1 — Force fondamentale bas du corps — Exercise Requirements Mo
       }),
     });
     expect(checkExerciseEligibility(PUSH_PRESS, pushPressInput).eligible).toBe(true);
+  });
+});
+
+
+describe("Lot 2 — Tirages du haut du corps — Exercise Requirements Model batch integration", () => {
+  const LOT2_EXERCISES = [
+    { exercise: WEIGHTED_PULL_UP, id: "weighted_pull_up" },
+    { exercise: PULL_UP, id: "pull_up" },
+    { exercise: CHIN_UP, id: "chin_up" },
+    { exercise: BARBELL_ROW, id: "barbell_row" },
+    { exercise: CHEST_SUPPORTED_ROW, id: "chest_supported_row" },
+  ] as const;
+
+  test.each(LOT2_EXERCISES)("$id — 1. exists in the catalog with the expected id", ({ exercise, id }) => {
+    expect(EXERCISE_KNOWLEDGE_BASE).toContain(exercise);
+    expect(exercise.id).toBe(id);
+  });
+
+  test("2. all five ids are unique within the catalog, and no prior id (e.g. back_squat) is duplicated", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const { id } of LOT2_EXERCISES) {
+      expect(ids.filter((existingId) => existingId === id)).toHaveLength(1);
+    }
+    expect(ids.filter((existingId) => existingId === "back_squat")).toEqual(["back_squat"]);
+  });
+
+  test.each(LOT2_EXERCISES)(
+    "$id — 3. respects the coexistence invariant: requiredEquipment is empty, optionalEquipment is absent",
+    ({ exercise }) => {
+      expect(exercise.requiredEquipment).toEqual([]);
+      expect(exercise.optionalEquipment).toBeUndefined();
+      expect(validateRequirementsCoexistenceInvariant(exercise)).toBeNull();
+      expect(validateExerciseRequirementsStructure(exercise.requirements!)).toEqual([]);
+    },
+  );
+
+  test("4. the default catalog used by runEngine(input) now also contains all five Lot 2 ids", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    for (const { id } of LOT2_EXERCISES) {
+      expect(ids).toContain(id);
+    }
+  });
+
+  test.each(LOT2_EXERCISES)("$id — 5. never mutates the exercise or the input it is given during evaluation", ({ exercise }) => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [
+          { type: "pull_up_bar" },
+          { type: "other" },
+          { type: "plates" },
+          { type: "barbell" },
+          { type: "bench" },
+          { type: "dumbbell" },
+        ],
+        availableSpace: "large",
+      }),
+    });
+    const exerciseSnapshot = structuredClone(exercise);
+    const inputSnapshot = structuredClone(input);
+
+    checkExerciseEligibility(exercise, input);
+
+    expect(exercise).toEqual(exerciseSnapshot);
+    expect(input).toEqual(inputSnapshot);
+  });
+
+  describe("WEIGHTED_PULL_UP", () => {
+    test("6. eligible with a pull-up bar, the 'other' dip-belt placeholder and plates", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "pull_up_bar" }, { type: "other" }, { type: "plates" }],
+        }),
+      });
+
+      const result = checkExerciseEligibility(WEIGHTED_PULL_UP, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("7. ineligible without a pull-up bar", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "other" }, { type: "plates" }] }),
+      });
+
+      const result = checkExerciseEligibility(WEIGHTED_PULL_UP, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("8. ineligible without the dip-belt placeholder", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "pull_up_bar" }, { type: "plates" }] }),
+      });
+
+      const result = checkExerciseEligibility(WEIGHTED_PULL_UP, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("9. ineligible without weight plates", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "pull_up_bar" }, { type: "other" }] }),
+      });
+
+      const result = checkExerciseEligibility(WEIGHTED_PULL_UP, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("10. no dependency on space, floor safety, jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "pull_up_bar" }, { type: "other" }, { type: "plates" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(WEIGHTED_PULL_UP, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("11. biomechanical fields match the canonical documentation", () => {
+      expect(WEIGHTED_PULL_UP.physicalQualities).toEqual([
+        "relative_strength",
+        "absolute_strength",
+        "grip_strength",
+        "trunk_strength",
+        "stability",
+        "coordination",
+        "tissue_capacity",
+      ]);
+      expect(WEIGHTED_PULL_UP.movementPatterns).toEqual(["vertical_pull", "isometric"]);
+      expect(WEIGHTED_PULL_UP.forceVectors).toEqual(["vertical"]);
+      expect(WEIGHTED_PULL_UP.unilateral).toBe(false);
+      expect(WEIGHTED_PULL_UP.bodyRegionsLoaded).toEqual(["shoulder", "upper_arm"]);
+      expect(WEIGHTED_PULL_UP.complexity).toBe("moderate");
+      expect(WEIGHTED_PULL_UP.minimumTechnicalLevel).toBe(3);
+      expect(WEIGHTED_PULL_UP.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("PULL_UP", () => {
+    test("12. eligible with a pull-up bar alone", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "pull_up_bar" }] }),
+      });
+
+      const result = checkExerciseEligibility(PULL_UP, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("13. ineligible without a pull-up bar", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(PULL_UP, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("14. no dependency on space, floor safety, jumping, throwing, a wall or a partner", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "pull_up_bar" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(PULL_UP, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("15. biomechanical fields match the canonical documentation", () => {
+      expect(PULL_UP.physicalQualities).toEqual([
+        "relative_strength",
+        "grip_strength",
+        "absolute_strength",
+        "trunk_strength",
+        "coordination",
+        "stability",
+        "tissue_capacity",
+      ]);
+      expect(PULL_UP.movementPatterns).toEqual(["vertical_pull", "isometric"]);
+      expect(PULL_UP.forceVectors).toEqual(["vertical"]);
+      expect(PULL_UP.unilateral).toBe(false);
+      expect(PULL_UP.bodyRegionsLoaded).toEqual(["shoulder", "upper_arm"]);
+      expect(PULL_UP.complexity).toBe("moderate");
+      expect(PULL_UP.minimumTechnicalLevel).toBe(2);
+      expect(PULL_UP.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("CHIN_UP", () => {
+    test("16. eligible with a pull-up bar alone", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "pull_up_bar" }] }),
+      });
+
+      const result = checkExerciseEligibility(CHIN_UP, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("17. ineligible without a pull-up bar", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(CHIN_UP, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("18. no dependency on space, floor safety, jumping, throwing, a wall or a partner", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "pull_up_bar" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(CHIN_UP, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("19. biomechanical fields match the canonical documentation", () => {
+      expect(CHIN_UP.physicalQualities).toEqual([
+        "relative_strength",
+        "grip_strength",
+        "absolute_strength",
+        "trunk_strength",
+        "coordination",
+        "stability",
+        "tissue_capacity",
+      ]);
+      expect(CHIN_UP.movementPatterns).toEqual(["vertical_pull", "isometric"]);
+      expect(CHIN_UP.forceVectors).toEqual(["vertical"]);
+      expect(CHIN_UP.unilateral).toBe(false);
+      expect(CHIN_UP.bodyRegionsLoaded).toEqual(["shoulder", "upper_arm"]);
+      expect(CHIN_UP.complexity).toBe("low");
+      expect(CHIN_UP.minimumTechnicalLevel).toBe(1);
+      expect(CHIN_UP.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("BARBELL_ROW", () => {
+    test("20. eligible with a barbell and plates", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "barbell" }, { type: "plates" }] }),
+      });
+
+      const result = checkExerciseEligibility(BARBELL_ROW, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("21. ineligible without a barbell", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "plates" }] }),
+      });
+
+      const result = checkExerciseEligibility(BARBELL_ROW, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("22. ineligible without weight plates", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "barbell" }] }),
+      });
+
+      const result = checkExerciseEligibility(BARBELL_ROW, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("23. eligible without a rack — a rack is documented as optional, not required (the bar is lifted from the floor)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "barbell" }, { type: "plates" }] }),
+      });
+
+      const result = checkExerciseEligibility(BARBELL_ROW, input);
+
+      expect(result.eligible).toBe(true);
+    });
+
+    test("24. no dependency on space, floor safety, jumping, throwing, a wall or a partner", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "barbell" }, { type: "plates" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(BARBELL_ROW, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("25. biomechanical fields match the canonical documentation", () => {
+      expect(BARBELL_ROW.physicalQualities).toEqual([
+        "absolute_strength",
+        "relative_strength",
+        "trunk_strength",
+        "grip_strength",
+        "stability",
+        "coordination",
+        "tissue_capacity",
+      ]);
+      expect(BARBELL_ROW.movementPatterns).toEqual(["horizontal_pull", "hinge", "isometric"]);
+      expect(BARBELL_ROW.forceVectors).toEqual(["horizontal", "vertical"]);
+      expect(BARBELL_ROW.unilateral).toBe(false);
+      expect(BARBELL_ROW.bodyRegionsLoaded).toEqual(["shoulder"]);
+      expect(BARBELL_ROW.complexity).toBe("moderate");
+      expect(BARBELL_ROW.minimumTechnicalLevel).toBe(3);
+      expect(BARBELL_ROW.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("CHEST_SUPPORTED_ROW", () => {
+    test("26. eligible with a bench and a dumbbell (one of three any_of alternatives)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "bench" }, { type: "dumbbell" }] }),
+      });
+
+      const result = checkExerciseEligibility(CHEST_SUPPORTED_ROW, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("27. eligible with a bench and a barbell (a second any_of alternative)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "bench" }, { type: "barbell" }] }),
+      });
+
+      const result = checkExerciseEligibility(CHEST_SUPPORTED_ROW, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("28. eligible with a bench and the 'other' machine placeholder (the third any_of alternative)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "bench" }, { type: "other" }] }),
+      });
+
+      const result = checkExerciseEligibility(CHEST_SUPPORTED_ROW, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("29. ineligible without a bench", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "dumbbell" }] }),
+      });
+
+      const result = checkExerciseEligibility(CHEST_SUPPORTED_ROW, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("30. ineligible without a dumbbell, barbell or machine", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "bench" }] }),
+      });
+
+      const result = checkExerciseEligibility(CHEST_SUPPORTED_ROW, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("31. no dependency on space, floor safety, jumping, throwing, a wall or a partner", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "bench" }, { type: "dumbbell" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(CHEST_SUPPORTED_ROW, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("32. biomechanical fields match the canonical documentation", () => {
+      expect(CHEST_SUPPORTED_ROW.physicalQualities).toEqual([
+        "absolute_strength",
+        "relative_strength",
+        "stability",
+        "grip_strength",
+        "coordination",
+        "tissue_capacity",
+      ]);
+      expect(CHEST_SUPPORTED_ROW.movementPatterns).toEqual(["horizontal_pull"]);
+      expect(CHEST_SUPPORTED_ROW.forceVectors).toEqual(["horizontal"]);
+      expect(CHEST_SUPPORTED_ROW.unilateral).toBe(false);
+      expect(CHEST_SUPPORTED_ROW.bodyRegionsLoaded).toEqual(["shoulder"]);
+      expect(CHEST_SUPPORTED_ROW.complexity).toBe("low");
+      expect(CHEST_SUPPORTED_ROW.minimumTechnicalLevel).toBe(1);
+      expect(CHEST_SUPPORTED_ROW.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("business distinctions", () => {
+    test("33. WEIGHTED_PULL_UP vs. PULL_UP: identical biomechanics, distinct equipment and fatigue", () => {
+      // Same underlying movement — biomechanical classification is identical.
+      expect(WEIGHTED_PULL_UP.movementPatterns).toEqual(PULL_UP.movementPatterns);
+      expect(WEIGHTED_PULL_UP.forceVectors).toEqual(PULL_UP.forceVectors);
+      expect(WEIGHTED_PULL_UP.bodyRegionsLoaded).toEqual(PULL_UP.bodyRegionsLoaded);
+
+      // Only WEIGHTED_PULL_UP requires a loading implement (dip belt + plates); PULL_UP requires
+      // only the bar itself.
+      const weightedEquipment = WEIGHTED_PULL_UP.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      const pullUpEquipment = PULL_UP.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(weightedEquipment).toEqual(["pull_up_bar", "other", "plates"]);
+      expect(pullUpEquipment).toEqual(["pull_up_bar"]);
+
+      // The added external load is directly reflected in a markedly higher neural fatigue cost.
+      expect(WEIGHTED_PULL_UP.fatigueProfile.neural).toBeGreaterThan(PULL_UP.fatigueProfile.neural);
+      expect(WEIGHTED_PULL_UP.minimumTechnicalLevel).toBeGreaterThan(PULL_UP.minimumTechnicalLevel);
+    });
+
+    test("34. PULL_UP vs. CHIN_UP: identical equipment and region set, but distinct technical level", () => {
+      // Both require only a pull-up bar — the engine's eligibility gate genuinely cannot and should
+      // not differentiate between them.
+      expect(PULL_UP.requirements).toEqual(CHIN_UP.requirements);
+      expect(PULL_UP.bodyRegionsLoaded).toEqual(CHIN_UP.bodyRegionsLoaded);
+
+      // CHIN_UP's own fiche documents a plain, unhedged "Beginner" Skill Requirement ("Often easier
+      // to master than the Pull-Up due to increased contribution from the elbow flexors"), while
+      // PULL_UP's own is the hedged "Beginner to Intermediate" — CHIN_UP is therefore the more
+      // accessible entry of the two.
+      expect(CHIN_UP.minimumTechnicalLevel).toBeLessThan(PULL_UP.minimumTechnicalLevel);
+      expect(CHIN_UP.complexity).toBe("low");
+      expect(PULL_UP.complexity).toBe("moderate");
+    });
+
+    test("35. BARBELL_ROW vs. CHEST_SUPPORTED_ROW: distinct equipment, distinct movement patterns, and distinct lumbar contraindications", () => {
+      // Equipment: BARBELL_ROW requires a barbell and plates only; CHEST_SUPPORTED_ROW requires a
+      // bench plus any one of three loading alternatives.
+      const barbellRowEquipment = BARBELL_ROW.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(barbellRowEquipment).toEqual(["barbell", "plates"]);
+
+      const chestSupportedRowClauseKinds = CHEST_SUPPORTED_ROW.requirements!.required.map((clause) => clause.kind);
+      expect(chestSupportedRowClauseKinds).toEqual(["all_of", "any_of"]);
+
+      // Movement patterns: only BARBELL_ROW documents a hip-hinge component and isometric bracing.
+      expect(BARBELL_ROW.movementPatterns).toEqual(expect.arrayContaining(["hinge", "isometric"]));
+      expect(CHEST_SUPPORTED_ROW.movementPatterns).not.toEqual(expect.arrayContaining(["hinge", "isometric"]));
+
+      // Only BARBELL_ROW documents a lumbar-spine contraindication and trunk_strength quality.
+      const barbellRowRegions = BARBELL_ROW.contraindications.map((c) => c.region).filter(Boolean);
+      const chestSupportedRowRegions = CHEST_SUPPORTED_ROW.contraindications.map((c) => c.region).filter(Boolean);
+      expect(barbellRowRegions).toContain("lumbar_spine");
+      expect(chestSupportedRowRegions).not.toContain("lumbar_spine");
+      expect(BARBELL_ROW.physicalQualities).toContain("trunk_strength");
+      expect(CHEST_SUPPORTED_ROW.physicalQualities).not.toContain("trunk_strength");
+    });
+
+    test("36. vertical_pull vs. horizontal_pull: the three pull-up-family exercises are vertical, the two row exercises are horizontal", () => {
+      for (const verticalPuller of [WEIGHTED_PULL_UP, PULL_UP, CHIN_UP]) {
+        expect(verticalPuller.movementPatterns).toContain("vertical_pull");
+        expect(verticalPuller.movementPatterns).not.toContain("horizontal_pull");
+        expect(verticalPuller.forceVectors).toEqual(["vertical"]);
+      }
+      for (const horizontalPuller of [BARBELL_ROW, CHEST_SUPPORTED_ROW]) {
+        expect(horizontalPuller.movementPatterns).toContain("horizontal_pull");
+        expect(horizontalPuller.movementPatterns).not.toContain("vertical_pull");
+        expect(horizontalPuller.forceVectors![0]).toBe("horizontal");
+      }
+    });
+
+    test("37. lumbar fatigue profiles of the two row variants: BARBELL_ROW carries a real, documented lumbar demand that CHEST_SUPPORTED_ROW does not", () => {
+      // BARBELL_ROW's own fiche names "Acute Lumbar Injury" and "Poor Hip Hinge Mechanics" as
+      // contraindications and documents a hip-hinge secondary movement pattern; CHEST_SUPPORTED_ROW's
+      // own fiche documents neither, corroborated by its own explicit "minimizing spinal loading" /
+      // "Not every pulling exercise should challenge trunk stability" framing.
+      expect(BARBELL_ROW.contraindications.some((c) => c.description.toLowerCase().includes("lumbar"))).toBe(true);
+      expect(CHEST_SUPPORTED_ROW.contraindications.some((c) => c.description.toLowerCase().includes("lumbar"))).toBe(
+        false,
+      );
+
+      // CHEST_SUPPORTED_ROW's own "one of the best stimulus-to-fatigue ratios among rowing exercises"
+      // is directly reflected in a lower mechanical/connective-tissue fatigue rating than BARBELL_ROW.
+      expect(CHEST_SUPPORTED_ROW.fatigueProfile.muscular).toBeLessThan(BARBELL_ROW.fatigueProfile.muscular);
+      expect(CHEST_SUPPORTED_ROW.fatigueProfile.connectiveTissue).toBeLessThan(BARBELL_ROW.fatigueProfile.connectiveTissue);
+    });
+  });
+
+  test("38. adding this batch never changes the previously integrated exercises, including BACK_SQUAT and AB_WHEEL", () => {
+    const backSquatInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "rack" }, { type: "plates" }],
+      }),
+    });
+    expect(checkExerciseEligibility(BACK_SQUAT, backSquatInput).eligible).toBe(true);
+
+    const abWheelInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "other" }],
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(AB_WHEEL, abWheelInput).eligible).toBe(true);
+
+    const farmerCarryInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "dumbbell" }],
+        availableSpace: "large",
+      }),
+    });
+    expect(checkExerciseEligibility(FARMER_CARRY, farmerCarryInput).eligible).toBe(true);
+
+    const hipThrustInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "bench" }, { type: "plates" }],
+      }),
+    });
+    expect(checkExerciseEligibility(HIP_THRUST, hipThrustInput).eligible).toBe(true);
   });
 });

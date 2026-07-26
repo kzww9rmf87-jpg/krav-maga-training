@@ -5627,6 +5627,710 @@ export const BULGARIAN_SPLIT_SQUAT: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Weighted Pull-Up
+// Source: 50-exercises/09_WEIGHTED_PULL_UP
+// -----------------------------------------------------------------------------
+
+/**
+ * First entry of the "Lot 2 — Tirages du haut du corps" batch, migrated
+ * alongside PULL_UP/CHIN_UP/BARBELL_ROW/CHEST_SUPPORTED_ROW. Source is
+ * another flat, standalone file under `50-exercises/` (same older
+ * documentary layer as Lot 1's own six entries — no chapter folder). No
+ * `exercisePrescriptionRegistry.ts` entry exists for `weighted_pull_up`
+ * (confirmed by direct search) — a known limitation, documented here
+ * without modifying that registry (the registry's own PULL_UP-adjacent
+ * comment at "50-exercises/11_CHIN_UP" explicitly notes "The loaded variant
+ * is a distinct, separately documented exercise (weighted_pull_up) — not
+ * represented here", confirming this gap was already known, not newly
+ * discovered).
+ *
+ * Same documentation-format limitation as every Lot 1 entry: no "Space
+ * Requirement" heading and no surface-safety language anywhere in this
+ * fiche (checked directly) — neither `sufficient_space` nor `floor_safe` is
+ * added. This same gap recurs identically across all five entries in this
+ * batch.
+ *
+ * KNOWN MODEL LIMITATION, flagged explicitly rather than silently
+ * approximated: "# Equipment Requirements — Required: Pull-Up Bar, Dip
+ * Belt, Weight Plates." Three separate required items, not two: `pull_up_bar`
+ * (existing type, used directly) and `plates` (existing type, used
+ * directly — "Weight Plates" is the load itself and maps honestly) are
+ * genuine matches, but "Dip Belt" (the attachment device that suspends the
+ * plates from the athlete's body) has no dedicated `EquipmentType` value.
+ * The generic `dip_bars` value is NOT used as a stand-in — it names a
+ * completely different physical object (a parallel-bar station for
+ * performing Dips), and using it here would silently misrepresent this
+ * fiche's own actual required implement, exactly the kind of approximation
+ * this project's methodology forbids. `"other"` is used instead as the
+ * flagged placeholder for the dip belt specifically, alongside `plates` as
+ * the separately-required load — the same honest-escape-hatch pattern
+ * already established for AB_WHEEL. "Optional — Weighted Vest, Chains,
+ * Resistance Bands" and "# Variations — ... Weighted Vest" are documented
+ * ALTERNATIVE loading mechanisms, but never promoted from Optional/
+ * Variation to Required — no `any_of` is built between the dip belt and
+ * the weighted vest, matching this catalog's established precedent that
+ * documented "optional"/"variation" equipment never silently substitutes
+ * for a Required item.
+ */
+export const WEIGHTED_PULL_UP: ExerciseDefinition = {
+  id: "weighted_pull_up",
+  name: "Weighted Pull-Up",
+  module: "strength",
+  // "# Primary Classification: Strength" (explicit).
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Relative Strength, Maximum Strength,
+  // Grip Strength" → relative_strength, absolute_strength, grip_strength
+  // (all exact matches). "Secondary: Core Stability" → trunk_strength.
+  // "Scapular Stability" → stability. "Movement Coordination" →
+  // coordination. "Mechanical Robustness" → tissue_capacity. "Upper-Body
+  // Force Production" is generic, non-specific framing with no distinct
+  // PhysicalQuality counterpart and is deliberately never force-mapped
+  // anywhere in this batch — noted once here, applying uniformly below.
+  physicalQualities: ["relative_strength", "absolute_strength", "grip_strength", "trunk_strength", "stability", "coordination", "tissue_capacity"],
+  // "# Movement Pattern — Primary: Vertical Pull." → vertical_pull (exact
+  // match). "Secondary: Scapular Depression, Shoulder Extension, Elbow
+  // Flexion, Brace" → isometric (from Brace); the other three are
+  // joint-action-level detail already implied by `vertical_pull` and are
+  // not separately force-fitted — the grip type ("supinated"/"pronated"/
+  // "neutral") is a technical cue represented nowhere in this model,
+  // matching the user's own explicit instruction not to turn grip style
+  // into a requirement.
+  movementPatterns: ["vertical_pull", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Vertical." No
+  // "Secondary Force Vector" heading exists in this fiche.
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "pull_up_bar" },
+          { kind: "equipment", equipment: "other" }, // flagged placeholder for "Dip Belt" — see block comment above
+          { kind: "equipment", equipment: "plates" },
+        ],
+      },
+    ],
+  },
+  // "# Skill Requirement: Intermediate. The athlete should first
+  // demonstrate strict bodyweight pull-ups." — mapped to the same
+  // minimumTechnicalLevel 3 / "moderate" pairing used throughout this
+  // catalog for that exact word.
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // "Bilateral" (Movement Context, explicit).
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Latissimus Dorsi, Biceps
+  // Brachii, Teres Major" → shoulder (latissimus dorsi, teres major —
+  // both shoulder-girdle musculature), upper_arm (biceps brachii, an
+  // elbow flexor). Secondary Muscles (Posterior Deltoid, Brachialis,
+  // Brachioradialis, Lower Trapezius) and Stabilizers are excluded,
+  // matching this catalog's established primary-muscles-only discipline.
+  bodyRegionsLoaded: ["shoulder", "upper_arm"],
+  // "# Contraindications", quoted one item per source line — this file's
+  // format has a single flat list, treated as the hard-exclusion tier,
+  // matching the convention already established throughout Lot 1.
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+    { description: "Acute elbow injury.", region: "elbow", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+    { description: "Acute wrist injury.", region: "wrist", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+    { description: "Pain during vertical pulling.", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: High. Mechanical
+    // Fatigue: Moderate. Metabolic Fatigue: Moderate." mapped via the same
+    // Low=1/Moderate=2/Moderate-to-High=3/High=4/Very-High=5 word scale
+    // established in Lot 1 (this file's format uses qualitative words, not
+    // 62_CORE's X/5 numbers). "Neuromuscular Fatigue" → neural.
+    // "Mechanical Fatigue" → muscular, also used as the shared source for
+    // `connectiveTissue` (no distinct "Connective-Tissue Fatigue" heading
+    // exists in this format, matching the identical Lot 1 limitation) —
+    // flagged as an inference, applying identically across this batch.
+    // "Produces a very high strength stimulus with relatively low
+    // systemic fatigue" (explicit prose) corroborates a moderate, not
+    // maximal, overall cost despite the elevated neural rating.
+    types: ["neural"],
+    neural: 4,
+    muscular: 2,
+    connectiveTissue: 2, // inferred from "Mechanical Fatigue: Moderate"
+    metabolic: 2,
+    technical: 3, // fallback from "Skill Requirement: Intermediate" (minimumTechnicalLevel 3)
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Weighted Pull-Ups
+  // demonstrate strong evidence..." — mapped to the CAS Evidence
+  // Framework's "Level 1 — Scientific consensus" (20-engine/
+  // 02_EXERCISE_KNOWLEDGE_BASE.md), matching every Lot 1 entry's own
+  // identical resolution of this exact star-rating/prose pattern.
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate is
+  // named in this table but has no `CombatSport` enum counterpart and is
+  // omitted rather than force-mapped, matching the established precedent.
+  combatSportRelevance: {
+    boxing: 3,
+    kickboxing: 3,
+    muay_thai: 3,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" names "Bodyweight Pull-Up" → pull_up (integrated in
+  // this same batch, real catalog id — the plain-bodyweight base movement
+  // this exercise adds external load to). "Band-Assisted Pull-Up", "Ring
+  // Row" and "Lat Pulldown" name no exercise with its own chapter/catalog
+  // id. No dedicated "Substitution Logic" section exists in this file's
+  // format — Progressions/Regressions/Variations are used as the
+  // substitute source instead, matching the sourcing-convention
+  // established in Lot 1.
+  substitutionExerciseIds: ["pull_up"],
+};
+
+// -----------------------------------------------------------------------------
+// Pull-Up
+// Source: 50-exercises/10_PULL_UP
+// -----------------------------------------------------------------------------
+
+/**
+ * Second entry of this batch. `exercisePrescriptionRegistry.ts` has a
+ * corroborating `pullUpEntry` (`requiredEquipmentCapabilities:
+ * ["pull_up_bar"]` only, `supportedLoadingModes: ["bodyweight"]`,
+ * `laterality: "bilateral"` — matching this entry's own equipment
+ * resolution and confirming no external load is claimed).
+ *
+ * Same documentation-format limitation as every entry in this batch: no
+ * space/floor-safety language anywhere in this fiche (checked directly).
+ *
+ * Central business distinction from WEIGHTED_PULL_UP, explicitly flagged
+ * before writing began: "# Equipment Requirements — Required: Pull-Up Bar.
+ * Optional: Resistance Bands, Gymnastic Rings." No dip belt, no weight
+ * plates — the base bodyweight movement genuinely requires only the bar
+ * itself, honestly reflected by `requirements` gating on `pull_up_bar`
+ * alone.
+ */
+export const PULL_UP: ExerciseDefinition = {
+  id: "pull_up",
+  name: "Pull-Up",
+  module: "strength",
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Relative Strength, Grip Strength,
+  // Upper-Body Strength" → relative_strength, grip_strength,
+  // absolute_strength ("Upper-Body Strength" folded into the closest
+  // generic quality, matching this batch's established convention).
+  // "Secondary: Core Stability" → trunk_strength. "Movement Coordination"
+  // → coordination. "Scapular Stability" → stability. "Mechanical
+  // Robustness" → tissue_capacity. The resulting set is identical in
+  // content to WEIGHTED_PULL_UP's own (both entries document the same
+  // underlying movement, loaded vs. unloaded) — a faithful reflection of
+  // the two fiches' near-identical Capability Mapping sections, not a
+  // copy-paste error.
+  physicalQualities: ["relative_strength", "grip_strength", "absolute_strength", "trunk_strength", "coordination", "stability", "tissue_capacity"],
+  // "# Movement Pattern — Primary: Vertical Pull." → vertical_pull.
+  // "Secondary: Scapular Depression, Shoulder Extension, Elbow Flexion,
+  // Brace" → isometric (from Brace only).
+  movementPatterns: ["vertical_pull", "isometric"],
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [{ kind: "equipment", equipment: "pull_up_bar" }],
+      },
+    ],
+  },
+  // "# Skill Requirement: Beginner to Intermediate. The Pull-Up is often
+  // used as a progression target for novice athletes." A genuine hedge
+  // between two named words (Beginner=1, Intermediate=3 elsewhere in this
+  // batch) — mapped to the midpoint, minimumTechnicalLevel 2, which this
+  // catalog's own established convention (see 62_CORE's MED_BALL_SCOOP_TOSS
+  // comment) resolves to `complexity: "moderate"`, not "low" — level 2 is
+  // reserved for "low" only when the fiche's own word is a plain, unhedged
+  // "Low"/"Beginner", which this one is not.
+  minimumTechnicalLevel: 2,
+  complexity: "moderate",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Latissimus Dorsi, Biceps
+  // Brachii, Teres Major" — identical primary-muscle list to
+  // WEIGHTED_PULL_UP → shoulder, upper_arm.
+  bodyRegionsLoaded: ["shoulder", "upper_arm"],
+  // "# Contraindications", quoted one item per source line — identical
+  // list to WEIGHTED_PULL_UP, a faithful reflection of the two fiches'
+  // identical Contraindications sections.
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+    { description: "Acute elbow injury.", region: "elbow", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+    { description: "Acute wrist injury.", region: "wrist", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+    { description: "Pain during vertical pulling.", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: Moderate. Metabolic Fatigue: Moderate." A flat "Moderate"
+    // across every dimension — genuinely lower than WEIGHTED_PULL_UP's own
+    // "Neuromuscular Fatigue: High", the clearest fatigue-profile
+    // distinction between the loaded and unloaded variant in this batch.
+    types: [],
+    neural: 2,
+    muscular: 2,
+    connectiveTissue: 2, // inferred from "Mechanical Fatigue: Moderate"
+    metabolic: 2,
+    technical: 2, // fallback from "Skill Requirement: Beginner to Intermediate" (minimumTechnicalLevel 2)
+  },
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star — identical
+  // to WEIGHTED_PULL_UP's own table.
+  combatSportRelevance: {
+    boxing: 3,
+    kickboxing: 3,
+    muay_thai: 3,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Progressions" names "Weighted Pull-Up" → weighted_pull_up
+  // (integrated in this same batch) — the reciprocal reference to
+  // WEIGHTED_PULL_UP's own "Bodyweight Pull-Up" substitution, a genuinely
+  // symmetric cross-reference between these two entries (unlike some
+  // asymmetric cases already documented elsewhere in this catalog).
+  // "Band-Assisted Pull-Up", "Ring Row" and "Lat Pulldown" name no
+  // exercise with its own chapter/catalog id.
+  substitutionExerciseIds: ["weighted_pull_up"],
+};
+
+// -----------------------------------------------------------------------------
+// Chin-Up
+// Source: 50-exercises/11_CHIN_UP
+// -----------------------------------------------------------------------------
+
+/**
+ * Third entry of this batch. `exercisePrescriptionRegistry.ts` has a
+ * corroborating `chinUpEntry` (`requiredEquipmentCapabilities:
+ * ["pull_up_bar"]` only, `supportedLoadingModes: ["bodyweight"]` — matching
+ * this entry's own resolution exactly; the registry's own comment on this
+ * exercise explicitly notes "The loaded variant is a distinct, separately
+ * documented exercise (weighted_pull_up) — not represented here",
+ * corroborating that no loaded chin-up entry is expected in this batch).
+ *
+ * Same documentation-format limitation as every entry in this batch: no
+ * space/floor-safety language anywhere in this fiche (checked directly).
+ *
+ * Central business distinction from PULL_UP, explicitly flagged before
+ * writing began: "# Muscular Profile — Primary Muscles: Latissimus Dorsi,
+ * Biceps Brachii, Brachialis" — Brachialis (a pure elbow flexor) replaces
+ * PULL_UP's own "Teres Major" (a shoulder-girdle muscle) in the PRIMARY
+ * tier, directly grounding this fiche's own explicit "# Capability Mapping
+ * — Secondary: ... Elbow Flexor Strength" entry (absent from PULL_UP's own
+ * Capability Mapping). No distinct `PhysicalQuality` value exists for
+ * "elbow flexor strength" specifically — it is not force-fitted into
+ * `absolute_strength` a second time (already listed) or into any other
+ * value. This is a genuine, real capability the fiche documents that this
+ * model's PhysicalQuality granularity cannot represent as its own field;
+ * the underlying muscle shift is preserved faithfully in the sourcing
+ * comment here, even though it does NOT change the resulting
+ * `bodyRegionsLoaded` SET (`teres_major`→shoulder and `brachialis`→
+ * upper_arm both land in regions PULL_UP already reports, since PULL_UP's
+ * own primary list already includes upper_arm via Biceps Brachii) — an
+ * honest, flagged granularity limit of the BodyRegion model, not an
+ * oversight.
+ *
+ * "# Skill Requirement: Beginner. Often easier to master than the Pull-Up
+ * due to increased contribution from the elbow flexors." — this is the
+ * ONLY entry among the three vertical-pull exercises in this batch with a
+ * plain, unhedged "Beginner" Skill Requirement (PULL_UP itself is hedged
+ * as "Beginner to Intermediate", WEIGHTED_PULL_UP is "Intermediate") —
+ * directly, explicitly corroborated by this fiche's own prose, not an
+ * inferred ordering.
+ */
+export const CHIN_UP: ExerciseDefinition = {
+  id: "chin_up",
+  name: "Chin-Up",
+  module: "strength",
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Relative Strength, Grip Strength,
+  // Upper-Body Strength" → relative_strength, grip_strength,
+  // absolute_strength. "Secondary: Core Stability" → trunk_strength.
+  // "Movement Coordination" → coordination. "Scapular Stability" →
+  // stability. "Mechanical Robustness" → tissue_capacity. "Elbow Flexor
+  // Strength" excluded — see block comment above for the full reasoning.
+  physicalQualities: ["relative_strength", "grip_strength", "absolute_strength", "trunk_strength", "coordination", "stability", "tissue_capacity"],
+  // "# Movement Pattern — Primary: Vertical Pull." → vertical_pull.
+  // "Secondary: Scapular Depression, Shoulder Extension, Elbow Flexion,
+  // Brace" → isometric (from Brace only) — identical resolution to
+  // PULL_UP/WEIGHTED_PULL_UP; the supinated grip is a technical execution
+  // detail, not a distinct MovementPattern value, matching the user's own
+  // explicit instruction not to turn grip type into a requirement.
+  movementPatterns: ["vertical_pull", "isometric"],
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [{ kind: "equipment", equipment: "pull_up_bar" }],
+      },
+    ],
+  },
+  // "# Skill Requirement: Beginner." — the plain, unhedged word, mapped to
+  // minimumTechnicalLevel 1 / "low" — see block comment above for why this
+  // is genuinely lower than PULL_UP's own hedged "Beginner to
+  // Intermediate" (level 2).
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Latissimus Dorsi, Biceps
+  // Brachii, Brachialis" → shoulder (latissimus dorsi), upper_arm (biceps
+  // brachii, brachialis — both elbow flexors). The resulting region SET
+  // is identical to PULL_UP's own (["shoulder", "upper_arm"]) despite the
+  // different underlying muscle composition — see block comment above.
+  bodyRegionsLoaded: ["shoulder", "upper_arm"],
+  // "# Contraindications", quoted one item per source line — identical
+  // list to PULL_UP/WEIGHTED_PULL_UP.
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+    { description: "Acute elbow injury.", region: "elbow", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+    { description: "Acute wrist injury.", region: "wrist", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+    { description: "Pain during vertical pulling.", prohibitedPatterns: ["vertical_pull", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: Moderate. Metabolic Fatigue: Moderate." — identical ratings
+    // to PULL_UP's own Fatigue Profile.
+    types: [],
+    neural: 2,
+    muscular: 2,
+    connectiveTissue: 2, // inferred from "Mechanical Fatigue: Moderate"
+    metabolic: 2,
+    technical: 1, // fallback from "Skill Requirement: Beginner" (minimumTechnicalLevel 1)
+  },
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star — identical
+  // to PULL_UP's/WEIGHTED_PULL_UP's own table.
+  combatSportRelevance: {
+    boxing: 3,
+    kickboxing: 3,
+    muay_thai: 3,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Progressions" names "Weighted Chin-Up" — a distinct exercise name
+  // from "Weighted Pull-Up" (this fiche's own name is "Chin-Up", never
+  // "Pull-Up"), and no dedicated "weighted_chin_up" fiche/catalog id
+  // exists anywhere in this repository — NOT resolved to
+  // `weighted_pull_up`, unlike DEAD_BUG's own "Dead Bug With Asymmetric
+  // Resistance" resolution in 62_CORE (that case modified the SAME base
+  // name; this one names a genuinely different exercise). "# Regressions"
+  // (Band-Assisted Chin-Up, Ring Row, Lat Pulldown, Suspension Row) name
+  // no exercise with its own catalog id either. Despite this fiche's own
+  // Purpose/Philosophy prose repeatedly comparing itself to "the Pull-Up"
+  // ("Compared with the Pull-Up...", "more than an easier Pull-Up"), no
+  // Progressions/Regressions/Variations entry formally names it as a
+  // substitute — prose commentary is not treated as a substitution
+  // source, matching this batch's own quote-from-structured-sections-only
+  // discipline. `substitutionExerciseIds` is genuinely empty for this
+  // entry.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Barbell Row
+// Source: 50-exercises/12_BARBELL_ROW
+// -----------------------------------------------------------------------------
+
+/**
+ * Fourth entry of this batch. `exercisePrescriptionRegistry.ts` has a
+ * corroborating `barbellRowEntry` (`requiredEquipmentCapabilities:
+ * ["barbell", "plates"]` — no `"rack"` — matching this entry's own
+ * equipment resolution exactly; the registry's own comment states
+ * explicitly "no rack — lifted from the floor").
+ *
+ * Same documentation-format limitation as every entry in this batch: no
+ * space/floor-safety language anywhere in this fiche (checked directly).
+ *
+ * "# Equipment Requirements — Required: Barbell, Weight Plates. Optional:
+ * Lifting Straps, Blocks, Rack." Rack is explicitly Optional, never
+ * Required — the bar is lifted directly from the floor for each
+ * repetition (this fiche's own "# Movement Context: Standing" and
+ * "Transfer of Force: Ground → Legs → Core → Scapula → Arms → Barbell"
+ * both describe a floor-to-hip-hinge setup, never a rack-supported one) —
+ * `rack` is deliberately NOT added to `requirements`.
+ *
+ * Central business question for this entry, explicitly flagged before
+ * writing began: hip hinge and trunk stabilization are genuine
+ * biomechanical characteristics of this movement — represented entirely
+ * through `movementPatterns` (`hinge`, `isometric`) and `physicalQualities`
+ * (`trunk_strength`), never as an equipment or environment requirement.
+ */
+export const BARBELL_ROW: ExerciseDefinition = {
+  id: "barbell_row",
+  name: "Barbell Row",
+  module: "strength",
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Maximum Strength, Relative Strength,
+  // Upper-Body Pulling Strength" → absolute_strength, relative_strength
+  // ("Upper-Body Pulling Strength" is a redundant restatement of "Maximum
+  // Strength" already mapped to absolute_strength and is not
+  // double-counted). "Secondary: Core Stability" → trunk_strength. "Grip
+  // Strength" → grip_strength (exact match — a genuine, real grip demand
+  // from holding a loaded barbell through the full pulling range).
+  // "Postural Endurance" → stability (matching FARMER_CARRY's own
+  // identical "Postural Endurance" → stability precedent). "Movement
+  // Coordination" → coordination. "Mechanical Robustness" →
+  // tissue_capacity.
+  physicalQualities: ["absolute_strength", "relative_strength", "trunk_strength", "grip_strength", "stability", "coordination", "tissue_capacity"],
+  // "# Movement Pattern — Primary: Horizontal Pull." → horizontal_pull
+  // (exact match). "Secondary: Hip Hinge, Brace, Scapular Retraction,
+  // Shoulder Extension" → hinge (from "Hip Hinge", explicitly named as its
+  // own distinct secondary pattern — the hip-hinge setup and continuous
+  // trunk-stabilization demand under a horizontally-pulled load, not
+  // force-fitted as an equipment requirement per the user's own explicit
+  // instruction), isometric (from Brace).
+  movementPatterns: ["horizontal_pull", "hinge", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Horizontal. Secondary
+  // Force Vector: Vertical Stabilization." Unlike Lot 1's own "Minimal
+  // Horizontal" hedge, this secondary vector carries no hedging qualifier
+  // — both vectors are kept.
+  forceVectors: ["horizontal", "vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "barbell" },
+          { kind: "equipment", equipment: "plates" },
+        ],
+      },
+    ],
+  },
+  // "# Skill Requirement: Intermediate. Requires consistent hip hinge
+  // mechanics and trunk stability."
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Latissimus Dorsi, Middle
+  // Trapezius, Rhomboids, Posterior Deltoid" — all shoulder-girdle
+  // musculature → shoulder only. Secondary Muscles (Biceps Brachii,
+  // Brachialis, Teres Major) and Stabilizers are excluded, matching this
+  // batch's established primary-muscles-only discipline.
+  bodyRegionsLoaded: ["shoulder"],
+  // "# Contraindications", quoted one item per source line. "Acute Lumbar
+  // Injury" and "Poor Hip Hinge Mechanics" are the direct textual grounding
+  // for this exercise's real lumbar-spine demand under the hip-hinge
+  // position — CHEST_SUPPORTED_ROW's own Contraindications list documents
+  // neither, the clearest single-field business distinction between the
+  // two row variants in this batch (see that entry's own comment below).
+  contraindications: [
+    { description: "Acute lumbar injury.", region: "lumbar_spine", prohibitedPatterns: ["horizontal_pull", "hinge", "isometric"], absolute: true },
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["horizontal_pull", "hinge", "isometric"], absolute: true },
+    { description: "Pain during horizontal pulling.", prohibitedPatterns: ["horizontal_pull", "hinge", "isometric"], absolute: true },
+    { description: "Poor hip hinge mechanics.", prohibitedPatterns: ["horizontal_pull", "hinge", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: High. Mechanical
+    // Fatigue: Moderate. Metabolic Fatigue: Moderate." Same
+    // muscular-shared connectiveTissue inference established throughout
+    // this batch.
+    types: ["neural"],
+    neural: 4,
+    muscular: 2,
+    connectiveTissue: 2, // inferred from "Mechanical Fatigue: Moderate"
+    metabolic: 2,
+    technical: 3, // fallback from "Skill Requirement: Intermediate"
+  },
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate is
+  // named in this table but has no `CombatSport` enum counterpart and is
+  // omitted rather than force-mapped.
+  combatSportRelevance: {
+    boxing: 4,
+    kickboxing: 4,
+    muay_thai: 4,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" and "# Variations" both name "Chest-Supported Row" →
+  // chest_supported_row (integrated in this same batch, real catalog id).
+  // "Seal Row", "Resistance Band Row" and "Suspension Row" name no
+  // exercise with its own chapter/catalog id.
+  substitutionExerciseIds: ["chest_supported_row"],
+};
+
+// -----------------------------------------------------------------------------
+// Chest-Supported Row
+// Source: 50-exercises/13_CHEST_SUPPORTED_ROW
+// -----------------------------------------------------------------------------
+
+/**
+ * Fifth and final entry of this batch. No `exercisePrescriptionRegistry.ts`
+ * entry exists for `chest_supported_row` (confirmed by direct search) — a
+ * known limitation, documented here without modifying that registry.
+ *
+ * Same documentation-format limitation as every entry in this batch: no
+ * space/floor-safety language anywhere in this fiche (checked directly).
+ *
+ * Central business question for this entry, explicitly flagged before
+ * writing began: "# Equipment Requirements — Required: Incline Bench,
+ * Dumbbells or Barbell or Machine." Unlike every other equipment
+ * alternative encountered so far in this catalog (always framed as
+ * separate "Variations"/"Optional" items rather than literal "or" language
+ * inside the Required section itself), this fiche's own Required heading
+ * explicitly uses "or" between three named loading implements — the
+ * textual permission the user's own task instructions required before
+ * building an `any_of` here. "Incline Bench" maps to the existing generic
+ * `bench` `EquipmentType` (the same honest-nearest-match resolution used
+ * for HIP_THRUST's/BULGARIAN_SPLIT_SQUAT's own plain "Bench" requirement
+ * in Lot 1 — no dedicated "incline_bench" value exists or is warranted).
+ * "Dumbbells" and "Barbell" map directly to `dumbbell`/`barbell`.
+ *
+ * KNOWN MODEL LIMITATION, flagged explicitly rather than silently
+ * approximated: the third alternative, "Machine", has no honest
+ * `EquipmentType` match. "# Optional — Chest-Supported Row Machine, Cable
+ * Machine" separately names TWO different specific machine types as
+ * sub-examples of this same generic "Machine" alternative — neither
+ * "chest-supported row machine" nor a bare "machine" concept has a
+ * dedicated type, and using the existing `cable_machine` value alone would
+ * incorrectly narrow "Machine" to only its cable-resistance sub-case,
+ * excluding the dedicated chest-supported-row-machine sub-case this same
+ * fiche also names. `"other"` is used as the flagged placeholder for this
+ * third `any_of` alternative — the same honest-escape-hatch pattern
+ * already established for AB_WHEEL/WEIGHTED_PULL_UP.
+ *
+ * "# Movement Pattern — Primary: Horizontal Pull. Secondary: Scapular
+ * Retraction, Shoulder Extension, Elbow Flexion." No "Brace" is named
+ * anywhere in this fiche's own Movement Pattern (checked directly, unlike
+ * BARBELL_ROW's own explicit "Brace" secondary pattern) — the torso is
+ * mechanically SUPPORTED by the bench, removing the trunk-bracing/
+ * anti-extension demand a free-standing row requires. `isometric` is
+ * therefore deliberately NOT added — the clearest single-field
+ * distinction from BARBELL_ROW in this entire batch, directly corroborated
+ * by this fiche's own "# Biomechanical Profile" (no "Secondary Force
+ * Vector" heading at all, unlike BARBELL_ROW's own "Vertical
+ * Stabilization"), "# Contraindications" (no lumbar-spine item at all,
+ * unlike BARBELL_ROW's own "Acute Lumbar Injury"/"Poor Hip Hinge
+ * Mechanics"), and explicit Purpose/Philosophy prose: "one of the safest
+ * and most efficient exercises for developing upper-back strength while
+ * minimizing spinal loading" / "Not every pulling exercise should
+ * challenge trunk stability."
+ */
+export const CHEST_SUPPORTED_ROW: ExerciseDefinition = {
+  id: "chest_supported_row",
+  name: "Chest-Supported Row",
+  module: "strength",
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Upper-Body Pulling Strength, Relative
+  // Strength" → absolute_strength (folded, matching the whole batch's
+  // established convention), relative_strength. "Secondary: Scapular
+  // Stability" → stability. "Grip Strength" → grip_strength. "Movement
+  // Coordination" → coordination. "Mechanical Robustness" →
+  // tissue_capacity. "Postural Strength" has no distinct PhysicalQuality
+  // counterpart beyond `stability` already listed via "Scapular
+  // Stability" — NOT folded into `trunk_strength`, consistent with this
+  // entry's own documented absence of any bracing/anti-extension movement
+  // pattern (see block comment above): adding trunk_strength here would
+  // contradict that finding.
+  physicalQualities: ["absolute_strength", "relative_strength", "stability", "grip_strength", "coordination", "tissue_capacity"],
+  // "# Movement Pattern — Primary: Horizontal Pull." → horizontal_pull.
+  // "Secondary: Scapular Retraction, Shoulder Extension, Elbow Flexion" are
+  // joint-action-level detail already implied by `horizontal_pull` — no
+  // `isometric` value is added here; see block comment above for why this
+  // is a deliberate, textually-grounded divergence from BARBELL_ROW.
+  movementPatterns: ["horizontal_pull"],
+  // "# Biomechanical Profile — Primary Force Vector: Horizontal." No
+  // "Secondary Force Vector" heading exists in this fiche at all (unlike
+  // BARBELL_ROW's own "Vertical Stabilization") — see block comment above.
+  forceVectors: ["horizontal"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [{ kind: "equipment", equipment: "bench" }],
+      },
+      {
+        kind: "any_of",
+        items: [
+          { kind: "equipment", equipment: "dumbbell" },
+          { kind: "equipment", equipment: "barbell" },
+          { kind: "equipment", equipment: "other" }, // flagged placeholder for "Machine" — see block comment above
+        ],
+      },
+    ],
+  },
+  // "# Skill Requirement: Beginner. Suitable for athletes of all levels."
+  // — the plain, unhedged word, matching CHIN_UP's own identical mapping.
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  // "Bilateral" (Movement Context, explicit). "# Progressions — ...
+  // Single-Arm Variation" and "# Variations — ... Single-Arm" name a
+  // documented but non-default variation, not the base/default execution
+  // — matching this catalog's established "variations aren't the base
+  // form" discipline (the same resolution already applied to
+  // FARMER_CARRY's own alternate-implement variations in an earlier
+  // batch).
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Latissimus Dorsi, Middle
+  // Trapezius, Rhomboids, Posterior Deltoid" — identical primary-muscle
+  // list to BARBELL_ROW → shoulder only.
+  bodyRegionsLoaded: ["shoulder"],
+  // "# Contraindications", quoted one item per source line — the shortest
+  // contraindication list in this batch (2 items), and notably contains NO
+  // lumbar-spine item at all, unlike BARBELL_ROW's own 4-item list — see
+  // block comment above.
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["horizontal_pull"], absolute: true },
+    { description: "Pain during horizontal pulling.", prohibitedPatterns: ["horizontal_pull"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: Low. Metabolic Fatigue: Moderate." "One of the best
+    // stimulus-to-fatigue ratios among rowing exercises" (explicit prose)
+    // directly corroborates the lowest `muscular`/`connectiveTissue`
+    // rating in this entire batch (Low=1, vs. BARBELL_ROW's own
+    // Moderate=2) — the clearest fatigue-profile distinction between the
+    // two row variants.
+    types: [],
+    neural: 2,
+    muscular: 1,
+    connectiveTissue: 1, // inferred from "Mechanical Fatigue: Low"
+    metabolic: 2,
+    technical: 1, // fallback from "Skill Requirement: Beginner"
+  },
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star — identical
+  // to BARBELL_ROW's own table.
+  combatSportRelevance: {
+    boxing: 4,
+    kickboxing: 4,
+    muay_thai: 4,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Progressions"/"# Regressions"/"# Variations" name no exercise with
+  // its own catalog id anywhere in this fiche (checked directly) —
+  // "Resistance Band Row", "Machine Row" and "Cable Row" have no dedicated
+  // chapter/catalog id. Despite BARBELL_ROW's own Regressions/Variations
+  // naming "Chest-Supported Row" as its own substitute, this fiche never
+  // names "Barbell Row" anywhere in its own Progressions/Regressions/
+  // Variations sections (checked directly) — the same faithfully-preserved
+  // one-directional asymmetry already documented elsewhere in this
+  // catalog (e.g. FRONT_SQUAT/BACK_SQUAT in Lot 1), not a gap to "fix" by
+  // inventing a reciprocal reference. `substitutionExerciseIds` is
+  // genuinely empty for this entry.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -7003,4 +7707,9 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   ROMANIAN_DEADLIFT,
   HIP_THRUST,
   BULGARIAN_SPLIT_SQUAT,
+  WEIGHTED_PULL_UP,
+  PULL_UP,
+  CHIN_UP,
+  BARBELL_ROW,
+  CHEST_SUPPORTED_ROW,
 ];
