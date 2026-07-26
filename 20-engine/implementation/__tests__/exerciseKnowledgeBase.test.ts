@@ -28,6 +28,7 @@ import {
   BULGARIAN_SPLIT_SQUAT,
   CHEST_SUPPORTED_ROW,
   CHIN_UP,
+  COPENHAGEN_PLANK,
   COUNTERMOVEMENT_JUMP,
   DEAD_BUG,
   DEPTH_JUMP,
@@ -53,6 +54,8 @@ import {
   MED_BALL_SCOOP_TOSS,
   MED_BALL_SHOT_PUT_THROW,
   MED_BALL_SLAM,
+  NECK_TRAINING,
+  NORDIC_HAMSTRING_CURL,
   OVERHEAD_CARRY,
   OVERHEAD_PRESS,
   PALLOF_PRESS,
@@ -63,13 +66,17 @@ import {
   ROMANIAN_DEADLIFT,
   ROPE_CLIMB,
   ROPE_PULL,
+  ROTATOR_CUFF_TRAINING,
   SANDBAG_CARRY,
   SINGLE_LEG_HOP,
+  SOLEUS_RAISE,
   SPLIT_SQUAT_JUMP,
   SUITCASE_CARRY,
+  TIBIALIS_RAISE,
   TOWEL_PULL_UP,
   TRAP_BAR_DEADLIFT,
   WEIGHTED_PULL_UP,
+  WRIST_STRENGTHENING,
   ZERCHER_CARRY,
 } from "../exerciseKnowledgeBase";
 
@@ -8416,5 +8423,612 @@ describe("Lot 3 — Poussées du haut du corps — Exercise Requirements Model b
       }),
     });
     expect(checkExerciseEligibility(BARBELL_ROW, barbellRowInput).eligible).toBe(true);
+  });
+});
+
+
+describe("Lot 4 — Chaine posterieure et robustness — Exercise Requirements Model batch integration", () => {
+  const LOT4_EXERCISES = [
+    { exercise: NORDIC_HAMSTRING_CURL, id: "nordic_hamstring_curl" },
+    { exercise: COPENHAGEN_PLANK, id: "copenhagen_plank" },
+    { exercise: TIBIALIS_RAISE, id: "tibialis_raise" },
+    { exercise: SOLEUS_RAISE, id: "soleus_raise" },
+    { exercise: ROTATOR_CUFF_TRAINING, id: "rotator_cuff_training" },
+    { exercise: WRIST_STRENGTHENING, id: "wrist_strengthening" },
+    { exercise: NECK_TRAINING, id: "neck_training" },
+  ] as const;
+
+  test.each(LOT4_EXERCISES)("$id — 1. exists in the catalog with the expected id", ({ exercise, id }) => {
+    expect(EXERCISE_KNOWLEDGE_BASE).toContain(exercise);
+    expect(exercise.id).toBe(id);
+  });
+
+  test("2. all seven ids are unique within the catalog, and no prior id (e.g. bench_press) is duplicated", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const { id } of LOT4_EXERCISES) {
+      expect(ids.filter((existingId) => existingId === id)).toHaveLength(1);
+    }
+    expect(ids.filter((existingId) => existingId === "bench_press")).toEqual(["bench_press"]);
+  });
+
+  test.each(LOT4_EXERCISES)(
+    "$id — 3. respects the coexistence invariant: requiredEquipment is empty, optionalEquipment is absent",
+    ({ exercise }) => {
+      expect(exercise.requiredEquipment).toEqual([]);
+      expect(exercise.optionalEquipment).toBeUndefined();
+      expect(validateRequirementsCoexistenceInvariant(exercise)).toBeNull();
+      // TIBIALIS_RAISE, SOLEUS_RAISE, WRIST_STRENGTHENING and NECK_TRAINING document no
+      // required equipment, environment or human assistance at all — `requirements` is
+      // genuinely omitted for those four, which the coexistence invariant itself treats as
+      // trivially satisfied (see `validateRequirementsCoexistenceInvariant`'s own early return).
+      if (exercise.requirements !== undefined) {
+        expect(validateExerciseRequirementsStructure(exercise.requirements)).toEqual([]);
+      }
+    },
+  );
+
+  test("4. the default catalog used by runEngine(input) now also contains all seven Lot 4 ids", () => {
+    const ids = EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id);
+    for (const { id } of LOT4_EXERCISES) {
+      expect(ids).toContain(id);
+    }
+  });
+
+  test.each(LOT4_EXERCISES)("$id — 5. never mutates the exercise or the input it is given during evaluation", ({ exercise }) => {
+    const input = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "other" }, { type: "bench" }, { type: "cable_machine" }, { type: "resistance_band" }],
+        partnerAvailable: true,
+        availableSpace: "large",
+      }),
+    });
+    const exerciseSnapshot = structuredClone(exercise);
+    const inputSnapshot = structuredClone(input);
+
+    checkExerciseEligibility(exercise, input);
+
+    expect(exercise).toEqual(exerciseSnapshot);
+    expect(input).toEqual(inputSnapshot);
+  });
+
+  describe("NORDIC_HAMSTRING_CURL", () => {
+    test("6. eligible with the 'other' Nordic-bench placeholder alone (no partner declared)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "other" }], partnerAvailable: false }),
+      });
+
+      const result = checkExerciseEligibility(NORDIC_HAMSTRING_CURL, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("7. eligible with a partner alone (no Nordic-bench equipment declared) — the second, independent eligibility path", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [], partnerAvailable: true }),
+      });
+
+      const result = checkExerciseEligibility(NORDIC_HAMSTRING_CURL, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("8. ineligible with neither the Nordic-bench placeholder nor a partner", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [], partnerAvailable: false }),
+      });
+
+      const result = checkExerciseEligibility(NORDIC_HAMSTRING_CURL, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("9. no dependency on space, floor safety, jumping, throwing or a wall", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "other" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(NORDIC_HAMSTRING_CURL, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("10. biomechanical fields match the canonical documentation", () => {
+      expect(NORDIC_HAMSTRING_CURL.physicalQualities).toEqual([
+        "deceleration",
+        "tissue_capacity",
+        "relative_strength",
+        "coordination",
+        "trunk_strength",
+      ]);
+      expect(NORDIC_HAMSTRING_CURL.movementPatterns).toEqual(["mixed", "isometric"]);
+      expect(NORDIC_HAMSTRING_CURL.forceVectors).toEqual(["vertical"]);
+      expect(NORDIC_HAMSTRING_CURL.unilateral).toBe(false);
+      expect(NORDIC_HAMSTRING_CURL.bodyRegionsLoaded).toEqual(["thigh"]);
+      expect(NORDIC_HAMSTRING_CURL.complexity).toBe("moderate");
+      expect(NORDIC_HAMSTRING_CURL.minimumTechnicalLevel).toBe(3);
+      expect(NORDIC_HAMSTRING_CURL.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("COPENHAGEN_PLANK", () => {
+    test("11. eligible with a bench", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "bench" }] }),
+      });
+
+      const result = checkExerciseEligibility(COPENHAGEN_PLANK, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("12. ineligible without a bench", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(COPENHAGEN_PLANK, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("13. no dependency on space, floor safety, jumping, throwing, a wall or a partner — no surface-safety language is documented in this fiche", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "bench" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(COPENHAGEN_PLANK, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("14. biomechanical fields match the canonical documentation", () => {
+      expect(COPENHAGEN_PLANK.physicalQualities).toEqual([
+        "stability",
+        "trunk_strength",
+        "tissue_capacity",
+        "coordination",
+        "relative_strength",
+      ]);
+      expect(COPENHAGEN_PLANK.movementPatterns).toEqual(["anti_lateral_flexion", "isometric"]);
+      expect(COPENHAGEN_PLANK.forceVectors).toEqual(["lateral"]);
+      expect(COPENHAGEN_PLANK.unilateral).toBe(true);
+      expect(COPENHAGEN_PLANK.bodyRegionsLoaded).toEqual(["groin"]);
+      expect(COPENHAGEN_PLANK.complexity).toBe("moderate");
+      expect(COPENHAGEN_PLANK.minimumTechnicalLevel).toBe(3);
+      expect(COPENHAGEN_PLANK.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("TIBIALIS_RAISE", () => {
+    test("15. eligible with no declared equipment at all — the documented bodyweight base variation", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(TIBIALIS_RAISE, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("16. no dependency on space, floor safety, jumping, throwing, a wall or a partner", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(TIBIALIS_RAISE, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("17. declares no `requirements` object at all — nothing is documented as required", () => {
+      expect(TIBIALIS_RAISE.requirements).toBeUndefined();
+    });
+
+    test("18. biomechanical fields match the canonical documentation", () => {
+      expect(TIBIALIS_RAISE.physicalQualities).toEqual([
+        "muscular_endurance",
+        "stability",
+        "coordination",
+        "deceleration",
+        "tissue_capacity",
+      ]);
+      expect(TIBIALIS_RAISE.movementPatterns).toEqual(["mixed"]);
+      expect(TIBIALIS_RAISE.forceVectors).toEqual(["upward"]);
+      expect(TIBIALIS_RAISE.unilateral).toBe(false);
+      expect(TIBIALIS_RAISE.bodyRegionsLoaded).toEqual(["lower_leg"]);
+      expect(TIBIALIS_RAISE.complexity).toBe("low");
+      expect(TIBIALIS_RAISE.minimumTechnicalLevel).toBe(1);
+      // The only "Level 2" (not "Level 1") evidence rating among the Lot 1-4 batches so far,
+      // directly grounded in this fiche's own 4-star, hedged "may contribute" claim.
+      expect(TIBIALIS_RAISE.evidenceLevel).toBe("level_2");
+    });
+  });
+
+  describe("SOLEUS_RAISE", () => {
+    test("19. eligible with no declared equipment at all — the documented bodyweight base variation", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(SOLEUS_RAISE, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("20. no dependency on space, floor safety, jumping, throwing, a wall or a partner", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(SOLEUS_RAISE, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("21. declares no `requirements` object at all — nothing is documented as required", () => {
+      expect(SOLEUS_RAISE.requirements).toBeUndefined();
+    });
+
+    test("22. biomechanical fields match the canonical documentation", () => {
+      expect(SOLEUS_RAISE.physicalQualities).toEqual([
+        "muscular_endurance",
+        "tissue_capacity",
+        "stability",
+        "reactive_strength",
+        "deceleration",
+      ]);
+      expect(SOLEUS_RAISE.movementPatterns).toEqual(["mixed"]);
+      expect(SOLEUS_RAISE.forceVectors).toEqual(["vertical"]);
+      expect(SOLEUS_RAISE.unilateral).toBe(false);
+      expect(SOLEUS_RAISE.bodyRegionsLoaded).toEqual(["lower_leg"]);
+      expect(SOLEUS_RAISE.complexity).toBe("low");
+      expect(SOLEUS_RAISE.minimumTechnicalLevel).toBe(1);
+      expect(SOLEUS_RAISE.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("ROTATOR_CUFF_TRAINING", () => {
+    test("23. eligible with a cable machine alone (one of two any_of alternatives)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "cable_machine" }] }),
+      });
+
+      const result = checkExerciseEligibility(ROTATOR_CUFF_TRAINING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("24. eligible with a resistance band alone (the other any_of alternative)", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "resistance_band" }] }),
+      });
+
+      const result = checkExerciseEligibility(ROTATOR_CUFF_TRAINING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("25. ineligible without a cable machine or resistance band", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "dumbbell" }] }),
+      });
+
+      const result = checkExerciseEligibility(ROTATOR_CUFF_TRAINING, input);
+
+      expect(result.eligible).toBe(false);
+      expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    });
+
+    test("26. no dependency on space, floor safety, jumping, throwing, a wall or a partner", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "resistance_band" }],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(ROTATOR_CUFF_TRAINING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("27. biomechanical fields match the canonical documentation", () => {
+      expect(ROTATOR_CUFF_TRAINING.physicalQualities).toEqual(["stability", "tissue_capacity", "coordination"]);
+      expect(ROTATOR_CUFF_TRAINING.movementPatterns).toEqual(["rotation"]);
+      expect(ROTATOR_CUFF_TRAINING.forceVectors).toEqual(["rotational"]);
+      expect(ROTATOR_CUFF_TRAINING.unilateral).toBe(false);
+      expect(ROTATOR_CUFF_TRAINING.bodyRegionsLoaded).toEqual(["shoulder"]);
+      expect(ROTATOR_CUFF_TRAINING.complexity).toBe("low");
+      expect(ROTATOR_CUFF_TRAINING.minimumTechnicalLevel).toBe(1);
+      expect(ROTATOR_CUFF_TRAINING.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("WRIST_STRENGTHENING", () => {
+    test("28. eligible with no declared equipment at all", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [] }),
+      });
+
+      const result = checkExerciseEligibility(WRIST_STRENGTHENING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("29. no dependency on space, floor safety, jumping, throwing, a wall or a partner", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(WRIST_STRENGTHENING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("30. declares no `requirements` object at all — nothing is documented as required", () => {
+      expect(WRIST_STRENGTHENING.requirements).toBeUndefined();
+    });
+
+    test("31. biomechanical fields match the canonical documentation", () => {
+      expect(WRIST_STRENGTHENING.physicalQualities).toEqual(["stability", "grip_strength", "tissue_capacity", "coordination"]);
+      expect(WRIST_STRENGTHENING.movementPatterns).toEqual(["mixed"]);
+      expect(WRIST_STRENGTHENING.forceVectors).toEqual(["mixed"]);
+      expect(WRIST_STRENGTHENING.unilateral).toBe(false);
+      expect(WRIST_STRENGTHENING.bodyRegionsLoaded).toEqual(["forearm"]);
+      expect(WRIST_STRENGTHENING.complexity).toBe("low");
+      expect(WRIST_STRENGTHENING.minimumTechnicalLevel).toBe(1);
+      expect(WRIST_STRENGTHENING.evidenceLevel).toBe("level_2");
+    });
+  });
+
+  describe("NECK_TRAINING", () => {
+    test("32. eligible with no declared equipment at all — a partner is documented only as optional", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [], partnerAvailable: false }),
+      });
+
+      const result = checkExerciseEligibility(NECK_TRAINING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("33. no dependency on space, floor safety, jumping, throwing, a wall or a partner", () => {
+      const input = makeValidInput({
+        environment: makeEnvironment({
+          availableEquipment: [],
+          availableSpace: "very_limited",
+          floorSafe: false,
+          jumpingAllowed: false,
+          throwingAllowed: false,
+          usableWall: false,
+          partnerAvailable: false,
+        }),
+      });
+
+      const result = checkExerciseEligibility(NECK_TRAINING, input);
+
+      expect(result.eligible).toBe(true);
+      expect(result.rejectionReasons).toEqual([]);
+    });
+
+    test("34. declares no `requirements` object at all — nothing is documented as required, and no unjustified 'other' placeholder was introduced", () => {
+      expect(NECK_TRAINING.requirements).toBeUndefined();
+      expect(NECK_TRAINING.requiredEquipment).toEqual([]);
+    });
+
+    test("35. biomechanical fields match the canonical documentation", () => {
+      expect(NECK_TRAINING.physicalQualities).toEqual(["muscular_endurance", "stability", "tissue_capacity"]);
+      expect(NECK_TRAINING.movementPatterns).toEqual(["rotation", "anti_rotation", "isometric"]);
+      expect(NECK_TRAINING.forceVectors).toEqual(["mixed"]);
+      expect(NECK_TRAINING.unilateral).toBe(false);
+      expect(NECK_TRAINING.bodyRegionsLoaded).toEqual(["neck"]);
+      expect(NECK_TRAINING.complexity).toBe("low");
+      expect(NECK_TRAINING.minimumTechnicalLevel).toBe(1);
+      expect(NECK_TRAINING.evidenceLevel).toBe("level_1");
+    });
+  });
+
+  describe("business distinctions", () => {
+    test("36. NORDIC_HAMSTRING_CURL vs. the other posterior-chain exercises: the only entry with a mixed equipment/partner any_of eligibility gate", () => {
+      expect(NORDIC_HAMSTRING_CURL.requirements!.required).toHaveLength(1);
+      const clause = NORDIC_HAMSTRING_CURL.requirements!.required[0];
+      expect(clause.kind).toBe("any_of");
+      expect(clause.items).toEqual(
+        expect.arrayContaining([
+          { kind: "equipment", equipment: "other" },
+          { kind: "human_assistance", assistance: "partner" },
+        ]),
+      );
+
+      // No other exercise in this batch documents any human_assistance dependency at all.
+      for (const exercise of [COPENHAGEN_PLANK, TIBIALIS_RAISE, SOLEUS_RAISE, ROTATOR_CUFF_TRAINING, WRIST_STRENGTHENING, NECK_TRAINING]) {
+        const hasHumanAssistance = (exercise.requirements?.required ?? [])
+          .flatMap((c) => c.items)
+          .some((atom) => atom.kind === "human_assistance");
+        expect(hasHumanAssistance).toBe(false);
+      }
+    });
+
+    test("37. COPENHAGEN_PLANK vs. bilateral core exercises: the only unilateral, adductor-specific entry in this batch", () => {
+      expect(COPENHAGEN_PLANK.unilateral).toBe(true);
+      expect(COPENHAGEN_PLANK.bodyRegionsLoaded).toEqual(["groin"]);
+      for (const exercise of [NORDIC_HAMSTRING_CURL, TIBIALIS_RAISE, SOLEUS_RAISE, ROTATOR_CUFF_TRAINING, WRIST_STRENGTHENING, NECK_TRAINING]) {
+        expect(exercise.unilateral).toBe(false);
+      }
+      // Anti-lateral flexion is unique to COPENHAGEN_PLANK in this batch.
+      expect(COPENHAGEN_PLANK.movementPatterns).toContain("anti_lateral_flexion");
+    });
+
+    test("38. TIBIALIS_RAISE vs. SOLEUS_RAISE: same lower-leg region and equipment-free base form, but distinct muscle emphasis, reactive quality and evidence level", () => {
+      // Both require nothing and load the same coarse region.
+      expect(TIBIALIS_RAISE.requirements).toBeUndefined();
+      expect(SOLEUS_RAISE.requirements).toBeUndefined();
+      expect(TIBIALIS_RAISE.bodyRegionsLoaded).toEqual(SOLEUS_RAISE.bodyRegionsLoaded);
+
+      // Only SOLEUS_RAISE documents a reactive-strength component (Stretch-Shortening Cycle:
+      // Moderate, vs. TIBIALIS_RAISE's own "Minimal").
+      expect(SOLEUS_RAISE.physicalQualities).toContain("reactive_strength");
+      expect(TIBIALIS_RAISE.physicalQualities).not.toContain("reactive_strength");
+
+      // Force vector distinguishes the joint action: TIBIALIS_RAISE lifts the foot upward
+      // (dorsiflexion); SOLEUS_RAISE drives the heel upward through plantar flexion — both
+      // "upward"-flavoured but documented with this catalog's own distinct closest vectors.
+      expect(TIBIALIS_RAISE.forceVectors).toEqual(["upward"]);
+      expect(SOLEUS_RAISE.forceVectors).toEqual(["vertical"]);
+
+      // TIBIALIS_RAISE's own 4-star, hedged evidence rating is genuinely weaker than
+      // SOLEUS_RAISE's own full 5-star rating.
+      expect(TIBIALIS_RAISE.evidenceLevel).toBe("level_2");
+      expect(SOLEUS_RAISE.evidenceLevel).toBe("level_1");
+    });
+
+    test("39. ROTATOR_CUFF_TRAINING vs. heavy pushing/pulling exercises: very-light resistance and rotation, never a compound push or pull pattern", () => {
+      expect(ROTATOR_CUFF_TRAINING.movementPatterns).toEqual(["rotation"]);
+      for (const heavyLift of [BENCH_PRESS, OVERHEAD_PRESS, BARBELL_ROW, WEIGHTED_PULL_UP]) {
+        expect(heavyLift.movementPatterns).toEqual(
+          expect.arrayContaining([]),
+        );
+        expect(
+          heavyLift.movementPatterns.some((p) =>
+            ["horizontal_push", "vertical_push", "horizontal_pull", "vertical_pull"].includes(p),
+          ),
+        ).toBe(true);
+        expect(heavyLift.movementPatterns).not.toContain("rotation");
+      }
+
+      // ROTATOR_CUFF_TRAINING's own fatigue profile is markedly lower than any heavy
+      // compound press or pull in this catalog.
+      expect(ROTATOR_CUFF_TRAINING.fatigueProfile.neural).toBeLessThan(BENCH_PRESS.fatigueProfile.neural);
+      expect(ROTATOR_CUFF_TRAINING.fatigueProfile.neural).toBeLessThan(BARBELL_ROW.fatigueProfile.neural);
+    });
+
+    test("40. WRIST_STRENGTHENING vs. grip-carry exercises: an equipment-free, multi-directional wrist family, distinct from loaded grip carries", () => {
+      expect(WRIST_STRENGTHENING.requirements).toBeUndefined();
+      expect(WRIST_STRENGTHENING.physicalQualities).toContain("grip_strength");
+
+      // FARMER_CARRY genuinely requires a loaded implement; WRIST_STRENGTHENING requires nothing.
+      const farmerCarryEquipment = FARMER_CARRY.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(farmerCarryEquipment.length).toBeGreaterThan(0);
+
+      // WRIST_STRENGTHENING documents no carry/locomotion pattern at all.
+      expect(WRIST_STRENGTHENING.movementPatterns).not.toContain("carry");
+      expect(FARMER_CARRY.movementPatterns).toContain("carry");
+    });
+
+    test("41. NECK_TRAINING vs. combat/carry exercises: partner and loaded assistance are documented only as optional, never as a requirement", () => {
+      expect(NECK_TRAINING.requirements).toBeUndefined();
+
+      // Every carry exercise integrated so far genuinely requires a physical implement;
+      // NECK_TRAINING requires nothing at all despite listing "Partner" and "Weight Plate" as
+      // optional accessories.
+      const overheadCarryEquipment = OVERHEAD_CARRY.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(overheadCarryEquipment.length).toBeGreaterThan(0);
+
+      const hasHumanAssistance = (NECK_TRAINING.requirements as typeof COPENHAGEN_PLANK.requirements)
+        ?.required?.flatMap((c) => c.items)
+        .some((atom) => atom.kind === "human_assistance");
+      expect(hasHumanAssistance ?? false).toBe(false);
+    });
+  });
+
+  test("42. adding this batch never changes the previously integrated exercises, including BENCH_PRESS and FARMER_CARRY", () => {
+    const benchPressInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "barbell" }, { type: "bench" }, { type: "rack" }, { type: "plates" }],
+      }),
+    });
+    expect(checkExerciseEligibility(BENCH_PRESS, benchPressInput).eligible).toBe(true);
+
+    const farmerCarryInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "dumbbell" }],
+        availableSpace: "large",
+      }),
+    });
+    expect(checkExerciseEligibility(FARMER_CARRY, farmerCarryInput).eligible).toBe(true);
+
+    const abWheelInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "other" }],
+        floorSafe: true,
+        availableSpace: "limited",
+      }),
+    });
+    expect(checkExerciseEligibility(AB_WHEEL, abWheelInput).eligible).toBe(true);
+
+    const weightedPullUpInput = makeValidInput({
+      environment: makeEnvironment({
+        availableEquipment: [{ type: "pull_up_bar" }, { type: "other" }, { type: "plates" }],
+      }),
+    });
+    expect(checkExerciseEligibility(WEIGHTED_PULL_UP, weightedPullUpInput).eligible).toBe(true);
   });
 });

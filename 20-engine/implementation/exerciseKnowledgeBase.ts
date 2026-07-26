@@ -6833,6 +6833,917 @@ export const LANDMINE_PRESS: ExerciseDefinition = {
 };
 
 // -----------------------------------------------------------------------------
+// Nordic Hamstring Curl
+// Source: 50-exercises/18_NORDIC_HAMSTRING_CURL
+// -----------------------------------------------------------------------------
+
+/**
+ * First entry of the "Lot 4 — Chaine posterieure et robustness" batch,
+ * migrated alongside COPENHAGEN_PLANK/TIBIALIS_RAISE/SOLEUS_RAISE/
+ * ROTATOR_CUFF_TRAINING/WRIST_STRENGTHENING/NECK_TRAINING. No
+ * `exercisePrescriptionRegistry.ts` entry exists for `nordic_hamstring_curl`
+ * (confirmed by direct search) — a known limitation, documented here
+ * without modifying that registry.
+ *
+ * Same documentation-format limitation as every entry migrated from this
+ * older `50-exercises/` layer so far: no space/floor-safety language
+ * anywhere in this fiche (checked directly).
+ *
+ * Central business question for this entry, explicitly flagged before
+ * writing began: "# Equipment Requirements — Required: Nordic Bench, or
+ * Partner Assistance." A genuine, literal "or" between a physical
+ * implement and human assistance, stated at the top-level Required
+ * heading (not buried in a single variant) — this is the FIRST exercise in
+ * this whole catalog whose eligibility gate mixes an `equipment` atom and
+ * a `human_assistance` atom inside the SAME `any_of` clause. The type
+ * model supports this directly: `ExerciseRequirementAtom` is a plain union
+ * of `equipment`/`environment`/`human_assistance` variants, and
+ * `ExerciseRequirementClause.items` accepts any mix of them — no schema
+ * change was needed to represent this honestly.
+ *
+ * "Nordic Bench" has no dedicated `EquipmentType` value. Neither generic
+ * `bench` nor `rigid_anchor_support` is silently reused: a Nordic bench is
+ * a specialized apparatus that anchors the ATHLETE'S ANKLES at floor
+ * level, physically and functionally distinct from the flat/adjustable
+ * bench used throughout this catalog for BENCH_PRESS/HIP_THRUST/
+ * CHEST_SUPPORTED_ROW's own back/foot support, and distinct from
+ * `rigid_anchor_support`'s own established hand-grip-anchor scope (see
+ * LANDMINE_PRESS's own identical reasoning in Lot 3). `"other"` is used as
+ * the flagged placeholder for the Nordic bench specifically, combined with
+ * `human_assistance: "partner"` in a single `any_of` clause — an honest,
+ * two-path eligibility gate reflecting this fiche's own explicit
+ * either/or requirement.
+ *
+ * "# Variations — Assisted Nordic, Weighted Nordic, Eccentric-Only Nordic,
+ * Partner Nordic, Machine Nordic" lists "Partner Nordic" as ONE of several
+ * named variations, not the exercise's sole method — confirming that
+ * partner assistance is a genuine alternative ANCHORING mechanism for the
+ * same base movement (matching the top-level Required "or" framing),
+ * not a separate, harder/easier variant requiring its own entry.
+ */
+export const NORDIC_HAMSTRING_CURL: ExerciseDefinition = {
+  id: "nordic_hamstring_curl",
+  name: "Nordic Hamstring Curl",
+  module: "strength",
+  // "# Primary Classification: Strength" (explicit).
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Eccentric Strength, Posterior Chain
+  // Strength, Mechanical Robustness." "Eccentric Strength" has no direct
+  // PhysicalQuality counterpart of its own — `deceleration` is used
+  // instead, directly grounded in this fiche's own "Explainability"
+  // section ("enhancing sprinting, kicking and deceleration performance"),
+  // the closest real quality for a controlled-lengthening/braking capacity.
+  // "Posterior Chain Strength" has no distinct counterpart and is not
+  // force-fitted (already substantively covered by `bodyRegionsLoaded`
+  // below, matching ROMANIAN_DEADLIFT's own identical exclusion in Lot 1).
+  // "Mechanical Robustness" → tissue_capacity. "Secondary: Relative
+  // Strength" → relative_strength. "Injury Resilience" → tissue_capacity
+  // (already listed). "Movement Control" → coordination. "Core Stability"
+  // → trunk_strength.
+  physicalQualities: ["deceleration", "tissue_capacity", "relative_strength", "coordination", "trunk_strength"],
+  // MODEL LIMITATION, flagged explicitly: "# Movement Pattern — Primary:
+  // Knee Flexion." No `MovementPattern` value represents an isolated knee-
+  // flexion action — this taxonomy is built for compound, whole-body
+  // patterns (squat, hinge, push/pull families, gait patterns), not
+  // single-joint accessory movements. `"mixed"` is used as the closest
+  // available generic value for the PRIMARY pattern — not because the
+  // movement is literally blended, but because no dedicated slot exists
+  // for it, the same honest gap that recurs across several entries in this
+  // batch (see TIBIALIS_RAISE/SOLEUS_RAISE/WRIST_STRENGTHENING below).
+  // "Secondary: Brace" → isometric, a genuinely grounded addition (this
+  // fiche explicitly names Brace as its own secondary pattern, unlike the
+  // entries below that have no such heading at all).
+  movementPatterns: ["mixed", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Vertical" (the
+  // athlete's center of mass descends vertically as the torso pivots
+  // forward around the knee).
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "any_of",
+        items: [
+          { kind: "equipment", equipment: "other" }, // flagged placeholder for "Nordic Bench" — see block comment above
+          { kind: "human_assistance", assistance: "partner" },
+        ],
+      },
+    ],
+  },
+  // "# Skill Requirement: Intermediate. Beginners should use assistance
+  // until full eccentric control is achieved."
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // "Bilateral" (Movement Context, explicit).
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Hamstrings" → thigh. Secondary
+  // Muscles (Gluteus Maximus, Gastrocnemius) are excluded, matching this
+  // catalog's established primary-muscles-only discipline.
+  bodyRegionsLoaded: ["thigh"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute hamstring injury.", region: "thigh", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+    { description: "Acute knee injury.", region: "knee", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+    { description: "Pain during knee flexion.", prohibitedPatterns: ["mixed", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: High. Mechanical
+    // Fatigue: Very High. Metabolic Fatigue: Low." mapped via the
+    // Low=1/Moderate=2/Moderate-to-High=3/High=4/Very-High=5 word scale
+    // established across every Lot 1/Lot 2/Lot 3 entry from this same
+    // older documentary format. "Produces significant delayed-onset
+    // muscle soreness" (explicit prose) corroborates the elevated
+    // muscular/connective ratings. `connectiveTissue` shares the same
+    // "Mechanical Fatigue" source as `muscular` (no distinct
+    // "Connective-Tissue Fatigue" heading exists in this format).
+    types: ["neural", "muscular", "connective_tissue"],
+    neural: 4,
+    muscular: 5,
+    connectiveTissue: 5, // inferred from "Mechanical Fatigue: Very High"
+    metabolic: 1,
+    technical: 3, // fallback from "Skill Requirement: Intermediate" (minimumTechnicalLevel 3)
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. The Nordic Hamstring
+  // Curl is among the most evidence-supported exercises..." — mapped to
+  // the CAS Evidence Framework's "Level 1 — Scientific consensus"
+  // (20-engine/02_EXERCISE_KNOWLEDGE_BASE.md).
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate is
+  // named in this table but has no `CombatSport` enum counterpart and is
+  // omitted rather than force-mapped.
+  combatSportRelevance: {
+    boxing: 4,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 4,
+    brazilian_jiu_jitsu: 4,
+    judo: 4,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" (Band-Assisted Nordic, Partial Range Nordic, Swiss
+  // Ball Hamstring Curl, Sliding Leg Curl, Machine Leg Curl) name no
+  // exercise with its own chapter/catalog id anywhere in this repository
+  // (confirmed by direct search). `substitutionExerciseIds` is genuinely
+  // empty for this entry.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Copenhagen Plank
+// Source: 50-exercises/19_COPENHAGEN_PLANK
+// -----------------------------------------------------------------------------
+
+/**
+ * Second entry of this batch. `exercisePrescriptionRegistry.ts` has a
+ * corroborating `copenhagenPlankEntry` (`requiredEquipmentCapabilities:
+ * ["bench"]`, `laterality: "unilateral"`, `moduleId: "core"` — matching
+ * this entry's own equipment/laterality resolution exactly, and grounding
+ * the `module` choice below).
+ *
+ * Same documentation-format limitation as every entry in this batch: no
+ * space/floor-safety language anywhere in this fiche (checked directly) —
+ * "# Movement Context: ... Ground Based" alone, with no "stable surface"/
+ * "non-slip" language, does not ground a `floor_safe` atom.
+ *
+ * "# Primary Classification: Stability" — a genuine outlier: no other
+ * entry migrated so far in Lots 1–4 uses this exact word (every strength
+ * lift says "Strength"; every robustness-family entry below says
+ * "Robustness"). No `CapabilityModule` value is literally "stability" —
+ * `module: "core"` is used instead, directly corroborated by the registry
+ * (`moduleId: "core"`) and by this fiche's own "Primary Movement Pattern:
+ * Anti-Lateral Flexion" — the identical MovementPattern value already
+ * used for SUITCASE_CARRY's own anti-lateral-flexion framing in 62_CORE.
+ * `primaryAdaptation: "movement"` is used for the same reason AB_WHEEL/
+ * PALLOF_PRESS used it in 62_CORE for their own stability/anti-X framing —
+ * no AdaptationDomain value is literally "stability" either.
+ *
+ * "# Equipment Requirements — Required: Bench." Required, not merely
+ * optional — the canonical setup rests the top foot on a bench for
+ * support (registry's own setup instruction: "Rest the top foot on a
+ * bench..."). "# Variations — ... Partner Assisted" names partner
+ * assistance as one of several documented variations, not the base/
+ * default requirement — no `human_assistance` clause is added.
+ */
+export const COPENHAGEN_PLANK: ExerciseDefinition = {
+  id: "copenhagen_plank",
+  name: "Copenhagen Plank",
+  module: "core",
+  primaryAdaptation: "movement",
+  // "# Capability Mapping — Primary: Dynamic Stability, Core Stability,
+  // Adductor Strength." "Dynamic Stability" → stability. "Core Stability"
+  // → trunk_strength. "Adductor Strength" has no distinct PhysicalQuality
+  // counterpart of its own (a region-specific strength descriptor, already
+  // substantively covered by `bodyRegionsLoaded` below) and is not
+  // force-fitted. "Secondary: Mechanical Robustness" → tissue_capacity.
+  // "Movement Control" → coordination. "Injury Resilience" →
+  // tissue_capacity (already listed). "Relative Strength" →
+  // relative_strength.
+  physicalQualities: ["stability", "trunk_strength", "tissue_capacity", "coordination", "relative_strength"],
+  // "# Movement Pattern — Primary: Anti-Lateral Flexion" → anti_lateral_flexion
+  // (exact match). "Secondary: Hip Adduction, Brace, Pelvic Stabilization"
+  // → isometric (from Brace); the other two are joint-action-level detail
+  // already implied by `anti_lateral_flexion` and captured through
+  // `bodyRegionsLoaded`/`physicalQualities` instead.
+  movementPatterns: ["anti_lateral_flexion", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Frontal Plane
+  // Stabilization." This fiche explicitly names a primary vector (unlike
+  // PLATE_PINCH's own true "no stated vector" case, which resolved to
+  // `not_applicable`) — `lateral` is the direct, honest ForceVector match
+  // for a frontal-plane stabilization demand.
+  forceVectors: ["lateral"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [{ kind: "equipment", equipment: "bench" }],
+      },
+    ],
+  },
+  // "# Skill Requirement: Intermediate. Beginners should start with
+  // short-lever variations."
+  minimumTechnicalLevel: 3,
+  complexity: "moderate",
+  // "# Movement Context — Unilateral" (explicit). `exercisePrescriptionRegistry.ts`'s
+  // own independent `laterality: "unilateral"` corroborates this directly.
+  unilateral: true,
+  // "# Muscular Profile — Primary Muscles: Adductor Longus, Adductor
+  // Magnus, Adductor Brevis" — all adductor-group musculature → groin.
+  bodyRegionsLoaded: ["groin"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute groin injury.", region: "groin", prohibitedPatterns: ["anti_lateral_flexion", "isometric"], absolute: true },
+    { description: "Acute hip injury.", region: "hip", prohibitedPatterns: ["anti_lateral_flexion", "isometric"], absolute: true },
+    { description: "Pain during hip adduction.", prohibitedPatterns: ["anti_lateral_flexion", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Moderate. Mechanical
+    // Fatigue: Low. Metabolic Fatigue: Low." "Excellent stimulus-to-fatigue
+    // ratio" (explicit prose) corroborates the low ratings.
+    types: [],
+    neural: 2,
+    muscular: 1,
+    connectiveTissue: 1, // inferred from "Mechanical Fatigue: Low"
+    metabolic: 1,
+    technical: 3, // fallback from "Skill Requirement: Intermediate"
+  },
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star — the
+  // highest overall combat-relevance profile documented so far (only
+  // Boxing falls below 5 stars).
+  combatSportRelevance: {
+    boxing: 4,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" (Short Lever Copenhagen, Side Plank, Bent-Knee
+  // Copenhagen) name no exercise with its own chapter/catalog id anywhere
+  // in this repository (confirmed by direct search).
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Tibialis Raise
+// Source: 50-exercises/41_TIBIALIS_RAISE
+// -----------------------------------------------------------------------------
+
+/**
+ * Third entry of this batch. `exercisePrescriptionRegistry.ts` has a
+ * corroborating `tibialisRaiseEntry` (`requiredEquipmentCapabilities: []`,
+ * `supportedLoadingModes: ["bodyweight", "added_external_load"]`,
+ * `moduleId: "robustness"` — matching this entry's own equipment
+ * resolution and module exactly).
+ *
+ * Same documentation-format limitation as every entry in this batch: no
+ * space/floor-safety language anywhere in this fiche (checked directly).
+ *
+ * "# Equipment Requirements — Required: None. Optional: Tibialis Machine,
+ * Resistance Band, Dumbbell, Slant Board." No wall, support or apparatus
+ * is required — the bodyweight execution is the fully valid default form
+ * (registry's own `requiredEquipmentCapabilities: []` corroborates this
+ * directly) — `requirements` is omitted entirely rather than gating on any
+ * `other` placeholder, since nothing is actually REQUIRED to flag.
+ *
+ * MODEL LIMITATION, flagged explicitly: "# Movement Pattern — Primary:
+ * Ankle Dorsiflexion." No `MovementPattern` value represents an isolated
+ * ankle-dorsiflexion action, and no "Brace"-equivalent secondary pattern
+ * is named either (unlike NORDIC_HAMSTRING_CURL above) — `"mixed"` is used
+ * as the sole value, the same isolated-single-joint-accessory-movement gap
+ * already flagged for NORDIC_HAMSTRING_CURL's own primary pattern.
+ *
+ * "# Scientific Evidence — Evidence Level: ★★★★☆. ... MAY contribute to
+ * reducing overuse injuries..." — the FIRST 4-star rating (not 5) and the
+ * first hedged "may contribute" claim encountered across Lots 1–4 (every
+ * other entry so far claims "strong evidence"/"strongly supported"/
+ * "extensively researched"). Mapped to the CAS Evidence Framework's "Level
+ * 2 — Expert practice" rather than "Level 1 — Scientific consensus" — a
+ * deliberate, textually-grounded divergence from the level_1 pattern used
+ * everywhere else in this migration so far, not an oversight.
+ */
+export const TIBIALIS_RAISE: ExerciseDefinition = {
+  id: "tibialis_raise",
+  name: "Tibialis Raise",
+  module: "robustness",
+  // "# Primary Classification: Robustness" (explicit).
+  primaryAdaptation: "robustness",
+  // "# Capability Mapping — Primary: Anterior Lower-Leg Strength, Ankle
+  // Stability, Foot Control." "Anterior Lower-Leg Strength" has no
+  // distinct region-specific PhysicalQuality counterpart of its own, but
+  // this fiche's own "# Performance Indicators" explicitly names "Muscular
+  // Endurance" (matching the high-repetition, 12–30-rep Loading Profile) —
+  // mapped to muscular_endurance on that direct textual anchor rather than
+  // excluded outright. "Ankle Stability" → stability. "Foot Control" →
+  // coordination. "Secondary: Deceleration" → deceleration (exact match).
+  // "Shock Absorption" → tissue_capacity (a structural/absorptive-capacity
+  // concept). "Movement Efficiency" excluded (generic, no distinct
+  // counterpart, matching this whole project's established exclusion of
+  // this recurring phrase). "Injury Resilience" → tissue_capacity (already
+  // listed).
+  physicalQualities: ["muscular_endurance", "stability", "coordination", "deceleration", "tissue_capacity"],
+  // See block comment above for why this resolves to `mixed` alone.
+  movementPatterns: ["mixed"],
+  // "# Biomechanical Profile — Primary Force Vector: Sagittal", grounded
+  // directly by the Coaching Cue "Lift through the front of the ankle" —
+  // the foot lifts upward against gravity/resistance.
+  forceVectors: ["upward"],
+  requiredEquipment: [],
+  // No `requirements` object — nothing is documented as required (see
+  // block comment above).
+  // "# Skill Requirement — Suitable For: All athletes", corroborated by
+  // "# Neurological Profile — Skill Requirement: Beginner" (this fiche's
+  // dedicated heading uses different phrasing than the Beginner/
+  // Intermediate word ladder used elsewhere — the Neurological Profile's
+  // own internal "Beginner" is used as the effective word here, matching
+  // the exact same resolution needed for SOLEUS_RAISE/ROTATOR_CUFF_TRAINING/
+  // WRIST_STRENGTHENING below, all of which share this identical dual
+  // phrasing).
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  // No unilateral/bilateral statement exists in "# Movement Context"
+  // (Standing, Seated, Bodyweight, Loaded). "# Progressions — Single-Leg
+  // Tibialis Raise" names single-leg execution as a harder PROGRESSION,
+  // implying the bilateral/both-feet base form is the default, easier
+  // execution.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Tibialis Anterior" → lower_leg.
+  bodyRegionsLoaded: ["lower_leg"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute ankle injury.", region: "ankle", prohibitedPatterns: ["mixed"], absolute: true },
+    { description: "Acute tibial stress injury.", region: "lower_leg", prohibitedPatterns: ["mixed"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Very Low. Mechanical
+    // Fatigue: Very Low. Metabolic Fatigue: Low. Overall Fatigue Cost:
+    // ★★★★★ Very Low." This fiche's own vocabulary introduces "Very Low"
+    // as a distinct tier BELOW "Low" — read fiche-relatively: "Very Low"
+    // maps to this Rating5 scale's floor (1), and "Low" (used once, for
+    // Metabolic) sits one tier above it (2) WITHIN this fiche's own
+    // internal ladder — the lowest overall fatigue profile documented
+    // anywhere in this migration so far.
+    types: [],
+    neural: 1,
+    muscular: 1,
+    connectiveTissue: 1, // inferred from "Mechanical Fatigue: Very Low"
+    metabolic: 2,
+    technical: 1, // fallback from "Skill Requirement: Beginner" (minimumTechnicalLevel 1)
+  },
+  // See block comment above — "Level 2 — Expert practice", not "Level 1".
+  evidenceLevel: "level_2",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate is
+  // named in this table but has no `CombatSport` enum counterpart and is
+  // omitted rather than force-mapped.
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 4,
+    brazilian_jiu_jitsu: 3,
+    judo: 4,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" (Bodyweight Tibialis Raise, Reduced Range of Motion)
+  // name no distinct catalog exercise — "Bodyweight Tibialis Raise" is the
+  // unloaded form of this same exercise, not a separate entry.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Soleus Raise
+// Source: 50-exercises/44_SOLEUS_RAISE
+// -----------------------------------------------------------------------------
+
+/**
+ * Fourth entry of this batch. `exercisePrescriptionRegistry.ts` has a
+ * corroborating `soleusRaiseEntry` (`requiredEquipmentCapabilities: []`,
+ * `moduleId: "robustness"` — matching this entry's own resolution
+ * exactly).
+ *
+ * Same documentation-format limitation as every entry in this batch: no
+ * space/floor-safety language anywhere in this fiche (checked directly).
+ *
+ * "# Equipment Requirements — Required: None." Same fully-valid bodyweight
+ * default as TIBIALIS_RAISE — `requirements` is omitted entirely.
+ *
+ * Central business distinction from TIBIALIS_RAISE, explicitly flagged
+ * before writing began: "Coaching Cues — Maintain knee flexion." is a
+ * TECHNIQUE cue (the knee stays bent throughout, isolating the soleus from
+ * the biarticular gastrocnemius), never turned into an equipment or
+ * environment requirement, matching the user's own explicit instruction.
+ * The real, textually-grounded distinction between this entry and a
+ * gastrocnemius-dominant "calf raise" lives in the Muscular Profile
+ * (`Soleus` primary here, vs. `Gastrocnemius` demoted to secondary) and in
+ * `physicalQualities` (`reactive_strength` appears here — grounded in this
+ * fiche's own "Stretch-Shortening Cycle: Moderate" and "Reactive Soleus
+ * Raise" progression — and does NOT appear for TIBIALIS_RAISE, whose own
+ * Stretch-Shortening Cycle is "Minimal").
+ *
+ * Same isolated-single-joint MovementPattern gap as TIBIALIS_RAISE: "#
+ * Movement Pattern — Primary: Plantar Flexion" has no `MovementPattern`
+ * counterpart, and no "Brace"-equivalent secondary pattern is named either
+ * — `"mixed"` is used as the sole value.
+ */
+export const SOLEUS_RAISE: ExerciseDefinition = {
+  id: "soleus_raise",
+  name: "Soleus Raise",
+  module: "robustness",
+  primaryAdaptation: "robustness",
+  // "# Capability Mapping — Primary: Lower-Leg Endurance, Achilles
+  // Resilience, Ankle Stiffness." "Lower-Leg Endurance" → muscular_endurance
+  // (direct match). "Achilles Resilience" → tissue_capacity (tendon/
+  // connective-capacity concept). "Ankle Stiffness" → stability (joint-
+  // control capacity). "Secondary: Movement Efficiency" excluded
+  // (generic). "Reactive Strength" → reactive_strength (exact match — see
+  // block comment above for the textual grounding). "Deceleration" →
+  // deceleration. "Footwork Economy" excluded (generic, no distinct
+  // counterpart).
+  physicalQualities: ["muscular_endurance", "tissue_capacity", "stability", "reactive_strength", "deceleration"],
+  // See block comment above for why this resolves to `mixed` alone.
+  movementPatterns: ["mixed"],
+  // "# Biomechanical Profile — Primary Force Vector: Vertical" (plantar
+  // flexion drives the heel/body upward against gravity).
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  // No `requirements` object — nothing is documented as required.
+  // "# Skill Requirement — Suitable For: All athletes", corroborated by
+  // "# Neurological Profile — Skill Requirement: Beginner".
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  // "# Progressions — Single-Leg Soleus Raise" names single-leg execution
+  // as a harder progression, implying the bilateral base form is the
+  // default.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Soleus" → lower_leg.
+  bodyRegionsLoaded: ["lower_leg"],
+  // "# Contraindications", quoted one item per source line. No dedicated
+  // "Achilles tendon" BodyRegion value exists — `lower_leg` is used for
+  // both tendon- and calf-specific injury descriptions, the same region
+  // already used for the Tibialis Anterior muscle above.
+  contraindications: [
+    { description: "Acute Achilles injury.", region: "lower_leg", prohibitedPatterns: ["mixed"], absolute: true },
+    { description: "Acute calf tear.", region: "lower_leg", prohibitedPatterns: ["mixed"], absolute: true },
+    { description: "Acute ankle injury.", region: "ankle", prohibitedPatterns: ["mixed"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Very Low. Mechanical
+    // Fatigue: Very Low. Metabolic Fatigue: Low." Same fiche-relative
+    // Very-Low=1/Low=2 resolution as TIBIALIS_RAISE.
+    types: [],
+    neural: 1,
+    muscular: 1,
+    connectiveTissue: 1, // inferred from "Mechanical Fatigue: Very Low"
+    metabolic: 2,
+    technical: 1, // fallback from "Skill Requirement: Beginner"
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Progressive soleus
+  // strengthening improves... while contributing to injury prevention." A
+  // full 5-star rating with confident (not hedged) language — genuinely
+  // distinct from TIBIALIS_RAISE's own 4-star, hedged "may contribute"
+  // claim, despite both being closely related lower-leg accessory
+  // exercises. Mapped to "Level 1 — Scientific consensus".
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star — identical
+  // to TIBIALIS_RAISE's own table.
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 4,
+    brazilian_jiu_jitsu: 3,
+    judo: 4,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" (Bodyweight Soleus Raise, Partial Range, Band
+  // Resistance) name no distinct catalog exercise.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Rotator Cuff Training
+// Source: 50-exercises/42_ROTATOR_CUFF_TRAINING
+// -----------------------------------------------------------------------------
+
+/**
+ * Fifth entry of this batch. `exercisePrescriptionRegistry.ts` has a
+ * corroborating `rotatorCuffTrainingEntry` (`requiredEquipmentCapabilities:
+ * ["cable_or_band_resistance"]` — the existing equivalence group already
+ * used identically by `pallof_press`, `laterality: "bilateral"`,
+ * `moduleId: "robustness"` — matching this entry's own resolution
+ * exactly).
+ *
+ * Same documentation-format limitation as every entry in this batch: no
+ * space/floor-safety language anywhere in this fiche (checked directly).
+ *
+ * HONESTY NOTE, explicitly flagged per the user's own instruction: "Rotator
+ * Cuff Training CONSISTS OF targeted exercises..." (plural, explicit) and
+ * "# Variations — External Rotation, Internal Rotation, Face Pull, Band
+ * Pull-Apart, Cuban Rotation, Scaption Raise, Bottom-Up Carry" name SEVEN
+ * distinct named movements. This entry represents a general shoulder-
+ * stability FAMILY/PROTOCOL, not one single canonical named movement — the
+ * same treatment already established by `exercisePrescriptionRegistry.ts`'s
+ * own single `rotatorCuffTrainingEntry` (generic setup/execution
+ * instructions, no single named sub-movement singled out). This is stated
+ * here explicitly rather than silently presenting a family as if it were
+ * one specific movement.
+ *
+ * "# Equipment Requirements — Required: Resistance Band, or Cable." The
+ * identical `any_of[cable_machine, resistance_band]` equivalence already
+ * established for PALLOF_PRESS in 62_CORE — reused directly, not
+ * reinvented, since both fiches document the exact same real equipment
+ * equivalence.
+ */
+export const ROTATOR_CUFF_TRAINING: ExerciseDefinition = {
+  id: "rotator_cuff_training",
+  name: "Rotator Cuff Training",
+  module: "robustness",
+  // "# Primary Classification: Robustness" (explicit).
+  primaryAdaptation: "robustness",
+  // "# Capability Mapping — Primary: Shoulder Stability, Joint Integrity,
+  // Dynamic Control." "Shoulder Stability" → stability. "Joint Integrity"
+  // → tissue_capacity (a structural/connective-integrity concept, matching
+  // "Mechanical Robustness"'s own established mapping). "Dynamic Control"
+  // → coordination. "Secondary: Movement Quality" and "Upper-Body
+  // Longevity" excluded (generic, no distinct counterpart). "Mechanical
+  // Robustness" → tissue_capacity (already listed). "Injury Resilience" →
+  // tissue_capacity (already listed).
+  physicalQualities: ["stability", "tissue_capacity", "coordination"],
+  // "# Movement Pattern — Primary: Shoulder Stabilization. Secondary:
+  // External Rotation, Internal Rotation, Scapular Control, Dynamic
+  // Stabilization." Unlike the ankle/knee isolation entries above, this
+  // family's dominant, explicitly repeated joint action IS rotation at the
+  // glenohumeral joint — `rotation` is a direct, honest match, not an
+  // escape hatch. "Dynamic Stabilization" explicitly names dynamic (not
+  // static) control through a range of motion — no "Brace"/static-hold
+  // language is named anywhere in this fiche (checked directly), so
+  // `isometric` is deliberately NOT added, matching this whole project's
+  // established discipline of only adding it when the Movement Pattern
+  // section itself names bracing/static-hold language.
+  movementPatterns: ["rotation"],
+  // "# Biomechanical Profile — Primary Force Vector: Rotational" (exact
+  // match).
+  forceVectors: ["rotational"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "any_of",
+        items: [
+          { kind: "equipment", equipment: "cable_machine" },
+          { kind: "equipment", equipment: "resistance_band" },
+        ],
+      },
+    ],
+  },
+  // "# Skill Requirement — Suitable For: All athletes", corroborated by
+  // "# Neurological Profile — Skill Requirement: Beginner".
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  // No unilateral/bilateral statement exists anywhere in this fiche.
+  // `exercisePrescriptionRegistry.ts`'s own independent `laterality:
+  // "bilateral"` corroborates this directly.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Supraspinatus, Infraspinatus,
+  // Teres Minor, Subscapularis" — the four rotator-cuff muscles, all
+  // shoulder-girdle musculature → shoulder.
+  bodyRegionsLoaded: ["shoulder"],
+  // "# Contraindications", quoted one item per source line. "Medical
+  // Clearance Required" is a procedural/administrative flag rather than an
+  // athlete-state condition, but is quoted faithfully like every other
+  // literal contraindication-list item throughout this project, matching
+  // the established discipline of trusting the source's own categorization
+  // rather than second-guessing its clinical nuance.
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["rotation"], absolute: true },
+    { description: "Post-surgical restrictions.", region: "shoulder", prohibitedPatterns: ["rotation"], absolute: true },
+    { description: "Medical clearance required.", prohibitedPatterns: ["rotation"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Very Low. Mechanical
+    // Fatigue: Very Low. Metabolic Fatigue: Low." Same fiche-relative
+    // Very-Low=1/Low=2 resolution as TIBIALIS_RAISE/SOLEUS_RAISE.
+    types: [],
+    neural: 1,
+    muscular: 1,
+    connectiveTissue: 1, // inferred from "Mechanical Fatigue: Very Low"
+    metabolic: 2,
+    technical: 1, // fallback from "Skill Requirement: Beginner"
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. ... strongly supported
+  // for reducing shoulder injury risk..." — mapped to "Level 1 —
+  // Scientific consensus".
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star — a maximal
+  // 5-star rating across every discipline, the highest and most uniform
+  // combat-relevance profile documented anywhere in this migration so far.
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" (Side-Lying External Rotation, Supported Band
+  // Rotation, Reduced Range of Motion) name no distinct catalog exercise.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Wrist Strengthening
+// Source: 50-exercises/43_WRIST_STRENGTHENING
+// -----------------------------------------------------------------------------
+
+/**
+ * Sixth entry of this batch. `exercisePrescriptionRegistry.ts` has a
+ * corroborating `wristStrengtheningEntry` (`requiredEquipmentCapabilities:
+ * []`, `moduleId: "robustness"` — matching this entry's own resolution
+ * exactly; the registry's own comment explicitly notes this represents
+ * only the repetitions variant, structurally excluding the isometric-hold
+ * variant — a distinction this `ExerciseDefinition` does not need to make,
+ * since it represents the general capability rather than a specific
+ * prescription method).
+ *
+ * Same documentation-format limitation as every entry in this batch: no
+ * space/floor-safety language anywhere in this fiche (checked directly).
+ *
+ * HONESTY NOTE, explicitly flagged per the user's own instruction: "Wrist
+ * Strengthening CONSISTS OF targeted exercises..." (plural, explicit) and
+ * "# Movement Pattern — Secondary: Flexion, Extension, Radial Deviation,
+ * Ulnar Deviation, Pronation, Supination, Grip" together with "#
+ * Variations — Flexion, Extension, Pronation, Supination, Deviation, Rice
+ * Bucket, Grip Crush, Pinch Grip, Support Grip" aggregate SEVEN-PLUS
+ * distinct named directions/movements into one documented exercise. This
+ * entry represents that same general wrist-robustness FAMILY, not a single
+ * named direction — matching the registry's own identical single-id
+ * treatment, and matching the user's own explicit instruction not to
+ * fragment a source that itself stays generic into several separate
+ * catalog exercises.
+ *
+ * "# Equipment Requirements — Required: None." No implement is required
+ * for any of the aggregated directions — `requirements` is omitted
+ * entirely, the same resolution as TIBIALIS_RAISE/SOLEUS_RAISE above.
+ */
+export const WRIST_STRENGTHENING: ExerciseDefinition = {
+  id: "wrist_strengthening",
+  name: "Wrist Strengthening",
+  module: "robustness",
+  primaryAdaptation: "robustness",
+  // "# Capability Mapping — Primary: Wrist Stability, Grip Integrity,
+  // Force Transmission." "Wrist Stability" → stability. "Grip Integrity" →
+  // grip_strength (the closest real quality for a grip-adjacent capacity).
+  // "Force Transmission" excluded (generic, matching this whole project's
+  // established exclusion of this recurring phrase). "Secondary: Grip
+  // Endurance" → grip_strength (already listed, matching FARMER_CARRY's
+  // own identical "Grip Endurance" → grip_strength precedent). "Mechanical
+  // Robustness" → tissue_capacity. "Joint Control" → coordination. "Impact
+  // Tolerance" → tissue_capacity (already listed).
+  physicalQualities: ["stability", "grip_strength", "tissue_capacity", "coordination"],
+  // MODEL LIMITATION, flagged explicitly: "# Movement Pattern — Primary:
+  // Wrist Stabilization. Secondary: Flexion, Extension, Radial Deviation,
+  // Ulnar Deviation, Pronation, Supination, Grip." None of these
+  // individually named directions has a `MovementPattern` counterpart —
+  // the same isolated-single-joint-accessory-movement gap already flagged
+  // for TIBIALIS_RAISE/SOLEUS_RAISE above, here compounded across seven
+  // named directions rather than one. `"mixed"` is used as the sole value.
+  movementPatterns: ["mixed"],
+  // "# Biomechanical Profile — Primary Force Vector: Multi-Directional" —
+  // `mixed` is a direct, literal match here (not an escape hatch): the
+  // fiche's own wording is functionally synonymous with this ForceVector
+  // value.
+  forceVectors: ["mixed"],
+  requiredEquipment: [],
+  // No `requirements` object — nothing is documented as required.
+  // "# Skill Requirement — Suitable For: All athletes", corroborated by
+  // "# Neurological Profile — Skill Requirement: Beginner".
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  // No unilateral/bilateral statement exists anywhere in this fiche
+  // (though "Train both sides equally" implies both wrists are trained,
+  // typically one at a time). `exercisePrescriptionRegistry.ts`'s own
+  // independent `laterality: "bilateral"` corroborates `unilateral: false`.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Forearm Flexors, Forearm
+  // Extensors, Pronator Teres, Supinator" — all forearm musculature →
+  // forearm. No dedicated "wrist" BodyRegion muscle exists (the wrist
+  // joint itself has no prime-mover muscles of its own) — matching this
+  // catalog's established primary-muscles-only sourcing discipline for
+  // `bodyRegionsLoaded`, not the Joint Profile's own "Radiocarpal Joint"
+  // heading.
+  bodyRegionsLoaded: ["forearm"],
+  // "# Contraindications", quoted one item per source line.
+  contraindications: [
+    { description: "Acute wrist injury.", region: "wrist", prohibitedPatterns: ["mixed"], absolute: true },
+    { description: "Acute hand fracture.", region: "hand", prohibitedPatterns: ["mixed"], absolute: true },
+    { description: "Acute forearm tendinopathy.", region: "forearm", prohibitedPatterns: ["mixed"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Very Low. Mechanical
+    // Fatigue: Very Low. Metabolic Fatigue: Low." Same fiche-relative
+    // Very-Low=1/Low=2 resolution as TIBIALIS_RAISE/SOLEUS_RAISE/
+    // ROTATOR_CUFF_TRAINING.
+    types: [],
+    neural: 1,
+    muscular: 1,
+    connectiveTissue: 1, // inferred from "Mechanical Fatigue: Very Low"
+    metabolic: 2,
+    technical: 1, // fallback from "Skill Requirement: Beginner"
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★☆. ... improves... and
+  // tolerance to repetitive loading..." — the second 4-star, moderately
+  // hedged rating in this batch (matching TIBIALIS_RAISE's own identical
+  // resolution) — mapped to "Level 2 — Expert practice", not "Level 1".
+  evidenceLevel: "level_2",
+  // "# Transfer to Combat Sports" table, quoted star-for-star — a maximal
+  // 5-star rating across every discipline, matching ROTATOR_CUFF_TRAINING's
+  // own identical table.
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" (Light Dumbbell, Band Resistance, Isometric Holds)
+  // name no distinct catalog exercise.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
+// Neck Training
+// Source: 50-exercises/34_NECK_TRAINING
+// -----------------------------------------------------------------------------
+
+/**
+ * Seventh and final entry of this batch. No `exercisePrescriptionRegistry.ts`
+ * entry exists for `neck_training` (confirmed by direct search) — a known
+ * limitation, documented here without modifying that registry.
+ *
+ * Same documentation-format limitation as every entry in this batch: no
+ * space/floor-safety language anywhere in this fiche (checked directly).
+ *
+ * Central business question for this entry, explicitly flagged before
+ * writing began: "# Equipment Requirements — Required: None. Optional:
+ * Neck Harness, Resistance Bands, Partner, Weight Plate, Neck Machine."
+ * "Partner" appears ONLY under Optional, never Required — directly
+ * answering whether human assistance is genuinely mandatory here: it is
+ * NOT. No `human_assistance` clause is added, and — since nothing at all
+ * is documented as required (no implement, no space, no assistance) —
+ * `requirements` is omitted entirely, exactly like TIBIALIS_RAISE/
+ * SOLEUS_RAISE/WRIST_STRENGTHENING above. No `"other"` placeholder is
+ * introduced either: `"other"` exists to flag a REQUIRED-but-unrepresentable
+ * implement, and nothing here is required in the first place — inventing
+ * one would be precisely the undocumented, unjustified use the user's own
+ * instructions warned against.
+ *
+ * "# Primary Classification: Strength" — unlike every other entry in this
+ * batch (all of which say "Robustness"), this fiche uses the same word as
+ * NORDIC_HAMSTRING_CURL above, hence `primaryAdaptation: "maximum_strength"`
+ * rather than `"robustness"`.
+ *
+ * Partial MovementPattern coverage: "# Movement Pattern — Primary:
+ * Cervical Stabilization. Secondary: Flexion, Extension, Lateral Flexion,
+ * Rotation, Anti-Rotation." Unlike the ankle/wrist entries above (zero
+ * clean matches), "Rotation" and "Anti-Rotation" here map directly and
+ * honestly to existing MovementPattern values — "Flexion"/"Extension"/
+ * "Lateral Flexion" (sagittal/frontal-plane cervical movement) still have
+ * no counterpart and are a flagged, PARTIAL representational gap, left
+ * unfilled rather than padded with `"mixed"` alongside the two genuine
+ * matches (mixed is reserved for when nothing more specific applies, not
+ * as a catch-all appended alongside real matches).
+ */
+export const NECK_TRAINING: ExerciseDefinition = {
+  id: "neck_training",
+  name: "Neck Training",
+  module: "strength",
+  primaryAdaptation: "maximum_strength",
+  // "# Capability Mapping — Primary: Neck Strength, Neck Endurance, Head
+  // Stability." "Neck Strength" has no distinct region-specific
+  // PhysicalQuality counterpart and is not force-fitted (matching the
+  // "Posterior Chain Strength"/"Adductor Strength" exclusion precedent
+  // already established in this batch — already substantively covered by
+  // `bodyRegionsLoaded`). "Neck Endurance" → muscular_endurance (direct
+  // match). "Head Stability" → stability. "Secondary: Mechanical
+  // Robustness" → tissue_capacity. "Postural Control" → stability (already
+  // listed). "Clinch Stability" → stability (already listed, redundant).
+  // "Injury Resilience" → tissue_capacity (already listed). "Movement
+  // Efficiency" excluded (generic).
+  physicalQualities: ["muscular_endurance", "stability", "tissue_capacity"],
+  // See block comment above. "Rotation" → rotation (exact match).
+  // "Anti-Rotation" → anti_rotation (exact match). "# Movement Context —
+  // ... Isometric, Dynamic" explicitly names Isometric as one of this
+  // exercise's own named execution modes (not merely a Contraction Profile
+  // star rating), directly corroborated by "# Contraction Profile —
+  // Isometric ★★★★★" — `isometric` is added on this explicit basis.
+  movementPatterns: ["rotation", "anti_rotation", "isometric"],
+  // "# Biomechanical Profile — Primary Force Vector: Multi-Directional" →
+  // mixed (the same direct, literal match already used for
+  // WRIST_STRENGTHENING above).
+  forceVectors: ["mixed"],
+  requiredEquipment: [],
+  // No `requirements` object — nothing is documented as required (see
+  // block comment above).
+  // "# Skill Requirement — Suitable For: Beginners, Intermediate,
+  // Advanced, Elite", corroborated by "# Neurological Profile — Skill
+  // Requirement: Beginner" (the same Beginner-accessible framing as every
+  // other entry in this batch).
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  // No unilateral/bilateral statement exists anywhere in this fiche —
+  // cervical rotation/lateral flexion can be performed to either side, but
+  // no per-side prescription language is documented.
+  unilateral: false,
+  // "# Muscular Profile — Primary Muscles: Sternocleidomastoid, Deep Neck
+  // Flexors, Upper Trapezius, Splenius Capitis, Levator Scapulae" — all
+  // named primarily for their cervical-stabilization function in this
+  // fiche's own framing → neck.
+  bodyRegionsLoaded: ["neck"],
+  // "# Contraindications", quoted one item per source line. "Acute
+  // Cervical Injury" and "Cervical Disc Pathology" both concern the neck,
+  // but are tagged with distinct BodyRegion values: `neck` for the general
+  // muscular/soft-tissue injury, `cervical_spine` for the explicitly
+  // spinal/disc-level pathology. "Acute Concussion" is tagged `head`.
+  // "Medical Clearance Required" is procedural and carries no region,
+  // matching ROTATOR_CUFF_TRAINING's own identical treatment above.
+  contraindications: [
+    { description: "Acute cervical injury.", region: "neck", prohibitedPatterns: ["rotation", "anti_rotation", "isometric"], absolute: true },
+    { description: "Acute concussion.", region: "head", prohibitedPatterns: ["rotation", "anti_rotation", "isometric"], absolute: true },
+    { description: "Cervical disc pathology.", region: "cervical_spine", prohibitedPatterns: ["rotation", "anti_rotation", "isometric"], absolute: true },
+    { description: "Medical clearance required.", prohibitedPatterns: ["rotation", "anti_rotation", "isometric"], absolute: true },
+  ],
+  fatigueProfile: {
+    // "# Fatigue Profile — Neuromuscular Fatigue: Low. Mechanical Fatigue:
+    // Low. Metabolic Fatigue: Low." Unlike TIBIALIS_RAISE/SOLEUS_RAISE/
+    // ROTATOR_CUFF_TRAINING/WRIST_STRENGTHENING above, this fiche's own
+    // per-dimension vocabulary never uses "Very Low" at all (only the
+    // AGGREGATE "Overall Fatigue Cost: Very Low" summary line does) — the
+    // baseline Low=1 mapping already established throughout Lots 1–3 is
+    // used directly here, not the fiche-relative Very-Low=1/Low=2 scale
+    // used for this batch's other four robustness entries.
+    types: [],
+    neural: 1,
+    muscular: 1,
+    connectiveTissue: 1, // inferred from "Mechanical Fatigue: Low"
+    metabolic: 1,
+    technical: 1, // fallback from "Skill Requirement: Beginner" (minimumTechnicalLevel 1)
+  },
+  // "# Scientific Evidence — Evidence Level: ★★★★★. Progressive neck
+  // strengthening... has been associated with enhanced head stability and
+  // reduced injury risk..." — a full 5-star rating with confident
+  // (associative but not weakly hedged) language, mapped to "Level 1 —
+  // Scientific consensus".
+  evidenceLevel: "level_1",
+  // "# Transfer to Combat Sports" table, quoted star-for-star. Savate is
+  // named in this table but has no `CombatSport` enum counterpart and is
+  // omitted rather than force-mapped.
+  combatSportRelevance: {
+    boxing: 5,
+    kickboxing: 5,
+    muay_thai: 5,
+    wrestling: 5,
+    brazilian_jiu_jitsu: 5,
+    judo: 5,
+    mma: 5,
+    krav_maga: 5,
+  },
+  // "# Regressions" (Manual Isometrics, Bodyweight Holds, Band-Assisted
+  // Neck Work) name no distinct catalog exercise.
+  substitutionExerciseIds: [],
+};
+
+// -----------------------------------------------------------------------------
 // Catalog
 // -----------------------------------------------------------------------------
 
@@ -8218,4 +9129,11 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   OVERHEAD_PRESS,
   DIP,
   LANDMINE_PRESS,
+  NORDIC_HAMSTRING_CURL,
+  COPENHAGEN_PLANK,
+  TIBIALIS_RAISE,
+  SOLEUS_RAISE,
+  ROTATOR_CUFF_TRAINING,
+  WRIST_STRENGTHENING,
+  NECK_TRAINING,
 ];
