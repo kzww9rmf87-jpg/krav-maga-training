@@ -154,6 +154,10 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   unresolvedProfile("weighted_pull_up", "sets_reps", ["50-exercises/09_WEIGHTED_PULL_UP"]),
   unresolvedProfile("neck_training", "sets_reps", ["50-exercises/34_NECK_TRAINING"]),
   unresolvedProfile("nordic_hamstring_curl", "sets_reps", ["50-exercises/18_NORDIC_HAMSTRING_CURL"]),
+
+  // Registry Lot 2 — Power immediate (sled_push not integrated this lot; no
+  // duration profile added for it)
+  unresolvedProfile("hang_power_clean", "sets_reps", ["50-exercises/64_POWER/12_HANG_POWER_CLEAN.md"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

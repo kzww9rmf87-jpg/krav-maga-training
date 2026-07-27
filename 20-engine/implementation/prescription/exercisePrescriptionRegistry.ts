@@ -212,6 +212,9 @@ export const PILOT_EXERCISE_IDS = [
   "weighted_pull_up",
   "neck_training",
   "nordic_hamstring_curl",
+  // Registry Lot 2 — Power immediate (sled_push deliberately NOT added —
+  // see the documented blocker comment above HANG_POWER_CLEAN's own entry).
+  "hang_power_clean",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -6296,6 +6299,286 @@ const nordicHamstringCurlEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Registry Lot 2 — Power immediate
+// hang_power_clean reuses the existing power_primary_repetition_sets_v0_1
+// profile, exactly as push_press/hang_high_pull/jump_shrug already do.
+// sled_push is NOT integrated in this lot — see the block comment at the
+// end of this section and the migration report for the full, precise
+// blocking rationale (a genuine structural mismatch between its own
+// flat "4-12 pushes, 10-40 meters" documented volume and the
+// power_repetition_sets method's own sets>=3 AND repetitions>=2 floor,
+// not a semantic preference).
+// -----------------------------------------------------------------------------
+
+// Source: 50-exercises/64_POWER/12_HANG_POWER_CLEAN.md
+//   - Primary Classification: "Loaded Power"; Primary Adaptation: "Power".
+//   - Equipment Requirements (Primary Equipment): "Barbell, Weight
+//     plates, Secure collars" — identical structure to hang_high_pull's
+//     own equipment list (no rack, unlike push_press). No `plates`/`barbell`
+//     duplication of the knowledge base's own requirements is introduced
+//     here — `requiredEquipmentCapabilities` reuses the same two existing
+//     capability ids `hang_high_pull` already uses.
+//   - Loading Profile: "Common Reference Range: Approximately 60 to 80
+//     percent of an athlete's conventional power clean one-repetition
+//     maximum WHEN SUCH A REFERENCE IS TECHNICALLY VALID... The correct
+//     load is not defined by percentage alone... CAS should prioritize
+//     execution velocity, turnover quality and catch stability over
+//     absolute load." This is an even stronger, more explicit hedge
+//     against `percentage_1rm` than push_press/hang_high_pull/jump_shrug
+//     ever documented, and it is architecturally moot regardless: the
+//     shared profile's own `requiresExerciseSpecificLoadRule: true` flag
+//     causes `resolveIntensity` to reject every load-based rule type
+//     (`absolute_load`, `percentage_1rm`, `percentage_training_max`,
+//     `percentage_body_mass`, `resistance_category`) for EVERY exercise
+//     using this profile, regardless of what any individual entry
+//     declares — `movement_intent` is the only rule type in the shared
+//     profile's own intensity array that this flag does not reject,
+//     which is exactly why every existing power/primary entry in this
+//     registry already uses `["movement_intent"]` alone. This is not a
+//     stylistic choice; it is the only type that can ever resolve.
+//   - Programming Applications (all four documented prescriptions):
+//     "General Power Development: 3 to 5 sets, 2 to 3 repetitions...
+//     Full recovery between sets." / "Strength-Speed Development: 3 to 5
+//     sets, 1 to 3 repetitions... Long recovery." / "Speed-Strength
+//     Development: 3 to 5 sets, 2 to 3 repetitions." / "Combat Athlete
+//     General Preparation: 2 to 4 sets, 1 to 3 repetitions, Low total
+//     volume." The shared profile's own default range (sets 3-4-5,
+//     repetitions 2-3-5) already matches the fiche's own most common "3
+//     to 5 sets" ceiling exactly and its floor of 3 sets falls within
+//     the documented range too — no widening is ever needed on the sets
+//     dimension. The fiche's own repetition ceiling never exceeds 3
+//     across any of the four programming applications ("Sets should end
+//     before... turnover quality... becomes the primary limiter";
+//     "High-repetition sets... are generally incompatible with the
+//     primary CAS power objective") — repetitions are therefore narrowed
+//     down to the profile's own floor (2) through 3, well inside the
+//     profile's own ceiling of 5. The Combat-Athlete section's own floor
+//     of "2 to 4 sets" and every section's floor of "1 to 3 repetitions"
+//     both fall BELOW the shared profile's own floors (3 sets, 2
+//     repetitions) — a dose constraint can never widen a shared profile,
+//     so both floors stay at the profile's own values, a documented,
+//     honest limitation rather than a fabricated wider range.
+//   - Key Coaching Cues: "Push the floor away.", "Stay over the bar
+//     until extension.", "Finish tall, then turn over.", "Elbows fast
+//     and around.", "Meet the bar, do not wait for it.", "Catch tall in
+//     the rack.", "Absorb with the hips and knees.", "Elbows up, chest
+//     up.", "Brace before every repetition.", "Stop before turnover or
+//     catch quality drops."
+//   - Technical Failure Criteria (abridged, quoted): "the athlete begins
+//     the turnover before meaningful hip and knee extension", "hip or
+//     knee extension is incomplete", "the bar drifts substantially away
+//     from the body", "the turnover is slow, partial or incomplete",
+//     "the bar is received before or after the correct catch position,
+//     forcing an unstable adjustment", "the elbows drop during or after
+//     the catch", "the torso collapses forward in the front rack".
+//   - Velocity Profile: "CAS should terminate or reduce the set when
+//     velocity loss, turnover delay or catch instability becomes visible
+//     or measurable beyond the programmed threshold."
+//   - Fatigue Profile: "Common fatigue-related changes include a slower
+//     turnover, a lower or later catch, forward torso lean in the rack,
+//     reduced extension velocity, wider or less stable foot placement
+//     and increased reliance on the arms to muscle the bar into
+//     position."
+//   - Safety Profile: "the catch produces a hard, uncontrolled collision
+//     with the shoulders" / "Bar collision with the shoulders, chin or
+//     chest from a poor turnover."
+//   - Technical Failure Criteria / Safety Profile: "the athlete steps or
+//     stumbles excessively to control the catch" / "Loss of balance or
+//     stumbling during the catch" / "the athlete loses neutral spinal
+//     control during the catch" / "the athlete cannot stand cleanly out
+//     of the catch position."
+//   - Contraindications and Restrictions: "Acute low-back pain, Acute
+//     hamstring injury, Acute hip, knee or ankle injury, Acute shoulder,
+//     elbow or wrist pain."
+// Method: power_repetition_sets / power / primary
+//   (power_primary_repetition_sets_v0_1 — sets 3/4/5, repetitions 2/3/5,
+//   intensity movement_intent + percentage_1rm (the latter structurally
+//   unreachable — see above), rest between_sets 120/180/300s, tempo
+//   global_intent/maximal_acceleration). Distinguished explicitly from
+//   `hang_high_pull` (a partial equivalent only for the propulsive
+//   component — the fiche's own words: "The Hang High Pull is a partial
+//   equivalent only for the propulsive component; it does not replicate
+//   the receiving demand" / "CAS should not substitute the Hang High
+//   Pull for the Hang Power Clean when receiving skill itself is the
+//   target adaptation") and from `jump_shrug` (an earlier-stage
+//   extension-only drill in this exercise's own Progression Model,
+//   Stage 3, entirely without a turnover or catch phase). The catch
+//   phase itself is the reason this entry's own stop conditions include
+//   impact/balance hazards neither `hang_high_pull` nor `jump_shrug`
+//   document at the same density.
+const SOURCE_HANG_POWER_CLEAN = "50-exercises/64_POWER/12_HANG_POWER_CLEAN.md";
+
+const hangPowerCleanStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "hang_power_clean_technical_failure",
+    description:
+      "Stop the set if the athlete begins the turnover before meaningful hip and knee extension, hip or knee extension is incomplete, the bar drifts substantially away from the body, the turnover is slow, partial or incomplete, the bar is received before or after the correct catch position, the elbows drop during or after the catch, or the torso collapses forward in the front rack.",
+    sourceRuleIds: [SOURCE_HANG_POWER_CLEAN],
+  }),
+  velocityLossCondition({
+    conditionId: "hang_power_clean_velocity_loss",
+    description:
+      "Terminate or reduce the set when bar height, extension velocity or turnover speed falls substantially, or when velocity loss, turnover delay or catch instability becomes visible or measurable beyond the programmed threshold.",
+    sourceRuleIds: [SOURCE_HANG_POWER_CLEAN],
+  }),
+  fatigueLimitCondition({
+    conditionId: "hang_power_clean_fatigue_limit",
+    description:
+      "Stop the set once the turnover becomes slower, the catch becomes lower or later, the torso leans forward in the rack, extension velocity is reduced, or the athlete increasingly relies on the arms to muscle the bar into position.",
+    sourceRuleIds: [SOURCE_HANG_POWER_CLEAN],
+  }),
+  impactLimitCondition({
+    conditionId: "hang_power_clean_impact_limit",
+    description: "Stop the set if the catch produces a hard, uncontrolled collision with the shoulders, or the bar collides with the shoulders, chin or chest from a poor turnover.",
+    sourceRuleIds: [SOURCE_HANG_POWER_CLEAN],
+  }),
+  balanceLossCondition({
+    conditionId: "hang_power_clean_balance_loss",
+    description:
+      "Stop the set if the athlete steps or stumbles excessively to control the catch, loses neutral spinal control during the catch, or cannot stand cleanly out of the catch position.",
+    sourceRuleIds: [SOURCE_HANG_POWER_CLEAN],
+  }),
+  painCondition({
+    conditionId: "hang_power_clean_pain",
+    description: "Stop if pain occurs, or in the presence of acute low-back, hamstring, hip, knee, ankle, shoulder, elbow or wrist symptoms.",
+    sourceRuleIds: [SOURCE_HANG_POWER_CLEAN],
+  }),
+  completionCondition({
+    conditionId: "hang_power_clean_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const hangPowerCleanInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "hang_power_clean_setup",
+    "setup",
+    "Set up the barbell with weight plates loaded and secure collars fitted; establish a stable hang position above or near the knees with a braced trunk and whole-foot pressure before initiating the pull.",
+    "high",
+    true,
+    SOURCE_HANG_POWER_CLEAN,
+  ),
+  makeInstruction(
+    "hang_power_clean_execution",
+    "execution",
+    "Push the floor away, extend the hips and knees forcefully into a tall finish, then pull the body down and under the bar with a fast, complete turnover of the elbows, receive the bar tall in the front rack with the elbows high, absorb the catch through coordinated hip, knee and ankle flexion, and stand to full extension to complete the repetition.",
+    "high",
+    true,
+    SOURCE_HANG_POWER_CLEAN,
+  ),
+];
+
+const hangPowerCleanEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "hang_power_clean",
+  moduleId: "power",
+  role: "primary",
+  explicitMethodId: "power_repetition_sets",
+  capabilities: {
+    exerciseId: "hang_power_clean",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["power_repetition_sets"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["movement_intent"],
+    preferredIntensityTypes: ["movement_intent"],
+    supportedLoadingModes: ["barbell", "added_external_load"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "global_movement_intent", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["barbell", "plates"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["hang_power_clean_setup", "hang_power_clean_execution"],
+    requiredStopConditionIds: [
+      "hang_power_clean_technical_failure",
+      "hang_power_clean_velocity_loss",
+      "hang_power_clean_fatigue_limit",
+      "hang_power_clean_impact_limit",
+      "hang_power_clean_balance_loss",
+      "hang_power_clean_pain",
+      "hang_power_clean_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_hang_power_clean",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_HANG_POWER_CLEAN, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["movement_intent"],
+  preferredIntensityType: "movement_intent",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: hangPowerCleanInstructions,
+  stopConditionDefinitions: hangPowerCleanStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: 2, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 5, repetitions: 3, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_HANG_POWER_CLEAN],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_HANG_POWER_CLEAN, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
+// sled_push — NOT integrated in this lot (documented blocker)
+//
+// Source: 50-exercises/17_SLED_PUSH — "# Loading Profile — Typical
+// Volume: 4-12 pushes, 10-40 meters." This is a single, flat,
+// undecomposed total-volume figure — no separate "sets" and
+// "repetitions" numbers are documented anywhere in this fiche (contrast
+// with hang_power_clean above, which documents "3 to 5 sets, 2 to 3
+// repetitions" as two explicit, independent numbers in every one of its
+// four programming sections).
+//
+// power_repetition_sets's own shared profile (power_primary_repetition_
+// sets_v0_1) requires a genuine sets_reps structure with an enforced
+// floor on BOTH dimensions simultaneously: sets >= 3 AND repetitions >=
+// 2 (a minimum of 6 total discrete units). Mapping "4-12 pushes" onto
+// this structure requires inventing a decomposition the source document
+// never states:
+//   - if each push is treated as one set of one repetition (the most
+//     mechanically honest reading, matching how a sled push is actually
+//     coached — one continuous drive per rest interval, never multiple
+//     discrete "reps" within a single push), repetitions would need to
+//     be 1, which is BELOW the profile's own floor of 2 and cannot be
+//     narrowed there (a dose constraint only narrows within existing
+//     bounds, never widens or lowers below them);
+//   - if instead the 4-12 pushes are treated as repetitions within a
+//     single set, sets would need to be 1, which is BELOW the profile's
+//     own floor of 3, for the identical reason;
+//   - any other invented sets x reps split (e.g. "3 sets of 4 pushes")
+//     would silently multiply the fiche's own documented floor upward
+//     (3 x 2 = 6 minimum total pushes under the shared profile, even
+//     before any invented split), overstating the exercise's own
+//     documented minimum volume — the same class of dishonest widening
+//     this whole registry's own discipline forbids.
+//
+// The 10-40 meter distance dimension compounds this: `power_repetition_
+// sets`'s own shared profile documents `distance: null` — no distance
+// dimension exists in this method's volume structure at all, for any
+// exercise. `distance_carry_sets` (the method with a real `sets_distance`
+// structure) is NOT authorized for the "power" module at all —
+// `contracts.ts`'s own `power` module profile explicitly lists
+// `distance_carry_sets` inside its `forbiddenMethods`. sled_push's own
+// module is "power" in both the knowledge base and this registry's own
+// classification (matching its own fiche's "Primary Classification:
+// Power" and Capability Mapping), so this is not a module
+// misclassification to fix — it is a genuine absence of any authorized,
+// structurally honest method for this exercise today.
+//
+// This is precisely the Category C finding already identified in the
+// full 32-exercise Registry Audit (sled_push required a new numerical
+// profile, not merely a new registry entry) — confirmed here at
+// implementation depth, not merely reasserted. sled_push is therefore
+// NOT migrated in this lot. Forcing it into power_repetition_sets today
+// would require either inventing an unsourced sets/reps decomposition or
+// silently dropping the documented distance entirely — both rejected.
+// A future lot introducing a genuine distance/work-based numerical
+// profile for the power module (or a documented, sourced sets x reps
+// convention) is the correct path, not a workaround here.
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -6366,6 +6649,8 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   weighted_pull_up: weightedPullUpEntry,
   neck_training: neckTrainingEntry,
   nordic_hamstring_curl: nordicHamstringCurlEntry,
+
+  hang_power_clean: hangPowerCleanEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>
