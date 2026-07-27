@@ -137,7 +137,8 @@ describe("registryVocabulary — equipment capabilities", () => {
     for (const id of PREVIOUSLY_EXISTING_IDS) {
       expect(isEquipmentCapabilityId(id)).toBe(true);
     }
-    expect(EQUIPMENT_CAPABILITY_IDS.length).toBe(PREVIOUSLY_EXISTING_IDS.length + 2);
+    // +2 for medicine_ball/wall (an earlier lot), +1 for dip_bars (Registry Lot 1 — Strength immediate).
+    expect(EQUIPMENT_CAPABILITY_IDS.length).toBe(PREVIOUSLY_EXISTING_IDS.length + 2 + 1);
   });
 
   test("an unknown equipment identifier is still rejected after the addition", () => {
@@ -422,6 +423,13 @@ describe("registryVocabulary — carry loading modes corrected to match document
       hip_thrust: ["barbell", "added_external_load"],
       chin_up: ["bodyweight"],
       barbell_row: ["barbell", "added_external_load"],
+      // Registry Lot 1 — Strength immediate
+      chest_supported_row: ["dumbbell", "barbell", "machine"],
+      dip: ["bodyweight", "added_external_load"],
+      landmine_press: ["barbell", "added_external_load"],
+      weighted_pull_up: ["bodyweight", "added_external_load"],
+      neck_training: ["bodyweight", "added_external_load", "partner_resistance"],
+      nordic_hamstring_curl: ["bodyweight", "assisted_bodyweight"],
     };
     const CORRECTED_IDS = ["pinch_carry", "sandbag_carry", "zercher_carry"];
 
@@ -438,8 +446,8 @@ describe("registryVocabulary — carry loading modes corrected to match document
   });
 
   test("7. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(44);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(44);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(50);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(50);
   });
 
   test("8. every retained value (plate, sandbag, barbell) is a known, documented LoadingMode", () => {
@@ -552,12 +560,12 @@ describe("registryVocabulary — pinch_carry represents only the Bilateral Varia
     for (const [id, text] of Object.entries(OTHER_ENTRY_FIRST_INSTRUCTION)) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id as PilotExerciseId].instructionDefinitions[0].text).toBe(text);
     }
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(44);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(50);
   });
 
   test("9. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(44);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(44);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(50);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(50);
   });
 
   test("10. explicitMethodId, supportedMethodIds, supportedVolumeStructures and stop conditions are unchanged", () => {
@@ -614,6 +622,15 @@ const DOSE_NARROWING_EXCEPTIONS = [
   "copenhagen_plank",
   "hip_thrust",
   "barbell_row",
+  // Registry Lot 1 — Strength immediate: all six narrow exerciseDoseConstraints
+  // against the shared strength_accessory_straight_sets_v0_1 /
+  // strength_primary_straight_sets_v0_1 profiles to their own documented ranges.
+  "chest_supported_row",
+  "dip",
+  "landmine_press",
+  "weighted_pull_up",
+  "neck_training",
+  "nordic_hamstring_curl",
 ] as const;
 
 describe("registryVocabulary — exerciseDoseConstraints", () => {
@@ -624,7 +641,7 @@ describe("registryVocabulary — exerciseDoseConstraints", () => {
       }
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseDoseConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(44);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(50);
   });
 
   test("tibialis_raise, rotator_cuff_training, soleus_raise, copenhagen_plank, hip_thrust and barbell_row narrow exerciseDoseConstraints; wrist_strengthening and chin_up do not", () => {
@@ -639,16 +656,35 @@ describe("registryVocabulary — exerciseDoseConstraints", () => {
   });
 });
 
+// Registry Lot 1 — Strength immediate: weighted_pull_up (excludes percentage_1rm
+// from the shared strength_primary_straight_sets_v0_1 profile's own intensity
+// types) and neck_training (narrows RPE to the shared strength_accessory
+// profile's own most conservative sub-range) both declare a non-null
+// exerciseIntensityConstraints. Neither is part of the Robustness batch, so a
+// separate exception list is used rather than overloading ROBUSTNESS_EXERCISE_IDS.
+const INTENSITY_CONSTRAINT_EXCEPTIONS = [
+  ...ROBUSTNESS_EXERCISE_IDS,
+  "weighted_pull_up",
+  "neck_training",
+] as const;
+
 describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestConstraints", () => {
-  test("every pilot registry entry outside the Robustness batch declares exerciseIntensityConstraints and exerciseRestConstraints as null", () => {
+  test("every pilot registry entry outside the known intensity-narrowing exceptions declares exerciseIntensityConstraints and exerciseRestConstraints as null", () => {
     for (const id of PILOT_EXERCISE_IDS) {
-      if ((ROBUSTNESS_EXERCISE_IDS as readonly string[]).includes(id)) {
+      if ((INTENSITY_CONSTRAINT_EXCEPTIONS as readonly string[]).includes(id)) {
         continue;
       }
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseIntensityConstraints).toBeNull();
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(44);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(50);
+  });
+
+  test("weighted_pull_up and neck_training narrow exerciseIntensityConstraints; neither narrows exerciseRestConstraints", () => {
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.weighted_pull_up.exerciseIntensityConstraints).not.toBeNull();
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.neck_training.exerciseIntensityConstraints).not.toBeNull();
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.weighted_pull_up.exerciseRestConstraints).toBeNull();
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.neck_training.exerciseRestConstraints).toBeNull();
   });
 
   test("all four Robustness exercises narrow exerciseIntensityConstraints and none narrow exerciseRestConstraints", () => {

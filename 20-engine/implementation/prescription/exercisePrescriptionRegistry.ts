@@ -205,6 +205,13 @@ export const PILOT_EXERCISE_IDS = [
   "hip_thrust",
   "chin_up",
   "barbell_row",
+  // Registry Lot 1 — Strength immediate
+  "chest_supported_row",
+  "dip",
+  "landmine_press",
+  "weighted_pull_up",
+  "neck_training",
+  "nordic_hamstring_curl",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -5500,6 +5507,795 @@ const barbellRowEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Registry Lot 1 — Strength immediate
+// Shared profile: strength_accessory_straight_sets_v0_1 (chest_supported_row,
+// dip, landmine_press, neck_training, nordic_hamstring_curl) plus
+// strength_primary_straight_sets_v0_1 (weighted_pull_up).
+// All six exercises are module="strength" in the exercise knowledge base
+// (confirmed directly, not assumed — neck_training and nordic_hamstring_curl
+// are "strength" in the KB, unlike their robustness-chapter cousins
+// tibialis_raise/soleus_raise/rotator_cuff_training/wrist_strengthening,
+// which are KB module="robustness" and use the separate
+// robustness_accessory_straight_sets_v0_1 profile instead — the registry's
+// moduleId mirrors the KB's own module field faithfully in every case,
+// exactly as it already does for barbell_row/chin_up/hip_thrust).
+// None of the six re-encodes any eligibility/requirements-layer decision
+// already owned by exerciseKnowledgeBase.ts — human_assistance, any_of
+// equipment alternatives and environment capabilities stay exclusively in
+// the Exercise Requirements Model; the registry only ever describes how a
+// prescription is dosed once the exercise is already known to be eligible.
+// -----------------------------------------------------------------------------
+
+// Source: 50-exercises/13_CHEST_SUPPORTED_ROW
+//   - Primary Classification: "Strength"; Typical Intensity: "60-90% 1RM
+//     Equivalent" (documented, not activated — same Table Group 12
+//     precedent as hip_thrust/barbell_row: resolveVolume and
+//     resolveIntensity resolve independently, and a wide repetition range
+//     combined with a wide percentage range could produce an incoherent
+//     pair); Typical Volume: 3-6 sets, 6-15 repetitions.
+//   - Equipment Requirements: Required: Incline Bench, Dumbbells or
+//     Barbell or Machine. `requiredEquipmentCapabilities` therefore holds
+//     only "bench" (the one unconditionally required item); the
+//     interchangeable dumbbell/barbell/machine choice is represented
+//     honestly through `supportedLoadingModes` instead of an invented
+//     equivalence-group capability id, since LoadingMode already exists
+//     precisely for "which of several loading approaches is supported"
+//     without turning an "or" into an "and".
+//   - Coaching Cues: "Brace lightly.", "Pull through the elbows.",
+//     "Squeeze the shoulder blades.", "Avoid shrugging.", "Control the
+//     lowering phase."
+//   - Common Errors: Using Momentum, Incomplete Retraction, Forward Head
+//     Position, Partial Range of Motion.
+//   - Safety Profile Primary Risks: Incomplete Range of Motion, Poor
+//     Scapular Control, Excessive Neck Extension.
+//   - Contraindications: Acute Shoulder Injury, Pain During Horizontal
+//     Pulling.
+// Method: straight_sets_repetitions / strength / accessory
+//   (strength_accessory_straight_sets_v0_1 — sets 2/3/6, reps 4/8/15, RPE
+//   6/7/8, rest 90/120/180s, tempo null). Narrowed: sets minimum 3 (up
+//   from the profile's own floor of 2, matching the fiche's own "3-6
+//   sets"); repetitions minimum 6 (up from the profile's own floor of 4,
+//   matching the fiche's own "6-15 repetitions"); both maxima already
+//   equal the profile's own ceiling and are restated explicitly for
+//   clarity, not widened.
+const SOURCE_CHEST_SUPPORTED_ROW = "50-exercises/13_CHEST_SUPPORTED_ROW";
+
+const chestSupportedRowStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "chest_supported_row_technical_failure",
+    description:
+      "Stop the set when momentum replaces controlled pulling, retraction becomes incomplete, the head moves into a forward or extended position, or the range of motion becomes partial.",
+    sourceRuleIds: [SOURCE_CHEST_SUPPORTED_ROW],
+  }),
+  painCondition({
+    conditionId: "chest_supported_row_pain",
+    description: "Stop immediately if pain occurs, including pain during horizontal pulling, or in the presence of an acute shoulder injury.",
+    sourceRuleIds: [SOURCE_CHEST_SUPPORTED_ROW],
+  }),
+  completionCondition({
+    conditionId: "chest_supported_row_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const chestSupportedRowInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "chest_supported_row_setup",
+    "setup",
+    "Set the incline bench and select a dumbbell, barbell or machine implement before beginning; a dedicated chest-supported-row machine or a cable machine may be used if available.",
+    "high",
+    true,
+    SOURCE_CHEST_SUPPORTED_ROW,
+  ),
+  makeInstruction(
+    "chest_supported_row_execution",
+    "execution",
+    "Brace lightly, pull through the elbows, squeeze the shoulder blades, avoid shrugging, and control the lowering phase.",
+    "high",
+    true,
+    SOURCE_CHEST_SUPPORTED_ROW,
+  ),
+  makeInstruction(
+    "chest_supported_row_safety",
+    "safety",
+    "Never force a repetition to muscular failure; stop at the first sign of technical breakdown.",
+    "high",
+    true,
+    SOURCE_CHEST_SUPPORTED_ROW,
+  ),
+];
+
+const chestSupportedRowEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "chest_supported_row",
+  moduleId: "strength",
+  role: "accessory",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "chest_supported_row",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["rpe"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["dumbbell", "barbell", "machine"],
+    supportedTempoTypes: [],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["bench"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["chest_supported_row_setup", "chest_supported_row_execution", "chest_supported_row_safety"],
+    requiredStopConditionIds: [
+      "chest_supported_row_technical_failure",
+      "chest_supported_row_pain",
+      "chest_supported_row_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_chest_supported_row",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_CHEST_SUPPORTED_ROW, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: [],
+  preferredTempoType: null,
+  instructionDefinitions: chestSupportedRowInstructions,
+  stopConditionDefinitions: chestSupportedRowStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: 6, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 6, repetitions: 15, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_CHEST_SUPPORTED_ROW],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_CHEST_SUPPORTED_ROW, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/14_DIP
+//   - Primary Classification: "Strength"; Typical Intensity: "Bodyweight
+//     or Bodyweight + External Load" (no percentage-of-maximum table
+//     documented at all — RPE only, matching the same no-invented-charge
+//     approach already used for pull_up/chin_up/bulgarian_split_squat);
+//     Typical Volume: 3-6 sets, 3-12 repetitions.
+//   - Equipment Requirements: Required: Parallel Bars. Optional: Dip
+//     Belt, Weighted Vest, Gymnastic Rings, Resistance Bands.
+//     `requiredEquipmentCapabilities` holds only "dip_bars" — a new,
+//     minimal capability id added to `equipmentCapabilities.ts` for this
+//     lot (see that file's own comment), aligned 1:1 with the knowledge
+//     base's own distinct `EquipmentType` member of the same name. The
+//     Dip Belt is never made required here — it is Optional in the
+//     fiche's own Equipment Requirements, and only appears below inside
+//     the setup instruction text as a documented progression, never as a
+//     gate.
+//   - Coaching Cues: "Brace the trunk.", "Keep the shoulders packed.",
+//     "Descend under control.", "Press explosively.", "Finish with full
+//     elbow extension."
+//   - Common Errors: Shoulder Shrugging, Excessive Depth, Forward Head
+//     Position, Loss of Body Tension, Incomplete Lockout, Swinging.
+//   - Safety Profile Primary Risks: Excessive Shoulder Extension,
+//     Anterior Shoulder Pain, Loss of Scapular Control, Incomplete
+//     Stability.
+//   - Contraindications: Acute Shoulder Injury, Acute Elbow Injury, Pain
+//     During Dips, Severe Shoulder Instability.
+// Method: straight_sets_repetitions / strength / accessory
+//   Narrowed: sets minimum 3 (up from the profile's own floor of 2,
+//   matching "3-6 sets"); repetitions maximum 12 (down from the
+//   profile's own ceiling of 15, matching "3-12 repetitions"). The
+//   fiche's own repetition floor of 3 is BELOW the shared profile's own
+//   floor of 4 — a dose constraint can only narrow within the profile's
+//   existing bounds, never widen below it, so the effective minimum stays
+//   at the profile's own 4, a documented, honest limitation rather than a
+//   fabricated 3.
+const SOURCE_DIP = "50-exercises/14_DIP";
+
+const dipStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "dip_technical_failure",
+    description:
+      "Stop the set when the shoulders shrug, depth becomes excessive, the head moves forward, body tension is lost, lockout becomes incomplete, or swinging appears.",
+    sourceRuleIds: [SOURCE_DIP],
+  }),
+  painCondition({
+    conditionId: "dip_pain",
+    description: "Stop immediately if pain occurs during dips, or in the presence of an acute shoulder or elbow injury, or severe shoulder instability.",
+    sourceRuleIds: [SOURCE_DIP],
+  }),
+  completionCondition({
+    conditionId: "dip_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const dipInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "dip_setup",
+    "setup",
+    "Set up at the parallel bars; bodyweight is the base loading, with a dip belt, weighted vest or resistance band added only once strict bodyweight dips are mastered.",
+    "high",
+    true,
+    SOURCE_DIP,
+  ),
+  makeInstruction(
+    "dip_execution",
+    "execution",
+    "Brace the trunk, keep the shoulders packed, descend under control, press explosively, and finish with full elbow extension.",
+    "high",
+    true,
+    SOURCE_DIP,
+  ),
+  makeInstruction(
+    "dip_safety",
+    "safety",
+    "Never force a repetition to muscular failure; stop at the first sign of technical breakdown.",
+    "high",
+    true,
+    SOURCE_DIP,
+  ),
+];
+
+const dipEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "dip",
+  moduleId: "strength",
+  role: "accessory",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "dip",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["rpe"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["bodyweight", "added_external_load"],
+    supportedTempoTypes: [],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["dip_bars"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["dip_setup", "dip_execution", "dip_safety"],
+    requiredStopConditionIds: ["dip_technical_failure", "dip_pain", "dip_completion"],
+    durationEstimationProfileId: "duration_profile_dip",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_DIP, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: [],
+  preferredTempoType: null,
+  instructionDefinitions: dipInstructions,
+  stopConditionDefinitions: dipStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: 4, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 6, repetitions: 12, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_DIP],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_DIP, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/26_LANDMINE_PRESS
+//   - Primary Classification: "Strength"; Typical Intensity: "40-80%
+//     Estimated Maximum" (documented, not activated — same Table Group
+//     12 precedent as hip_thrust/barbell_row/chest_supported_row above);
+//     Typical Volume: 3-6 sets, 4-10 repetitions.
+//   - Equipment Requirements: Required: Barbell, Landmine Attachment.
+//     `requiredEquipmentCapabilities` holds only "barbell" — "Landmine
+//     Attachment" has no dedicated id in the closed prescription
+//     vocabulary, and the knowledge base itself has no dedicated
+//     `EquipmentType` for it either (it uses the flagged `"other"`
+//     placeholder in `LANDMINE_PRESS`'s own `ExerciseDefinition`) — a new
+//     capability id is deliberately NOT added here, unlike `dip_bars`
+//     above, because doing so would claim more precision than even the
+//     knowledge base itself claims. This is an accepted, documented
+//     precision loss, not an oversight.
+//   - Movement Context: "Unilateral or Bilateral" — the knowledge base's
+//     own `ExerciseDefinition` resolves this to `unilateral: false`
+//     (bilateral as the default form); this registry entry matches that
+//     resolution rather than contradicting it.
+//   - Coaching Cues: "Brace first.", "Drive from the legs.", "Press
+//     diagonally.", "Reach naturally.", "Control the lowering phase."
+//   - Common Errors: Lumbar Extension, Shrugging, Loss of Balance,
+//     Pressing Only With the Arm, Incomplete Core Engagement.
+//   - Safety Profile Primary Risks: Poor Trunk Stability, Lumbar
+//     Hyperextension, Poor Foot Position.
+//   - Contraindications: Acute Shoulder Injury, Acute Elbow Injury, Pain
+//     During Pressing.
+// Method: straight_sets_repetitions / strength / accessory
+//   Narrowed: sets minimum 3 (up from 2, matching "3-6 sets");
+//   repetitions maximum 10 (down from 15, matching "4-10 repetitions");
+//   the repetitions minimum already equals the profile's own floor of 4.
+const SOURCE_LANDMINE_PRESS = "50-exercises/26_LANDMINE_PRESS";
+
+const landminePressStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "landmine_press_technical_failure",
+    description:
+      "Stop the set when lumbar extension or hyperextension appears, the shoulders shrug, balance is lost, the arm presses in isolation without leg and trunk drive, or core engagement becomes incomplete.",
+    sourceRuleIds: [SOURCE_LANDMINE_PRESS],
+  }),
+  painCondition({
+    conditionId: "landmine_press_pain",
+    description: "Stop immediately if pain occurs during pressing, or in the presence of an acute shoulder or elbow injury.",
+    sourceRuleIds: [SOURCE_LANDMINE_PRESS],
+  }),
+  completionCondition({
+    conditionId: "landmine_press_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const landminePressInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "landmine_press_setup",
+    "setup",
+    "Anchor the barbell in the landmine attachment and set a stable standing base before pressing, bilateral or unilateral as prescribed.",
+    "high",
+    true,
+    SOURCE_LANDMINE_PRESS,
+  ),
+  makeInstruction(
+    "landmine_press_execution",
+    "execution",
+    "Brace first, drive from the legs, press diagonally along the barbell's natural path, reach naturally, and control the lowering phase.",
+    "high",
+    true,
+    SOURCE_LANDMINE_PRESS,
+  ),
+  makeInstruction(
+    "landmine_press_safety",
+    "safety",
+    "Never force a repetition to muscular failure; stop at the first sign of technical breakdown.",
+    "high",
+    true,
+    SOURCE_LANDMINE_PRESS,
+  ),
+];
+
+const landminePressEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "landmine_press",
+  moduleId: "strength",
+  role: "accessory",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "landmine_press",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["rpe"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["barbell", "added_external_load"],
+    supportedTempoTypes: [],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["barbell"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["landmine_press_setup", "landmine_press_execution", "landmine_press_safety"],
+    requiredStopConditionIds: ["landmine_press_technical_failure", "landmine_press_pain", "landmine_press_completion"],
+    durationEstimationProfileId: "duration_profile_landmine_press",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_LANDMINE_PRESS, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: [],
+  preferredTempoType: null,
+  instructionDefinitions: landminePressInstructions,
+  stopConditionDefinitions: landminePressStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: 4, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 6, repetitions: 10, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_LANDMINE_PRESS],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_LANDMINE_PRESS, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/09_WEIGHTED_PULL_UP
+//   - Primary Classification: "Strength"; Typical Intensity: "Bodyweight
+//     + 5-60 kg" (a raw kilogram range, never a percentage-of-maximum
+//     table) — matching the same no-invented-charge approach already
+//     used for pull_up/chin_up/bulgarian_split_squat, `percentage_1rm` is
+//     deliberately excluded from this entry's own active intensity types
+//     via `exerciseIntensityConstraints.allowedIntensityTypes`, even
+//     though the shared profile documents it; Typical Volume: 3-6 sets,
+//     2-8 repetitions.
+//   - Equipment Requirements: Required: Pull-Up Bar, Dip Belt, Weight
+//     Plates. `requiredEquipmentCapabilities` holds "pull_up_bar" and
+//     "plates" — the two items with an honest existing capability id.
+//     "Dip Belt" (the harness that attaches the plates) has no dedicated
+//     id, matching the same accepted-precision-loss treatment as
+//     `landmine_press`'s own "Landmine Attachment" above, and matching
+//     the knowledge base's own identical treatment (`"other"` flagged
+//     placeholder for "Dip Belt" in `WEIGHTED_PULL_UP`'s own
+//     `ExerciseDefinition`).
+//   - Coaching Cues: "Brace before pulling.", "Initiate with the
+//     scapula.", "Pull the elbows toward the ribs.", "Maintain body
+//     tension.", "Control the descent.", "Avoid swinging."
+//   - Common Errors: Incomplete Range of Motion, Forward Head Position,
+//     Excessive Swing, Loss of Scapular Control, Kipping, Grip Failure.
+//   - Safety Profile Primary Risks: Shoulder Irritation, Grip Failure,
+//     Incomplete Scapular Control, Excessive Swing.
+//   - Contraindications: Acute Shoulder Injury, Acute Elbow Injury, Acute
+//     Wrist Injury, Pain During Vertical Pulling.
+// Method: straight_sets_repetitions / strength / primary
+//   (strength_primary_straight_sets_v0_1 — sets 2/3/4, reps 3/5/6,
+//   percentage_1rm 80/85/90, RPE 7.5/8/9, RIR 1/2/3, rest 180/180/300s,
+//   tempo phase_intent/maximal_safe_speed). Role "primary" mirrors
+//   `pull_up`'s own identical resolution (weighted_pull_up is literally
+//   pull_up plus external load). Narrowed: sets minimum 3 (up from the
+//   profile's own floor of 2, matching "3-6 sets"); the fiche's own
+//   ceiling of 6 sets and 8 repetitions both exceed the shared profile's
+//   own ceiling (4 sets, 6 repetitions) — a dose constraint can never
+//   widen a shared profile, so both maxima stay at the profile's own
+//   ceiling, a documented, honest limitation rather than a fabricated
+//   wider range. Repetitions minimum likewise stays at the profile's own
+//   floor of 3 (the fiche's own floor of 2 is below it).
+const SOURCE_WEIGHTED_PULL_UP = "50-exercises/09_WEIGHTED_PULL_UP";
+
+const weightedPullUpStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "weighted_pull_up_technical_failure",
+    description:
+      "Stop the set when the range of motion becomes incomplete, the head moves forward, swinging or kipping appears, or scapular control is lost.",
+    sourceRuleIds: [SOURCE_WEIGHTED_PULL_UP],
+  }),
+  painCondition({
+    conditionId: "weighted_pull_up_pain",
+    description: "Stop immediately if pain occurs during vertical pulling, or in the presence of an acute shoulder, elbow or wrist injury.",
+    sourceRuleIds: [SOURCE_WEIGHTED_PULL_UP],
+  }),
+  completionCondition({
+    conditionId: "weighted_pull_up_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const weightedPullUpInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "weighted_pull_up_setup",
+    "setup",
+    "Attach the additional load via a dip belt and weight plates before mounting the pull-up bar; the athlete should first demonstrate strict bodyweight pull-ups before adding external load.",
+    "high",
+    true,
+    SOURCE_WEIGHTED_PULL_UP,
+  ),
+  makeInstruction(
+    "weighted_pull_up_execution",
+    "execution",
+    "Brace before pulling, initiate with the scapula, pull the elbows toward the ribs, maintain body tension, control the descent, and avoid swinging.",
+    "high",
+    true,
+    SOURCE_WEIGHTED_PULL_UP,
+  ),
+  makeInstruction(
+    "weighted_pull_up_safety",
+    "safety",
+    "Never force a repetition to muscular failure; stop at the first sign of technical breakdown or grip failure.",
+    "high",
+    true,
+    SOURCE_WEIGHTED_PULL_UP,
+  ),
+];
+
+const weightedPullUpEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "weighted_pull_up",
+  moduleId: "strength",
+  role: "primary",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "weighted_pull_up",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["rpe", "rir"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["bodyweight", "added_external_load"],
+    supportedTempoTypes: ["phase_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["pull_up_bar", "plates"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["weighted_pull_up_setup", "weighted_pull_up_execution", "weighted_pull_up_safety"],
+    requiredStopConditionIds: [
+      "weighted_pull_up_technical_failure",
+      "weighted_pull_up_pain",
+      "weighted_pull_up_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_weighted_pull_up",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_WEIGHTED_PULL_UP, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "rir"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: ["phase_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: weightedPullUpInstructions,
+  stopConditionDefinitions: weightedPullUpStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: 3, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 4, repetitions: 6, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_WEIGHTED_PULL_UP],
+  },
+  exerciseIntensityConstraints: {
+    allowedIntensityTypes: ["rpe", "rir"],
+    rangeConstraints: [],
+    sourceRuleIds: [SOURCE_WEIGHTED_PULL_UP],
+  },
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_WEIGHTED_PULL_UP, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/34_NECK_TRAINING
+//   - Primary Classification: "Strength"; Typical Intensity: "Low to
+//     Moderate"; Typical Volume: "2-5 sets, 10-20 repetitions OR 10-45
+//     second holds" — a dual rep/isometric-hold fiche. Only the
+//     repetition structure is modeled here (`straight_sets_repetitions`);
+//     the isometric-hold alternative is a genuine, documented but
+//     unmodeled variant, not silently dropped — flagged in the final
+//     report rather than requiring a second method/contract.
+//   - Movement Pattern Secondary: "Flexion, Extension, Lateral Flexion,
+//     Rotation, Anti-Rotation" — no single default direction is named
+//     anywhere in the fiche. Per the user's own instruction, this
+//     direction/variant selection is encoded in the setup instruction
+//     text below, not as a new capability or contract: a generic
+//     "neck_training" entry stays honest by requiring the athlete/coach
+//     to pick one documented direction per set, rather than silently
+//     assuming one.
+//   - Equipment Requirements: Required: None. `requiredEquipmentCapabilities`
+//     is genuinely empty — Neck Harness/Resistance Bands/Partner/Weight
+//     Plate/Neck Machine are all Optional.
+//   - Coaching Cues: "Maintain neutral alignment.", "Move under
+//     control.", "Brace the trunk.", "Breathe continuously.", "Stop
+//     immediately if symptoms appear."
+//   - Common Errors: Using excessive resistance, Fast uncontrolled
+//     movements, Compensating with the torso, Holding the breath,
+//     Ignoring pain.
+//   - Contraindications: Acute Cervical Injury, Acute Concussion,
+//     Cervical Disc Pathology, Medical Clearance Required.
+// Method: straight_sets_repetitions / strength / accessory
+//   Narrowed: sets maximum 5 (down from the profile's own ceiling of 6,
+//   matching "2-5 sets"; the minimum already equals the profile's own
+//   floor of 2); repetitions minimum 10 (up from the profile's own floor
+//   of 4, matching "10-20 repetitions"). The fiche's own repetition
+//   ceiling of 20 EXCEEDS the shared profile's own ceiling of 15 — a
+//   dose constraint can never widen a shared profile, so the maximum
+//   stays at the profile's own 15, a documented, honest limitation.
+//   Intensity: the shared profile's own RPE floor (6) is higher than the
+//   fiche's own "Low to Moderate" framing for a cervical exercise — this
+//   registry entry pins the effective RPE range to the most conservative
+//   position achievable within the shared profile's own bounds (6-7,
+//   normal 6) rather than fabricating a value below the profile's own
+//   floor, and this tension is flagged explicitly in the final report.
+const SOURCE_NECK_TRAINING = "50-exercises/34_NECK_TRAINING";
+
+const neckTrainingStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "neck_training_technical_failure",
+    description:
+      "Stop the set when excessive resistance is used, movements become fast or uncontrolled, the torso compensates for the neck, or the breath is held.",
+    sourceRuleIds: [SOURCE_NECK_TRAINING],
+  }),
+  painCondition({
+    conditionId: "neck_training_pain",
+    description:
+      "Stop immediately if any symptom appears, or in the presence of an acute cervical injury, acute concussion, cervical disc pathology, or when medical clearance has not been granted.",
+    sourceRuleIds: [SOURCE_NECK_TRAINING],
+  }),
+  completionCondition({
+    conditionId: "neck_training_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const neckTrainingInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "neck_training_setup",
+    "setup",
+    "Select a single cervical direction for the set — flexion, extension, lateral flexion or rotation — before beginning; no equipment is required, and a neck harness, resistance band, partner or weight plate may be added if available.",
+    "high",
+    true,
+    SOURCE_NECK_TRAINING,
+  ),
+  makeInstruction(
+    "neck_training_execution",
+    "execution",
+    "Maintain neutral alignment, move under control, brace the trunk, and breathe continuously throughout.",
+    "high",
+    true,
+    SOURCE_NECK_TRAINING,
+  ),
+  makeInstruction(
+    "neck_training_safety",
+    "safety",
+    "Stop immediately if any symptom appears; never train through cervical pain.",
+    "high",
+    true,
+    SOURCE_NECK_TRAINING,
+  ),
+];
+
+const neckTrainingEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "neck_training",
+  moduleId: "strength",
+  role: "accessory",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "neck_training",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["rpe"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["bodyweight", "added_external_load", "partner_resistance"],
+    supportedTempoTypes: [],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: [],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["neck_training_setup", "neck_training_execution", "neck_training_safety"],
+    requiredStopConditionIds: ["neck_training_technical_failure", "neck_training_pain", "neck_training_completion"],
+    durationEstimationProfileId: "duration_profile_neck_training",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_NECK_TRAINING, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: [],
+  preferredTempoType: null,
+  instructionDefinitions: neckTrainingInstructions,
+  stopConditionDefinitions: neckTrainingStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 2, repetitions: 10, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 5, repetitions: 15, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_NECK_TRAINING],
+  },
+  exerciseIntensityConstraints: {
+    allowedIntensityTypes: null,
+    rangeConstraints: [{ type: "rpe", minimum: 6, maximum: 7, normal: 6 }],
+    sourceRuleIds: [SOURCE_NECK_TRAINING],
+  },
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_NECK_TRAINING, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/18_NORDIC_HAMSTRING_CURL
+//   - Primary Classification: "Strength"; Typical Intensity: "Bodyweight
+//     or Assisted Bodyweight" (no percentage-of-maximum table); Typical
+//     Volume: 2-5 sets, 3-8 repetitions.
+//   - Equipment Requirements: Required: Nordic Bench OR Partner
+//     Assistance. `requiredEquipmentCapabilities` is deliberately empty
+//     — this any_of alternative (Nordic bench vs. partner) is already
+//     the exercise's own eligibility gate inside
+//     `exerciseKnowledgeBase.ts`'s Requirements Model (an `other`/
+//     `human_assistance: partner` any_of clause), and is not re-encoded
+//     here, per the explicit boundary between eligibility (knowledge
+//     base) and prescription (this registry).
+//   - Coaching Cues: "Maintain a straight line from knees to shoulders.",
+//     "Brace continuously.", "Control the descent.", "Resist gravity for
+//     as long as possible.", "Avoid hip flexion."
+//   - Common Errors: Breaking at the hips, Falling too quickly,
+//     Incomplete range of motion, Poor trunk stability, Excessive lumbar
+//     extension.
+//   - Safety Profile Primary Risks: Excessive Initial Volume, Poor Hip
+//     Position, Uncontrolled Descent.
+//   - Contraindications: Acute Hamstring Injury, Acute Knee Injury, Pain
+//     During Knee Flexion.
+// Method: straight_sets_repetitions / strength / accessory
+//   Narrowed: sets maximum 5 (down from 6, matching "2-5 sets"; minimum
+//   already equals the profile's own floor of 2); repetitions maximum 8
+//   (down from 15, matching "3-8 repetitions"). The fiche's own
+//   repetition floor of 3 is below the shared profile's own floor of 4 —
+//   the effective minimum stays at the profile's own 4, a documented,
+//   honest limitation rather than a fabricated 3.
+const SOURCE_NORDIC_HAMSTRING_CURL = "50-exercises/18_NORDIC_HAMSTRING_CURL";
+
+const nordicHamstringCurlStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "nordic_hamstring_curl_technical_failure",
+    description:
+      "Stop the set when the hips break, the descent becomes uncontrolled or too fast, the range of motion is incomplete, trunk stability is lost, or excessive lumbar extension appears.",
+    sourceRuleIds: [SOURCE_NORDIC_HAMSTRING_CURL],
+  }),
+  painCondition({
+    conditionId: "nordic_hamstring_curl_pain",
+    description: "Stop immediately if pain occurs during knee flexion, or in the presence of an acute hamstring or knee injury.",
+    sourceRuleIds: [SOURCE_NORDIC_HAMSTRING_CURL],
+  }),
+  completionCondition({
+    conditionId: "nordic_hamstring_curl_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const nordicHamstringCurlInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "nordic_hamstring_curl_setup",
+    "setup",
+    "Kneel with the ankles secured by a Nordic bench or held firmly by a partner before beginning.",
+    "high",
+    true,
+    SOURCE_NORDIC_HAMSTRING_CURL,
+  ),
+  makeInstruction(
+    "nordic_hamstring_curl_execution",
+    "execution",
+    "Maintain a straight line from knees to shoulders, brace continuously, control the descent, resist gravity for as long as possible, and avoid hip flexion.",
+    "high",
+    true,
+    SOURCE_NORDIC_HAMSTRING_CURL,
+  ),
+  makeInstruction(
+    "nordic_hamstring_curl_safety",
+    "safety",
+    "Beginners should use assistance until full eccentric control is achieved; never force the descent.",
+    "high",
+    true,
+    SOURCE_NORDIC_HAMSTRING_CURL,
+  ),
+];
+
+const nordicHamstringCurlEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "nordic_hamstring_curl",
+  moduleId: "strength",
+  role: "accessory",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "nordic_hamstring_curl",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["rpe"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["bodyweight", "assisted_bodyweight"],
+    supportedTempoTypes: [],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: [],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["nordic_hamstring_curl_setup", "nordic_hamstring_curl_execution", "nordic_hamstring_curl_safety"],
+    requiredStopConditionIds: [
+      "nordic_hamstring_curl_technical_failure",
+      "nordic_hamstring_curl_pain",
+      "nordic_hamstring_curl_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_nordic_hamstring_curl",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_NORDIC_HAMSTRING_CURL, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: [],
+  preferredTempoType: null,
+  instructionDefinitions: nordicHamstringCurlInstructions,
+  stopConditionDefinitions: nordicHamstringCurlStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 2, repetitions: 4, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 5, repetitions: 8, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_NORDIC_HAMSTRING_CURL],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_NORDIC_HAMSTRING_CURL, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -5563,6 +6359,13 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   hip_thrust: hipThrustEntry,
   chin_up: chinUpEntry,
   barbell_row: barbellRowEntry,
+
+  chest_supported_row: chestSupportedRowEntry,
+  dip: dipEntry,
+  landmine_press: landminePressEntry,
+  weighted_pull_up: weightedPullUpEntry,
+  neck_training: neckTrainingEntry,
+  nordic_hamstring_curl: nordicHamstringCurlEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

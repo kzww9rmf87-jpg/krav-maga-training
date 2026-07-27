@@ -146,6 +146,14 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   unresolvedProfile("hip_thrust", "sets_reps", ["50-exercises/05_HIP_THRUST"]),
   unresolvedProfile("chin_up", "sets_reps", ["50-exercises/11_CHIN_UP"]),
   unresolvedProfile("barbell_row", "sets_reps", ["50-exercises/12_BARBELL_ROW"]),
+
+  // Registry Lot 1 — Strength immediate
+  unresolvedProfile("chest_supported_row", "sets_reps", ["50-exercises/13_CHEST_SUPPORTED_ROW"]),
+  unresolvedProfile("dip", "sets_reps", ["50-exercises/14_DIP"]),
+  unresolvedProfile("landmine_press", "sets_reps", ["50-exercises/26_LANDMINE_PRESS"]),
+  unresolvedProfile("weighted_pull_up", "sets_reps", ["50-exercises/09_WEIGHTED_PULL_UP"]),
+  unresolvedProfile("neck_training", "sets_reps", ["50-exercises/34_NECK_TRAINING"]),
+  unresolvedProfile("nordic_hamstring_curl", "sets_reps", ["50-exercises/18_NORDIC_HAMSTRING_CURL"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

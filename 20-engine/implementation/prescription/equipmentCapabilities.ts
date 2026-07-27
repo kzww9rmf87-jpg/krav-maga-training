@@ -69,6 +69,10 @@ export const EQUIPMENT_CAPABILITY_IDS = [
   "slam_ball", // Med Ball Slam: "Slam Ball or Non-Rebounding Medicine Ball" — non-rebounding is safety-relevant, distinct from a regular medicine ball
   "medicine_ball", // Standard (rebounding-capable) medicine ball used for passes and throws — aligned with `EquipmentType`/`LoadingMode`'s existing "medicine_ball" value, but never mirrored here until now. Deliberately distinct from `slam_ball`: no automatic substitution between the two.
   "wall", // A resistant vertical surface authorized to receive a thrown implement — aligned with `EquipmentType`'s existing "wall" value. Never implied by `open_space`; must be declared explicitly.
+  // Added for the Strength-immediate registry lot (chest_supported_row,
+  // dip, landmine_press, weighted_pull_up, neck_training,
+  // nordic_hamstring_curl).
+  "dip_bars", // Dip: "Required: Parallel Bars" — aligned 1:1 with the knowledge base's own distinct `EquipmentType` member of the same name (`dip_bars`), unlike a generic pull-up bar.
 ] as const;
 
 export type EquipmentCapabilityId = (typeof EQUIPMENT_CAPABILITY_IDS)[number];
