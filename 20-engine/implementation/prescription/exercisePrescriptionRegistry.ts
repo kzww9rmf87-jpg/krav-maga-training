@@ -223,6 +223,9 @@ export const PILOT_EXERCISE_IDS = [
   "shadow_boxing",
   "technical_stand_up",
   "shrimping",
+  // Registry Lot 4 — Combat movement immediate
+  "sprawl",
+  "shot_entries",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -7379,6 +7382,295 @@ const shrimpingEntry: ExercisePrescriptionRegistryEntry = {
   sourceRuleIds: [SOURCE_SHRIMPING, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
+// Source: 50-exercises/30_SPRAWL
+//   - Primary Classification: "Combat-Specific Movement" — a defensive
+//     ground-transition action, not a general-conditioning circuit
+//     exercise. `moduleId` stays "movement", never reclassified to
+//     "conditioning" or "power" despite the "Power"/"Conditioning"
+//     Secondary Classifications and the "Reactive Power"/"Anaerobic
+//     Power" Capability Mapping entries — the same discipline already
+//     applied to bear_crawl/bridging/shrimping/technical_stand_up in
+//     Registry Lot 3. This is NOT `burpee` (no exercise with that id
+//     exists anywhere in this knowledge base, confirmed by direct
+//     search) and is NOT `sprint_intervals` (module "conditioning",
+//     a distance/interval running drill with no ground-transition
+//     component) — no substitution is made toward either.
+//   - Loading Profile: "Typical Volume: 3-8 rounds, 5-20 repetitions or
+//     10-30 second intervals." The "rounds"/"repetitions" reading cannot
+//     be honestly mapped onto `controlled_mobility_sets` (a
+//     `sets_duration` method that forbids a `repetitions` field, and
+//     "rounds" is never treated as a `sets` synonym — the same
+//     discipline already applied to footwork_drills/shadow_boxing in
+//     Lot 3, where "rounds" was left entirely unconstrained rather than
+//     silently reinterpreted as "sets"). The fiche's own alternative
+//     figure, "10-30 second intervals", is however a genuine,
+//     already-in-seconds duration figure requiring no invented
+//     conversion — it is used to narrow ONLY the duration dimension:
+//     intersected with the shared profile's own 20-60s range, this
+//     yields an effective 20-30s (narrower ceiling than the profile's
+//     own default 60s, consistent with this fiche's own "Physiological
+//     Profile — Typical Work Duration: 2-8 seconds" framing of a
+//     maximal ATP-PC effort). `sets` is deliberately left unconstrained
+//     (both bounds `null`) — no genuine per-set count is documented,
+//     only "rounds", which is not converted into "sets".
+//   - Equipment Requirements: Required: Mat.
+//   - Coaching Cues: "Throw the hips back explosively.", "Maintain a
+//     strong trunk.", "Keep the head neutral.", "Recover immediately.",
+//     "Move with intent."
+//   - Common Errors / Safety Profile Primary Risks: "Landing on the
+//     knees.", "Slow hip projection.", "Poor recovery to stance.", "Loss
+//     of balance.", "Looking at the floor." / "Poor Landing Mechanics",
+//     "Lumbar Hyperextension", "Wrist Overload", "Poor Neck Position".
+//   - Contraindications: Acute Shoulder Injury, Acute Wrist Injury, Acute
+//     Lumbar Injury, Acute Cervical Injury.
+//   - No side ("left"/"right") or alternating language exists anywhere in
+//     this fiche ("Movement Context: ... Whole Body" only) — a
+//     simultaneous, symmetric bilateral action, matching the knowledge
+//     base's own `unilateral: false` resolution exactly:
+//     `laterality: "bilateral"`.
+// Method: controlled_mobility_sets / movement / technical
+//   Narrowed: duration 20-30s only (see above); sets left unconstrained.
+const SOURCE_SPRAWL = "50-exercises/30_SPRAWL";
+
+const sprawlStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "sprawl_technical_failure",
+    description: "Stop the set if the athlete lands on the knees, hip projection becomes slow, or recovery to the fighting stance is delayed.",
+    sourceRuleIds: [SOURCE_SPRAWL],
+  }),
+  rangeOfMotionLossCondition({
+    conditionId: "sprawl_range_of_motion_loss",
+    description: "Stop the set if hip projection distance decreases substantially or the recovery to base becomes incomplete.",
+    sourceRuleIds: [SOURCE_SPRAWL],
+  }),
+  balanceLossCondition({
+    conditionId: "sprawl_balance_loss",
+    description: "Stop the set if balance is lost during the sprawl or its recovery.",
+    sourceRuleIds: [SOURCE_SPRAWL],
+  }),
+  painCondition({
+    conditionId: "sprawl_pain",
+    description: "Stop immediately if shoulder, wrist, lumbar or cervical pain occurs, or in the presence of an acute shoulder, wrist, lumbar or cervical injury.",
+    sourceRuleIds: [SOURCE_SPRAWL],
+  }),
+  completionCondition({
+    conditionId: "sprawl_completion",
+    description: "Stop once the prescribed sets and duration are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const sprawlInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "sprawl_setup",
+    "setup",
+    "Begin from a stable fighting stance on the mat; no partner or additional equipment is required, though reaction lights, a partner, a heavy bag or a timer may be used if available.",
+    "high",
+    true,
+    SOURCE_SPRAWL,
+  ),
+  makeInstruction(
+    "sprawl_execution",
+    "execution",
+    "Throw the hips back explosively, maintain a strong trunk, keep the head neutral, and recover immediately to the fighting stance, prioritizing full hip projection and clean recovery mechanics over raw speed.",
+    "high",
+    true,
+    SOURCE_SPRAWL,
+  ),
+];
+
+const sprawlEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "sprawl",
+  moduleId: "movement",
+  role: "technical",
+  explicitMethodId: "controlled_mobility_sets",
+  capabilities: {
+    exerciseId: "sprawl",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["controlled_mobility_sets"],
+    supportedVolumeStructures: ["sets_duration"],
+    supportedIntensityTypes: ["rpe", "technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_duration"],
+    capabilityTags: ["timed_effort", "tempo_control", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["mat"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["sprawl_setup", "sprawl_execution"],
+    requiredStopConditionIds: [
+      "sprawl_technical_failure",
+      "sprawl_range_of_motion_loss",
+      "sprawl_balance_loss",
+      "sprawl_pain",
+      "sprawl_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_sprawl",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_SPRAWL, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: sprawlInstructions,
+  stopConditionDefinitions: sprawlStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: null, repetitions: null, durationSeconds: 20, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: null, repetitions: null, durationSeconds: 30, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_SPRAWL],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_SPRAWL, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/36_SHOT_ENTRIES
+//   - Primary Classification: "Combat-Specific Movement" — an offensive
+//     standing-to-standing penetration/level-change action. `moduleId`
+//     stays "movement", never reclassified to "strength" or "power"
+//     despite the "Power" Secondary Classification and "Explosive
+//     Entry"/"Rate of Force Development: ★★★★★" Capability Mapping
+//     entries — the same discipline already applied to sprawl above.
+//     This is NOT `pummeling` (already in the knowledge base, module
+//     "movement", but requiring a mandatory partner —
+//     `{ kind: "human_assistance", assistance: "partner" }` — a clinch
+//     control drill, not a penetration entry) and is NOT
+//     `technical_stand_up` (a ground-to-standing recovery movement, not
+//     a standing-to-standing offensive entry) — no substitution is made
+//     toward either. "Movement Context: ... Partner or Solo" and
+//     "Equipment Requirements — Optional: Partner" confirm this entry
+//     represents the solo form; no partner requirement is added to the
+//     registry (the knowledge base itself never requires one).
+//   - Loading Profile: "Typical Volume: 3-8 sets, 3-10 repetitions." No
+//     total-set-duration figure is documented anywhere in this fiche
+//     (the only duration figure, "Typical Duration: 2-5 seconds" under
+//     Physiological Profile, describes a SINGLE repetition's own
+//     duration, not a set — the same distinction already applied to
+//     bridging/technical_stand_up in Lot 3) — multiplying reps by
+//     per-repetition duration to manufacture a set-duration figure would
+//     be an invented conversion and is deliberately not done. The
+//     repetition count is preserved only as guidance in the execution
+//     instruction; no duration narrowing is applied — the shared
+//     profile's own default duration range (20-30-60s) is used as-is.
+//   - Equipment Requirements: Required: Mat.
+//   - Coaching Cues: "Lower your level.", "Keep your posture.", "Drive
+//     through the lead leg.", "Penetrate deeply.", "Finish with intent."
+//   - Common Errors / Safety Profile Primary Risks: "Bending at the
+//     waist.", "Looking down.", "Stopping after penetration.", "Poor
+//     foot placement.", "Weak hip drive." / "Poor Knee Position",
+//     "Lumbar Flexion", "Poor Head Position", "Loss of Balance".
+//   - Contraindications: Acute Knee Injury, Acute Hip Injury, Acute
+//     Lumbar Injury.
+//   - "Single Leg Entry" is named only as a documented Variation (not
+//     this exercise's own default bilateral form, matching the knowledge
+//     base's own comment) — no "per side" or alternating language exists
+//     anywhere in this fiche, matching the knowledge base's own
+//     `unilateral: false` resolution exactly: `laterality: "bilateral"`.
+// Method: controlled_mobility_sets / movement / technical
+//   Narrowed: sets pinned to 3 (the fiche's own "3-8 sets" intersects
+//   the profile's own [1,3] range at exactly {3}, the same resolution
+//   already used for bear_crawl/bridging/shrimping in Lot 3). No
+//   duration narrowing (see above).
+const SOURCE_SHOT_ENTRIES = "50-exercises/36_SHOT_ENTRIES";
+
+const shotEntriesStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "shot_entries_technical_failure",
+    description: "Stop the set if the athlete bends at the waist, looks down, stops immediately after penetration, or shows poor foot placement or weak hip drive.",
+    sourceRuleIds: [SOURCE_SHOT_ENTRIES],
+  }),
+  rangeOfMotionLossCondition({
+    conditionId: "shot_entries_range_of_motion_loss",
+    description: "Stop the set if penetration distance decreases substantially or the level change becomes shallow.",
+    sourceRuleIds: [SOURCE_SHOT_ENTRIES],
+  }),
+  balanceLossCondition({
+    conditionId: "shot_entries_balance_loss",
+    description: "Stop the set if balance is lost during the entry or the recovery to base.",
+    sourceRuleIds: [SOURCE_SHOT_ENTRIES],
+  }),
+  painCondition({
+    conditionId: "shot_entries_pain",
+    description: "Stop immediately if knee, hip or lumbar pain occurs, or in the presence of an acute knee, hip or lumbar injury.",
+    sourceRuleIds: [SOURCE_SHOT_ENTRIES],
+  }),
+  completionCondition({
+    conditionId: "shot_entries_completion",
+    description: "Stop once the prescribed sets and duration are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const shotEntriesInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "shot_entries_setup",
+    "setup",
+    "Begin from a stable wrestling stance on the mat; no partner is required for a solo entry, though a partner, reaction lights, cones or coach commands may be used if available. The fiche's own typical volume is 3-10 repetitions within each prescribed set.",
+    "high",
+    true,
+    SOURCE_SHOT_ENTRIES,
+  ),
+  makeInstruction(
+    "shot_entries_execution",
+    "execution",
+    "Lower the level, keep the posture upright, drive through the lead leg, penetrate deeply, finish with intent, and recover the base after each repetition.",
+    "high",
+    true,
+    SOURCE_SHOT_ENTRIES,
+  ),
+];
+
+const shotEntriesEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "shot_entries",
+  moduleId: "movement",
+  role: "technical",
+  explicitMethodId: "controlled_mobility_sets",
+  capabilities: {
+    exerciseId: "shot_entries",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["controlled_mobility_sets"],
+    supportedVolumeStructures: ["sets_duration"],
+    supportedIntensityTypes: ["rpe", "technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_duration"],
+    capabilityTags: ["timed_effort", "tempo_control", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["mat"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["shot_entries_setup", "shot_entries_execution"],
+    requiredStopConditionIds: [
+      "shot_entries_technical_failure",
+      "shot_entries_range_of_motion_loss",
+      "shot_entries_balance_loss",
+      "shot_entries_pain",
+      "shot_entries_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_shot_entries",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_SHOT_ENTRIES, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: shotEntriesInstructions,
+  stopConditionDefinitions: shotEntriesStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: null, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 3, repetitions: null, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_SHOT_ENTRIES],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_SHOT_ENTRIES, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
 // -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
@@ -7459,6 +7751,9 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   shadow_boxing: shadowBoxingEntry,
   technical_stand_up: technicalStandUpEntry,
   shrimping: shrimpingEntry,
+
+  sprawl: sprawlEntry,
+  shot_entries: shotEntriesEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

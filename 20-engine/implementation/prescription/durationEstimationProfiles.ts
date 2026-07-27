@@ -166,6 +166,10 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   unresolvedProfile("shadow_boxing", "sets_duration", ["50-exercises/28_SHADOW_BOXING"]),
   unresolvedProfile("technical_stand_up", "sets_duration", ["50-exercises/35_TECHNICAL_STAND_UP"]),
   unresolvedProfile("shrimping", "sets_duration", ["50-exercises/38_SHRIMPING"]),
+
+  // Registry Lot 4 — Combat movement immediate
+  unresolvedProfile("sprawl", "sets_duration", ["50-exercises/30_SPRAWL"]),
+  unresolvedProfile("shot_entries", "sets_duration", ["50-exercises/36_SHOT_ENTRIES"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

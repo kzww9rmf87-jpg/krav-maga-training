@@ -679,8 +679,8 @@ describe("registry Lot 1 — registry validation and non-regression", () => {
   });
 
   test("the registry now contains exactly 50 active exercises", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(57);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(57);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(59);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(59);
   });
 
   test("no historical entry was removed: every one of the 44 previously-existing ids is still present", () => {
