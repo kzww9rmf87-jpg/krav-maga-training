@@ -158,6 +158,14 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // Registry Lot 2 — Power immediate (sled_push not integrated this lot; no
   // duration profile added for it)
   unresolvedProfile("hang_power_clean", "sets_reps", ["50-exercises/64_POWER/12_HANG_POWER_CLEAN.md"]),
+
+  // Registry Lot 3 — Movement immediate
+  unresolvedProfile("bear_crawl", "sets_duration", ["50-exercises/37_BEAR_CRAWL"]),
+  unresolvedProfile("bridging", "sets_duration", ["50-exercises/39_BRIDGING"]),
+  unresolvedProfile("footwork_drills", "sets_duration", ["50-exercises/29_FOOTWORK_DRILLS"]),
+  unresolvedProfile("shadow_boxing", "sets_duration", ["50-exercises/28_SHADOW_BOXING"]),
+  unresolvedProfile("technical_stand_up", "sets_duration", ["50-exercises/35_TECHNICAL_STAND_UP"]),
+  unresolvedProfile("shrimping", "sets_duration", ["50-exercises/38_SHRIMPING"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

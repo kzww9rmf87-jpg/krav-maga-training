@@ -35,6 +35,7 @@ import {
   fatigueLimitCondition,
   impactLimitCondition,
   painCondition,
+  rangeOfMotionLossCondition,
   technicalFailureCondition,
   velocityLossCondition,
 } from "./stopConditionRegistry";
@@ -215,6 +216,13 @@ export const PILOT_EXERCISE_IDS = [
   // Registry Lot 2 — Power immediate (sled_push deliberately NOT added —
   // see the documented blocker comment above HANG_POWER_CLEAN's own entry).
   "hang_power_clean",
+  // Registry Lot 3 — Movement immediate
+  "bear_crawl",
+  "bridging",
+  "footwork_drills",
+  "shadow_boxing",
+  "technical_stand_up",
+  "shrimping",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -6579,6 +6587,799 @@ const hangPowerCleanEntry: ExercisePrescriptionRegistryEntry = {
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
+// Registry Lot 3 — Movement immediate
+// The first six entries in this whole registry to use moduleId "movement".
+// All six reuse the single existing controlled_mobility_sets_v0_1 profile
+// (moduleId: movement, methodId: controlled_mobility_sets, exerciseRole:
+// technical) — no new numerical prescription profile is created.
+//
+// STRUCTURAL DISCOVERY, verified directly in contracts.ts before writing
+// any entry: the controlled_mobility_sets method contract declares
+// `requiredStopConditionCategories: ["pain", "technical_failure",
+// "range_of_motion_loss", "balance_loss", "completion"]` — FIVE mandatory
+// categories, enforced by `resolveStopConditions.ts` (a missing category
+// hard-fails with `STOP_CONDITION_CATEGORY_MISSING`, independent of
+// whichever specific stop conditions any single entry happens to declare).
+// No existing entry in this registry used this method before this lot, so
+// no `rangeOfMotionLossCondition` factory existed in
+// `stopConditionRegistry.ts` — a single new factory was added there,
+// mirroring `balanceLossCondition`'s own exact shape, purely additive.
+//
+// VOLUME STRUCTURE DISCOVERY: the shared profile's own `volume.structure`
+// is "sets_duration" — `repetitions: null`. None of the six exercises'
+// own fiches document their volume exclusively in seconds; several
+// document "sets x repetitions" instead (bridging, technical_stand_up),
+// and two (footwork_drills, shadow_boxing) document multi-minute,
+// round-based session volumes that categorically exceed the shared
+// profile's own ceiling (3 sets x 60 seconds = 3 minutes maximum). Per
+// exercise, the exact representational decision made is documented in
+// that exercise's own block comment below — no arbitrary reps-to-duration
+// conversion is invented anywhere in this lot.
+// -----------------------------------------------------------------------------
+
+// Source: 50-exercises/37_BEAR_CRAWL
+//   - Primary Classification: "Athletic Development"; Loading Profile:
+//     "Typical Volume: 3-8 sets, 10-30 meters OR 20-60 seconds." The
+//     fiche itself documents a genuine duration equivalent alongside the
+//     distance figure — no conversion is invented; the directly-quoted
+//     "20-60 seconds" is used as-is, matching the shared profile's own
+//     duration range (20-30-60s) exactly. The 10-30 meter distance has
+//     no representable dimension in this method's own volume structure
+//     (`distance: null`) and is preserved only as descriptive context in
+//     the setup instruction, never as a structural dose claim.
+//   - Equipment Requirements: Required: None.
+//   - Coaching Cues: "Keep the hips low.", "Brace continuously.", "Move
+//     opposite hand and foot together.", "Take controlled steps.", "Stay
+//     quiet through the trunk."
+//   - Common Errors / Safety Profile Primary Risks: "High hips.",
+//     "Overstriding.", "Lumbar extension.", "Poor shoulder stability." /
+//     "Hip Elevation", "Lumbar Extension", "Shoulder Collapse", "Short
+//     Strides".
+//   - Contraindications: Acute Wrist Injury, Acute Shoulder Injury,
+//     Acute Knee Injury.
+// Method: controlled_mobility_sets / movement / technical
+//   (controlled_mobility_sets_v0_1 — sets 1/2/3, duration per_set
+//   20/30/60s, RPE 2/3/5 + technical_effort, rest between_sets 0/15/45s,
+//   tempo global_intent/technical_precision). Narrowed: sets pinned to 3
+//   (the fiche's own documented floor of "3-8 sets" intersects the
+//   profile's own range [1,3] at exactly {3} — a genuine, honest single-
+//   point overlap, not an error); duration 20-60s restated explicitly
+//   (already matches the profile's own default range exactly).
+const SOURCE_BEAR_CRAWL = "50-exercises/37_BEAR_CRAWL";
+
+const bearCrawlStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "bear_crawl_technical_failure",
+    description: "Stop the set when the hips rise, the athlete overstrides, lumbar extension appears, or shoulder stability is lost.",
+    sourceRuleIds: [SOURCE_BEAR_CRAWL],
+  }),
+  rangeOfMotionLossCondition({
+    conditionId: "bear_crawl_range_of_motion_loss",
+    description: "Stop the set if strides shorten excessively or the coordinated opposite hand-and-foot reach pattern is lost.",
+    sourceRuleIds: [SOURCE_BEAR_CRAWL],
+  }),
+  balanceLossCondition({
+    conditionId: "bear_crawl_balance_loss",
+    description: "Stop the set if shoulder stability collapses or the whole-body coordinated pattern becomes unstable.",
+    sourceRuleIds: [SOURCE_BEAR_CRAWL],
+  }),
+  painCondition({
+    conditionId: "bear_crawl_pain",
+    description: "Stop immediately if pain occurs, or in the presence of an acute wrist, shoulder or knee injury.",
+    sourceRuleIds: [SOURCE_BEAR_CRAWL],
+  }),
+  completionCondition({
+    conditionId: "bear_crawl_completion",
+    description: "Stop once the prescribed sets and duration are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const bearCrawlInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "bear_crawl_setup",
+    "setup",
+    "Set up in a quadrupedal stance with the hips low and whole-body tension established; no equipment is required, and the prescribed distance is typically 10-30 meters per set.",
+    "high",
+    true,
+    SOURCE_BEAR_CRAWL,
+  ),
+  makeInstruction(
+    "bear_crawl_execution",
+    "execution",
+    "Keep the hips low, brace continuously, move the opposite hand and foot together, take controlled steps, and stay quiet through the trunk.",
+    "high",
+    true,
+    SOURCE_BEAR_CRAWL,
+  ),
+];
+
+const bearCrawlEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "bear_crawl",
+  moduleId: "movement",
+  role: "technical",
+  explicitMethodId: "controlled_mobility_sets",
+  capabilities: {
+    exerciseId: "bear_crawl",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["controlled_mobility_sets"],
+    supportedVolumeStructures: ["sets_duration"],
+    supportedIntensityTypes: ["rpe", "technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_duration"],
+    capabilityTags: ["timed_effort", "tempo_control", "technical_quality_observation"],
+    requiredEquipmentCapabilities: [],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["bear_crawl_setup", "bear_crawl_execution"],
+    requiredStopConditionIds: [
+      "bear_crawl_technical_failure",
+      "bear_crawl_range_of_motion_loss",
+      "bear_crawl_balance_loss",
+      "bear_crawl_pain",
+      "bear_crawl_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_bear_crawl",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_BEAR_CRAWL, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: bearCrawlInstructions,
+  stopConditionDefinitions: bearCrawlStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: null, durationSeconds: 20, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 3, repetitions: null, durationSeconds: 60, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_BEAR_CRAWL],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_BEAR_CRAWL, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/39_BRIDGING
+//   - Primary Classification: "Combat-Specific Movement" — this is the
+//     canonical grappling/wrestling bridge (escaping, reversing and
+//     generating force from the ground), explicitly distinguished in its
+//     own text from a conditioning drill ("CAS develops Bridging as a
+//     universal combat movement rather than a simple conditioning
+//     drill"). This is NOT the same exercise as `hip_thrust` (already in
+//     the registry, moduleId "strength", role "primary", a barbell-loaded
+//     strength lift) — "Glute Bridge"/"Hip Lift" are named only as this
+//     fiche's own Regressions, never as the base form, and are not
+//     substituted in. `moduleId` stays "movement", never reclassified to
+//     "strength".
+//   - Loading Profile: "Typical Volume: 3-8 sets, 5-15 repetitions." No
+//     total-set-duration figure is documented anywhere in this fiche
+//     (the only duration figure present, "Typical Duration: 2-10
+//     seconds" under Physiological Profile, describes a SINGLE
+//     repetition's own duration, not a set) — multiplying reps by
+//     per-repetition duration to manufacture a set-duration figure would
+//     be an invented conversion, not a sourced one, and is deliberately
+//     not done. The repetition count is preserved only as guidance in
+//     the execution instruction; no `exerciseDoseConstraints` duration
+//     narrowing is applied — the shared profile's own default duration
+//     range (20-30-60s) is used as-is.
+//   - Equipment Requirements: Required: Mat.
+//   - Coaching Cues: "Drive through the feet.", "Explode with the
+//     hips.", "Protect the neck.", "Create maximum elevation.", "Recover
+//     immediately."
+//   - Common Errors / Safety Profile Primary Risks: "Lifting only the
+//     pelvis.", "Poor hip extension.", "Weak foot drive." / "Excessive
+//     Cervical Loading", "Poor Hip Extension", "Lumbar Hyperextension".
+//   - Contraindications: Acute Cervical Injury, Acute Lumbar Injury,
+//     Acute Shoulder Injury.
+// Method: controlled_mobility_sets / movement / technical
+//   Narrowed: sets pinned to 3 (the fiche's own "3-8 sets" intersects
+//   the profile's own [1,3] range at exactly {3}, the same resolution
+//   already used for bear_crawl above). No duration narrowing (see
+//   above).
+const SOURCE_BRIDGING = "50-exercises/39_BRIDGING";
+
+const bridgingStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "bridging_technical_failure",
+    description: "Stop the set if only the pelvis lifts without full hip extension, foot drive is weak, or the movement becomes uncoordinated.",
+    sourceRuleIds: [SOURCE_BRIDGING],
+  }),
+  rangeOfMotionLossCondition({
+    conditionId: "bridging_range_of_motion_loss",
+    description: "Stop the set if hip extension becomes incomplete or elevation decreases substantially across repetitions.",
+    sourceRuleIds: [SOURCE_BRIDGING],
+  }),
+  balanceLossCondition({
+    conditionId: "bridging_balance_loss",
+    description: "Stop the set if the base of support through the feet and shoulders becomes unstable during the bridge.",
+    sourceRuleIds: [SOURCE_BRIDGING],
+  }),
+  painCondition({
+    conditionId: "bridging_pain",
+    description: "Stop immediately if cervical, lumbar or shoulder pain occurs, or in the presence of an acute cervical, lumbar or shoulder injury.",
+    sourceRuleIds: [SOURCE_BRIDGING],
+  }),
+  completionCondition({
+    conditionId: "bridging_completion",
+    description: "Stop once the prescribed sets and duration are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const bridgingInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "bridging_setup",
+    "setup",
+    "Lie on the mat and plant the feet, establishing a neck-safe starting position before initiating the bridge; the fiche's own typical volume is 5-15 repetitions within each prescribed set.",
+    "high",
+    true,
+    SOURCE_BRIDGING,
+  ),
+  makeInstruction(
+    "bridging_execution",
+    "execution",
+    "Drive through the feet, explode with the hips, protect the neck throughout, create maximum elevation, and recover immediately.",
+    "high",
+    true,
+    SOURCE_BRIDGING,
+  ),
+];
+
+const bridgingEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "bridging",
+  moduleId: "movement",
+  role: "technical",
+  explicitMethodId: "controlled_mobility_sets",
+  capabilities: {
+    exerciseId: "bridging",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["controlled_mobility_sets"],
+    supportedVolumeStructures: ["sets_duration"],
+    supportedIntensityTypes: ["rpe", "technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_duration"],
+    capabilityTags: ["timed_effort", "tempo_control", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["mat"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["bridging_setup", "bridging_execution"],
+    requiredStopConditionIds: [
+      "bridging_technical_failure",
+      "bridging_range_of_motion_loss",
+      "bridging_balance_loss",
+      "bridging_pain",
+      "bridging_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_bridging",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_BRIDGING, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: bridgingInstructions,
+  stopConditionDefinitions: bridgingStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: null, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 3, repetitions: null, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_BRIDGING],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_BRIDGING, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/29_FOOTWORK_DRILLS
+//   - Primary Classification: "Combat-Specific Technique"; Loading
+//     Profile: "Typical Duration: 5-15 minutes. Rounds: 2-6." This full
+//     session-length, round-based volume categorically exceeds the
+//     shared profile's own maximum (3 sets x 60 seconds = 3 minutes) —
+//     no dose constraint can honestly claim to represent it. This entry
+//     therefore represents a SHORT TECHNICAL TOUCH of footwork practice
+//     (matching this fiche's own "Warm-Up"/"Skill Acquisition" secondary
+//     classifications and "Frequency: Daily if required" framing), using
+//     the shared profile's own default, unconstrained range — not the
+//     fiche's own full extended-session volume, which remains outside
+//     what a single controlled_mobility_sets exercise slot can express.
+//     A future session-composition layer (multiple prescribed blocks in
+//     sequence) is the correct path to the fiche's own longer practice
+//     length, not a fabricated dose constraint here. This limitation is
+//     documented explicitly, not silently understated.
+//   - Equipment Requirements: Required: None.
+//   - Coaching Cues: "Stay light on the feet.", "Maintain your stance.",
+//     "Move before striking.", "Never cross your feet.", "Stay
+//     balanced."
+//   - Common Errors / Contraindications: "Crossing Feet", "Standing
+//     Upright", "Overstepping", "Poor Balance" / "Acute Lower-Limb
+//     Injury", "Severe Balance Deficit".
+// Method: controlled_mobility_sets / movement / technical
+//   No exerciseDoseConstraints — the shared profile's own default range
+//   is used unconstrained (see the model-limitation note above).
+const SOURCE_FOOTWORK_DRILLS = "50-exercises/29_FOOTWORK_DRILLS";
+
+const footworkDrillsStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "footwork_drills_technical_failure",
+    description: "Stop the set if the feet cross, the athlete stands upright, overstepping occurs, or movement loses intent.",
+    sourceRuleIds: [SOURCE_FOOTWORK_DRILLS],
+  }),
+  rangeOfMotionLossCondition({
+    conditionId: "footwork_drills_range_of_motion_loss",
+    description: "Stop the set if stride length or multidirectional range collapses, or movement becomes restricted to a single pattern.",
+    sourceRuleIds: [SOURCE_FOOTWORK_DRILLS],
+  }),
+  balanceLossCondition({
+    conditionId: "footwork_drills_balance_loss",
+    description: "Stop the set if balance is lost or a severe balance deficit becomes apparent.",
+    sourceRuleIds: [SOURCE_FOOTWORK_DRILLS],
+  }),
+  painCondition({
+    conditionId: "footwork_drills_pain",
+    description: "Stop immediately if pain occurs, or in the presence of an acute lower-limb injury.",
+    sourceRuleIds: [SOURCE_FOOTWORK_DRILLS],
+  }),
+  completionCondition({
+    conditionId: "footwork_drills_completion",
+    description: "Stop once the prescribed sets and duration are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const footworkDrillsInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "footwork_drills_setup",
+    "setup",
+    "Establish a combat stance in a clear, multidirectional space; no equipment is required, though cones, an agility ladder or markers may be used if available.",
+    "high",
+    true,
+    SOURCE_FOOTWORK_DRILLS,
+  ),
+  makeInstruction(
+    "footwork_drills_execution",
+    "execution",
+    "Stay light on the feet, maintain the stance, move before striking, never cross the feet, and stay balanced throughout.",
+    "high",
+    true,
+    SOURCE_FOOTWORK_DRILLS,
+  ),
+];
+
+const footworkDrillsEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "footwork_drills",
+  moduleId: "movement",
+  role: "technical",
+  explicitMethodId: "controlled_mobility_sets",
+  capabilities: {
+    exerciseId: "footwork_drills",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["controlled_mobility_sets"],
+    supportedVolumeStructures: ["sets_duration"],
+    supportedIntensityTypes: ["rpe", "technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_duration"],
+    capabilityTags: ["timed_effort", "tempo_control", "technical_quality_observation"],
+    requiredEquipmentCapabilities: [],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["footwork_drills_setup", "footwork_drills_execution"],
+    requiredStopConditionIds: [
+      "footwork_drills_technical_failure",
+      "footwork_drills_range_of_motion_loss",
+      "footwork_drills_balance_loss",
+      "footwork_drills_pain",
+      "footwork_drills_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_footwork_drills",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_FOOTWORK_DRILLS, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: footworkDrillsInstructions,
+  stopConditionDefinitions: footworkDrillsStopConditions,
+  exerciseDoseConstraints: null,
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_FOOTWORK_DRILLS, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/28_SHADOW_BOXING
+//   - Primary Classification: "Combat-Specific Technique"; Loading
+//     Profile: "Typical Duration: 3-8 rounds, 2-5 minutes. Recovery:
+//     30-60 seconds" (and, separately, "Typical Duration: 3-20 minutes"
+//     under Physiological Profile). This is the same class of session-
+//     length, round-based volume already discussed for footwork_drills
+//     above, and categorically exceeds the shared profile's own ceiling.
+//     This entry represents a SHORT TECHNICAL TOUCH of shadow boxing
+//     practice (matching this fiche's own "Warm-Up"/"Recovery"/
+//     "Regressions: Slow Technical Shadow, Single Technique" framing),
+//     not its own full multi-round session — the same documented,
+//     honest limitation as footwork_drills. This entry is NOT
+//     `heavy_bag_power_intervals` (a different exercise, module
+//     "conditioning", requiring a heavy bag and gloves — not integrated
+//     in this lot) — no equipment or partner eligibility is introduced
+//     here; the fiche's own "Required: None" stands unchanged.
+//   - Equipment Requirements: Required: None.
+//   - Coaching Cues: "Move with purpose.", "Stay relaxed.", "Maintain
+//     your guard.", "Rotate through the hips.", "Visualize a real
+//     opponent.", "Move continuously."
+//   - Common Errors / Contraindications: "Moving without intent.",
+//     "Punching only with the arms.", "Poor footwork." / "None. Except
+//     acute injury preventing movement."
+// Method: controlled_mobility_sets / movement / technical
+//   No exerciseDoseConstraints — the shared profile's own default range
+//   is used unconstrained (see the model-limitation note above).
+const SOURCE_SHADOW_BOXING = "50-exercises/28_SHADOW_BOXING";
+
+const shadowBoxingStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "shadow_boxing_technical_failure",
+    description: "Stop the set if punches are thrown only with the arms, footwork deteriorates, or movement loses intent.",
+    sourceRuleIds: [SOURCE_SHADOW_BOXING],
+  }),
+  rangeOfMotionLossCondition({
+    conditionId: "shadow_boxing_range_of_motion_loss",
+    description: "Stop the set if punches lose full technical extension or movement becomes restricted and mechanical.",
+    sourceRuleIds: [SOURCE_SHADOW_BOXING],
+  }),
+  balanceLossCondition({
+    conditionId: "shadow_boxing_balance_loss",
+    description: "Stop the set if balance is lost or the guard position collapses during movement.",
+    sourceRuleIds: [SOURCE_SHADOW_BOXING],
+  }),
+  painCondition({
+    conditionId: "shadow_boxing_pain",
+    description: "Stop immediately if pain occurs, or in the presence of an acute injury preventing movement.",
+    sourceRuleIds: [SOURCE_SHADOW_BOXING],
+  }),
+  completionCondition({
+    conditionId: "shadow_boxing_completion",
+    description: "Stop once the prescribed sets and duration are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const shadowBoxingInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "shadow_boxing_setup",
+    "setup",
+    "No equipment is required; establish a guard and stance before beginning, a mirror or timer may be used if available.",
+    "high",
+    true,
+    SOURCE_SHADOW_BOXING,
+  ),
+  makeInstruction(
+    "shadow_boxing_execution",
+    "execution",
+    "Move with purpose, stay relaxed, maintain the guard, rotate through the hips, visualize a real opponent, and move continuously.",
+    "high",
+    true,
+    SOURCE_SHADOW_BOXING,
+  ),
+];
+
+const shadowBoxingEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "shadow_boxing",
+  moduleId: "movement",
+  role: "technical",
+  explicitMethodId: "controlled_mobility_sets",
+  capabilities: {
+    exerciseId: "shadow_boxing",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["controlled_mobility_sets"],
+    supportedVolumeStructures: ["sets_duration"],
+    supportedIntensityTypes: ["rpe", "technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_duration"],
+    capabilityTags: ["timed_effort", "tempo_control", "technical_quality_observation"],
+    requiredEquipmentCapabilities: [],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["shadow_boxing_setup", "shadow_boxing_execution"],
+    requiredStopConditionIds: [
+      "shadow_boxing_technical_failure",
+      "shadow_boxing_range_of_motion_loss",
+      "shadow_boxing_balance_loss",
+      "shadow_boxing_pain",
+      "shadow_boxing_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_shadow_boxing",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_SHADOW_BOXING, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: shadowBoxingInstructions,
+  stopConditionDefinitions: shadowBoxingStopConditions,
+  exerciseDoseConstraints: null,
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_SHADOW_BOXING, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/35_TECHNICAL_STAND_UP
+//   - Primary Classification: "Combat-Specific Movement"; Loading
+//     Profile: "Typical Volume: 2-6 sets, 5-15 repetitions." No
+//     total-set-duration figure exists (the only duration figure, "2-5
+//     seconds" under Physiological Profile, is a single repetition's own
+//     duration, not a set) — the repetition count is preserved only as
+//     guidance in the execution instruction, matching the same
+//     discipline already applied to bridging above. No side ("left" or
+//     "right") is ever named anywhere in this fiche, and no "alternate"
+//     or "continuous" language appears either (contrast with shrimping
+//     below) — the knowledge base's own `ExerciseDefinition` resolves
+//     `unilateral: false`, and this entry matches that resolution
+//     exactly: `laterality: "bilateral"`, with the free choice of side
+//     documented as an execution detail, not a registry-level
+//     alternating claim the fiche itself never makes.
+//   - Equipment Requirements: Required: Mat.
+//   - Coaching Cues: "Protect your head.", "Keep your eyes on the
+//     opponent.", "Create distance first.", "Stand with balance.",
+//     "Recover your fighting stance immediately."
+//   - Common Errors / Safety Profile Primary Risks: "Turning your
+//     back.", "Standing without protection.", "Crossing the feet.",
+//     "Poor base." / "Poor Hand Placement", "Standing Too Early", "Loss
+//     of Balance", "Poor Situational Awareness".
+//   - Contraindications: Acute Wrist Injury, Acute Shoulder Injury,
+//     Acute Knee Injury.
+// Method: controlled_mobility_sets / movement / technical
+//   Narrowed: sets 2-3 (the fiche's own "2-6 sets" intersects the
+//   profile's own [1,3] range at [2,3] — a genuine, honest overlap
+//   narrower than the profile's own default floor of 1, and short of
+//   the fiche's own documented ceiling of 6, which the profile cannot
+//   reach).
+const SOURCE_TECHNICAL_STAND_UP = "50-exercises/35_TECHNICAL_STAND_UP";
+
+const technicalStandUpStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "technical_stand_up_technical_failure",
+    description: "Stop the set if the athlete turns their back, stands without protection, or shows poor situational awareness during the transition.",
+    sourceRuleIds: [SOURCE_TECHNICAL_STAND_UP],
+  }),
+  rangeOfMotionLossCondition({
+    conditionId: "technical_stand_up_range_of_motion_loss",
+    description: "Stop the set if the base narrows excessively, the feet cross, or protective positioning is lost during the transition.",
+    sourceRuleIds: [SOURCE_TECHNICAL_STAND_UP],
+  }),
+  balanceLossCondition({
+    conditionId: "technical_stand_up_balance_loss",
+    description: "Stop the set if balance is lost while standing up.",
+    sourceRuleIds: [SOURCE_TECHNICAL_STAND_UP],
+  }),
+  painCondition({
+    conditionId: "technical_stand_up_pain",
+    description: "Stop immediately if pain occurs, or in the presence of an acute wrist, shoulder or knee injury.",
+    sourceRuleIds: [SOURCE_TECHNICAL_STAND_UP],
+  }),
+  completionCondition({
+    conditionId: "technical_stand_up_completion",
+    description: "Stop once the prescribed sets and duration are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const technicalStandUpInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "technical_stand_up_setup",
+    "setup",
+    "Begin seated or grounded on the mat, choosing either side freely; no other equipment is required.",
+    "high",
+    true,
+    SOURCE_TECHNICAL_STAND_UP,
+  ),
+  makeInstruction(
+    "technical_stand_up_execution",
+    "execution",
+    "Protect the head, keep the eyes on the opponent, create distance first, stand with balance, and recover the fighting stance immediately.",
+    "high",
+    true,
+    SOURCE_TECHNICAL_STAND_UP,
+  ),
+];
+
+const technicalStandUpEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "technical_stand_up",
+  moduleId: "movement",
+  role: "technical",
+  explicitMethodId: "controlled_mobility_sets",
+  capabilities: {
+    exerciseId: "technical_stand_up",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["controlled_mobility_sets"],
+    supportedVolumeStructures: ["sets_duration"],
+    supportedIntensityTypes: ["rpe", "technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_duration"],
+    capabilityTags: ["timed_effort", "tempo_control", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["mat"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["technical_stand_up_setup", "technical_stand_up_execution"],
+    requiredStopConditionIds: [
+      "technical_stand_up_technical_failure",
+      "technical_stand_up_range_of_motion_loss",
+      "technical_stand_up_balance_loss",
+      "technical_stand_up_pain",
+      "technical_stand_up_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_technical_stand_up",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_TECHNICAL_STAND_UP, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: technicalStandUpInstructions,
+  stopConditionDefinitions: technicalStandUpStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 2, repetitions: null, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 3, repetitions: null, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_TECHNICAL_STAND_UP],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_TECHNICAL_STAND_UP, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// Source: 50-exercises/38_SHRIMPING
+//   - Primary Classification: "Combat-Specific Movement"; Loading
+//     Profile: "Typical Volume: 3-8 sets, 10-20 repetitions OR 20-60
+//     seconds." As with bear_crawl above, the fiche itself documents a
+//     genuine duration equivalent alongside the repetition count — the
+//     directly-quoted "20-60 seconds" is used as-is, matching the shared
+//     profile's own duration range exactly; no conversion is invented.
+//     Unlike the other five exercises in this lot, this movement
+//     genuinely alternates sides continuously within a single set
+//     ("Variations: ... Continuous Shrimp"; "Progressions: ... Continuous
+//     Ground Movement") without ever being described as a fixed
+//     per-side count. `laterality: "alternating"` was considered but
+//     rejected after direct execution: `validateCompatibility.ts` requires
+//     an "alternating"-laterality exercise to declare a volume
+//     interpretation of "repetitions_per_side", "duration_per_side" or
+//     similar — every available option asserts the prescribed dose is
+//     repeated ONCE PER SIDE (doubling total volume), a claim this
+//     fiche's own "20-60 seconds" (a single continuous total, not a
+//     per-side figure) does not support. `laterality: "bilateral"` is
+//     used instead — the honest choice given the current architecture has
+//     no vocabulary for "continuous, non-doubled, alternating-sides"
+//     laterality — with the alternating-sides nature preserved only as
+//     execution guidance. A genuine, documented model limitation, not a
+//     workaround.
+//   - Equipment Requirements: Required: Mat.
+//   - Coaching Cues: "Drive through the planted foot.", "Move the hips
+//     first.", "Create maximum space.", "Stay connected to the ground.",
+//     "Maintain defensive posture."
+//   - Common Errors / Safety Profile Primary Risks: "Moving only the
+//     shoulders.", "Minimal hip displacement.", "Poor foot placement." /
+//     "Poor Hip Extension", "Excessive Neck Tension", "Poor Arm
+//     Position".
+//   - Contraindications: Acute Shoulder Injury, Acute Hip Injury, Acute
+//     Lumbar Injury.
+// Method: controlled_mobility_sets / movement / technical
+//   Narrowed: sets pinned to 3 (the fiche's own "3-8 sets" intersects
+//   the profile's own [1,3] range at exactly {3}, the same resolution
+//   already used for bear_crawl/bridging above); duration 20-60s
+//   restated explicitly (already matches the profile's own default range
+//   exactly).
+const SOURCE_SHRIMPING = "50-exercises/38_SHRIMPING";
+
+const shrimpingStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "shrimping_technical_failure",
+    description: "Stop the set if the movement comes only from the shoulders, foot placement deteriorates, or intent is lost.",
+    sourceRuleIds: [SOURCE_SHRIMPING],
+  }),
+  rangeOfMotionLossCondition({
+    conditionId: "shrimping_range_of_motion_loss",
+    description: "Stop the set if hip displacement decreases substantially or the movement becomes segmented.",
+    sourceRuleIds: [SOURCE_SHRIMPING],
+  }),
+  balanceLossCondition({
+    conditionId: "shrimping_balance_loss",
+    description: "Stop the set if structural connection to the ground is lost during the movement.",
+    sourceRuleIds: [SOURCE_SHRIMPING],
+  }),
+  painCondition({
+    conditionId: "shrimping_pain",
+    description: "Stop immediately if shoulder, hip or lumbar pain occurs, or in the presence of an acute shoulder, hip or lumbar injury.",
+    sourceRuleIds: [SOURCE_SHRIMPING],
+  }),
+  completionCondition({
+    conditionId: "shrimping_completion",
+    description: "Stop once the prescribed sets and duration are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const shrimpingInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "shrimping_setup",
+    "setup",
+    "Lie on the mat in a defensive ground position before beginning.",
+    "high",
+    true,
+    SOURCE_SHRIMPING,
+  ),
+  makeInstruction(
+    "shrimping_execution",
+    "execution",
+    "Drive through the planted foot, move the hips first, create maximum space, stay connected to the ground, and maintain defensive posture throughout, alternating sides continuously.",
+    "high",
+    true,
+    SOURCE_SHRIMPING,
+  ),
+];
+
+const shrimpingEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "shrimping",
+  moduleId: "movement",
+  role: "technical",
+  explicitMethodId: "controlled_mobility_sets",
+  capabilities: {
+    exerciseId: "shrimping",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["controlled_mobility_sets"],
+    supportedVolumeStructures: ["sets_duration"],
+    supportedIntensityTypes: ["rpe", "technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_duration"],
+    capabilityTags: ["timed_effort", "tempo_control", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["mat"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["shrimping_setup", "shrimping_execution"],
+    requiredStopConditionIds: [
+      "shrimping_technical_failure",
+      "shrimping_range_of_motion_loss",
+      "shrimping_balance_loss",
+      "shrimping_pain",
+      "shrimping_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_shrimping",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_SHRIMPING, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: shrimpingInstructions,
+  stopConditionDefinitions: shrimpingStopConditions,
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: null, durationSeconds: 20, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 3, repetitions: null, durationSeconds: 60, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_SHRIMPING],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_SHRIMPING, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -6651,6 +7452,13 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   nordic_hamstring_curl: nordicHamstringCurlEntry,
 
   hang_power_clean: hangPowerCleanEntry,
+
+  bear_crawl: bearCrawlEntry,
+  bridging: bridgingEntry,
+  footwork_drills: footworkDrillsEntry,
+  shadow_boxing: shadowBoxingEntry,
+  technical_stand_up: technicalStandUpEntry,
+  shrimping: shrimpingEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

@@ -289,8 +289,8 @@ describe("copenhagen_plank — registry validation and non-regression", () => {
   });
 
   test("the registry now contains exactly 44 active exercises", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(51);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(51);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(57);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(57);
   });
 
   test("determinism: identical input produces an identical result", () => {

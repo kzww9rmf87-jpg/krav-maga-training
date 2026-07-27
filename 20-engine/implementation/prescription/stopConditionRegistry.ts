@@ -103,3 +103,8 @@ export function fatigueLimitCondition(spec: StopConditionSpec): StopConditionDef
 export function impactLimitCondition(spec: StopConditionSpec): StopConditionDefinition {
   return buildDefinition(spec, "impact_limit", "set", "impact_quality_loss", "end_set", "high", "recoverable_same_exercise");
 }
+
+/** Reduction or restriction of the movement's own documented range of motion during the set. */
+export function rangeOfMotionLossCondition(spec: StopConditionSpec): StopConditionDefinition {
+  return buildDefinition(spec, "range_of_motion_loss", "set", "range_of_motion_loss", "end_set", "high", "recoverable_same_exercise");
+}

@@ -73,6 +73,9 @@ export const EQUIPMENT_CAPABILITY_IDS = [
   // dip, landmine_press, weighted_pull_up, neck_training,
   // nordic_hamstring_curl).
   "dip_bars", // Dip: "Required: Parallel Bars" — aligned 1:1 with the knowledge base's own distinct `EquipmentType` member of the same name (`dip_bars`), unlike a generic pull-up bar.
+  // Added for the Movement-immediate registry lot (bridging,
+  // technical_stand_up, shrimping — all three document "Required: Mat").
+  "mat", // Aligned 1:1 with the knowledge base's own distinct `EquipmentType` member of the same name, already used by these same three ExerciseDefinitions' own Requirements Model.
 ] as const;
 
 export type EquipmentCapabilityId = (typeof EQUIPMENT_CAPABILITY_IDS)[number];
