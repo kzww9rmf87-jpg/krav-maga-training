@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { prescribeExercise } from "../../prescription/prescribeExercise";
 import { makeCapabilities, makePrescribeExerciseInput } from "./fixtures";
+import { EXERCISE_PRESCRIPTION_REGISTRY, getExercisePrescriptionSource } from "../../prescription/exercisePrescriptionRegistry";
 
 describe("prescribeExercise", () => {
   test("prescribes a fully documented-compatible exercise end to end", () => {
@@ -127,5 +128,42 @@ describe("prescribeExercise", () => {
     prescribeExercise(input);
 
     expect(input).toEqual(snapshot);
+  });
+});
+
+// Fixed defect: resolveRest.ts used to reject the shared
+// controlled_mobility_sets_v0_1 profile's own documented 0-second rest
+// floor (34_NUMERICAL_PRESCRIPTION_TABLES.md, Table Group 6) as
+// REST_VALUE_INVALID under rangeContext "reduced" (`seconds <= 0`).
+// Fixed to `seconds < 0`. bear_crawl is used as a representative
+// real-registry exercise for this method/module/role triple — all eight
+// currently-affected exercises are covered transversally in
+// registryLot4CombatMovementImmediate.test.ts.
+describe("prescribeExercise — controlled_mobility_sets zero-rest fix (movement, reduced range context)", () => {
+  test("a real movement/controlled_mobility_sets/technical exercise (bear_crawl) prescribes completely under rangeContext \"reduced\", with rest resolved to 0 seconds", () => {
+    const entry = EXERCISE_PRESCRIPTION_REGISTRY.bear_crawl;
+    const context = {
+      rangeContext: "reduced" as const,
+      athleteReferences: [],
+      availableEquipmentCapabilities: entry.capabilities.requiredEquipmentCapabilities,
+    };
+    const sourceResult = getExercisePrescriptionSource("bear_crawl", context);
+    if (!sourceResult.ok) {
+      throw new Error(`Expected bear_crawl to build a prescription source, got: ${sourceResult.message}`);
+    }
+
+    const result = prescribeExercise({ exerciseId: "bear_crawl", moduleId: sourceResult.moduleId, ...sourceResult.source });
+    if (!result.ok) {
+      throw new Error(`Expected bear_crawl to prescribe successfully under "reduced", got failure at ${result.failureStage}: ${result.message}`);
+    }
+
+    expect(result.prescription.status).toBe("complete");
+
+    const betweenSets = result.prescription.rest?.betweenSets;
+    if (betweenSets?.type !== "fixed") {
+      throw new Error("Expected a fixed between-sets rest target for bear_crawl.");
+    }
+    expect(betweenSets.duration.value).toBe(0);
+    expect(result.trace.volume.ok && result.trace.volume.profileId).toBe("controlled_mobility_sets_v0_1");
   });
 });

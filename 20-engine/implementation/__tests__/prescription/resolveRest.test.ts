@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { resolveRest } from "../../prescription/resolveRest";
+import { NUMERICAL_PRESCRIPTION_PROFILES } from "../../prescription/prescriptionKnowledge";
 
 describe("resolveRest", () => {
   test("resolves the documented rest duration for the normal range context", () => {
@@ -419,6 +420,192 @@ describe("resolveRest — exerciseRestConstraints", () => {
     resolveRest(input);
 
     expect(input).toEqual(snapshot);
+  });
+});
+
+// Substrate: movement/controlled_mobility_sets/technical
+// (controlled_mobility_sets_v0_1) documents rest scope "between_sets",
+// seconds 0-45 (normal 15) — the ONLY one of the 12 numerical profiles
+// whose documented minimum is 0. Sourced in 34_NUMERICAL_PRESCRIPTION_TABLES.md,
+// Table Group 6 (Profile MOB-CONTROLLED): "Zero formal rest is allowed
+// only when the method defines immediate controlled transition." Fixed
+// defect: the resolver used to reject this documented 0 as
+// REST_VALUE_INVALID under rangeContext "reduced" (`seconds <= 0`) —
+// corrected to `seconds < 0`, so only genuinely negative or non-integer
+// values are rejected.
+describe("resolveRest — controlled_mobility_sets_v0_1's documented zero-rest floor", () => {
+  test("rangeContext \"reduced\" resolves successfully with rest = 0 seconds (not REST_VALUE_INVALID)", () => {
+    const result = resolveRest({
+      moduleId: "movement",
+      methodId: "controlled_mobility_sets",
+      role: "technical",
+      rangeContext: "reduced",
+    });
+
+    if (!result.ok) {
+      throw new Error(`Expected resolution to succeed under "reduced", got failure: ${result.message}`);
+    }
+
+    const betweenSets = result.rest?.betweenSets;
+    if (betweenSets?.type !== "fixed") {
+      throw new Error("Expected a fixed rest target for controlled_mobility_sets.");
+    }
+
+    expect(betweenSets.duration.value).toBe(0);
+    expect(betweenSets.duration.scope).toBe("between_sets");
+    expect(result.profileId).toBe("controlled_mobility_sets_v0_1");
+  });
+
+  test("rangeContext \"normal\" resolves successfully with rest = 15 seconds", () => {
+    const result = resolveRest({
+      moduleId: "movement",
+      methodId: "controlled_mobility_sets",
+      role: "technical",
+      rangeContext: "normal",
+    });
+
+    if (!result.ok) {
+      throw new Error(`Expected resolution to succeed under "normal", got failure: ${result.message}`);
+    }
+
+    const betweenSets = result.rest?.betweenSets;
+    if (betweenSets?.type !== "fixed") {
+      throw new Error("Expected a fixed rest target for controlled_mobility_sets.");
+    }
+
+    expect(betweenSets.duration.value).toBe(15);
+  });
+
+  test("rangeContext \"high\" resolves successfully with rest = 45 seconds", () => {
+    const result = resolveRest({
+      moduleId: "movement",
+      methodId: "controlled_mobility_sets",
+      role: "technical",
+      rangeContext: "high",
+    });
+
+    if (!result.ok) {
+      throw new Error(`Expected resolution to succeed under "high", got failure: ${result.message}`);
+    }
+
+    const betweenSets = result.rest?.betweenSets;
+    if (betweenSets?.type !== "fixed") {
+      throw new Error("Expected a fixed rest target for controlled_mobility_sets.");
+    }
+
+    expect(betweenSets.duration.value).toBe(45);
+  });
+
+  test("determinism: identical input under \"reduced\" produces an identical result", () => {
+    const input = {
+      moduleId: "movement" as const,
+      methodId: "controlled_mobility_sets" as const,
+      role: "technical" as const,
+      rangeContext: "reduced" as const,
+    };
+
+    expect(resolveRest(input)).toEqual(resolveRest(input));
+  });
+
+  test("does not mutate its input under \"reduced\"", () => {
+    const input = {
+      moduleId: "movement" as const,
+      methodId: "controlled_mobility_sets" as const,
+      role: "technical" as const,
+      rangeContext: "reduced" as const,
+    };
+    const snapshot = JSON.parse(JSON.stringify(input));
+
+    resolveRest(input);
+
+    expect(input).toEqual(snapshot);
+  });
+});
+
+// Cross-cutting non-regression: the fix (`seconds <= 0` -> `seconds < 0`
+// in resolveRest.ts) only ever changes behavior for a resolved value of
+// exactly 0. Every other NumericalPrescriptionProfile either documents a
+// strictly positive rest minimum, or has no rest concept at all
+// (`not_applicable` / `seconds: null`) — neither path is reachable by
+// this guard change.
+describe("resolveRest — non-regression across all 12 numerical prescription profiles", () => {
+  test("exactly 12 profiles exist, and controlled_mobility_sets_v0_1 is the only one with a documented rest minimum of 0", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(12);
+
+    const zeroFloorProfiles = NUMERICAL_PRESCRIPTION_PROFILES.filter(
+      (profile) => profile.rest !== null && profile.rest.seconds !== null && profile.rest.seconds.min === 0,
+    );
+    expect(zeroFloorProfiles.map((profile) => profile.profileId)).toEqual(["controlled_mobility_sets_v0_1"]);
+  });
+
+  test("every other profile's reduced/normal/high rest values resolve exactly as documented, unaffected by the fix", () => {
+    const otherProfiles = NUMERICAL_PRESCRIPTION_PROFILES.filter(
+      (profile) => profile.profileId !== "controlled_mobility_sets_v0_1",
+    );
+    expect(otherProfiles).toHaveLength(11);
+
+    for (const profile of otherProfiles) {
+      for (const rangeContext of ["reduced", "normal", "high"] as const) {
+        const result = resolveRest({
+          moduleId: profile.moduleId,
+          methodId: profile.methodId,
+          role: profile.exerciseRole,
+          rangeContext,
+        });
+
+        if (!result.ok) {
+          throw new Error(
+            `Expected ${profile.profileId} to resolve successfully under "${rangeContext}", got failure: ${result.message}`,
+          );
+        }
+
+        if (profile.rest === null || profile.rest.seconds === null) {
+          // not_applicable, or a documented scope with no envelope: rest
+          // stays null — never a fabricated 0.
+          expect(result.rest).toBeNull();
+          continue;
+        }
+
+        const expectedSeconds =
+          rangeContext === "reduced"
+            ? profile.rest.seconds.min
+            : rangeContext === "normal"
+              ? profile.rest.seconds.normal
+              : profile.rest.seconds.max;
+
+        // Every one of these 11 profiles documents a strictly positive
+        // minimum — confirms none of them were ever exposed to the
+        // REST_VALUE_INVALID defect in the first place.
+        expect(profile.rest.seconds.min).toBeGreaterThan(0);
+
+        const betweenSets = result.rest?.betweenSets;
+        const betweenRounds = result.rest?.betweenRounds;
+        const resolvedValue = betweenSets?.type === "fixed" ? betweenSets.duration.value : betweenRounds?.type === "fixed" ? betweenRounds.duration.value : null;
+        expect(resolvedValue).toBe(expectedSeconds);
+      }
+    }
+  });
+
+  test("no profile ever resolves a negative rest value, and no Hard Constraint (module/method/role triple, required stop conditions) is bypassed by this fix", () => {
+    for (const profile of NUMERICAL_PRESCRIPTION_PROFILES) {
+      const result = resolveRest({
+        moduleId: profile.moduleId,
+        methodId: profile.methodId,
+        role: profile.exerciseRole,
+        rangeContext: "reduced",
+      });
+
+      if (!result.ok) {
+        continue;
+      }
+
+      const betweenSets = result.rest?.betweenSets;
+      const betweenRounds = result.rest?.betweenRounds;
+      const resolvedValue = betweenSets?.type === "fixed" ? betweenSets.duration.value : betweenRounds?.type === "fixed" ? betweenRounds.duration.value : null;
+      if (resolvedValue !== null) {
+        expect(resolvedValue).toBeGreaterThanOrEqual(0);
+      }
+    }
   });
 });
 

@@ -9,6 +9,7 @@ import {
   REQUIRED_INSTRUCTION_IDS,
   REQUIRED_STOP_CONDITION_IDS,
 } from "./fixtures";
+import { EXERCISE_PRESCRIPTION_REGISTRY, getExercisePrescriptionSource } from "../../prescription/exercisePrescriptionRegistry";
 
 /**
  * A second, documented-compatible exercise (core / timed_isometric_sets /
@@ -184,5 +185,62 @@ describe("prescribeSession", () => {
     prescribeSession(input);
 
     expect(input).toEqual(snapshot);
+  });
+});
+
+// Fixed defect: resolveRest.ts used to reject the shared
+// controlled_mobility_sets_v0_1 profile's own documented 0-second rest
+// floor as REST_VALUE_INVALID under rangeContext "reduced", which used
+// to make SESSION_REQUIRED_EXERCISE_FAILED fire for any session
+// containing such an exercise under "reduced". bear_crawl (a real
+// registry entry) is used as a representative movement/
+// controlled_mobility_sets/technical exercise.
+describe("prescribeSession — controlled_mobility_sets zero-rest fix (movement, reduced range context)", () => {
+  function makeBearCrawlSessionInput(
+    overrides: Partial<SessionExercisePrescriptionInput> = {},
+  ): SessionExercisePrescriptionInput {
+    const entry = EXERCISE_PRESCRIPTION_REGISTRY.bear_crawl;
+    const sourceResult = getExercisePrescriptionSource("bear_crawl", {
+      rangeContext: "reduced",
+      athleteReferences: [],
+      availableEquipmentCapabilities: entry.capabilities.requiredEquipmentCapabilities,
+    });
+    if (!sourceResult.ok) {
+      throw new Error(`Expected bear_crawl to build a prescription source, got: ${sourceResult.message}`);
+    }
+    return {
+      exerciseId: "bear_crawl",
+      moduleId: sourceResult.moduleId,
+      ...sourceResult.source,
+      order: 2,
+      required: true,
+      blockId: "block-movement",
+      ...overrides,
+    };
+  }
+
+  test("a session containing bear_crawl under rangeContext \"reduced\" (required) no longer fails — rest resolves to 0 seconds instead of blocking the session", () => {
+    const result = prescribeSession({
+      sessionId: "session-reduced-movement",
+      sessionName: "Test Session — Movement Reduced",
+      modules: ["strength", "movement"],
+      exercises: [makeStrengthExerciseInput(), makeBearCrawlSessionInput()],
+    });
+
+    if (!result.ok) {
+      throw new Error(`Expected session prescription to succeed, got issues: ${JSON.stringify(result.issues)}`);
+    }
+
+    expect(result.omittedOptionalExerciseIds).toEqual([]);
+    const bearCrawlExercise = result.session.exercises.find((exercise) => exercise.blockId === "block-movement");
+    if (!bearCrawlExercise) {
+      throw new Error("Expected bear_crawl (blockId \"block-movement\") to be present in the prescribed session.");
+    }
+    expect(bearCrawlExercise.prescription.status).toBe("complete");
+    const betweenSets = bearCrawlExercise.prescription.rest?.betweenSets;
+    if (betweenSets?.type !== "fixed") {
+      throw new Error("Expected a fixed between-sets rest target for bear_crawl.");
+    }
+    expect(betweenSets.duration.value).toBe(0);
   });
 });

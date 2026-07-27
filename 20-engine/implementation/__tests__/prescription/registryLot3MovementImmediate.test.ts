@@ -260,6 +260,21 @@ describe("registry Lot 3 — rest", () => {
       const result = prescribe(id);
       expect(result.prescription.rest?.betweenSets).toBeDefined();
     });
+
+    // Fixed defect (resolveRest.ts): rangeContext "reduced" used to fail
+    // with REST_VALUE_INVALID because the shared profile's own documented
+    // rest floor (0 seconds, sourced in 34_NUMERICAL_PRESCRIPTION_TABLES.md
+    // Table Group 6) was incorrectly rejected (`seconds <= 0`). Fixed to
+    // `seconds < 0` — 0 now resolves successfully.
+    test(`${id}: "reduced" range context now resolves successfully with rest = 0 seconds (previously REST_VALUE_INVALID)`, () => {
+      const result = prescribe(id, "reduced");
+      expect(result.prescription.status).toBe("complete");
+      const betweenSets = result.prescription.rest?.betweenSets;
+      if (betweenSets?.type !== "fixed") {
+        throw new Error(`Expected "${id}" to resolve a fixed between-sets rest target under "reduced".`);
+      }
+      expect(betweenSets.duration.value).toBe(0);
+    });
   }
 });
 

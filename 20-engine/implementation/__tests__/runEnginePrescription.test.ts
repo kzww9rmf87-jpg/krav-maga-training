@@ -328,4 +328,50 @@ describe("runEngine prescription integration", () => {
       result.decisionTrace.entries.some((entry) => entry.stage === "prescription_generation"),
     ).toBe(true);
   });
+
+  test("19. fixed defect: a movement/controlled_mobility_sets pilot exercise (bear_crawl) prescribes end to end through runEngine under rangeContext \"reduced\", with rest resolved to 0 seconds instead of failing", () => {
+    const input = makeValidInput({
+      request: makeRequest({ primaryObjective: { adaptationDomain: "movement" } }),
+    });
+    // module/primaryAdaptation "movement" matches the registry's own
+    // "bear_crawl" entry (module "movement", role "technical") — the
+    // engine's own module selection resolves "movement" from this request.
+    const exercise = makeExercise({ id: "bear_crawl", module: "movement", primaryAdaptation: "movement" });
+
+    const sourceResult = getExercisePrescriptionSource("bear_crawl", {
+      rangeContext: "reduced",
+      athleteReferences: [],
+      availableEquipmentCapabilities: ["mat"],
+    });
+    if (!sourceResult.ok) {
+      throw new Error(`Fixture setup failed: ${sourceResult.message}`);
+    }
+
+    const prescriptionSources = new Map<string, ExercisePrescriptionSource>([["bear_crawl", sourceResult.source]]);
+
+    const result = runEngine(input, [exercise], prescriptionSources);
+
+    if (result.outcome !== "draft") {
+      throw new Error(`Expected outcome "draft" but received "${result.outcome}".`);
+    }
+    if (result.prescription?.status !== "prescribed") {
+      throw new Error(`Expected prescription status "prescribed", got: ${JSON.stringify(result.prescription)}`);
+    }
+
+    const [prescribedExercise] = result.prescription.session.exercises;
+    expect(prescribedExercise?.prescription.methodId).toBe("controlled_mobility_sets");
+    expect(prescribedExercise?.prescription.status).toBe("complete");
+
+    const betweenSets = prescribedExercise?.prescription.rest?.betweenSets;
+    if (betweenSets?.type !== "fixed") {
+      throw new Error("Expected a fixed between-sets rest target for bear_crawl.");
+    }
+    expect(betweenSets.duration.value).toBe(0);
+
+    // No rest-related failure anywhere in the Decision Trace.
+    const failureReasons = result.decisionTrace.entries
+      .filter((entry) => entry.stage === "prescription_generation")
+      .flatMap((entry) => entry.reasons);
+    expect(failureReasons.some((reason) => reason.toLowerCase().includes("invalid rest"))).toBe(false);
+  });
 });

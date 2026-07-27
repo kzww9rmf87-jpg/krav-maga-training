@@ -439,7 +439,15 @@ export const resolveRest = (
     input.rangeContext,
   );
 
-  if (!Number.isInteger(seconds) || seconds <= 0) {
+  // `seconds === 0` is a valid, documented value (an immediate,
+  // controlled transition with no formal rest) — only negative or
+  // non-integer values are rejected here. See
+  // controlled_mobility_sets_v0_1's own sourced rest floor
+  // (34_NUMERICAL_PRESCRIPTION_TABLES.md, Table Group 6: "Zero formal
+  // rest is allowed only when the method defines immediate controlled
+  // transition"). `null`/`not_applicable` are handled in separate
+  // branches earlier in this function and are unaffected by this guard.
+  if (!Number.isInteger(seconds) || seconds < 0) {
     return buildFailure(
       input,
       profile,
