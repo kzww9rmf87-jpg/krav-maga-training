@@ -150,8 +150,8 @@ describe("registry Lot 4 — shared numerical profile", () => {
     expect(matches[0].volume.distance).toBeNull();
   });
 
-  test("the total number of NumericalPrescriptionProfiles is 15 (12 historical + the 3 Table Group 8 interval profiles; this lot added none)", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(15);
+  test("the total number of NumericalPrescriptionProfiles is 16 (12 historical + the 3 Table Group 8 interval profiles + the Table Group 13 Core repetition profile; this lot added none)", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(16);
   });
 });
 
@@ -515,8 +515,8 @@ describe("registry Lot 4 — duration estimation profiles", () => {
     });
   }
 
-  test("no more than 2 new duration profiles were added this lot, and no duration profile has any effect on the numerical prescription profiles (now 15) or the 57 historical entries", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(15);
+  test("no more than 2 new duration profiles were added this lot, and no duration profile has any effect on the numerical prescription profiles (now 16) or the 57 historical entries", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(16);
     expect(getDurationEstimationProfile("duration_profile_bench_press").ok).toBe(false);
     expect(getDurationEstimationProfile("duration_profile_bear_crawl").ok).toBe(false);
   });

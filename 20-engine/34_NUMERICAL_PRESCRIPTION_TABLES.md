@@ -1790,6 +1790,137 @@ This exclusion is deliberate: `resolveVolume` and `resolveIntensity` currently r
 
 ---
 
+# Table Group 13 — Core Repetition Work
+
+Table Group 4 covers Core work prescribed as a timed hold. This group covers the other half of the Core module: Core work prescribed in repetitions.
+
+`50-exercises/62_CORE/00_OVERVIEW.md`, "Volume Principles", names the preferred volume unit of every V0.1 Core exercise and identifies the repetition-prescribed family directly:
+
+```text
+Ab Wheel          → repetitions
+Pallof Press      → repetitions or duration
+Dead Bug          → repetitions per side or controlled breaths
+Hanging Leg Raise → repetitions
+Dragon Flag       → repetitions or controlled eccentrics
+```
+
+That named family — not any single exercise — is the scope of this group.
+
+## Profile CORE-REPETITION-ROBUSTNESS
+
+```text
+profileId: core_robustness_straight_sets_v0_1
+moduleId: core
+methodId: straight_sets_repetitions
+exerciseRole: robustness, secondary, accessory, or corrective
+```
+
+The role list mirrors ISO-CORE-ROBUSTNESS (Table Group 4), the only other Core profile: `62_CORE/00_OVERVIEW.md`, "Exercise Position Within a Session", places Core at position 8 of the default session order, after Assistance and after Robustness or Grip. Core repetition work is not primary strength work, and no role above `robustness` is claimed for it.
+
+### Volume
+
+```text
+sets: 2–5
+repetitions: 3–15
+```
+
+Normal:
+
+```text
+3 sets × 10 repetitions
+```
+
+The set floor and normal are taken unchanged from ISO-CORE-ROBUSTNESS (2–4, normal 3) — the established Core set doctrine, which this group does not restate differently for the sake of restating it. The ceiling is raised to 5 because the repetition family's own records document 5 (Ab Wheel: "Valid Set Range — 2 to 5 sets"; Pallof Press: "Valid Set Range — 2 to 5 sets"); the isometric family's ceiling of 4 is not imposed on a family that documents 5.
+
+The repetition range is an envelope covering the named family, constructed exactly as ROBUSTNESS-ACCESSORY's own 10–30 envelope covers its four exercises: the floor is the lowest documented in the family (Ab Wheel, "Valid Repetition Range — 3 to 12 repetitions"), the ceiling the highest (Pallof Press, "Valid Repetition Range — 6 to 15 repetitions per side"). Every exercise then narrows it to its own documented bounds. The envelope is never widened per exercise.
+
+The repetition normal is stated rather than derived from the range: `62_CORE/00_OVERVIEW.md`, "Prescription Requirements", gives the only worked Core prescription example in the documentation, and it reads `repetitions: 10`. That value lies inside every documented range in the family and equals the ceiling of Ab Wheel's own "Standard V0.1 Range — 3 to 4 sets of 5 to 10 controlled repetitions". Stating a normal instead of taking the arithmetic middle follows Table Group 4, which states 20 seconds as the normal of a 10–40 second range.
+
+### Intensity
+
+```text
+RPE 6–8
+```
+
+Normal:
+
+```text
+RPE 7
+```
+
+or:
+
+```text
+technical_effort: high_quality
+```
+
+The RPE band is taken unchanged from ISO-CORE-ROBUSTNESS and is independently corroborated by two records of this family, each stating "Approximately RPE 6 to 8" (Ab Wheel and Pallof Press, "Recommended Effort"). The normal follows Integer Resolution. `technical_effort: high_quality` is offered as the alternative metric, matching Table Group 4 and the Core module's own preferred intensity types (`technical_effort`, `rpe` — `32_MODULE_PRESCRIPTION_PROFILES.md`, Module 8).
+
+Percentage of a one-repetition maximum is not offered. `62_CORE/00_OVERVIEW.md`, "Intensity Principles", regulates Core intensity through lever length, range of motion, base of support, asymmetry, complexity, tempo and resistance — not through a percentage of a maximal lift.
+
+### Rest
+
+```text
+45–120 seconds
+```
+
+Normal:
+
+```text
+60 seconds
+```
+
+Taken unchanged from ISO-CORE-ROBUSTNESS, and corroborated exactly by Ab Wheel's own "Rest Range — 45 to 120 seconds". The Core module's rest policy is qualitative ("Rest must preserve trunk position and execution quality"), so the numeric envelope comes from the Core table doctrine rather than from the module profile.
+
+### Tempo
+
+```text
+type: global_intent
+globalIntent: controlled
+```
+
+The Core module's tempo policy is "Controlled or hold-based tempo is often required". Hold-based tempo belongs to Table Group 4; the repetition family therefore takes the controlled form, encoded exactly as ROBUSTNESS-ACCESSORY encodes it.
+
+Individual records in this family document phase-timed tempos (Ab Wheel: `3-1-2`, `2-0-2`, `4-1-2`). Phase timing is **not representable** by a numerical profile's tempo rule, which admits only `global_intent`, `phase_intent`, `isometric_hold` or `none`. This is a documented precision loss, not a silent approximation: an exercise's documented phase timings belong in its own instructions until a phase-timed tempo rule exists.
+
+### Minimum Dose
+
+```text
+2 sets × 3 repetitions
+```
+
+### Maximum Dose
+
+```text
+5 sets × 15 repetitions
+```
+
+The maximum boundaries must not be combined automatically.
+
+### Bilateral and Per-Side Exercises
+
+The repetition range above is expressed **per set as prescribed**, not as a whole-body total.
+
+An exercise whose own record prescribes repetitions per side (Dead Bug: "repetitions per side"; Pallof Press: "6 to 15 repetitions per side") declares that fact in its own registry entry through its laterality and volume interpretation. The same numeric range then applies to each side.
+
+No doubling, halving or other conversion between a per-side count and a total count is performed anywhere — by this profile, by any resolver, or by any registry entry.
+
+### Limits of Use
+
+This profile must not be used for:
+
+- timed Core holds — Table Group 4 covers those, and converting repetitions into seconds is forbidden;
+- high-repetition, fatigue-driven accessory work — ROBUSTNESS-ACCESSORY's 10–30 envelope covers that, and it belongs to the robustness module;
+- externally loaded Core work requiring an exact implement mass, a percentage of body mass or a load per side, which remain exercise-specific numerical requirements (see below).
+
+### Exercise-Specific Narrowing
+
+```text
+ab_wheel:  sets 2–5 (matches the shared envelope exactly)   reps 3–12
+```
+
+---
+
 # Exercise-Specific Numerical Requirement
 
 The generic profiles above are insufficient for final execution when an exercise requires:

@@ -748,6 +748,86 @@ export const NUMERICAL_PRESCRIPTION_PROFILES = [
     requiresSportSpecificSubtype: false,
     sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
   },
+  {
+    // Profile CORE-REPETITION-ROBUSTNESS (Table Group 13 — Core Repetition
+    // Work). The Core module's other half: Table Group 4 covers Core work
+    // prescribed as a timed hold (`timed_isometric_core_robustness_v0_1`),
+    // this one covers Core work prescribed in repetitions.
+    //
+    // Scope is the repetition-prescribed family named by
+    // 50-exercises/62_CORE/00_OVERVIEW.md's own "Volume Principles" (Ab
+    // Wheel, Pallof Press, Dead Bug, Hanging Leg Raise, Dragon Flag) — not
+    // any single exercise. Each member narrows this envelope to its own
+    // documented bounds via `exerciseDoseConstraints` /
+    // `exerciseIntensityConstraints`; the envelope is never widened.
+    //
+    // The table's role list is "robustness, secondary, accessory, or
+    // corrective", mirroring ISO-CORE-ROBUSTNESS. This profile encodes the
+    // first-listed role, the same convention `repeated_sprint_intervals_v0_1`
+    // already uses for its own "conditioning or power" table entry — a
+    // secondary/accessory/corrective variant would be a separate profile.
+    //
+    // Every value is taken from the table, which sources each dimension
+    // separately: sets floor/normal and the whole rest and RPE envelope come
+    // unchanged from Table Group 4's established Core doctrine; the set
+    // ceiling and the repetition floor/ceiling come from this family's own
+    // exercise records; the repetition normal is the one stated in
+    // 62_CORE/00_OVERVIEW.md's own worked prescription example. None of them
+    // is an average between exercises.
+    //
+    // Phase-timed tempos documented by individual records (Ab Wheel's
+    // `3-1-2` / `2-0-2` / `4-1-2`) are NOT representable here —
+    // `NumericalTempoRule.type` admits only global_intent / phase_intent /
+    // isometric_hold / none. Documented precision loss, recorded in the
+    // table; those timings stay in the exercise's own instructions.
+    profileId: "core_robustness_straight_sets_v0_1",
+    version: "0.1",
+    moduleId: "core",
+    methodId: "straight_sets_repetitions",
+    exerciseRole: "robustness",
+    volume: {
+      structure: "sets_reps",
+      sets: integerRange(2, 3, 5),
+      repetitions: { type: "fixed_range", range: integerRange(3, 10, 15) },
+      duration: null,
+      distance: null,
+      rounds: null,
+      workIntervals: null,
+    },
+    intensity: [
+      {
+        type: "rpe",
+        min: 6,
+        normal: 7,
+        max: 8,
+        unit: "rpe_scale_1_10",
+        referenceType: null,
+        sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_INTENSITY_MODEL],
+      },
+      {
+        type: "technical_effort",
+        value: "high_quality",
+        sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_INTENSITY_MODEL],
+      },
+    ],
+    rest: {
+      scope: "between_sets",
+      seconds: integerRange(45, 60, 120),
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    tempo: {
+      type: "global_intent",
+      globalIntent: "controlled",
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    minimumDose: { ...emptyDose(), sets: 2, repetitions: 3 },
+    // "The maximum boundaries must not be combined automatically" — these are
+    // validation ceilings per dimension, not a 5x15 prescription target.
+    maximumDose: { ...emptyDose(), sets: 5, repetitions: 15 },
+    requiresExerciseSpecificLoadRule: false,
+    requiresSportSpecificSubtype: false,
+    sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
+  },
   // ---------------------------------------------------------------------------
   // Table Group 8 — General Work-Rest Intervals.
   //
