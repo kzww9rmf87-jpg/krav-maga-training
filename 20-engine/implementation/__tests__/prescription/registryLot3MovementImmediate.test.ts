@@ -547,12 +547,21 @@ describe("registry Lot 3 — distinctions from named precedents", () => {
     expect(hipThrust.capabilities.requiredEquipmentCapabilities).not.toEqual(["mat"]);
   });
 
-  test("footwork_drills vs. sprint_intervals: footwork_drills is a short technical movement touch (movement/technical, no equipment); sprint_intervals remains entirely unintegrated in the registry (module conditioning at the KB level, never forced into this lot's method)", () => {
+  test("footwork_drills vs. sprint_intervals: footwork_drills is a short technical movement touch (movement/technical, no equipment); sprint_intervals was never forced into this lot's module or method, and was later integrated on its own conditioning/work_rest_intervals terms", () => {
     const footworkDrills = EXERCISE_PRESCRIPTION_REGISTRY.footwork_drills;
     const sprintIntervalsKb = EXERCISE_KNOWLEDGE_BASE.find((e) => e.id === "sprint_intervals")!;
     expect(footworkDrills.moduleId).toBe("movement");
     expect(sprintIntervalsKb.module).toBe("conditioning");
-    expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty("sprint_intervals");
+
+    // sprint_intervals entered the registry in a later lot (Registry Lot 6),
+    // under its own module and method — this lot's controlled_mobility_sets
+    // treatment was never extended to it.
+    const sprintIntervals = EXERCISE_PRESCRIPTION_REGISTRY.sprint_intervals;
+    expect(sprintIntervals.moduleId).toBe("conditioning");
+    expect(sprintIntervals.explicitMethodId).toBe("work_rest_intervals");
+    expect(sprintIntervals.explicitMethodId).not.toBe(footworkDrills.explicitMethodId);
+    expect(sprintIntervals.moduleId).not.toBe(footworkDrills.moduleId);
+    expect(footworkDrills.explicitMethodId).toBe("controlled_mobility_sets");
   });
 
   test("shadow_boxing vs. heavy_bag_power_intervals: shadow_boxing requires no equipment and stays module movement; heavy_bag_power_intervals (module conditioning at the KB level) remains entirely unintegrated and is never conflated with shadow_boxing's own entry", () => {
@@ -601,8 +610,8 @@ describe("registry Lot 3 — registry validation and non-regression", () => {
   });
 
   test("the registry now contains exactly 57 active exercises (51 + 6 Lot 3 exercises)", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(60);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(60);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(61);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(61);
   });
 
   test("no historical entry was removed: all 51 previously-existing ids are still present", () => {

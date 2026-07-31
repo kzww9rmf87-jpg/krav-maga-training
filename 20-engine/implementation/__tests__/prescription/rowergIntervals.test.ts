@@ -86,10 +86,14 @@ function prescribe(rangeContext: PrescriptionExecutionContext["rangeContext"] = 
 // -----------------------------------------------------------------------------
 
 describe("rowerg_intervals — registry, knowledge base and profile counts", () => {
-  test("1. the registry grew from 59 to exactly 60 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(60);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(60);
+  test("1. rowerg_intervals took the registry from 59 to 60 entries; later lots only ever add to that", () => {
+    // 59 historical + rowerg_intervals (this lot) + sprint_intervals
+    // (Registry Lot 6). The two lists below are what this test actually
+    // guards; the total is derived from them, never the other way round.
+    expect(PILOT_EXERCISE_IDS).toHaveLength(61);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(61);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
+    expect(PILOT_EXERCISE_IDS).toContain(EXERCISE_ID);
   });
 
   test("2. the knowledge base still holds exactly 76 ExerciseDefinitions — none added, none removed", () => {
@@ -113,7 +117,7 @@ describe("rowerg_intervals — registry, knowledge base and profile counts", () 
     expect(PILOT_EXERCISE_IDS.filter((id) => id === EXERCISE_ID)).toHaveLength(1);
   });
 
-  test("5. no other exercise was added to the registry: the 59 historical ids are exactly the other 59 keys", () => {
+  test("5. this lot added rowerg_intervals and nothing else: the 59 historical ids plus the later lots' ids account for every key", () => {
     const HISTORICAL_IDS = [
       "bench_press", "back_squat", "trap_bar_deadlift", "pull_up", "farmer_carry", "pallof_press", "box_jump",
       "front_squat", "romanian_deadlift", "overhead_press", "bulgarian_split_squat",
@@ -132,12 +136,20 @@ describe("rowerg_intervals — registry, knowledge base and profile counts", () 
       "sprawl", "shot_entries",
     ] as const;
 
-    expect(HISTORICAL_IDS).toHaveLength(59);
-    expect([...HISTORICAL_IDS, EXERCISE_ID].sort()).toEqual(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort());
+    // Ids added by lots AFTER this one, listed explicitly so that this
+    // test keeps proving what it was written to prove — that rowerg_intervals
+    // was the only exercise this lot introduced — instead of silently
+    // absorbing any future addition.
+    const ADDED_BY_LATER_LOTS = ["sprint_intervals"] as const;
 
-    // The conditioning modalities named alongside this one in the knowledge
-    // base stay OUT of the registry — this integration covers one exercise.
-    for (const id of ["sprint_intervals", "assault_bike_intervals", "battle_ropes", "heavy_bag_power_intervals", "sled_push"]) {
+    expect(HISTORICAL_IDS).toHaveLength(59);
+    expect([...HISTORICAL_IDS, EXERCISE_ID, ...ADDED_BY_LATER_LOTS].sort()).toEqual(
+      Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort(),
+    );
+
+    // The other conditioning modalities named alongside this one in the
+    // knowledge base are still OUT of the registry.
+    for (const id of ["assault_bike_intervals", "battle_ropes", "heavy_bag_power_intervals", "sled_push"]) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(id);
     }
   });
@@ -648,7 +660,11 @@ describe("rowerg_intervals — determinism, non-mutation and non-regression", ()
       confidence: "validated" as const,
     };
 
-    const historicalIds = PILOT_EXERCISE_IDS.filter((id) => id !== EXERCISE_ID);
+    // The 59 entries that predate this lot: everything except this lot's own
+    // entry and the ids added by later lots (each of which has its own
+    // non-regression coverage in its own test file).
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "sprint_intervals"];
+    const historicalIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(historicalIds).toHaveLength(59);
 
     for (const id of historicalIds) {

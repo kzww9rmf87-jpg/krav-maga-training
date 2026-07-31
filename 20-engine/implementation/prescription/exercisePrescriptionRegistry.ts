@@ -246,10 +246,16 @@ export const PILOT_EXERCISE_IDS = [
   // to declare an explicit `numericalProfileId`: its
   // (conditioning, work_rest_intervals, conditioning) triple is shared by
   // the three Table Group 8 profiles and never resolves implicitly.
-  // sprint_intervals, assault_bike_intervals and battle_ropes remain
-  // unintegrated — each needs its own fiche read and its own equipment
-  // resolution, and none is assumed to follow from this one.
+  // assault_bike_intervals and battle_ropes remain unintegrated — each
+  // needs its own fiche read and its own equipment resolution, and none is
+  // assumed to follow from this one.
   "rowerg_intervals",
+  // Registry Lot 6 — Sprint intervals. Second entry on the ambiguous
+  // interval triple, and the first to select `repeated_sprint_intervals_v0_1`.
+  // Shares the triple and the method with rowerg_intervals, and nothing
+  // else: different profile, different intensity vocabulary, different
+  // eligibility gates, no equipment at all.
+  "sprint_intervals",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -7936,6 +7942,260 @@ const rowergIntervalsEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Sprint Intervals
+// Source: 50-exercises/47_SPRINT_INTERVALS
+//   - Primary Classification: "Combat-Specific Conditioning" (module:
+//     conditioning), matching the knowledge base's own resolution.
+//   - Equipment Requirements: "Required: Track, Field, Flat Surface.
+//     Optional: Timing Gates, GPS, Heart Rate Monitor, Sled."
+//   - Physiological Profile: "Typical Work Duration: 5-10 seconds.
+//     Typical Recovery: 20-90 seconds."
+//   - Loading Profile: "Typical Volume: 6-15 repetitions. Sprint
+//     Distance: 10-60 meters."
+//   - Velocity Profile: "Maximum Speed. Maximum Intent."
+//   - Coaching Cues: "Accelerate aggressively.", "Maintain posture.",
+//     "Drive through the ground.", "Relax the upper body.", "Finish every
+//     sprint at maximum intent."
+//   - Common Errors: Starting too upright, Overstriding, Poor arm action,
+//     Stopping before the finish, Training while fatigued.
+//   - Performance Indicators: Sprint Time, Acceleration, Maximum Velocity,
+//     Stride Frequency, Stride Length, Recovery Between Repetitions,
+//     Technical Consistency.
+//   - Safety Profile: Primary Risks — Hamstring Strain, Poor Warm-Up,
+//     Excessive Fatigue, Poor Sprint Mechanics.
+//   - Contraindications: Acute Hamstring / Calf / Achilles / Hip Flexor
+//     Injury.
+//   - Philosophy: "CAS prioritizes sprint quality over training volume."
+// Method: work_rest_intervals / conditioning / conditioning
+//
+// EXPLICIT PROFILE SELECTION: `repeated_sprint_intervals_v0_1` (INT-
+// REPEATED-SPRINT: 10/15/20 intervals, 3/5/8s per interval, 20/40/60s
+// between intervals, `movement_intent: maximal_safe_speed`, no tempo).
+// The (conditioning, work_rest_intervals, conditioning) triple is shared
+// by all three Table Group 8 profiles and never resolves implicitly.
+//
+// Why this profile and not the other two:
+//   - `conditioning_short_intervals_v0_1` (INT-SHORT) documents no
+//     encodable intensity and is refused at validation time
+//     (`NON_EXECUTABLE_NUMERICAL_PROFILE`);
+//   - `conditioning_long_intervals_v0_1` (INT-LONG, used by
+//     rowerg_intervals) encodes 60-180s RPE-controlled efforts — an
+//     aerobic-interval envelope that this fiche's own 5-10 second
+//     ATP-PC efforts and "Maximum Intent" velocity profile contradict.
+//   INT-REPEATED-SPRINT's own table also states it is "unavailable when
+//   the exercise is not sprint-compatible" — this fiche's "# Movement
+//   Pattern — Primary: Sprint" is exactly that compatibility.
+//
+// ELIGIBILITY. Governed entirely by the knowledge base, which already
+// documents the three gates this exercise needs and no equipment at all:
+// `sprinting_allowed`, `floor_safe` and `sufficient_space` (minimum
+// "large"). Nothing is added, mirrored or re-encoded here: no equipment
+// capability is invented to stand in for "Track, Field, Flat Surface"
+// (those are the SURFACE the environment gates already describe, not an
+// implement the athlete carries), and the Optional timing gates / GPS /
+// heart-rate monitor / sled are excluded, matching the established
+// discipline of never promoting an Optional item to Required. The sled in
+// particular belongs to the documented "Resisted Sprint" variation, not
+// to this base entry.
+//
+// VOLUME — one honest intersection, one deliberate abstention:
+//   - work duration: the fiche's own "Typical Work Duration: 5-10
+//     seconds" intersected with the profile's own [3, 8] gives [5, 8].
+//     Same dimension, same unit, same per-effort scope — a real
+//     narrowing, declared;
+//   - interval count: the fiche documents "Typical Volume: 6-15
+//     repetitions" while the profile (and 34_NUMERICAL_PRESCRIPTION_
+//     TABLES.md's own INT-REPEATED-SPRINT table) counts "10-20
+//     intervals". These are two different documented dimensions with two
+//     different names, and this registry does not treat one as a synonym
+//     for the other — the same discipline already applied to "rounds"
+//     vs. "sets" for footwork_drills/shadow_boxing/sprawl. No
+//     `workIntervals` constraint is therefore derived from the fiche's
+//     repetition count.
+//     DOCUMENTED CONSEQUENCE, flagged rather than silently reconciled:
+//     the interval count stays governed by the shared profile alone, so
+//     `rangeContext: "high"` prescribes 20 intervals — above the 15 this
+//     fiche names as its own typical upper bound. Resolving that needs a
+//     documented rule for mapping a chapter's "repetitions" onto the
+//     interval dimension (or a fiche revision), not a silent assumption
+//     here.
+//
+// DOCUMENTED PRECISION LOSS (distance). The fiche documents distance as a
+// first-class dimension — "# Loading Profile — Sprint Distance: 10-60
+// meters", "# Variations: 10 m / 20 m / 30 m Sprint", "Progression:
+// Distance" — and `work_rest_intervals` lists `distance` among its
+// optional volume fields. `repeated_sprint_intervals_v0_1` encodes no
+// distance rule, so a distance-based sprint interval CANNOT be prescribed
+// through this entry. No metre figure is converted into seconds, no
+// second into metres, and no `distanceMeters` dose constraint is declared
+// (the resolver would reject it with `EXERCISE_DOSE_CONSTRAINT_INVALID`,
+// the selected profile's volume structure not using that dimension).
+// Prescribing "20 m sprints" needs a documented distance-scoped interval
+// profile — a numerical-table change, out of scope here.
+//
+// INTENSITY. `movement_intent: maximal_safe_speed` only — the profile's
+// own single documented rule, and the finite vocabulary's representation
+// of the fiche's "# Velocity Profile: Maximum Speed. Maximum Intent."
+// 33_EXERCISE_PRESCRIPTION_CAPABILITIES' own "Exercise Family 10 —
+// Sprints and Locomotion" also lists pace, velocity, heart_rate, rpe and
+// technical_effort, and this fiche's Optional timing gates / GPS / heart-
+// rate monitor would supply the first three — but none is encodable by
+// `IntensityRangeRule` today, and this chapter documents no number for
+// any of them. A qualitative category rule carries no range, so the
+// prescribed intent is identical under reduced, normal and high: the
+// range context moves volume and rest, never the instruction to sprint
+// at maximal safe speed.
+//
+// TEMPO. `global_intent` is declared because Family 10 documents it for
+// this family, but `work_rest_intervals` forbids tempo and the profile
+// carries none, so the resolved tempo is `null`.
+//
+// STOP CONDITIONS — the six categories `work_rest_intervals` requires, no
+// more. `environmental_hazard`, named by Family 10's own "Required Stop
+// Conditions" and plausible for outdoor sprinting, is knowingly absent:
+// no factory exists for that category and 28_STOP_CONDITIONS.md documents
+// no scope, action or recoverability for it, so writing one would mean
+// inventing all three. The same documented gap already recorded for
+// rowerg_intervals (`equipment_failure`) and for the conditioning MODULE
+// contract's own `intensity_limit` / `environmental_hazard` /
+// `time_limit`, none of which any resolver enforces today.
+// -----------------------------------------------------------------------------
+
+const SOURCE_SPRINT_INTERVALS = "50-exercises/47_SPRINT_INTERVALS";
+
+const sprintIntervalsStopConditions: StopConditionDefinition[] = [
+  intervalPaceLossCondition({
+    conditionId: "sprint_intervals_pace_loss",
+    description:
+      "Stop the interval if sprint time lengthens or acceleration and maximum velocity visibly drop — sprint quality is prioritized over training volume.",
+    sourceRuleIds: [SOURCE_SPRINT_INTERVALS, SOURCE_METHOD_CATALOGUE],
+  }),
+  technicalFailureCondition({
+    conditionId: "sprint_intervals_technical_failure",
+    description:
+      "Stop the set if the start becomes too upright, the athlete overstrides, arm action deteriorates or sprints are no longer finished through the line.",
+    sourceRuleIds: [SOURCE_SPRINT_INTERVALS],
+  }),
+  fatigueLimitCondition({
+    conditionId: "sprint_intervals_fatigue_limit",
+    description:
+      "Stop the exercise once accumulated fatigue prevents sprinting at maximum intent; sprinting while fatigued is a documented risk, not a training stimulus.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_SPRINT_INTERVALS],
+  }),
+  acuteSymptomCondition({
+    conditionId: "sprint_intervals_acute_symptom",
+    description:
+      "Stop immediately if an acute symptom appears at any point during the sprints or the recoveries.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+  painCondition({
+    conditionId: "sprint_intervals_pain",
+    description:
+      "Stop immediately if pain occurs, or in the presence of an acute hamstring, calf, Achilles or hip-flexor injury.",
+    sourceRuleIds: [SOURCE_SPRINT_INTERVALS],
+  }),
+  completionCondition({
+    conditionId: "sprint_intervals_completion",
+    description:
+      "Stop once the prescribed sprint intervals and their per-interval duration are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const sprintIntervalsInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "sprint_intervals_setup",
+    "setup",
+    "Sprint on a track, field or other flat surface, in an environment where full-speed running is permitted. Timing gates, GPS, a heart-rate monitor and a sled are optional. Sprint mechanics should be learned before sprinting at maximum intent.",
+    "high",
+    true,
+    SOURCE_SPRINT_INTERVALS,
+  ),
+  makeInstruction(
+    "sprint_intervals_execution",
+    "execution",
+    "Accelerate aggressively, maintain posture, drive through the ground, relax the upper body and finish every sprint at maximum intent. Do not stop before the finish.",
+    "high",
+    true,
+    SOURCE_SPRINT_INTERVALS,
+  ),
+];
+
+const sprintIntervalsEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "sprint_intervals",
+  moduleId: "conditioning",
+  role: "conditioning",
+  explicitMethodId: "work_rest_intervals",
+  numericalProfileId: "repeated_sprint_intervals_v0_1",
+  capabilities: {
+    exerciseId: "sprint_intervals",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["work_rest_intervals"],
+    supportedVolumeStructures: ["intervals"],
+    supportedIntensityTypes: ["movement_intent"],
+    preferredIntensityTypes: ["movement_intent"],
+    // 33_EXERCISE_PRESCRIPTION_CAPABILITIES.md, "Exercise Family 10 —
+    // Sprints and Locomotion": "locomotion_only", "sled",
+    // "resistance_band". Only the first is declared — `sled` and
+    // `resistance_band` serve the documented Resisted Sprint variation,
+    // which this entry does not represent. `bodyweight` is deliberately
+    // NOT claimed: this family's documentation never gives it, and
+    // `locomotion_only` is the mode written for exactly this case.
+    supportedLoadingModes: ["locomotion_only"],
+    supportedTempoTypes: ["global_intent"],
+    // Family 10's own documented laterality ("Normally: not_applicable"),
+    // consistent with the knowledge base's `unilateral: false`.
+    laterality: "not_applicable",
+    volumeInterpretations: ["interval_total"],
+    // Exactly the three tags `work_rest_intervals` requires.
+    capabilityTags: ["interval_structure", "timed_effort", "technical_quality_observation"],
+    // Deliberately empty: the knowledge base already gates this exercise
+    // on `sprinting_allowed` + `floor_safe` + `sufficient_space` ("large"),
+    // and its own `requirements` declare no equipment atom whatsoever. No
+    // capability id is invented here to mirror an environment gate — that
+    // would move an eligibility decision out of the knowledge base, which
+    // owns it.
+    requiredEquipmentCapabilities: [],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["sprint_intervals_setup", "sprint_intervals_execution"],
+    requiredStopConditionIds: [
+      "sprint_intervals_pace_loss",
+      "sprint_intervals_technical_failure",
+      "sprint_intervals_fatigue_limit",
+      "sprint_intervals_acute_symptom",
+      "sprint_intervals_pain",
+      "sprint_intervals_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_sprint_intervals",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_SPRINT_INTERVALS, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["movement_intent"],
+  preferredIntensityType: "movement_intent",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: sprintIntervalsInstructions,
+  stopConditionDefinitions: sprintIntervalsStopConditions,
+  // "# Physiological Profile — Typical Work Duration: 5-10 seconds",
+  // intersected with the selected profile's own [3, 8] seconds per
+  // interval. Only that dimension is constrained; see the block comment
+  // above for why the fiche's "6-15 repetitions" is NOT read as an
+  // interval count and why its documented sprint distance is not encoded.
+  exerciseDoseConstraints: {
+    minimumDose: { sets: null, repetitions: null, durationSeconds: 5, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: null, repetitions: null, durationSeconds: 8, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_SPRINT_INTERVALS],
+  },
+  exerciseIntensityConstraints: null,
+  // "# Physiological Profile — Typical Recovery: 20-90 seconds" fully
+  // contains the profile's own 20-60s between-intervals window, so there
+  // is nothing to narrow — a wider documented range never widens a profile.
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_SPRINT_INTERVALS, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -8020,6 +8280,7 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   shot_entries: shotEntriesEntry,
 
   rowerg_intervals: rowergIntervalsEntry,
+  sprint_intervals: sprintIntervalsEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

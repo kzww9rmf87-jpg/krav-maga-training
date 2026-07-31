@@ -181,6 +181,18 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // multiplying the prescribed intervals is not estimation from documented
   // timing data, and is not done here.
   unresolvedProfile("rowerg_intervals", "intervals", ["50-exercises/49_ROWERG_INTERVALS"]),
+
+  // Registry Lot 6 — Sprint intervals.
+  //
+  // `"unresolved"` like every profile above. The Sprint Intervals chapter
+  // documents work and recovery ranges per effort, but no setup time, no
+  // transition time, no technical margin and no total session duration —
+  // and its own "Typical Recovery: 20-90 seconds" is deliberately not read
+  // as a duration-estimation `restSeconds`: that field feeds a timing
+  // ESTIMATE, while the prescribed rest is resolved separately from the
+  // numerical profile. Multiplying intervals by their duration to invent a
+  // session length is not estimation from documented timing data.
+  unresolvedProfile("sprint_intervals", "intervals", ["50-exercises/47_SPRINT_INTERVALS"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

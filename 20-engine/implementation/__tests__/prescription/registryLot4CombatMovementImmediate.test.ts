@@ -547,12 +547,22 @@ describe("registry Lot 4 — distinctions from named precedents", () => {
     expect(bearCrawlKb.movementPatterns).toContain("locomotion");
   });
 
-  test("sprawl vs. sprint_intervals: sprawl stays classified as movement/technical (a defensive ground-transition drill on a mat); sprint_intervals remains conditioning-module and entirely unintegrated in the registry — confirmed at the knowledge-base level", () => {
+  test("sprawl vs. sprint_intervals: sprawl stays classified as movement/technical (a defensive ground-transition drill on a mat); sprint_intervals stays conditioning-module and was integrated only later, on its own terms — never absorbed into this lot", () => {
     const sprawlKb = EXERCISE_KNOWLEDGE_BASE.find((e) => e.id === "sprawl")!;
     const sprintIntervalsKb = EXERCISE_KNOWLEDGE_BASE.find((e) => e.id === "sprint_intervals")!;
     expect(sprawlKb.module).toBe("movement");
     expect(sprintIntervalsKb.module).toBe("conditioning");
-    expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty("sprint_intervals");
+
+    // Integrated in Registry Lot 6, under conditioning/work_rest_intervals
+    // with no equipment at all — nothing about this lot's mat-based,
+    // controlled_mobility_sets treatment was reused for it.
+    const sprintIntervals = EXERCISE_PRESCRIPTION_REGISTRY.sprint_intervals;
+    const sprawl = EXERCISE_PRESCRIPTION_REGISTRY.sprawl;
+    expect(sprintIntervals.moduleId).toBe("conditioning");
+    expect(sprintIntervals.explicitMethodId).toBe("work_rest_intervals");
+    expect(sprintIntervals.capabilities.requiredEquipmentCapabilities).toEqual([]);
+    expect(sprawl.capabilities.requiredEquipmentCapabilities).toEqual(["mat"]);
+    expect(sprawl.explicitMethodId).toBe("controlled_mobility_sets");
   });
 
   test("shot_entries vs. technical_stand_up: both movement/technical/controlled_mobility_sets/mat-required/bilateral, but shot_entries is a standing-to-standing offensive penetration entry (sets pinned to 3) while technical_stand_up is a ground-to-standing defensive recovery movement (sets 2-3) — distinct instruction content and distinct narrowed ranges, not merely distinct names", () => {
@@ -612,8 +622,8 @@ describe("registry Lot 4 — registry validation and non-regression", () => {
   });
 
   test("the registry now contains exactly 59 active exercises (57 + sprawl + shot_entries)", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(60);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(60);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(61);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(61);
   });
 
   test("no historical entry was removed: all 57 previously-existing ids are still present", () => {

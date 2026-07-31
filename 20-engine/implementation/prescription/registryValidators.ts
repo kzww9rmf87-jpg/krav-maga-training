@@ -25,6 +25,7 @@ import { findUnknownEquipmentCapabilities } from "./equipmentCapabilities";
 import { isKnownAthleteReferenceType } from "./athleteReferenceCatalog";
 import { getDurationEstimationProfile } from "./durationEstimationProfiles";
 import { findNonConformingSourceRuleIds } from "./sourceRuleIdentifiers";
+import type { LoadingMode } from "./validateCompatibility";
 import { EXERCISE_PRESCRIPTION_REGISTRY, type ExercisePrescriptionRegistryEntry } from "./exercisePrescriptionRegistry";
 
 export type RegistryIssueCode =
@@ -46,6 +47,28 @@ export interface RegistryIssue {
   exerciseId: Identifier;
   message: string;
 }
+
+/**
+ * Loading modes the athlete supplies entirely from their own body, needing
+ * no implement, machine or external resistance. An entry declaring one of
+ * these is legitimately allowed to require no equipment capability at all.
+ *
+ * This list exists because "requires no equipment" and "is a bodyweight
+ * exercise" are not the same statement. The check below originally admitted
+ * `bodyweight` alone, which held while every registry entry was either
+ * implement-based or bodyweight — but `locomotion_only`, the loading mode
+ * 33_EXERCISE_PRESCRIPTION_CAPABILITIES.md documents for its own "Exercise
+ * Family 10 — Sprints and Locomotion", is equally self-supplied and would
+ * otherwise be reported as an impossible combination. Widening the exemption
+ * to a named set keeps the rule's real intent (an entry must not silently
+ * omit the equipment it needs) without forcing a sprint entry to claim a
+ * `bodyweight` loading mode its own family documentation never gives it.
+ *
+ * Deliberately NOT included: `assisted_bodyweight` (needs a band, machine or
+ * partner) and every implement mode. Membership here is a claim that the
+ * mode requires nothing external — not merely that it is unloaded.
+ */
+const SELF_SUPPLIED_LOADING_MODES: readonly LoadingMode[] = ["bodyweight", "locomotion_only"];
 
 /** Every check confined to a single entry — no cross-entry duplicate check here (see `validatePilotRegistry`). */
 export function validateRegistryEntry(entry: ExercisePrescriptionRegistryEntry): RegistryIssue[] {
@@ -194,11 +217,14 @@ export function validateRegistryEntry(entry: ExercisePrescriptionRegistryEntry):
       message: `Method "${entry.explicitMethodId}" requires volume structure "${method.volumeStructure}", which is not in supportedVolumeStructures.`,
     });
   }
-  if (entry.capabilities.requiredEquipmentCapabilities.length === 0 && entry.capabilities.supportedLoadingModes.every((mode) => mode !== "bodyweight")) {
+  if (
+    entry.capabilities.requiredEquipmentCapabilities.length === 0 &&
+    !entry.capabilities.supportedLoadingModes.some((mode) => SELF_SUPPLIED_LOADING_MODES.includes(mode))
+  ) {
     issues.push({
       code: "IMPOSSIBLE_METHOD_STRUCTURE_EQUIPMENT_COMBINATION",
       exerciseId,
-      message: "No required equipment capability is declared, but no loading mode is \"bodyweight\" either.",
+      message: `No required equipment capability is declared, and no loading mode is self-supplied (one of: ${SELF_SUPPLIED_LOADING_MODES.join(", ")}).`,
     });
   }
 

@@ -109,6 +109,10 @@ const EXPLICIT_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
   // Registry Lot 5 — the first entry on the ambiguous
   // (conditioning, work_rest_intervals, conditioning) triple.
   rowerg_intervals: "conditioning_long_intervals_v0_1",
+  // Registry Lot 6 — second entry on the same triple, resolving to a
+  // DIFFERENT profile. This pair is the reason explicit selection exists:
+  // the triple alone could never have told them apart.
+  sprint_intervals: "repeated_sprint_intervals_v0_1",
 };
 
 const historicalEntries = () =>
