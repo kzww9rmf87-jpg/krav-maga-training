@@ -44,10 +44,13 @@ import {
 import { makeInstruction } from "./instructionRegistry";
 import type { StopConditionDefinition } from "./resolveStopConditions";
 import type { InstructionDefinition } from "./resolveInstructions";
-import type { ExercisePrescriptionCapabilities } from "./validateCompatibility";
-import type { IntensityReferenceType, IntensityType, TempoType } from "./types";
+import {
+  requiresLateralityResolution,
+  type ExercisePrescriptionCapabilities,
+} from "./validateCompatibility";
+import type { IntensityReferenceType, IntensityType, PrescriptionLaterality, TempoType } from "./types";
 import type { ExerciseRole } from "./types";
-import type { TrainingMethodId } from "./contracts";
+import { getTrainingMethodContract, type TrainingMethodId } from "./contracts";
 import type { PrescribeExerciseInput } from "./prescribeExercise";
 import type {
   NumericalPrescriptionProfileId,
@@ -8543,6 +8546,56 @@ export type ExercisePrescriptionSourceResult = ExercisePrescriptionSourceSuccess
 const unique = <T>(values: readonly T[]): T[] => [...new Set(values)];
 
 /**
+ * The `PrescriptionLaterality` an entry declares, or `null` when it cannot
+ * be stated honestly.
+ *
+ * Before this existed, `getExercisePrescriptionSource` simply did not
+ * forward laterality: every registry entry declared one, and every resolved
+ * `PrescriptionVolume.laterality` came out `null` — including for the eight
+ * entries declaring `unilateral` with a per-side volume interpretation. An
+ * athlete reading "3 repetitions" could not tell whether that meant three
+ * in total or three per side, and the public `CasLateralityV1` field the
+ * serializer already maps was permanently empty.
+ *
+ * The rule is purely declarative — nothing is inferred:
+ * - `laterality` and `interpretation` are copied from what the entry
+ *   declares. They are never derived from the knowledge base's
+ *   `unilateral` flag, and no repetition count is ever doubled, halved or
+ *   otherwise converted because of them: a per-side interpretation
+ *   *labels* the resolved number, it never changes it;
+ * - `startingSide` and `sideSwitchRuleId` stay `null`. No exercise chapter
+ *   in `50-exercises/` documents which side to start on or when to switch,
+ *   and inventing either would be exactly the fabrication this registry
+ *   refuses everywhere else;
+ * - an entry declaring no volume interpretation yields `null` rather than
+ *   a half-filled object;
+ * - a method whose contract FORBIDS the laterality volume field yields
+ *   `null` too. That is a method-contract rule, not an exercise rule, so it
+ *   holds for any future entry without naming one.
+ */
+const buildPrescriptionLaterality = (
+  capabilities: ExercisePrescriptionCapabilities,
+  methodId: TrainingMethodId,
+): PrescriptionLaterality | null => {
+  if (getTrainingMethodContract(methodId).forbiddenVolumeFields.includes("laterality")) {
+    return null;
+  }
+
+  const [interpretation] = capabilities.volumeInterpretations;
+
+  if (interpretation === undefined) {
+    return null;
+  }
+
+  return {
+    laterality: capabilities.laterality,
+    interpretation,
+    startingSide: null,
+    sideSwitchRuleId: null,
+  };
+};
+
+/**
  * Builds a complete `ExercisePrescriptionSource` for one pilot exercise, or
  * a structured failure when a required athlete reference or equipment
  * capability is missing from `context`. Never mutates `context`, never
@@ -8600,6 +8653,12 @@ export function getExercisePrescriptionSource(
       rangeContext: context.rangeContext,
       capabilities: entry.capabilities,
       explicitMethodId: entry.explicitMethodId,
+      // Declared by the entry, forwarded verbatim. `lateralityRequired`
+      // reuses `validateCompatibility`'s own predicate rather than
+      // restating it, so an entry that must resolve a side to be
+      // compatible is exactly an entry whose volume must carry one.
+      laterality: buildPrescriptionLaterality(entry.capabilities, entry.explicitMethodId),
+      lateralityRequired: requiresLateralityResolution(entry.capabilities),
       supportedIntensityTypes: entry.supportedIntensityTypes,
       athleteReferences: context.athleteReferences,
       preferredIntensityType: entry.preferredIntensityType,

@@ -179,7 +179,17 @@ const missingValues = <T>(
     (requiredValue) => !availableValues.includes(requiredValue),
   );
 
-const requiresLateralityResolution = (
+/**
+ * Whether this exercise's declared laterality forces a per-side resolution.
+ *
+ * Exported so the registry's own source builder and this validator share
+ * ONE definition: an entry that must resolve a side here is exactly an
+ * entry whose prescription must carry that side downstream
+ * (`PrescribeExerciseInput.lateralityRequired`). Two copies of this rule
+ * would be free to drift apart, and the drift would be silent — an entry
+ * could pass compatibility while its resolved volume carried no side.
+ */
+export const requiresLateralityResolution = (
   capabilities: ExercisePrescriptionCapabilities,
 ): boolean =>
   capabilities.laterality === "unilateral" ||

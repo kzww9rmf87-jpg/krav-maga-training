@@ -185,7 +185,7 @@ describe("copenhagen_plank — dose narrowing (durationSeconds only)", () => {
   });
 });
 
-describe("copenhagen_plank — laterality: documenting the engine's real behavior, not an invented semantic", () => {
+describe("copenhagen_plank — laterality: declared by the entry, carried through to the prescription", () => {
   test("declares laterality \"unilateral\" and volumeInterpretations [\"duration_per_side\"]", () => {
     const entry = EXERCISE_PRESCRIPTION_REGISTRY.copenhagen_plank;
     expect(entry.capabilities.laterality).toBe("unilateral");
@@ -197,9 +197,25 @@ describe("copenhagen_plank — laterality: documenting the engine's real behavio
     expect(result.prescription.volume.duration?.scope).toBe("per_set");
   });
 
-  test("volume.laterality stays null when the caller supplies no explicit laterality — matching single_leg_hop's own precedent", () => {
+  test("volume.laterality carries the entry's own declaration — it used to come out null for every entry, unilateral included", () => {
+    // REGRESSION GUARD. `getExercisePrescriptionSource` did not forward
+    // laterality at all: this exercise declared "unilateral" +
+    // "duration_per_side" and the resolved volume still reported `null`,
+    // so nothing downstream could tell 20 seconds per side from 20 seconds
+    // in total. The declaration is now carried through verbatim.
     const result = prescribe();
-    expect(result.prescription.volume.laterality).toBeNull();
+    expect(result.prescription.volume.laterality).toEqual({
+      laterality: "unilateral",
+      interpretation: "duration_per_side",
+      startingSide: null,
+      sideSwitchRuleId: null,
+    });
+  });
+
+  test("no starting side or side-switch rule is invented — this fiche documents neither", () => {
+    const laterality = prescribe().prescription.volume.laterality;
+    expect(laterality?.startingSide).toBeNull();
+    expect(laterality?.sideSwitchRuleId).toBeNull();
   });
 
   test("no automatic doubling of sets or duration occurs for the unilateral declaration", () => {

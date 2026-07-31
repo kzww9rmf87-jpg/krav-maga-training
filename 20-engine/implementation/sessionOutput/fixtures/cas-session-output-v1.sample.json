@@ -80,7 +80,12 @@
               "distance": null,
               "rounds": null,
               "workIntervals": null,
-              "laterality": null
+              "laterality": {
+                "laterality": "bilateral",
+                "interpretation": "total_repetitions",
+                "startingSide": null,
+                "sideSwitchRuleId": null
+              }
             },
             "intensity": {
               "primaryMetric": {
@@ -471,7 +476,7 @@
         "decision": "Volume resolved for exercise \"bench_press\".",
         "reasons": [
           "profile=strength_primary_straight_sets_v0_1 (selection=module_method_role_unique)",
-          "structure=sets_reps, sets=3, reps=5"
+          "structure=sets_reps, sets=3, reps=5, laterality=bilateral (total_repetitions)"
         ],
         "affectedExerciseIds": [
           "bench_press"

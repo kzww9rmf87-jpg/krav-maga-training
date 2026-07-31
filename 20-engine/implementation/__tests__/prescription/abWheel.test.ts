@@ -421,7 +421,15 @@ describe("ab_wheel — resolved prescription under every range context", () => {
     expect(entry.capabilities.laterality).toBe("bilateral");
     expect(entry.capabilities.volumeInterpretations).toEqual(["total_repetitions"]);
     expect(entry.capabilities.volumeInterpretations).not.toContain("repetitions_per_side");
-    expect(prescribe().prescription.volume.laterality).toBeNull();
+
+    // The declaration is carried through to the prescription, so the
+    // resolved repetition count is explicitly labelled as a total.
+    expect(prescribe().prescription.volume.laterality).toEqual({
+      laterality: "bilateral",
+      interpretation: "total_repetitions",
+      startingSide: null,
+      sideSwitchRuleId: null,
+    });
   });
 });
 

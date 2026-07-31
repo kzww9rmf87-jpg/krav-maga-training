@@ -75,6 +75,13 @@ const summarizeVolume = (volume: PrescriptionVolume): string => {
   if (volume.distance !== null) parts.push(`distance=${volume.distance.value}${volume.distance.unit}`);
   if (volume.rounds !== null) parts.push(`rounds=${volume.rounds}`);
   if (volume.workIntervals !== null) parts.push(`workIntervals=${volume.workIntervals}`);
+  // How the numbers above are to be read. Without this, a resolved "reps=3"
+  // was indistinguishable from "reps=3 per side" anywhere in the trace —
+  // the interpretation is what makes the count unambiguous, so it belongs
+  // beside the count rather than in a separate entry.
+  if (volume.laterality !== null) {
+    parts.push(`laterality=${volume.laterality.laterality} (${volume.laterality.interpretation})`);
+  }
   return parts.join(", ");
 };
 
