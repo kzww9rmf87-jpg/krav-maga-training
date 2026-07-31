@@ -3,7 +3,9 @@
  * Version 0.1
  *
  * Reusable `StopConditionDefinition` factories, one per `StopConditionCategory`
- * actually needed by the pilot exercise registry (`exercisePrescriptionRegistry.ts`).
+ * actually needed by the pilot exercise registry (`exercisePrescriptionRegistry.ts`)
+ * or required by a Training Method contract being prepared for registry use
+ * (`pace_loss` and `acute_symptom` for `work_rest_intervals`).
  *
  * Every factory fixes the mechanical shape (scope, trigger type, action,
  * priority, recoverability) that is identical across every exercise using
@@ -35,6 +37,7 @@ function buildDefinition(
   action: StopConditionDefinition["action"],
   priority: StopConditionDefinition["priority"],
   recoverability: StopConditionDefinition["recoverability"],
+  evaluationTiming: StopConditionDefinition["trigger"]["evaluationTiming"] = "during_set",
 ): StopConditionDefinition {
   return {
     conditionId: spec.conditionId,
@@ -46,7 +49,7 @@ function buildDefinition(
       operator: "detected",
       expectedValue: null,
       unit: null,
-      evaluationTiming: "during_set",
+      evaluationTiming,
     },
     threshold: null,
     action,
@@ -107,4 +110,28 @@ export function impactLimitCondition(spec: StopConditionSpec): StopConditionDefi
 /** Reduction or restriction of the movement's own documented range of motion during the set. */
 export function rangeOfMotionLossCondition(spec: StopConditionSpec): StopConditionDefinition {
   return buildDefinition(spec, "range_of_motion_loss", "set", "range_of_motion_loss", "end_set", "high", "recoverable_same_exercise");
+}
+
+/**
+ * Measurable or visible decline in pace or power output across the interval.
+ * The interval-family analogue of `velocityLossCondition`: required by the
+ * `work_rest_intervals` method contract ("pace or power loss where
+ * applicable", 31_TRAINING_METHOD_CATALOGUE.md, Method 6) and sitting in the
+ * "method-specific quality threshold" priority tier of
+ * 25_PRESCRIPTION_RULES.md — hence the same `medium` /
+ * `recoverable_same_exercise` shape at interval scope.
+ */
+export function paceLossCondition(spec: StopConditionSpec): StopConditionDefinition {
+  return buildDefinition(spec, "pace_loss", "interval", "pace_decline", "end_interval", "medium", "recoverable_same_exercise", "during_interval");
+}
+
+/**
+ * Acute symptom reported at any point (dizziness, nausea, chest discomfort…)
+ * — never continued through. 25_PRESCRIPTION_RULES.md places "pain or acute
+ * symptom" together in the tier just below emergency medical, so this factory
+ * mirrors `painCondition` exactly: exercise scope, `stop_exercise`,
+ * `critical`, `not_recoverable`.
+ */
+export function acuteSymptomCondition(spec: StopConditionSpec): StopConditionDefinition {
+  return buildDefinition(spec, "acute_symptom", "exercise", "acute_symptom_report", "stop_exercise", "critical", "not_recoverable");
 }
