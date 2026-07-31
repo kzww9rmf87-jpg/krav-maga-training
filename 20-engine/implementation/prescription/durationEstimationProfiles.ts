@@ -207,6 +207,19 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // never selects — the numerical profile encodes `global_intent:
   // controlled`, not a phase timing. No value is derived from them here.
   unresolvedProfile("ab_wheel", "sets_reps", ["50-exercises/62_CORE/10_AB_WHEEL.md"]),
+
+  // Registry Lot 8 — second Core repetition entry.
+  //
+  // `"unresolved"`, like every profile above. The Dead Bug chapter comes
+  // closer than most — "# Setup Time: Less Than 1 Minute", "# Loading
+  // Profile — Tempo: 2-4 seconds of controlled limb extension. Pause: 1-2
+  // seconds near end range" — but none of it is an estimate this field can
+  // hold honestly: "less than 1 minute" is a bound, not a duration, and the
+  // tempo figures describe one limb extension under a phase timing the
+  // prescription does not select (the profile encodes `global_intent:
+  // controlled`). Deriving seconds per repetition from them, then a total
+  // from the repetition count, would be inventing timing data twice over.
+  unresolvedProfile("dead_bug", "sets_reps", ["50-exercises/62_CORE/12_DEAD_BUG.md"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

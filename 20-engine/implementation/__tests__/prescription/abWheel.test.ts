@@ -94,8 +94,8 @@ function prescribe(rangeContext: PrescriptionExecutionContext["rangeContext"] = 
 
 describe("ab_wheel — registry, knowledge base and profile counts", () => {
   test("11. the registry grew from 61 to exactly 62 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(62);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(62);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(63);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(63);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -141,12 +141,17 @@ describe("ab_wheel — registry, knowledge base and profile counts", () => {
       "rowerg_intervals", "sprint_intervals",
     ] as const;
 
-    expect(PREVIOUS_IDS).toHaveLength(61);
-    expect([...PREVIOUS_IDS, EXERCISE_ID].sort()).toEqual(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort());
+    // Ids added by lots AFTER this one, listed explicitly so this test keeps
+    // proving that ab_wheel was the only exercise this lot added.
+    const ADDED_BY_LATER_LOTS = ["dead_bug"] as const;
 
-    // The other Core repetition exercises named by 62_CORE's own Volume
-    // Principles stay out of the registry — this lot integrates one.
-    for (const id of ["dead_bug", "hanging_leg_raise"]) {
+    expect(PREVIOUS_IDS).toHaveLength(61);
+    expect([...PREVIOUS_IDS, EXERCISE_ID, ...ADDED_BY_LATER_LOTS].sort()).toEqual(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort());
+
+    // The Core repetition exercises named by 62_CORE's own Volume
+    // Principles that are still out of the registry. dead_bug joined in
+    // Registry Lot 8 and is accounted for above.
+    for (const id of ["hanging_leg_raise"]) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(id);
     }
   });
@@ -668,7 +673,10 @@ describe("ab_wheel — determinism, non-mutation and non-regression", () => {
       confidence: "validated" as const,
     };
 
-    const previousIds = PILOT_EXERCISE_IDS.filter((id) => id !== EXERCISE_ID);
+    // The 61 entries that predate this lot: everything except this lot's own
+    // entry and the ids added by later lots, each covered by its own file.
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "dead_bug"];
+    const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(61);
 
     for (const id of previousIds) {

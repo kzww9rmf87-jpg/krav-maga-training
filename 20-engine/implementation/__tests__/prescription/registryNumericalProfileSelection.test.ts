@@ -122,6 +122,9 @@ const EXPLICIT_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
   // "implicit resolution must be ambiguous" check is scoped to the
   // genuinely ambiguous triple.
   ab_wheel: "core_robustness_straight_sets_v0_1",
+  // Registry Lot 8 — second entry on that same unique Core repetition
+  // triple, declaring the id for the same auditability reason.
+  dead_bug: "core_robustness_straight_sets_v0_1",
 };
 
 /**

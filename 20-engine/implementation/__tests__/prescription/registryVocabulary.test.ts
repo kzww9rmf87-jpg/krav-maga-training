@@ -456,6 +456,10 @@ describe("registryVocabulary — carry loading modes corrected to match document
       // Registry Lot 7 — Core repetition work. "Loading Type: Bodyweight
       // with leverage-based loading"; no external load is prescribed.
       ab_wheel: ["bodyweight"],
+      // Registry Lot 8 — Core repetition work. "# Movement Context — ...
+      // Bodyweight"; the optional band, dumbbell and kettlebell belong to
+      // documented progressions this entry does not represent.
+      dead_bug: ["bodyweight"],
     };
     const CORRECTED_IDS = ["pinch_carry", "sandbag_carry", "zercher_carry"];
 
@@ -472,8 +476,8 @@ describe("registryVocabulary — carry loading modes corrected to match document
   });
 
   test("7. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(62);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(62);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(63);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(63);
   });
 
   test("8. every retained value (plate, sandbag, barbell) is a known, documented LoadingMode", () => {
@@ -586,12 +590,12 @@ describe("registryVocabulary — pinch_carry represents only the Bilateral Varia
     for (const [id, text] of Object.entries(OTHER_ENTRY_FIRST_INSTRUCTION)) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id as PilotExerciseId].instructionDefinitions[0].text).toBe(text);
     }
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(62);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(63);
   });
 
   test("9. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(62);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(62);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(63);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(63);
   });
 
   test("10. explicitMethodId, supportedMethodIds, supportedVolumeStructures and stop conditions are unchanged", () => {
@@ -694,6 +698,10 @@ const DOSE_NARROWING_EXCEPTIONS = [
   // core_robustness_straight_sets_v0_1's own [2, 5] / [3, 15]. Only the
   // repetition ceiling actually narrows.
   "ab_wheel",
+  // Registry Lot 8 — Core repetition work: dead_bug narrows sets (2-4),
+  // repetitions (5-10 PER SIDE) and rest (its documented 20-60s window,
+  // intersected with the Core doctrine floor of 45s).
+  "dead_bug",
 ] as const;
 
 describe("registryVocabulary — exerciseDoseConstraints", () => {
@@ -704,7 +712,7 @@ describe("registryVocabulary — exerciseDoseConstraints", () => {
       }
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseDoseConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(62);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(63);
   });
 
   test("tibialis_raise, rotator_cuff_training, soleus_raise, copenhagen_plank, hip_thrust and barbell_row narrow exerciseDoseConstraints; wrist_strengthening and chin_up do not", () => {
@@ -731,16 +739,38 @@ const INTENSITY_CONSTRAINT_EXCEPTIONS = [
   "neck_training",
 ] as const;
 
+/**
+ * Entries narrowing the shared profile's REST window — a separate list from
+ * the intensity one, because they are separate claims. dead_bug (Registry
+ * Lot 8) is the first: its own "Recovery — 20-60 seconds" caps the Core
+ * doctrine's 45-120s window at 60.
+ */
+const REST_CONSTRAINT_EXCEPTIONS = ["dead_bug"] as const;
+
 describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestConstraints", () => {
   test("every pilot registry entry outside the known intensity-narrowing exceptions declares exerciseIntensityConstraints and exerciseRestConstraints as null", () => {
     for (const id of PILOT_EXERCISE_IDS) {
-      if ((INTENSITY_CONSTRAINT_EXCEPTIONS as readonly string[]).includes(id)) {
-        continue;
+      if (!(INTENSITY_CONSTRAINT_EXCEPTIONS as readonly string[]).includes(id)) {
+        expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseIntensityConstraints).toBeNull();
       }
-      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseIntensityConstraints).toBeNull();
-      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).toBeNull();
+      if (!(REST_CONSTRAINT_EXCEPTIONS as readonly string[]).includes(id)) {
+        expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).toBeNull();
+      }
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(62);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(63);
+  });
+
+  test("dead_bug is the only entry narrowing rest, and it narrows rest alone — not intensity", () => {
+    for (const id of REST_CONSTRAINT_EXCEPTIONS) {
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).not.toBeNull();
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseIntensityConstraints).toBeNull();
+    }
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.dead_bug.exerciseRestConstraints).toEqual({
+      scope: "between_sets",
+      minimumSeconds: 20,
+      maximumSeconds: 60,
+      sourceRuleIds: ["50-exercises/62_CORE/12_DEAD_BUG.md"],
+    });
   });
 
   test("weighted_pull_up and neck_training narrow exerciseIntensityConstraints; neither narrows exerciseRestConstraints", () => {

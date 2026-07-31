@@ -266,6 +266,12 @@ export const PILOT_EXERCISE_IDS = [
   // dragon_flag, copenhagen_plank) all prescribe timed holds; this is the
   // other half of the module.
   "ab_wheel",
+  // Registry Lot 8 — second Core repetition entry, and the FIRST entry in
+  // this whole registry to declare `laterality: "alternating"`. Its fiche
+  // prescribes "5-10 repetitions per side" within a contralateral set, so
+  // it is also the first real consumer of the laterality plumbing fixed
+  // just before it.
+  "dead_bug",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -8408,6 +8414,225 @@ const abWheelEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Dead Bug
+// Source: 50-exercises/62_CORE/12_DEAD_BUG.md
+//   - Primary Classification: "Movement and Control"; Primary Adaptation:
+//     "Movement"; module core.
+//   - Movement Context: "Supine, Closed Trunk Position, Contralateral,
+//     Controlled, Bodyweight".
+//   - Loading Profile: "Typical Volume — 2-4 sets", "Repetitions — 5-10
+//     per side", "Recovery — 20-60 seconds". ("Alternative Prescription —
+//     20-45 seconds per set" is the DURATION variant; see below.)
+//   - Velocity Profile: "Slow. Controlled. Position-Dominant. No Ballistic
+//     Intent."
+//   - Equipment Requirements: "Required — Floor Space." Optional: Exercise
+//     Mat, Resistance Band, Light Dumbbell, Light Kettlebell, Stability
+//     Ball, Wall.
+//   - Technical Failure Criteria and Key Coaching Cues: quoted below.
+//   - Fatigue Profile: every axis at the lowest level; "Overall Fatigue
+//     Cost: Very Low".
+// Method: straight_sets_repetitions / core / robustness
+//   (core_robustness_straight_sets_v0_1 — sets 2/3/5, reps 3/10/15,
+//   RPE 6/7/8 or technical_effort high_quality, rest 45/60/120s,
+//   tempo global_intent controlled)
+//
+// LATERALITY — the first `alternating` entry in this registry, and the
+// reason the laterality plumbing was fixed immediately before it.
+//
+// Three independent statements in the fiche settle it:
+//   - "# Loading Profile — Repetitions: 5-10 PER SIDE";
+//   - "# Movement Context — Contralateral";
+//   - "# Execution Standard — Extend the prescribed arm, leg or opposite
+//     arm-and-leg combination ... Return under control and repeat on the
+//     opposite side when required."
+// The sides alternate WITHIN a set and each receives the prescribed count:
+// that is `alternating`, not `unilateral` (which would mean completing one
+// side before switching — this fiche never says that) and not `bilateral`
+// (which would mean both sides working together). The interpretation is
+// `repetitions_per_side`, not `alternating_total_repetitions`: the fiche
+// counts per side, so the resolved number is per side.
+//
+// The knowledge base's own `unilateral: false` is NOT read as "no per-side
+// work" — its own comment says the opposite, describing "equal work on
+// both sides within the same set". `unilateral: false` denies a
+// single-sided specialization; it says nothing about how the count is
+// allocated.
+//
+// NO MULTIPLICATION. A per-side interpretation LABELS the resolved count.
+// 10 repetitions per side is prescribed as `reps = 10` carrying
+// `interpretation: "repetitions_per_side"` — never as 20 total, and never
+// as 5 per side halved from a total. No resolver multiplies, halves or
+// converts anything for laterality.
+//
+// VOLUME — three real narrowings, all from the fiche's own numbers:
+//   - sets: "2-4 sets" intersected with the profile's own [2, 5] → [2, 4];
+//   - repetitions: "5-10 per side" intersected with [3, 15] → [5, 10];
+//   - rest: "Recovery — 20-60 seconds" intersected with the profile's own
+//     45-120s → [45, 60]. The fiche's own 20-second floor sits BELOW the
+//     Core rest doctrine's 45-second floor, and a constraint can only
+//     narrow: the effective floor stays 45. Declared as 20/60 so the entry
+//     states its own documented range and the generic resolver computes
+//     the intersection, exactly as `applyExerciseDoseConstraint` does for
+//     volume.
+//
+// VARIANT SCOPE. This entry represents the REPETITION variant only. The
+// fiche's "Alternative Prescription — 20-45 seconds per set" is a separate,
+// duration-based variant: `straight_sets_repetitions` forbids the duration
+// volume field outright, and converting seconds into repetitions is exactly
+// the conversion this registry refuses. The same applies to the documented
+// breathing work ("Exhale through the difficult portion", "Breathing Under
+// Tension"): breaths are never counted as repetitions. Both stay in the
+// instructions, where the athlete reads them.
+//
+// INTENSITY. `technical_effort` only, and deliberately NOT `rpe`. Unlike
+// ab_wheel and pallof_press — whose own chapters state "Approximately RPE 6
+// to 8" — this fiche documents no RPE figure anywhere, and no intensity
+// metric at all in its Loading Profile. What it does document is a quality
+// endpoint: nine "Technical Failure Criteria", "A set ends when trunk
+// position can no longer be maintained", and "Use low-intensity variations
+// ... without approaching technical failure". `technical_effort:
+// high_quality` is the profile's own documented alternative rule and the
+// Core module's own first preferred intensity type. Claiming the profile's
+// RPE band here would be importing a number this chapter never gives.
+//
+// EQUIPMENT. None. "Required — Floor Space" is space, not an implement,
+// and the knowledge base already gates the exercise on `sufficient_space`
+// (minimum "very_limited"). The Exercise Mat is listed under Optional and
+// is NOT promoted to required — the same Optional-stays-optional discipline
+// applied to the sled for sprint_intervals and the heart-rate monitor for
+// rowerg_intervals. `mat` already exists in the vocabulary and is
+// deliberately not claimed.
+//
+// STOP CONDITIONS — four categories. `straight_sets_repetitions` requires
+// technical_failure, pain and completion; `range_of_motion_loss` is added
+// because this fiche names it explicitly ("Range of Motion Exceeding
+// Positional Control"). `fatigue_limit` is deliberately absent, unlike
+// ab_wheel: every fatigue axis in this chapter is rated at its lowest
+// level, "Overall Fatigue Cost: Very Low", and the documented set endpoint
+// is positional, not fatigue-driven — "A set ends when trunk position can
+// no longer be maintained", which is the technical_failure condition.
+// `balance_loss` is absent too: nothing supine describes a loss of balance.
+// -----------------------------------------------------------------------------
+
+const SOURCE_DEAD_BUG = "50-exercises/62_CORE/12_DEAD_BUG.md";
+
+const deadBugStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "dead_bug_technical_failure",
+    description:
+      "Stop the set if the lumbar spine extends, the ribs flare, the pelvis tilts anteriorly or rotates, abdominal tension is lost, breathing is held without intent, or limb movement becomes rapid and uncontrolled. A set ends when trunk position can no longer be maintained.",
+    sourceRuleIds: [SOURCE_DEAD_BUG],
+  }),
+  rangeOfMotionLossCondition({
+    conditionId: "dead_bug_range_of_motion_loss",
+    description:
+      "Stop the set if the limbs travel beyond the range the athlete can control, or if repetition quality becomes asymmetrical between the two sides.",
+    sourceRuleIds: [SOURCE_DEAD_BUG],
+  }),
+  painCondition({
+    conditionId: "dead_bug_pain",
+    description:
+      "Stop immediately if low-back, hip-flexor or shoulder pain occurs during supine limb movement, or if the athlete cannot lie supine comfortably.",
+    sourceRuleIds: [SOURCE_DEAD_BUG],
+  }),
+  completionCondition({
+    conditionId: "dead_bug_completion",
+    description:
+      "Stop once the prescribed sets and per-side repetitions are completed with the ribcage and pelvis aligned throughout.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const deadBugInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "dead_bug_setup",
+    "setup",
+    "Lie supine on the floor with the hips and knees flexed to approximately 90 degrees and the arms above the shoulders. An exercise mat is optional. Set the ribcage over the pelvis without forcing the lower back into the floor, and create gentle circumferential trunk tension while breathing normally.",
+    "high",
+    true,
+    SOURCE_DEAD_BUG,
+  ),
+  makeInstruction(
+    "dead_bug_execution",
+    "execution",
+    "Brace before the limbs move, then extend the opposite arm and leg slowly — a documented option is 2 to 4 seconds of controlled extension with a 1 to 2 second pause near end range. Reach long rather than low, stop at the furthest range that preserves trunk position, return under control and repeat on the opposite side. The prescribed repetitions are per side. Exhale through the difficult portion without losing tension.",
+    "high",
+    true,
+    SOURCE_DEAD_BUG,
+  ),
+];
+
+const deadBugEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "dead_bug",
+  moduleId: "core",
+  role: "robustness",
+  explicitMethodId: "straight_sets_repetitions",
+  numericalProfileId: "core_robustness_straight_sets_v0_1",
+  capabilities: {
+    exerciseId: "dead_bug",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    // technical_effort ONLY — this chapter documents no RPE figure. See the
+    // block comment above.
+    supportedIntensityTypes: ["technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    // "# Movement Context — ... Bodyweight". No external load is
+    // prescribed; the optional band, dumbbell and kettlebell belong to
+    // documented progressions this entry does not represent.
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["global_intent"],
+    // See the block comment: "5-10 per side" within a contralateral set.
+    laterality: "alternating",
+    volumeInterpretations: ["repetitions_per_side"],
+    // Exactly the two tags `straight_sets_repetitions` requires.
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    // "Required — Floor Space" is space, already gated by the knowledge
+    // base; the Exercise Mat is Optional and is not promoted.
+    requiredEquipmentCapabilities: [],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["dead_bug_setup", "dead_bug_execution"],
+    requiredStopConditionIds: [
+      "dead_bug_technical_failure",
+      "dead_bug_range_of_motion_loss",
+      "dead_bug_pain",
+      "dead_bug_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_dead_bug",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_DEAD_BUG, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: deadBugInstructions,
+  stopConditionDefinitions: deadBugStopConditions,
+  // "Typical Volume — 2-4 sets" and "Repetitions — 5-10 per side",
+  // intersected with the shared profile's own [2, 5] sets and [3, 15]
+  // repetitions. The repetition figure is per side and stays per side —
+  // it is never doubled into a total.
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 2, repetitions: 5, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 4, repetitions: 10, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_DEAD_BUG],
+  },
+  exerciseIntensityConstraints: null,
+  // "Recovery — 20-60 seconds". The documented floor is below the Core rest
+  // doctrine's own 45-second floor; a constraint can only narrow, so the
+  // effective window is 45-60s. Declared as documented, intersection left
+  // to the generic resolver.
+  exerciseRestConstraints: {
+    scope: "between_sets",
+    minimumSeconds: 20,
+    maximumSeconds: 60,
+    sourceRuleIds: [SOURCE_DEAD_BUG],
+  },
+  sourceRuleIds: [SOURCE_DEAD_BUG, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -8495,6 +8720,7 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   sprint_intervals: sprintIntervalsEntry,
 
   ab_wheel: abWheelEntry,
+  dead_bug: deadBugEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>
