@@ -18,6 +18,8 @@ import {
   NUMERICAL_PRESCRIPTION_PROFILES,
   findDuplicateProfileTriples,
   getNumericalPrescriptionProfileById,
+  hasExecutableNumericalProfile,
+  isExecutableNumericalProfile,
   resolveNumericalProfile,
 } from "../../prescription/prescriptionKnowledge";
 import { resolveVolume } from "../../prescription/resolveVolume";
@@ -195,6 +197,51 @@ describe("Table Group 8 — documented profile values", () => {
 });
 
 // -----------------------------------------------------------------------------
+// Structural presence is not executability
+// -----------------------------------------------------------------------------
+
+describe("executability of the interval profiles", () => {
+  test("INT-SHORT is the only documented profile that is present but not executable", () => {
+    const nonExecutable = NUMERICAL_PRESCRIPTION_PROFILES.filter(
+      (profile) => !isExecutableNumericalProfile(profile),
+    );
+
+    expect(nonExecutable.map((profile) => profile.profileId)).toEqual([
+      "conditioning_short_intervals_v0_1",
+    ]);
+  });
+
+  test("INT-SHORT stays in the documented profile table — its volume and rest envelopes are real, sourced data", () => {
+    const profile = getNumericalPrescriptionProfileById("conditioning_short_intervals_v0_1");
+
+    expect(profile).not.toBeNull();
+    expect(profile?.volume.workIntervals).not.toBeNull();
+    expect(profile?.rest?.seconds).not.toBeNull();
+    // Only the intensity dimension is missing, and deliberately so.
+    expect(profile?.intensity).toEqual([]);
+  });
+
+  test("hasExecutableNumericalProfile answers false for the interval triple — ambiguous, and its first match is not executable", () => {
+    expect(
+      hasExecutableNumericalProfile(
+        INTERVAL_TRIPLE.moduleId,
+        INTERVAL_TRIPLE.methodId,
+        INTERVAL_TRIPLE.exerciseRole,
+      ),
+    ).toBe(false);
+  });
+
+  test("hasExecutableNumericalProfile still answers true for a unique, executable triple", () => {
+    expect(hasExecutableNumericalProfile("strength", "straight_sets_repetitions", "primary")).toBe(true);
+    expect(hasExecutableNumericalProfile("grip", "distance_carry_sets", "primary")).toBe(true);
+  });
+
+  test("hasExecutableNumericalProfile answers false for a triple no profile documents", () => {
+    expect(hasExecutableNumericalProfile("recovery", "straight_sets_repetitions", "primary")).toBe(false);
+  });
+});
+
+// -----------------------------------------------------------------------------
 // Ambiguous-triple behavior — the Lot 0 machinery on real documented data
 // -----------------------------------------------------------------------------
 
@@ -332,6 +379,27 @@ describe("resolveIntensity — interval profiles", () => {
     expect(result.profileId).toBe("conditioning_short_intervals_v0_1");
   });
 
+  test("INT-SHORT's failure is total — no supported type or range context can ever make it resolve", () => {
+    const everyIntensityType = [
+      "absolute_load", "percentage_1rm", "percentage_training_max",
+      "percentage_body_mass", "rpe", "rir", "velocity", "heart_rate", "pace",
+      "technical_effort", "movement_intent", "impact_intent",
+      "assistance_level", "resistance_category", "session_intensity",
+    ] as const;
+
+    for (const rangeContext of ["reduced", "normal", "high"] as const) {
+      const result = resolveIntensity({
+        ...resolverInput("conditioning_short_intervals_v0_1"),
+        rangeContext,
+        supportedIntensityTypes: everyIntensityType,
+      });
+
+      expect(result.ok).toBe(false);
+      if (result.ok) continue;
+      expect(result.failureCode).toBe("INTENSITY_NOT_DOCUMENTED");
+    }
+  });
+
   test("INT-LONG resolves the documented fallback RPE (7 reduced, 8 normal, 9 high)", () => {
     for (const [rangeContext, expected] of [
       ["reduced", 7],
@@ -448,6 +516,7 @@ describe("registry validators — entries on the interval triple", () => {
     "UNKNOWN_NUMERICAL_PROFILE",
     "NUMERICAL_PROFILE_TRIPLE_MISMATCH",
     "AMBIGUOUS_TRIPLE_REQUIRES_EXPLICIT_PROFILE",
+    "NON_EXECUTABLE_NUMERICAL_PROFILE",
   ];
 
   test("an entry on the triple without a numericalProfileId is rejected with AMBIGUOUS_TRIPLE_REQUIRES_EXPLICIT_PROFILE", () => {
@@ -462,14 +531,37 @@ describe("registry validators — entries on the interval triple", () => {
     }
   });
 
-  test("declaring any of the three interval profiles satisfies the validator", () => {
-    for (const profileId of INTERVAL_PROFILE_IDS) {
+  test("declaring either executable interval profile satisfies the validator", () => {
+    for (const profileId of [
+      "conditioning_long_intervals_v0_1",
+      "repeated_sprint_intervals_v0_1",
+    ] as const) {
       const issues = validateRegistryEntry(syntheticIntervalEntry(profileId));
 
       expect(
         issues.filter((issue) => profileIssueCodes.includes(issue.code)),
       ).toEqual([]);
     }
+  });
+
+  test("declaring INT-SHORT is rejected at validation time with NON_EXECUTABLE_NUMERICAL_PROFILE, before any prescription is attempted", () => {
+    const issues = validateRegistryEntry(
+      syntheticIntervalEntry("conditioning_short_intervals_v0_1"),
+    );
+    const nonExecutable = issues.filter(
+      (issue) => issue.code === "NON_EXECUTABLE_NUMERICAL_PROFILE",
+    );
+
+    expect(nonExecutable).toHaveLength(1);
+    expect(nonExecutable[0]?.message).toContain("conditioning_short_intervals_v0_1");
+    expect(nonExecutable[0]?.message).toContain("INTENSITY_NOT_DOCUMENTED");
+    // The selection itself is valid — it is executability, not resolution,
+    // that fails here.
+    expect(
+      issues.some((issue) =>
+        ["UNKNOWN_NUMERICAL_PROFILE", "NUMERICAL_PROFILE_TRIPLE_MISMATCH"].includes(issue.code),
+      ),
+    ).toBe(false);
   });
 
   test("declaring a profile from another triple is rejected with NUMERICAL_PROFILE_TRIPLE_MISMATCH", () => {

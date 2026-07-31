@@ -10,10 +10,12 @@
  * - `pace_loss` — "pace or power loss where applicable"
  *   (31_TRAINING_METHOD_CATALOGUE.md, Method 6), the interval-family
  *   analogue of `velocity_loss` in the "method-specific quality threshold"
- *   tier of 25_PRESCRIPTION_RULES.md;
+ *   tier of 25_PRESCRIPTION_RULES.md. Named `intervalPaceLossCondition`
+ *   because the shape is structure-bound: `continuous_aerobic_duration`
+ *   requires the same category but has no intervals to end;
  * - `acute_symptom` — "Pain or acute symptom" share one priority tier in
- *   25_PRESCRIPTION_RULES.md, so the factory mirrors `painCondition`
- *   exactly apart from category and trigger type.
+ *   25_PRESCRIPTION_RULES.md, so the factory takes `painCondition`'s tier,
+ *   with a structure-independent `continuous` evaluation timing.
  */
 
 import { describe, expect, test } from "vitest";
@@ -25,7 +27,7 @@ import {
   equipmentFailureCondition,
   fatigueLimitCondition,
   impactLimitCondition,
-  paceLossCondition,
+  intervalPaceLossCondition,
   painCondition,
   rangeOfMotionLossCondition,
   technicalFailureCondition,
@@ -44,8 +46,8 @@ const spec = (conditionId: string, description: string) => ({
 // Factory shapes
 // -----------------------------------------------------------------------------
 
-describe("paceLossCondition", () => {
-  const definition = paceLossCondition(
+describe("intervalPaceLossCondition", () => {
+  const definition = intervalPaceLossCondition(
     spec("test-stop-pace-loss", "Stop the interval when target pace or power can no longer be held."),
   );
 
@@ -103,16 +105,42 @@ describe("acuteSymptomCondition", () => {
     expect(definition.recoverability).toBe("not_recoverable");
   });
 
-  test("mirrors painCondition exactly apart from category and trigger type — one shared priority tier", () => {
+  test("takes painCondition's priority tier — same scope, action, priority and recoverability", () => {
     const pain = painCondition(spec("test-stop-pain-mirror", "pain"));
 
     expect(definition.scope).toBe(pain.scope);
     expect(definition.action).toBe(pain.action);
     expect(definition.priority).toBe(pain.priority);
     expect(definition.recoverability).toBe(pain.recoverability);
-    expect(definition.trigger.evaluationTiming).toBe(pain.trigger.evaluationTiming);
     expect(definition.trigger.type).toBe("acute_symptom_report");
     expect(pain.trigger.type).toBe("pain_report");
+  });
+
+  test("is evaluated continuously, not during_set — every method requiring it forbids sets", () => {
+    expect(definition.trigger.evaluationTiming).toBe("continuous");
+
+    for (const methodId of [
+      "combat_rounds",
+      "work_rest_intervals",
+      "continuous_aerobic_duration",
+      "recovery_duration_work",
+    ] as const) {
+      const contract = getTrainingMethodContract(methodId);
+      expect(contract.requiredStopConditionCategories).toContain("acute_symptom");
+      expect(contract.forbiddenVolumeFields).toContain("sets");
+    }
+
+    // painCondition deliberately keeps `during_set`: 59 registry entries
+    // resolve through it, and this factory does not touch their output.
+    expect(painCondition(spec("t-pain-timing", "d")).trigger.evaluationTiming).toBe("during_set");
+  });
+
+  test("one structure-independent shape serves every method requiring the category — unlike pace_loss", () => {
+    // acute_symptom stops the whole exercise, which is meaningful under
+    // rounds_duration, intervals and continuous_duration alike; pace_loss
+    // ends an interval, which only exists under `intervals`.
+    expect(definition.scope).toBe("exercise");
+    expect(intervalPaceLossCondition(spec("t-pace-scope", "d")).scope).toBe("interval");
   });
 
   test("triggers on detection with no invented threshold", () => {
@@ -150,7 +178,7 @@ describe("existing factories — non-regression", () => {
 // -----------------------------------------------------------------------------
 
 const intervalDefinitions = () => [
-  paceLossCondition(spec("wr-stop-pace-loss", "Stop the interval when the target pace cannot be held.")),
+  intervalPaceLossCondition(spec("wr-stop-pace-loss", "Stop the interval when the target pace cannot be held.")),
   technicalFailureCondition(spec("wr-stop-technical", "Stop the interval on repeated technical breakdown.")),
   fatigueLimitCondition(spec("wr-stop-fatigue", "Stop the exercise when fatigue degrades output across intervals.")),
   acuteSymptomCondition(spec("wr-stop-acute", "Stop immediately on any acute symptom.")),
@@ -239,8 +267,8 @@ describe("resolveStopConditions — work_rest_intervals", () => {
   });
 
   test("factories are pure: two identical calls return structurally identical definitions", () => {
-    const first = paceLossCondition(spec("wr-stop-pace-loss", "Stop the interval when the target pace cannot be held."));
-    const second = paceLossCondition(spec("wr-stop-pace-loss", "Stop the interval when the target pace cannot be held."));
+    const first = intervalPaceLossCondition(spec("wr-stop-pace-loss", "Stop the interval when the target pace cannot be held."));
+    const second = intervalPaceLossCondition(spec("wr-stop-pace-loss", "Stop the interval when the target pace cannot be held."));
 
     expect(first).toEqual(second);
     expect(acuteSymptomCondition(spec("a", "b"))).toEqual(acuteSymptomCondition(spec("a", "b")));

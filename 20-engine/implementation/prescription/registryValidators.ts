@@ -18,6 +18,8 @@ import { getTrainingMethodContract } from "./contracts";
 import {
   NUMERICAL_PRESCRIPTION_PROFILES,
   getNumericalPrescriptionProfileById,
+  isExecutableNumericalProfile,
+  resolveNumericalProfile,
 } from "./prescriptionKnowledge";
 import { findUnknownEquipmentCapabilities } from "./equipmentCapabilities";
 import { isKnownAthleteReferenceType } from "./athleteReferenceCatalog";
@@ -36,7 +38,8 @@ export type RegistryIssueCode =
   | "IMPOSSIBLE_METHOD_STRUCTURE_EQUIPMENT_COMBINATION"
   | "UNKNOWN_NUMERICAL_PROFILE"
   | "NUMERICAL_PROFILE_TRIPLE_MISMATCH"
-  | "AMBIGUOUS_TRIPLE_REQUIRES_EXPLICIT_PROFILE";
+  | "AMBIGUOUS_TRIPLE_REQUIRES_EXPLICIT_PROFILE"
+  | "NON_EXECUTABLE_NUMERICAL_PROFILE";
 
 export interface RegistryIssue {
   code: RegistryIssueCode;
@@ -150,6 +153,30 @@ export function validateRegistryEntry(entry: ExercisePrescriptionRegistryEntry):
         `${tripleCandidates.length} numerical profiles share this entry's triple ` +
         `${entry.moduleId}/${entry.explicitMethodId}/${entry.role} ` +
         `(${tripleCandidates.map((profile) => profile.profileId).join(", ")}) — an explicit numericalProfileId is required.`,
+    });
+  }
+
+  // Presence is not executability: a profile may be fully documented and
+  // correctly selected yet still be unable to produce a prescription (no
+  // encodable intensity — see `isExecutableNumericalProfile`). Catching it
+  // here means the entry is rejected when it is declared, rather than
+  // failing at the `"intensity"` stage every time it is prescribed. Only
+  // reported when resolution actually succeeded — the codes above already
+  // cover unknown, mismatched and ambiguous selections.
+  const profileResolution = resolveNumericalProfile({
+    moduleId: entry.moduleId,
+    methodId: entry.explicitMethodId,
+    exerciseRole: entry.role,
+    explicitProfileId: declaredProfileId,
+  });
+
+  if (profileResolution.ok && !isExecutableNumericalProfile(profileResolution.profile)) {
+    issues.push({
+      code: "NON_EXECUTABLE_NUMERICAL_PROFILE",
+      exerciseId,
+      message:
+        `Numerical profile "${profileResolution.profile.profileId}" documents no encodable intensity rule, ` +
+        `so it can never produce a prescription — resolveIntensity fails with INTENSITY_NOT_DOCUMENTED for every input.`,
     });
   }
 

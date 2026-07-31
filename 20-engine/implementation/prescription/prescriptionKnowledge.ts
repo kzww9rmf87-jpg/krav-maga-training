@@ -765,15 +765,40 @@ export const NUMERICAL_PRESCRIPTION_PROFILES = [
   // and rest ranges, not separately encoded rules.
   // ---------------------------------------------------------------------------
   {
-    // Profile INT-SHORT. Intensity is documented only as "a percentage of a
-    // validated maximal aerobic or sport-specific reference, pace, power,
-    // heart rate, or documented RPE" with no numeric range: none of these is
-    // encodable in this schema today (no pace/power/heart-rate units or
-    // aerobic reference types), and no RPE range is documented. The table's
-    // own rule — "Without a valid intensity profile, the engine must not
-    // prescribe this method numerically" — is therefore represented by an
-    // empty intensity list: `resolveIntensity` fails deterministically with
-    // `INTENSITY_NOT_DOCUMENTED` instead of inventing a value.
+    // Profile INT-SHORT — DELIBERATELY NOT EXECUTABLE (see
+    // `isExecutableNumericalProfile`). Its volume and rest envelopes are
+    // fully documented and encoded; its intensity cannot be, so the profile
+    // is knowledge the engine holds but cannot yet prescribe.
+    //
+    // The table requires "one of: a percentage of a validated maximal
+    // aerobic or sport-specific reference; pace; power; heart rate; or
+    // documented RPE" — and gives no number for any of them. The first four
+    // are unencodable in this schema: `IntensityRangeRule.unit` admits only
+    // percentage/RPE/repetitions/kilograms/category (never
+    // beats_per_minute, minutes_per_kilometer, seconds_per_meter or
+    // meters_per_second), and its `referenceType` only one_rep_max /
+    // training_max / body_mass (never max_aerobic_speed, max_heart_rate,
+    // heart_rate_reserve or baseline_pace) — both unions being deliberately
+    // narrower than the canonical vocabularies in `types.ts`. The fifth,
+    // RPE, is named without a range; the contrast with INT-LONG, which does
+    // document a numeric "General fallback RPE 7-9", shows the omission is
+    // the table's intent and not a gap to be filled here.
+    //
+    // `movement_intent` is not one of the five documented options and is
+    // therefore not a legitimate substitute, however available it is in the
+    // method contract.
+    //
+    // So the table's own rule — "Without a valid intensity profile, the
+    // engine must not prescribe this method numerically" — is enforced by an
+    // empty intensity list: `resolveIntensity` fails with
+    // `INTENSITY_NOT_DOCUMENTED` on every input rather than inventing a
+    // value, and `registryValidators.ts` refuses any entry pointing here
+    // (`NON_EXECUTABLE_NUMERICAL_PROFILE`) before runtime is ever reached.
+    //
+    // Making it executable requires widening `IntensityRangeRule` to the
+    // aerobic reference types and pace/power/heart-rate units already
+    // present in `types.ts`, plus mapping them in `resolveIntensity`'s
+    // `mapIntensityUnit` — a numerical-model change, not a profile edit.
     profileId: "conditioning_short_intervals_v0_1",
     version: "0.1",
     moduleId: "conditioning",
@@ -1162,9 +1187,42 @@ export const findDuplicateProfileTriples = (
     });
 };
 
+/**
+ * Whether a profile can, in principle, produce a complete prescription.
+ *
+ * Being present in `NUMERICAL_PRESCRIPTION_PROFILES` is not the same thing:
+ * a profile whose documented table defines volume and rest but no encodable
+ * intensity is structurally real and correctly sourced, yet can never be
+ * prescribed — `resolveIntensity` returns `INTENSITY_NOT_DOCUMENTED` for it
+ * on every input, whatever the exercise supports, before any capability or
+ * reference check runs. `conditioning_short_intervals_v0_1` is exactly that
+ * case today (see its own comment above).
+ *
+ * Derived from the profile's own data rather than declared as a flag, so it
+ * can never drift out of step with the profile it describes: adding a
+ * documented intensity rule makes the profile executable in the same edit.
+ */
+export const isExecutableNumericalProfile = (
+  profile: NumericalPrescriptionProfile,
+): boolean => profile.intensity.length > 0;
+
+/**
+ * Whether the triple resolves to exactly one profile *and* that profile is
+ * executable. An ambiguous triple answers `false`: several profiles share
+ * it, so no single profile is selected without an explicit
+ * `numericalProfileId` (see `resolveNumericalProfile`) — the caller does not
+ * "have" a profile for the triple alone.
+ */
 export const hasExecutableNumericalProfile = (
   moduleId: CapabilityModule,
   methodId: TrainingMethodId,
   exerciseRole: ExerciseRole,
-): boolean =>
-  getNumericalPrescriptionProfile(moduleId, methodId, exerciseRole) !== null;
+): boolean => {
+  const resolution = resolveNumericalProfile({
+    moduleId,
+    methodId,
+    exerciseRole,
+  });
+
+  return resolution.ok && isExecutableNumericalProfile(resolution.profile);
+};

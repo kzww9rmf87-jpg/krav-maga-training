@@ -2,10 +2,16 @@
  * Combat Athlete System — Stop-Condition Registry
  * Version 0.1
  *
- * Reusable `StopConditionDefinition` factories, one per `StopConditionCategory`
- * actually needed by the pilot exercise registry (`exercisePrescriptionRegistry.ts`)
- * or required by a Training Method contract being prepared for registry use
- * (`pace_loss` and `acute_symptom` for `work_rest_intervals`).
+ * Reusable `StopConditionDefinition` factories for every
+ * `StopConditionCategory` actually needed by the pilot exercise registry
+ * (`exercisePrescriptionRegistry.ts`) or required by a Training Method
+ * contract being prepared for registry use (`pace_loss` and `acute_symptom`
+ * for `work_rest_intervals`).
+ *
+ * Usually one factory per category. `pace_loss` is the exception: its shape
+ * depends on the method's volume structure, so it is named for the structure
+ * it serves (`intervalPaceLossCondition`) and a continuous-aerobic
+ * counterpart stays unwritten until one is documented.
  *
  * Every factory fixes the mechanical shape (scope, trigger type, action,
  * priority, recoverability) that is identical across every exercise using
@@ -113,15 +119,28 @@ export function rangeOfMotionLossCondition(spec: StopConditionSpec): StopConditi
 }
 
 /**
- * Measurable or visible decline in pace or power output across the interval.
- * The interval-family analogue of `velocityLossCondition`: required by the
- * `work_rest_intervals` method contract ("pace or power loss where
- * applicable", 31_TRAINING_METHOD_CATALOGUE.md, Method 6) and sitting in the
- * "method-specific quality threshold" priority tier of
+ * Measurable or visible decline in pace or power output across one work
+ * interval. The interval-family analogue of `velocityLossCondition`:
+ * required by the `work_rest_intervals` method contract ("pace or power loss
+ * where applicable", 31_TRAINING_METHOD_CATALOGUE.md, Method 6) and sitting
+ * in the "method-specific quality threshold" priority tier of
  * 25_PRESCRIPTION_RULES.md — hence the same `medium` /
- * `recoverable_same_exercise` shape at interval scope.
+ * `recoverable_same_exercise` shape, scoped to the interval.
+ *
+ * Named for the structure, not just the category, because `pace_loss` is the
+ * one required category whose shape genuinely cannot be shared across
+ * methods: `continuous_aerobic_duration` also requires it, but its
+ * `continuous_duration` structure forbids `work_intervals` entirely, so
+ * `scope: "interval"` / `action: "end_interval"` would describe a boundary
+ * that does not exist in a continuous prescription. Nothing downstream would
+ * catch that — `resolveStopConditions` and `validatePrescription` check
+ * category coverage and copy `scope` through verbatim, never verifying it
+ * against the method's structure. A continuous-aerobic counterpart therefore
+ * needs its own factory, and no such factory is written here: its scope,
+ * action and recoverability are documented nowhere yet, and inventing them
+ * is exactly what 28_STOP_CONDITIONS.md forbids for an inactive category.
  */
-export function paceLossCondition(spec: StopConditionSpec): StopConditionDefinition {
+export function intervalPaceLossCondition(spec: StopConditionSpec): StopConditionDefinition {
   return buildDefinition(spec, "pace_loss", "interval", "pace_decline", "end_interval", "medium", "recoverable_same_exercise", "during_interval");
 }
 
@@ -129,9 +148,20 @@ export function paceLossCondition(spec: StopConditionSpec): StopConditionDefinit
  * Acute symptom reported at any point (dizziness, nausea, chest discomfort…)
  * — never continued through. 25_PRESCRIPTION_RULES.md places "pain or acute
  * symptom" together in the tier just below emergency medical, so this factory
- * mirrors `painCondition` exactly: exercise scope, `stop_exercise`,
+ * takes `painCondition`'s tier exactly: exercise scope, `stop_exercise`,
  * `critical`, `not_recoverable`.
+ *
+ * Unlike `pace_loss`, this shape is structure-independent and needs no
+ * per-method variant: all four methods requiring `acute_symptom`
+ * (`combat_rounds`, `work_rest_intervals`, `continuous_aerobic_duration`,
+ * `recovery_duration_work`) are served by stopping the whole exercise. That
+ * is also why the timing is `continuous` rather than the file's `during_set`
+ * default — an acute symptom is monitored throughout, and every one of those
+ * four methods lists `sets` in `forbiddenVolumeFields`, so `during_set` would
+ * name a boundary none of their prescriptions has. `painCondition` keeps
+ * `during_set`: 59 registry entries resolve through it today, and changing
+ * their prescriptions is not this factory's business.
  */
 export function acuteSymptomCondition(spec: StopConditionSpec): StopConditionDefinition {
-  return buildDefinition(spec, "acute_symptom", "exercise", "acute_symptom_report", "stop_exercise", "critical", "not_recoverable");
+  return buildDefinition(spec, "acute_symptom", "exercise", "acute_symptom_report", "stop_exercise", "critical", "not_recoverable", "continuous");
 }

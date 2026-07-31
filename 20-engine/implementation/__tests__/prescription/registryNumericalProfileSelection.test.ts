@@ -262,6 +262,7 @@ describe("Lot 0 — registry validators", () => {
           "UNKNOWN_NUMERICAL_PROFILE",
           "NUMERICAL_PROFILE_TRIPLE_MISMATCH",
           "AMBIGUOUS_TRIPLE_REQUIRES_EXPLICIT_PROFILE",
+          "NON_EXECUTABLE_NUMERICAL_PROFILE",
         ].includes(issue.code),
       ),
     ).toEqual([]);
@@ -273,6 +274,7 @@ describe("Lot 0 — registry validators", () => {
         "UNKNOWN_NUMERICAL_PROFILE",
         "NUMERICAL_PROFILE_TRIPLE_MISMATCH",
         "AMBIGUOUS_TRIPLE_REQUIRES_EXPLICIT_PROFILE",
+        "NON_EXECUTABLE_NUMERICAL_PROFILE",
       ].includes(issue.code),
     );
 
