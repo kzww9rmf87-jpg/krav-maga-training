@@ -15,10 +15,11 @@
 import type { CapabilityModule, Identifier } from "../types";
 import type { TrainingMethodId } from "./contracts";
 import {
-  getNumericalPrescriptionProfile,
+  resolveNumericalProfile,
   selectRangeValue,
   type NumericalIntensityRule,
   type NumericalPrescriptionProfile,
+  type NumericalProfileResolutionSource,
   type RangeContext,
 } from "./prescriptionKnowledge";
 import type {
@@ -78,6 +79,9 @@ export interface ExerciseIntensityConstraints {
 
 export type IntensityResolutionFailureCode =
   | "NUMERICAL_PROFILE_MISSING"
+  | "NUMERICAL_PROFILE_AMBIGUOUS"
+  | "NUMERICAL_PROFILE_ID_UNKNOWN"
+  | "NUMERICAL_PROFILE_TRIPLE_MISMATCH"
   | "INTENSITY_NOT_DOCUMENTED"
   | "INTENSITY_TYPE_UNSUPPORTED"
   | "INTENSITY_REFERENCE_MISSING"
@@ -97,6 +101,8 @@ export interface IntensityResolutionSuccess {
   methodId: TrainingMethodId;
   role: ExerciseRole;
   profileId: Identifier;
+  /** How the numerical profile was selected — explicit id or unique triple. */
+  profileResolutionSource: NumericalProfileResolutionSource;
   rangeContext: RangeContext;
   intensity: PrescriptionIntensity;
   selectedRuleType: IntensityType;
@@ -173,6 +179,14 @@ export interface ResolveIntensityInput {
    * resolution then behaves exactly as it did before this field existed.
    */
   exerciseIntensityConstraints?: ExerciseIntensityConstraints | null;
+
+  /**
+   * Explicit numerical profile selection supplied by the registry entry.
+   * Required whenever several profiles share this input's
+   * module/method/role triple; `null` or absent preserves the historical
+   * unique-triple lookup exactly.
+   */
+  numericalProfileId?: Identifier | null;
 
   sourceRuleIds?: readonly Identifier[];
 }
@@ -631,21 +645,24 @@ const buildEffectiveIntensityRules = (
 export const resolveIntensity = (
   input: ResolveIntensityInput,
 ): IntensityResolutionResult => {
-  const profile = getNumericalPrescriptionProfile(
-    input.moduleId,
-    input.methodId,
-    input.role,
-  );
+  const profileResolution = resolveNumericalProfile({
+    moduleId: input.moduleId,
+    methodId: input.methodId,
+    exerciseRole: input.role,
+    explicitProfileId: input.numericalProfileId ?? null,
+  });
 
-  if (profile === null) {
+  if (!profileResolution.ok) {
     return buildFailure(
       input,
       null,
-      "NUMERICAL_PROFILE_MISSING",
-      `No numerical prescription profile exists for module ${input.moduleId}, method ${input.methodId} and role ${input.role}.`,
+      profileResolution.failureCode,
+      profileResolution.message,
       [],
     );
   }
+
+  const { profile, resolutionSource: profileResolutionSource } = profileResolution;
 
   if (profile.intensity.length === 0) {
     return buildFailure(
@@ -826,6 +843,7 @@ export const resolveIntensity = (
       methodId: input.methodId,
       role: input.role,
       profileId: profile.profileId,
+      profileResolutionSource,
       rangeContext: input.rangeContext,
       intensity: {
         primaryMetric,

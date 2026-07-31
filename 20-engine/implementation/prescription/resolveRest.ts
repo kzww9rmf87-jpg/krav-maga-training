@@ -14,10 +14,11 @@ import {
   type TrainingMethodId,
 } from "./contracts";
 import {
-  getNumericalPrescriptionProfile,
+  resolveNumericalProfile,
   selectRangeValue,
   type IntegerRange,
   type NumericalPrescriptionProfile,
+  type NumericalProfileResolutionSource,
   type NumericalRestRule,
   type RangeContext,
 } from "./prescriptionKnowledge";
@@ -54,6 +55,9 @@ export interface ExerciseRestConstraints {
 
 export type RestResolutionFailureCode =
   | "NUMERICAL_PROFILE_MISSING"
+  | "NUMERICAL_PROFILE_AMBIGUOUS"
+  | "NUMERICAL_PROFILE_ID_UNKNOWN"
+  | "NUMERICAL_PROFILE_TRIPLE_MISMATCH"
   | "REST_REQUIRED_BUT_UNDOCUMENTED"
   | "REST_FORBIDDEN_BUT_DOCUMENTED"
   | "REST_SCOPE_INVALID"
@@ -70,6 +74,8 @@ export interface RestResolutionSuccess {
   methodId: TrainingMethodId;
   role: ExerciseRole;
   profileId: Identifier;
+  /** How the numerical profile was selected — explicit id or unique triple. */
+  profileResolutionSource: NumericalProfileResolutionSource;
   rangeContext: RangeContext;
   rest: PrescriptionRest | null;
   /**
@@ -117,6 +123,14 @@ export interface ResolveRestInput {
    * behaves exactly as it did before this field existed.
    */
   exerciseRestConstraints?: ExerciseRestConstraints | null;
+
+  /**
+   * Explicit numerical profile selection supplied by the registry entry.
+   * Required whenever several profiles share this input's
+   * module/method/role triple; `null` or absent preserves the historical
+   * unique-triple lookup exactly.
+   */
+  numericalProfileId?: Identifier | null;
 
   sourceRuleIds?: readonly Identifier[];
 }
@@ -277,20 +291,23 @@ const buildPrescriptionRest = (
 export const resolveRest = (
   input: ResolveRestInput,
 ): RestResolutionResult => {
-  const profile = getNumericalPrescriptionProfile(
-    input.moduleId,
-    input.methodId,
-    input.role,
-  );
+  const profileResolution = resolveNumericalProfile({
+    moduleId: input.moduleId,
+    methodId: input.methodId,
+    exerciseRole: input.role,
+    explicitProfileId: input.numericalProfileId ?? null,
+  });
 
-  if (profile === null) {
+  if (!profileResolution.ok) {
     return buildFailure(
       input,
       null,
-      "NUMERICAL_PROFILE_MISSING",
-      `No numerical prescription profile exists for module ${input.moduleId}, method ${input.methodId} and role ${input.role}.`,
+      profileResolution.failureCode,
+      profileResolution.message,
     );
   }
+
+  const { profile, resolutionSource: profileResolutionSource } = profileResolution;
 
   const method = getTrainingMethodContract(input.methodId);
   const restRule = profile.rest;
@@ -328,6 +345,7 @@ export const resolveRest = (
       methodId: input.methodId,
       role: input.role,
       profileId: profile.profileId,
+      profileResolutionSource,
       rangeContext: input.rangeContext,
       rest: null,
       narrowingNotes: [],
@@ -367,6 +385,7 @@ export const resolveRest = (
       methodId: input.methodId,
       role: input.role,
       profileId: profile.profileId,
+      profileResolutionSource,
       rangeContext: input.rangeContext,
       rest: null,
       narrowingNotes: [],
@@ -471,6 +490,7 @@ export const resolveRest = (
     methodId: input.methodId,
     role: input.role,
     profileId: profile.profileId,
+    profileResolutionSource,
     rangeContext: input.rangeContext,
     rest: buildPrescriptionRest(
       scope,

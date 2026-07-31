@@ -18,22 +18,27 @@ vi.mock("../../prescription/prescriptionKnowledge", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../prescription/prescriptionKnowledge")>();
   return {
     ...actual,
-    getNumericalPrescriptionProfile: (
-      moduleId: string,
-      methodId: string,
-      exerciseRole: string,
-    ) => {
-      if (methodId === "straight_sets_repetitions" && exerciseRole === "primary") {
-        return REST_NULL_PROFILE;
+    resolveNumericalProfile: (query: {
+      moduleId: string;
+      methodId: string;
+      exerciseRole: string;
+      explicitProfileId?: string | null;
+    }) => {
+      if (query.methodId === "straight_sets_repetitions" && query.exerciseRole === "primary") {
+        return {
+          ok: true as const,
+          profile: REST_NULL_PROFILE,
+          resolutionSource: "module_method_role_unique" as const,
+        };
       }
-      if (methodId === "straight_sets_repetitions" && exerciseRole === "secondary") {
-        return REST_NO_ENVELOPE_PROFILE;
+      if (query.methodId === "straight_sets_repetitions" && query.exerciseRole === "secondary") {
+        return {
+          ok: true as const,
+          profile: REST_NO_ENVELOPE_PROFILE,
+          resolutionSource: "module_method_role_unique" as const,
+        };
       }
-      return actual.getNumericalPrescriptionProfile(
-        moduleId as never,
-        methodId as never,
-        exerciseRole as never,
-      );
+      return actual.resolveNumericalProfile(query as never);
     },
   };
 });

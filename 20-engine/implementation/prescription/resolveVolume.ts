@@ -15,12 +15,13 @@
 import type { CapabilityModule, Identifier } from "../types";
 import type { TrainingMethodId } from "./contracts";
 import {
-  getNumericalPrescriptionProfile,
+  resolveNumericalProfile,
   selectRangeValue,
   type DoseBoundary,
   type IntegerRange,
   type NumericRange,
   type NumericalPrescriptionProfile,
+  type NumericalProfileResolutionSource,
   type NumericalVolumeProfile,
   type RangeContext,
 } from "./prescriptionKnowledge";
@@ -57,6 +58,9 @@ export interface ExerciseDoseConstraints {
 
 export type VolumeResolutionFailureCode =
   | "NUMERICAL_PROFILE_MISSING"
+  | "NUMERICAL_PROFILE_AMBIGUOUS"
+  | "NUMERICAL_PROFILE_ID_UNKNOWN"
+  | "NUMERICAL_PROFILE_TRIPLE_MISMATCH"
   | "VOLUME_STRUCTURE_MISMATCH"
   | "VOLUME_REQUIRED_FIELD_MISSING"
   | "VOLUME_FORBIDDEN_FIELD_PRESENT"
@@ -75,6 +79,8 @@ export interface VolumeResolutionSuccess {
   methodId: TrainingMethodId;
   role: ExerciseRole;
   profileId: Identifier;
+  /** How the numerical profile was selected — explicit id or unique triple. */
+  profileResolutionSource: NumericalProfileResolutionSource;
   rangeContext: RangeContext;
   volume: PrescriptionVolume;
   /**
@@ -132,6 +138,14 @@ export interface ResolveVolumeInput {
    * behaves exactly as it did before this field existed.
    */
   exerciseDoseConstraints?: ExerciseDoseConstraints | null;
+
+  /**
+   * Explicit numerical profile selection supplied by the registry entry.
+   * Required whenever several profiles share this input's
+   * module/method/role triple; `null` or absent preserves the historical
+   * unique-triple lookup exactly.
+   */
+  numericalProfileId?: Identifier | null;
 
   sourceRuleIds?: readonly Identifier[];
 }
@@ -447,20 +461,23 @@ const validateDoseBoundary = (
 export const resolveVolume = (
   input: ResolveVolumeInput,
 ): VolumeResolutionResult => {
-  const profile = getNumericalPrescriptionProfile(
-    input.moduleId,
-    input.methodId,
-    input.role,
-  );
+  const profileResolution = resolveNumericalProfile({
+    moduleId: input.moduleId,
+    methodId: input.methodId,
+    exerciseRole: input.role,
+    explicitProfileId: input.numericalProfileId ?? null,
+  });
 
-  if (profile === null) {
+  if (!profileResolution.ok) {
     return buildFailure(
       input,
       null,
-      "NUMERICAL_PROFILE_MISSING",
-      `No numerical prescription profile exists for module ${input.moduleId}, method ${input.methodId} and role ${input.role}.`,
+      profileResolution.failureCode,
+      profileResolution.message,
     );
   }
+
+  const { profile, resolutionSource: profileResolutionSource } = profileResolution;
 
   if (profile.sourceRuleIds.length === 0) {
     return buildFailure(
@@ -697,6 +714,7 @@ export const resolveVolume = (
     methodId: input.methodId,
     role: input.role,
     profileId: profile.profileId,
+    profileResolutionSource,
     rangeContext: input.rangeContext,
     volume,
     narrowingNotes,

@@ -4,7 +4,7 @@
  * Isolated in its own file so `vi.mock("../../prescription/prescriptionKnowledge", ...)`
  * never affects `resolveIntensity.test.ts` or any other suite — Vitest gives
  * every test file its own module registry by default, and this file never
- * touches `NUMERICAL_PRESCRIPTION_PROFILES` itself: `getNumericalPrescriptionProfile`
+ * touches `NUMERICAL_PRESCRIPTION_PROFILES` itself: `resolveNumericalProfile`
  * is the only export replaced, and only within this file.
  *
  * The mocked profile below is built here, once, purely to exercise the
@@ -20,7 +20,11 @@ vi.mock("../../prescription/prescriptionKnowledge", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../prescription/prescriptionKnowledge")>();
   return {
     ...actual,
-    getNumericalPrescriptionProfile: () => UNDOCUMENTED_INTENSITY_PROFILE,
+    resolveNumericalProfile: () => ({
+      ok: true as const,
+      profile: UNDOCUMENTED_INTENSITY_PROFILE,
+      resolutionSource: "module_method_role_unique" as const,
+    }),
   };
 });
 

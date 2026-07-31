@@ -6,7 +6,7 @@
  * direct inspection of all 12 profiles), so the resolver's own final
  * guard (`!Number.isInteger(seconds) || seconds < 0` in `resolveRest.ts`)
  * cannot be exercised against negative/non-integer values through real
- * production data alone. This file mocks `getNumericalPrescriptionProfile`
+ * production data alone. This file mocks `resolveNumericalProfile`
  * with two deliberately malformed local profiles — never added to the
  * real `NUMERICAL_PRESCRIPTION_PROFILES` array — purely to reach this
  * defensive guard directly. Isolated in its own file so `vi.mock` never
@@ -29,22 +29,27 @@ vi.mock("../../prescription/prescriptionKnowledge", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../prescription/prescriptionKnowledge")>();
   return {
     ...actual,
-    getNumericalPrescriptionProfile: (
-      moduleId: string,
-      methodId: string,
-      exerciseRole: string,
-    ) => {
-      if (methodId === "straight_sets_repetitions" && exerciseRole === "primary") {
-        return NEGATIVE_REST_PROFILE;
+    resolveNumericalProfile: (query: {
+      moduleId: string;
+      methodId: string;
+      exerciseRole: string;
+      explicitProfileId?: string | null;
+    }) => {
+      if (query.methodId === "straight_sets_repetitions" && query.exerciseRole === "primary") {
+        return {
+          ok: true as const,
+          profile: NEGATIVE_REST_PROFILE,
+          resolutionSource: "module_method_role_unique" as const,
+        };
       }
-      if (methodId === "straight_sets_repetitions" && exerciseRole === "secondary") {
-        return NON_INTEGER_REST_PROFILE;
+      if (query.methodId === "straight_sets_repetitions" && query.exerciseRole === "secondary") {
+        return {
+          ok: true as const,
+          profile: NON_INTEGER_REST_PROFILE,
+          resolutionSource: "module_method_role_unique" as const,
+        };
       }
-      return actual.getNumericalPrescriptionProfile(
-        moduleId as never,
-        methodId as never,
-        exerciseRole as never,
-      );
+      return actual.resolveNumericalProfile(query as never);
     },
   };
 });

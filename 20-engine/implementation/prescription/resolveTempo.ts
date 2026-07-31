@@ -16,8 +16,9 @@ import {
   type TrainingMethodId,
 } from "./contracts";
 import {
-  getNumericalPrescriptionProfile,
+  resolveNumericalProfile,
   type NumericalPrescriptionProfile,
+  type NumericalProfileResolutionSource,
   type RangeContext,
 } from "./prescriptionKnowledge";
 import type {
@@ -32,6 +33,9 @@ import type {
 
 export type TempoResolutionFailureCode =
   | "NUMERICAL_PROFILE_MISSING"
+  | "NUMERICAL_PROFILE_AMBIGUOUS"
+  | "NUMERICAL_PROFILE_ID_UNKNOWN"
+  | "NUMERICAL_PROFILE_TRIPLE_MISMATCH"
   | "TEMPO_REQUIRED_BUT_UNDOCUMENTED"
   | "TEMPO_FORBIDDEN_BUT_DOCUMENTED"
   | "TEMPO_TYPE_UNSUPPORTED_BY_METHOD"
@@ -45,6 +49,8 @@ export interface TempoResolutionSuccess {
   methodId: TrainingMethodId;
   role: ExerciseRole;
   profileId: Identifier;
+  /** How the numerical profile was selected — explicit id or unique triple. */
+  profileResolutionSource: NumericalProfileResolutionSource;
   rangeContext: RangeContext;
   tempo: PrescriptionTempo | null;
   sourceRuleIds: readonly Identifier[];
@@ -86,6 +92,14 @@ export interface ResolveTempoInput {
    */
   preferredTempoType?: TempoType | null;
 
+  /**
+   * Explicit numerical profile selection supplied by the registry entry.
+   * Required whenever several profiles share this input's
+   * module/method/role triple; `null` or absent preserves the historical
+   * unique-triple lookup exactly.
+   */
+  numericalProfileId?: Identifier | null;
+
   sourceRuleIds?: readonly Identifier[];
 }
 
@@ -123,20 +137,23 @@ const buildFailure = (
 export const resolveTempo = (
   input: ResolveTempoInput,
 ): TempoResolutionResult => {
-  const profile = getNumericalPrescriptionProfile(
-    input.moduleId,
-    input.methodId,
-    input.role,
-  );
+  const profileResolution = resolveNumericalProfile({
+    moduleId: input.moduleId,
+    methodId: input.methodId,
+    exerciseRole: input.role,
+    explicitProfileId: input.numericalProfileId ?? null,
+  });
 
-  if (profile === null) {
+  if (!profileResolution.ok) {
     return buildFailure(
       input,
       null,
-      "NUMERICAL_PROFILE_MISSING",
-      `No numerical prescription profile exists for module ${input.moduleId}, method ${input.methodId} and role ${input.role}.`,
+      profileResolution.failureCode,
+      profileResolution.message,
     );
   }
+
+  const { profile, resolutionSource: profileResolutionSource } = profileResolution;
 
   const method = getTrainingMethodContract(input.methodId);
   const tempoRule = profile.tempo;
@@ -157,6 +174,7 @@ export const resolveTempo = (
       methodId: input.methodId,
       role: input.role,
       profileId: profile.profileId,
+      profileResolutionSource,
       rangeContext: input.rangeContext,
       tempo: null,
       sourceRuleIds: unique([
@@ -245,6 +263,7 @@ export const resolveTempo = (
     methodId: input.methodId,
     role: input.role,
     profileId: profile.profileId,
+    profileResolutionSource,
     rangeContext: input.rangeContext,
     tempo,
     sourceRuleIds,
