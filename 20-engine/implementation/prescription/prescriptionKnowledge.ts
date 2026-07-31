@@ -764,6 +764,14 @@ export const selectRangeValue = (
   }
 };
 
+/**
+ * Legacy unique-triple helper: returns the FIRST profile matching the
+ * triple, in array order. Safe only while every (moduleId, methodId,
+ * exerciseRole) triple is unique in `NUMERICAL_PRESCRIPTION_PROFILES`.
+ * Resolvers no longer call this — they use `resolveNumericalProfile`,
+ * which refuses an ambiguous triple instead of silently picking the
+ * first match.
+ */
 export const getNumericalPrescriptionProfile = (
   moduleId: CapabilityModule,
   methodId: TrainingMethodId,
@@ -789,6 +797,206 @@ export const getNumericalProfilesForModule = (
   NUMERICAL_PRESCRIPTION_PROFILES.filter(
     (profile) => profile.moduleId === moduleId,
   );
+
+// -----------------------------------------------------------------------------
+// Explicit numerical profile resolution
+// -----------------------------------------------------------------------------
+
+/**
+ * Identifier of one `NumericalPrescriptionProfile`. An alias rather than a
+ * literal union: the profile set grows lot by lot, and runtime membership
+ * is what actually guarantees validity — see
+ * `isNumericalPrescriptionProfileId` (same convention as
+ * `isTrainingMethodId` / `isEquipmentCapabilityId`).
+ */
+export type NumericalPrescriptionProfileId = Identifier;
+
+export const isNumericalPrescriptionProfileId = (
+  value: unknown,
+): value is NumericalPrescriptionProfileId =>
+  typeof value === "string" &&
+  NUMERICAL_PRESCRIPTION_PROFILES.some(
+    (profile) => profile.profileId === value,
+  );
+
+export type NumericalProfileResolutionSource =
+  | "explicit_profile_id"
+  | "module_method_role_unique";
+
+export type NumericalProfileResolutionFailureCode =
+  | "NUMERICAL_PROFILE_MISSING"
+  | "NUMERICAL_PROFILE_AMBIGUOUS"
+  | "NUMERICAL_PROFILE_ID_UNKNOWN"
+  | "NUMERICAL_PROFILE_TRIPLE_MISMATCH";
+
+export interface NumericalProfileQuery {
+  moduleId: CapabilityModule;
+  methodId: TrainingMethodId;
+  exerciseRole: ExerciseRole;
+  /**
+   * Explicit profile selection supplied by the registry entry. `null` or
+   * absent preserves the historical unique-triple lookup exactly.
+   */
+  explicitProfileId?: Identifier | null;
+}
+
+export type NumericalProfileResolution =
+  | {
+      ok: true;
+      profile: NumericalPrescriptionProfile;
+      resolutionSource: NumericalProfileResolutionSource;
+    }
+  | {
+      ok: false;
+      failureCode: NumericalProfileResolutionFailureCode;
+      message: string;
+      candidateProfileIds: readonly Identifier[];
+    };
+
+/**
+ * Pure, data-injected core of numerical profile resolution.
+ *
+ * - Explicit id supplied: the id must exist and its own
+ *   (moduleId, methodId, exerciseRole) triple must equal the query's —
+ *   no fallback, no substitution.
+ * - No explicit id: the triple's candidates decide — zero fails with
+ *   `NUMERICAL_PROFILE_MISSING`, exactly one succeeds (historical
+ *   behavior), and two or more fail with `NUMERICAL_PROFILE_AMBIGUOUS`.
+ *   Array order never breaks a tie.
+ */
+export const resolveNumericalProfileFrom = (
+  profiles: readonly NumericalPrescriptionProfile[],
+  query: NumericalProfileQuery,
+): NumericalProfileResolution => {
+  const candidates = profiles.filter(
+    (profile) =>
+      profile.moduleId === query.moduleId &&
+      profile.methodId === query.methodId &&
+      profile.exerciseRole === query.exerciseRole,
+  );
+  const candidateProfileIds = candidates.map((profile) => profile.profileId);
+
+  const explicitProfileId = query.explicitProfileId ?? null;
+
+  if (explicitProfileId !== null) {
+    const explicitProfile =
+      profiles.find((profile) => profile.profileId === explicitProfileId) ??
+      null;
+
+    if (explicitProfile === null) {
+      return {
+        ok: false,
+        failureCode: "NUMERICAL_PROFILE_ID_UNKNOWN",
+        message: `No numerical prescription profile exists with id ${explicitProfileId}.`,
+        candidateProfileIds,
+      };
+    }
+
+    if (
+      explicitProfile.moduleId !== query.moduleId ||
+      explicitProfile.methodId !== query.methodId ||
+      explicitProfile.exerciseRole !== query.exerciseRole
+    ) {
+      return {
+        ok: false,
+        failureCode: "NUMERICAL_PROFILE_TRIPLE_MISMATCH",
+        message:
+          `Profile ${explicitProfileId} is defined for ` +
+          `${explicitProfile.moduleId}/${explicitProfile.methodId}/${explicitProfile.exerciseRole}, ` +
+          `not for the requested ${query.moduleId}/${query.methodId}/${query.exerciseRole}.`,
+        candidateProfileIds,
+      };
+    }
+
+    return {
+      ok: true,
+      profile: explicitProfile,
+      resolutionSource: "explicit_profile_id",
+    };
+  }
+
+  if (candidates.length === 0) {
+    return {
+      ok: false,
+      failureCode: "NUMERICAL_PROFILE_MISSING",
+      message: `No numerical prescription profile exists for module ${query.moduleId}, method ${query.methodId} and role ${query.exerciseRole}.`,
+      candidateProfileIds,
+    };
+  }
+
+  const uniqueCandidate = candidates.length === 1 ? candidates[0] : undefined;
+
+  if (uniqueCandidate === undefined) {
+    return {
+      ok: false,
+      failureCode: "NUMERICAL_PROFILE_AMBIGUOUS",
+      message:
+        `${candidates.length} numerical prescription profiles share module ${query.moduleId}, ` +
+        `method ${query.methodId} and role ${query.exerciseRole} — an explicit numericalProfileId is required.`,
+      candidateProfileIds,
+    };
+  }
+
+  return {
+    ok: true,
+    profile: uniqueCandidate,
+    resolutionSource: "module_method_role_unique",
+  };
+};
+
+/** `resolveNumericalProfileFrom` bound to the documented profile set. */
+export const resolveNumericalProfile = (
+  query: NumericalProfileQuery,
+): NumericalProfileResolution =>
+  resolveNumericalProfileFrom(NUMERICAL_PRESCRIPTION_PROFILES, query);
+
+export interface DuplicateProfileTriple {
+  moduleId: CapabilityModule;
+  methodId: TrainingMethodId;
+  exerciseRole: ExerciseRole;
+  profileIds: readonly Identifier[];
+}
+
+/**
+ * Every (moduleId, methodId, exerciseRole) triple shared by two or more
+ * profiles. Empty as long as the historical uniqueness assumption holds —
+ * once a triple appears here, every registry entry on that triple must
+ * declare an explicit `numericalProfileId` (enforced by
+ * `registryValidators.ts`).
+ */
+export const findDuplicateProfileTriples = (
+  profiles: readonly NumericalPrescriptionProfile[] = NUMERICAL_PRESCRIPTION_PROFILES,
+): readonly DuplicateProfileTriple[] => {
+  const byTriple = new Map<string, NumericalPrescriptionProfile[]>();
+
+  for (const profile of profiles) {
+    const key = `${profile.moduleId}|${profile.methodId}|${profile.exerciseRole}`;
+    const group = byTriple.get(key);
+
+    if (group === undefined) {
+      byTriple.set(key, [profile]);
+    } else {
+      group.push(profile);
+    }
+  }
+
+  return [...byTriple.values()]
+    .filter((group) => group.length > 1)
+    .map((group) => {
+      const [first] = group;
+
+      if (first === undefined) {
+        throw new Error("Unreachable: duplicate group cannot be empty.");
+      }
+
+      return {
+        moduleId: first.moduleId,
+        methodId: first.methodId,
+        exerciseRole: first.exerciseRole,
+        profileIds: group.map((profile) => profile.profileId),
+      };
+    });
+};
 
 export const hasExecutableNumericalProfile = (
   moduleId: CapabilityModule,
