@@ -128,8 +128,8 @@ describe("registry Lot 1 — shared numerical profiles", () => {
     expect(matches[0].volume.repetitions?.range).toEqual({ min: 3, normal: 5, max: 6 });
   });
 
-  test("the total number of NumericalPrescriptionProfiles is unchanged at 12 (no new profile added)", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(12);
+  test("the total number of NumericalPrescriptionProfiles is 15 (12 historical + the 3 Table Group 8 interval profiles; this lot added none)", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(15);
   });
 });
 

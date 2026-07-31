@@ -528,9 +528,9 @@ describe("resolveRest — controlled_mobility_sets_v0_1's documented zero-rest f
 // strictly positive rest minimum, or has no rest concept at all
 // (`not_applicable` / `seconds: null`) — neither path is reachable by
 // this guard change.
-describe("resolveRest — non-regression across all 12 numerical prescription profiles", () => {
-  test("exactly 12 profiles exist, and controlled_mobility_sets_v0_1 is the only one with a documented rest minimum of 0", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(12);
+describe("resolveRest — non-regression across all 15 numerical prescription profiles", () => {
+  test("exactly 15 profiles exist, and controlled_mobility_sets_v0_1 is the only one with a documented rest minimum of 0", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(15);
 
     const zeroFloorProfiles = NUMERICAL_PRESCRIPTION_PROFILES.filter(
       (profile) => profile.rest !== null && profile.rest.seconds !== null && profile.rest.seconds.min === 0,
@@ -542,15 +542,19 @@ describe("resolveRest — non-regression across all 12 numerical prescription pr
     const otherProfiles = NUMERICAL_PRESCRIPTION_PROFILES.filter(
       (profile) => profile.profileId !== "controlled_mobility_sets_v0_1",
     );
-    expect(otherProfiles).toHaveLength(11);
+    expect(otherProfiles).toHaveLength(14);
 
     for (const profile of otherProfiles) {
       for (const rangeContext of ["reduced", "normal", "high"] as const) {
+        // Explicit profile selection: the three interval profiles share one
+        // triple, so implicit resolution would fail with
+        // NUMERICAL_PROFILE_AMBIGUOUS — which is not what this test guards.
         const result = resolveRest({
           moduleId: profile.moduleId,
           methodId: profile.methodId,
           role: profile.exerciseRole,
           rangeContext,
+          numericalProfileId: profile.profileId,
         });
 
         if (!result.ok) {
@@ -573,14 +577,15 @@ describe("resolveRest — non-regression across all 12 numerical prescription pr
               ? profile.rest.seconds.normal
               : profile.rest.seconds.max;
 
-        // Every one of these 11 profiles documents a strictly positive
+        // Every one of these 14 profiles documents a strictly positive
         // minimum — confirms none of them were ever exposed to the
         // REST_VALUE_INVALID defect in the first place.
         expect(profile.rest.seconds.min).toBeGreaterThan(0);
 
         const betweenSets = result.rest?.betweenSets;
         const betweenRounds = result.rest?.betweenRounds;
-        const resolvedValue = betweenSets?.type === "fixed" ? betweenSets.duration.value : betweenRounds?.type === "fixed" ? betweenRounds.duration.value : null;
+        const betweenIntervals = result.rest?.betweenIntervals;
+        const resolvedValue = betweenSets?.type === "fixed" ? betweenSets.duration.value : betweenRounds?.type === "fixed" ? betweenRounds.duration.value : betweenIntervals?.type === "fixed" ? betweenIntervals.duration.value : null;
         expect(resolvedValue).toBe(expectedSeconds);
       }
     }
@@ -593,6 +598,7 @@ describe("resolveRest — non-regression across all 12 numerical prescription pr
         methodId: profile.methodId,
         role: profile.exerciseRole,
         rangeContext: "reduced",
+        numericalProfileId: profile.profileId,
       });
 
       if (!result.ok) {
@@ -601,7 +607,8 @@ describe("resolveRest — non-regression across all 12 numerical prescription pr
 
       const betweenSets = result.rest?.betweenSets;
       const betweenRounds = result.rest?.betweenRounds;
-      const resolvedValue = betweenSets?.type === "fixed" ? betweenSets.duration.value : betweenRounds?.type === "fixed" ? betweenRounds.duration.value : null;
+      const betweenIntervals = result.rest?.betweenIntervals;
+      const resolvedValue = betweenSets?.type === "fixed" ? betweenSets.duration.value : betweenRounds?.type === "fixed" ? betweenRounds.duration.value : betweenIntervals?.type === "fixed" ? betweenIntervals.duration.value : null;
       if (resolvedValue !== null) {
         expect(resolvedValue).toBeGreaterThanOrEqual(0);
       }

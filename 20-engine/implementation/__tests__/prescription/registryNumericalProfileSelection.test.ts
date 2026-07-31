@@ -267,7 +267,7 @@ describe("Lot 0 — registry validators", () => {
     ).toEqual([]);
   });
 
-  test("the real registry raises none of the new issue codes (every triple is still unique)", () => {
+  test("the real registry raises none of the new issue codes (no entry sits on the ambiguous interval triple)", () => {
     const issues = validatePilotRegistry().filter((issue) =>
       [
         "UNKNOWN_NUMERICAL_PROFILE",

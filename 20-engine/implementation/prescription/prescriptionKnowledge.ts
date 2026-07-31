@@ -52,7 +52,7 @@ export interface DurationRule {
 export interface DistanceRule {
   type: "fixed_range";
   range: DistanceRangeMeters;
-  scope: "per_set" | "per_side" | "total";
+  scope: "per_set" | "per_side" | "per_interval" | "total";
 }
 
 export interface NumericalVolumeProfile {
@@ -748,6 +748,169 @@ export const NUMERICAL_PRESCRIPTION_PROFILES = [
     requiresSportSpecificSubtype: false,
     sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
   },
+  // ---------------------------------------------------------------------------
+  // Table Group 8 — General Work-Rest Intervals.
+  //
+  // The three profiles below share the triple
+  // (conditioning, work_rest_intervals, conditioning) — the first genuinely
+  // ambiguous triple in this file. Any registry entry on that triple must
+  // declare an explicit `numericalProfileId`
+  // (`AMBIGUOUS_TRIPLE_REQUIRES_EXPLICIT_PROFILE` in `registryValidators.ts`);
+  // implicit unique-triple resolution deliberately fails with
+  // `NUMERICAL_PROFILE_AMBIGUOUS` and never picks by array order.
+  //
+  // The documented work-to-rest ratios (INT-SHORT 1:1 to 2:1,
+  // INT-REPEATED-SPRINT greater than 1:8) have no field in this schema —
+  // they are documentation-level guidance on combining the documented work
+  // and rest ranges, not separately encoded rules.
+  // ---------------------------------------------------------------------------
+  {
+    // Profile INT-SHORT. Intensity is documented only as "a percentage of a
+    // validated maximal aerobic or sport-specific reference, pace, power,
+    // heart rate, or documented RPE" with no numeric range: none of these is
+    // encodable in this schema today (no pace/power/heart-rate units or
+    // aerobic reference types), and no RPE range is documented. The table's
+    // own rule — "Without a valid intensity profile, the engine must not
+    // prescribe this method numerically" — is therefore represented by an
+    // empty intensity list: `resolveIntensity` fails deterministically with
+    // `INTENSITY_NOT_DOCUMENTED` instead of inventing a value.
+    profileId: "conditioning_short_intervals_v0_1",
+    version: "0.1",
+    moduleId: "conditioning",
+    methodId: "work_rest_intervals",
+    exerciseRole: "conditioning",
+    volume: {
+      structure: "intervals",
+      sets: null,
+      repetitions: null,
+      duration: {
+        type: "fixed_range",
+        range: durationRange(15, 30, 60),
+        scope: "per_interval",
+      },
+      distance: null,
+      rounds: null,
+      workIntervals: integerRange(10, 12, 20),
+    },
+    intensity: [],
+    rest: {
+      scope: "between_intervals",
+      seconds: integerRange(15, 30, 60),
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    tempo: null,
+    minimumDose: { ...emptyDose(), workIntervals: 10, durationSeconds: 15 },
+    // "The maximum boundaries must not be combined automatically" — these
+    // are validation ceilings per dimension, not a 20×60 prescription target.
+    maximumDose: { ...emptyDose(), workIntervals: 20, durationSeconds: 60 },
+    requiresExerciseSpecificLoadRule: false,
+    requiresSportSpecificSubtype: false,
+    sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
+  },
+  {
+    // Profile INT-LONG. Rest encodes the documented passive range 30-120s;
+    // the documented active-rest range (120-240s) would need a separate,
+    // explicitly selected profile and is not implemented here. Rest normal 75
+    // and the dose boundaries follow the tables' own "Integer Resolution" /
+    // range-boundary conventions — the table documents no separate normal or
+    // dose values for them. The RPE 7-9 rule is the table's own general
+    // fallback, permitted "only when an explicit RPE-controlled profile is
+    // selected": this profile can only ever be used through an explicit
+    // `numericalProfileId` (its triple is ambiguous), which is exactly that
+    // explicit selection.
+    profileId: "conditioning_long_intervals_v0_1",
+    version: "0.1",
+    moduleId: "conditioning",
+    methodId: "work_rest_intervals",
+    exerciseRole: "conditioning",
+    volume: {
+      structure: "intervals",
+      sets: null,
+      repetitions: null,
+      duration: {
+        type: "fixed_range",
+        range: durationRange(60, 120, 180),
+        scope: "per_interval",
+      },
+      distance: null,
+      rounds: null,
+      workIntervals: integerRange(4, 6, 10),
+    },
+    intensity: [
+      {
+        type: "rpe",
+        min: 7,
+        normal: 8,
+        max: 9,
+        unit: "rpe_scale_1_10",
+        referenceType: null,
+        sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_INTENSITY_MODEL],
+      },
+    ],
+    rest: {
+      scope: "between_intervals",
+      seconds: integerRange(30, 75, 120),
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    tempo: null,
+    minimumDose: { ...emptyDose(), workIntervals: 4, durationSeconds: 60 },
+    maximumDose: { ...emptyDose(), workIntervals: 10, durationSeconds: 180 },
+    requiresExerciseSpecificLoadRule: false,
+    requiresSportSpecificSubtype: false,
+    sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
+  },
+  {
+    // Profile INT-REPEATED-SPRINT. The table lists "conditioning or power" /
+    // "conditioning or secondary"; this profile encodes the first-listed
+    // (conditioning, conditioning) pair — a power/secondary variant would be
+    // a separate profile. Normals follow the tables' "Integer Resolution"
+    // convention (10-20 → 15; 3-8 → 5, lower integer of an even-width range;
+    // 20-60 → 40). Documented intensity is "all-out or validated supramaximal
+    // reference": supramaximal references are not encodable in this schema,
+    // and 26_INTENSITY_MODEL represents intended maximal execution speed as
+    // the qualitative `movement_intent` category `maximal_safe_speed` — the
+    // finite vocabulary's maximal speed value — never as a measured velocity.
+    // The documented availability restrictions (sprint compatibility, safety
+    // conditions, recovery protection, protected combat sessions) are
+    // eligibility rules for the knowledge base and planning layers, not
+    // numerical-profile fields.
+    profileId: "repeated_sprint_intervals_v0_1",
+    version: "0.1",
+    moduleId: "conditioning",
+    methodId: "work_rest_intervals",
+    exerciseRole: "conditioning",
+    volume: {
+      structure: "intervals",
+      sets: null,
+      repetitions: null,
+      duration: {
+        type: "fixed_range",
+        range: durationRange(3, 5, 8),
+        scope: "per_interval",
+      },
+      distance: null,
+      rounds: null,
+      workIntervals: integerRange(10, 15, 20),
+    },
+    intensity: [
+      {
+        type: "movement_intent",
+        value: "maximal_safe_speed",
+        sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_INTENSITY_MODEL],
+      },
+    ],
+    rest: {
+      scope: "between_intervals",
+      seconds: integerRange(20, 40, 60),
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    tempo: null,
+    minimumDose: { ...emptyDose(), workIntervals: 10, durationSeconds: 3 },
+    maximumDose: { ...emptyDose(), workIntervals: 20, durationSeconds: 8 },
+    requiresExerciseSpecificLoadRule: false,
+    requiresSportSpecificSubtype: false,
+    sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
+  },
 ] as const satisfies readonly NumericalPrescriptionProfile[];
 
 export const selectRangeValue = (
@@ -766,11 +929,12 @@ export const selectRangeValue = (
 
 /**
  * Legacy unique-triple helper: returns the FIRST profile matching the
- * triple, in array order. Safe only while every (moduleId, methodId,
- * exerciseRole) triple is unique in `NUMERICAL_PRESCRIPTION_PROFILES`.
- * Resolvers no longer call this — they use `resolveNumericalProfile`,
- * which refuses an ambiguous triple instead of silently picking the
- * first match.
+ * triple, in array order. Safe only for triples that are unique in
+ * `NUMERICAL_PRESCRIPTION_PROFILES` — which is no longer all of them:
+ * (conditioning, work_rest_intervals, conditioning) is shared by the three
+ * Table Group 8 interval profiles. Resolvers never call this — they use
+ * `resolveNumericalProfile`, which refuses an ambiguous triple instead of
+ * silently picking the first match.
  */
 export const getNumericalPrescriptionProfile = (
   moduleId: CapabilityModule,
@@ -959,10 +1123,10 @@ export interface DuplicateProfileTriple {
 
 /**
  * Every (moduleId, methodId, exerciseRole) triple shared by two or more
- * profiles. Empty as long as the historical uniqueness assumption holds —
- * once a triple appears here, every registry entry on that triple must
- * declare an explicit `numericalProfileId` (enforced by
- * `registryValidators.ts`).
+ * profiles. Since the Table Group 8 interval profiles landed, this contains
+ * exactly (conditioning, work_rest_intervals, conditioning) — every registry
+ * entry on a triple listed here must declare an explicit
+ * `numericalProfileId` (enforced by `registryValidators.ts`).
  */
 export const findDuplicateProfileTriples = (
   profiles: readonly NumericalPrescriptionProfile[] = NUMERICAL_PRESCRIPTION_PROFILES,

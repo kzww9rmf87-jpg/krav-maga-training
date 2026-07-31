@@ -182,9 +182,24 @@ describe("resolveNumericalProfileFrom — determinism and non-mutation", () => {
   });
 });
 
+// The one documented ambiguous triple: shared by the three Table Group 8
+// interval profiles since the generic interval foundation lot.
+const AMBIGUOUS_TRIPLE = {
+  moduleId: "conditioning",
+  methodId: "work_rest_intervals",
+  exerciseRole: "conditioning",
+} as const;
+
+const isOnAmbiguousTriple = (profile: NumericalPrescriptionProfile): boolean =>
+  profile.moduleId === AMBIGUOUS_TRIPLE.moduleId &&
+  profile.methodId === AMBIGUOUS_TRIPLE.methodId &&
+  profile.exerciseRole === AMBIGUOUS_TRIPLE.exerciseRole;
+
 describe("resolveNumericalProfile — documented profile set", () => {
-  test("every documented triple is currently unique, so implicit resolution matches the legacy helper for all 12 profiles", () => {
+  test("every unique documented triple resolves implicitly and matches the legacy helper", () => {
     for (const profile of NUMERICAL_PRESCRIPTION_PROFILES) {
+      if (isOnAmbiguousTriple(profile)) continue;
+
       const result = resolveNumericalProfile({
         moduleId: profile.moduleId,
         methodId: profile.methodId,
@@ -205,6 +220,19 @@ describe("resolveNumericalProfile — documented profile set", () => {
     }
   });
 
+  test("the documented ambiguous interval triple fails implicit resolution with every candidate listed", () => {
+    const result = resolveNumericalProfile({ ...AMBIGUOUS_TRIPLE });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.failureCode).toBe("NUMERICAL_PROFILE_AMBIGUOUS");
+    expect([...result.candidateProfileIds].sort()).toEqual([
+      "conditioning_long_intervals_v0_1",
+      "conditioning_short_intervals_v0_1",
+      "repeated_sprint_intervals_v0_1",
+    ]);
+  });
+
   test("every documented profile id resolves explicitly to itself", () => {
     for (const profile of NUMERICAL_PRESCRIPTION_PROFILES) {
       const result = resolveNumericalProfile({
@@ -223,8 +251,18 @@ describe("resolveNumericalProfile — documented profile set", () => {
 });
 
 describe("findDuplicateProfileTriples", () => {
-  test("the documented profile set contains no duplicate triple", () => {
-    expect(findDuplicateProfileTriples()).toEqual([]);
+  test("the documented profile set contains exactly the interval triple as duplicate", () => {
+    const duplicates = findDuplicateProfileTriples();
+
+    expect(duplicates).toHaveLength(1);
+    expect(duplicates[0]?.moduleId).toBe("conditioning");
+    expect(duplicates[0]?.methodId).toBe("work_rest_intervals");
+    expect(duplicates[0]?.exerciseRole).toBe("conditioning");
+    expect([...(duplicates[0]?.profileIds ?? [])].sort()).toEqual([
+      "conditioning_long_intervals_v0_1",
+      "conditioning_short_intervals_v0_1",
+      "repeated_sprint_intervals_v0_1",
+    ]);
   });
 
   test("an injected duplicate triple is reported with both profile ids", () => {

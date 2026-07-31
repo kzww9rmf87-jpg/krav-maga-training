@@ -115,8 +115,8 @@ describe("registry Lot 2 — shared numerical profile", () => {
     expect(matches[0].requiresExerciseSpecificLoadRule).toBe(true);
   });
 
-  test("the total number of NumericalPrescriptionProfiles is unchanged at 12 (no new prescription profile added)", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(12);
+  test("the total number of NumericalPrescriptionProfiles is 15 (12 historical + the 3 Table Group 8 interval profiles; this lot added none)", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(15);
   });
 
   test("the shared profile's own percentage_1rm rule can never resolve, for hang_power_clean or any other power/primary exercise — requiresExerciseSpecificLoadRule rejects every load-based type", () => {
