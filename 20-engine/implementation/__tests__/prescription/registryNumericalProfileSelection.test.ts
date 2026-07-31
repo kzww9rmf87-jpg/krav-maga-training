@@ -113,7 +113,23 @@ const EXPLICIT_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
   // DIFFERENT profile. This pair is the reason explicit selection exists:
   // the triple alone could never have told them apart.
   sprint_intervals: "repeated_sprint_intervals_v0_1",
+  // Registry Lot 7 — Core repetition work. Its triple
+  // (core, straight_sets_repetitions, robustness) is UNIQUE, so implicit
+  // resolution would already select the right profile; the id is declared
+  // anyway because this entry is the profile's first consumer and the
+  // selection is worth stating rather than inferring. The assertions below
+  // therefore still hold: explicit selection resolves it, and the
+  // "implicit resolution must be ambiguous" check is scoped to the
+  // genuinely ambiguous triple.
+  ab_wheel: "core_robustness_straight_sets_v0_1",
 };
+
+/**
+ * Entries whose triple is genuinely shared by several profiles. For these,
+ * dropping the explicit id must fail with NUMERICAL_PROFILE_AMBIGUOUS —
+ * that is the whole reason they declare one.
+ */
+const AMBIGUOUS_TRIPLE_EXERCISES: readonly string[] = ["rowerg_intervals", "sprint_intervals"];
 
 const historicalEntries = () =>
   Object.values(EXERCISE_PRESCRIPTION_REGISTRY).filter(
@@ -178,16 +194,25 @@ describe("Lot 0 — 59-entry profile freeze", () => {
       expect(resolution.profile.profileId).toBe(profileId);
       expect(resolution.resolutionSource).toBe("explicit_profile_id");
 
-      // Without the explicit id, the same triple must refuse to resolve —
-      // that is precisely why the entry has to declare one.
+      // For an entry sitting on a genuinely shared triple, dropping the
+      // explicit id must refuse to resolve — that is precisely why the
+      // entry has to declare one. An entry on a unique triple declares its
+      // id for auditability instead, and still resolves without it.
       const implicit = resolveNumericalProfile({
         moduleId: entry.moduleId,
         methodId: entry.explicitMethodId,
         exerciseRole: entry.role,
       });
-      expect(implicit.ok).toBe(false);
-      if (implicit.ok) continue;
-      expect(implicit.failureCode).toBe("NUMERICAL_PROFILE_AMBIGUOUS");
+
+      if (AMBIGUOUS_TRIPLE_EXERCISES.includes(exerciseId)) {
+        expect(implicit.ok).toBe(false);
+        if (implicit.ok) continue;
+        expect(implicit.failureCode).toBe("NUMERICAL_PROFILE_AMBIGUOUS");
+      } else {
+        expect(implicit.ok).toBe(true);
+        if (!implicit.ok) continue;
+        expect(implicit.profile.profileId).toBe(profileId);
+      }
     }
   });
 });

@@ -94,6 +94,20 @@ export const EQUIPMENT_CAPABILITY_IDS = [
   // hierarchy ("a rowing ergometer is a cardio machine") this vocabulary
   // has no primitive for and does not want.
   "rowing_ergometer",
+  // Added for the first Core repetition registry entry (ab_wheel).
+  //
+  // Aligned 1:1 with the knowledge base's own `ab_wheel` `EquipmentType`
+  // member, added in the same change to replace a flagged `"other"`
+  // catch-all. Matched exactly, like every id in this list.
+  //
+  // NOT an equivalence group: the Ab Wheel chapter lists "Acceptable
+  // Alternatives" (barbell with rotating plates, stability ball,
+  // suspension trainer, sliding discs, towels) but denies their
+  // equivalence in the same breath — "An alternative must therefore be
+  // treated as a separate variation rather than an identical
+  // implementation". Building a `loaded_carry_implement`-style group from
+  // them would contradict the source document.
+  "ab_wheel",
 ] as const;
 
 export type EquipmentCapabilityId = (typeof EQUIPMENT_CAPABILITY_IDS)[number];

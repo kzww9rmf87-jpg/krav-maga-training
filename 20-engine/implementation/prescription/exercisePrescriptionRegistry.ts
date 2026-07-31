@@ -256,6 +256,13 @@ export const PILOT_EXERCISE_IDS = [
   // else: different profile, different intensity vocabulary, different
   // eligibility gates, no equipment at all.
   "sprint_intervals",
+  // Registry Lot 7 — Core repetition work. First entry on the `core`
+  // module with the `straight_sets_repetitions` method, and the first
+  // consumer of Table Group 13's own `core_robustness_straight_sets_v0_1`.
+  // The four existing core entries (pallof_press, hollow_body_hold,
+  // dragon_flag, copenhagen_plank) all prescribe timed holds; this is the
+  // other half of the module.
+  "ab_wheel",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -8196,6 +8203,208 @@ const sprintIntervalsEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Ab Wheel Rollout
+// Source: 50-exercises/62_CORE/10_AB_WHEEL.md
+//   - Exercise Family: "Anti-Extension Core Exercise"; module core.
+//   - Equipment Requirements: "Required Equipment: Ab Wheel." The
+//     "Acceptable Alternatives" are denied equivalence by the fiche itself
+//     and are not represented — see the equipment note below.
+//   - Prescription Profile: "Valid Set Range — 2 to 5 sets", "Valid
+//     Repetition Range — 3 to 12 repetitions", "Rest Range — 45 to 120
+//     seconds", "Default Rest — 60 to 90 seconds".
+//   - Intensity Regulation: "The Ab Wheel does not use percentage of
+//     one-repetition maximum." "Recommended Effort — Approximately RPE 6
+//     to 8." "Technical Repetitions in Reserve — 1 to 3."
+//   - Tempo Options: "3-1-2", "2-0-2", "4-1-2".
+//   - Core Principle: "The rollout distance is valid only while the athlete
+//     can maintain trunk position."
+//   - Stopping Rules and Common Errors: quoted in the stop conditions below.
+//   - Technical Complexity: "Complexity Level: 3 — Intermediate".
+// Method: straight_sets_repetitions / core / robustness
+//   (core_robustness_straight_sets_v0_1 — sets 2/3/5, reps 3/10/15,
+//   RPE 6/7/8, rest 45/60/120s, tempo global_intent controlled)
+//
+// PROFILE. Table Group 13's own profile, whose triple
+// (core, straight_sets_repetitions, robustness) is unique — implicit
+// resolution would already select it. The id is declared explicitly all
+// the same: this entry is the profile's first consumer, and naming the
+// selection at the entry keeps the decision auditable in the Decision
+// Trace rather than inferred from the absence of a competitor. The role
+// mirrors Table Group 4's own Core role list and the four existing Core
+// entries, all of which use `robustness`.
+//
+// NARROWING — one dimension, honestly:
+//   - repetitions: the fiche's "3 to 12" intersected with the profile's
+//     own [3, 15] gives [3, 12]. Declared;
+//   - sets: the fiche's "2 to 5" IS the profile's own envelope — that
+//     envelope was built from this family's records, so there is nothing
+//     to narrow. Both bounds are declared anyway, as sprawl/shot_entries
+//     already do, so the entry states its own documented range rather
+//     than relying on the envelope happening to match;
+//   - rest: the fiche's "45 to 120 seconds" is the profile's own window
+//     exactly — `exerciseRestConstraints` stays null. The narrower
+//     "Default Rest — 60 to 90 seconds" is a default WITHIN the valid
+//     range, not a replacement for it, and is not encoded as a bound;
+//   - intensity: the fiche's "RPE 6 to 8" is the profile's own band
+//     exactly — `exerciseIntensityConstraints` stays null.
+//
+// NOT CONVERTED. The fiche's difficulty model is explicitly non-numeric:
+// "Difficulty is primarily determined by: rollout distance; lever length;
+// body position; control; tempo; and variation." None of that is turned
+// into a number here. Specifically:
+//   - rollout distance and range of motion are never converted into
+//     repetitions, load or intensity — they belong to the execution
+//     instruction below and to the range-of-motion stop condition;
+//   - "Technical Repetitions in Reserve — 1 to 3" is NOT converted into
+//     an RPE value. `rir` is a real IntensityType, but the Core module's
+//     own contract does not authorise it (allowed: rpe, technical_effort,
+//     absolute_load, percentage_body_mass, resistance_category), so it is
+//     neither claimed nor silently folded into the RPE band;
+//   - the documented phase tempos (3-1-2 / 2-0-2 / 4-1-2) are not
+//     representable by a numerical profile's tempo rule (global_intent /
+//     phase_intent / isometric_hold / none only). The prescribed tempo is
+//     the profile's `global_intent: controlled`; the phase timings stay in
+//     the execution instruction, where the athlete can read them. This is
+//     a documented precision loss, recorded in Table Group 13 itself.
+//
+// EQUIPMENT. `ab_wheel`, added to both vocabularies in this same change to
+// replace the `"other"` catch-all the knowledge base had flagged. Exact
+// matching, no equivalence group: the fiche lists alternatives and denies
+// their equivalence in the same section.
+//
+// STOP CONDITIONS — five categories. `straight_sets_repetitions` requires
+// three (technical_failure, pain, completion); the Core module documents
+// six. `range_of_motion_loss` and `fatigue_limit` are added because this
+// fiche's own "Stopping Rules" name them explicitly, not to reach a count.
+// `balance_loss`, the module's sixth, is knowingly absent: nothing in this
+// fiche describes a loss of balance — its Stopping Rules describe loss of
+// trunk position, of range, of control and of breathing. Module-level
+// categories are not enforced by any resolver today, a documented gap
+// already recorded for the conditioning entries.
+// -----------------------------------------------------------------------------
+
+const SOURCE_AB_WHEEL = "50-exercises/62_CORE/10_AB_WHEEL.md";
+
+const abWheelStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "ab_wheel_technical_failure",
+    description:
+      "Stop the set if lumbar extension becomes visible and cannot be corrected immediately, the rib cage and pelvis lose alignment, the hips sag toward the floor, or the return requires excessive momentum.",
+    sourceRuleIds: [SOURCE_AB_WHEEL],
+  }),
+  rangeOfMotionLossCondition({
+    conditionId: "ab_wheel_range_of_motion_loss",
+    description:
+      "Stop the set if the rollout range shortens involuntarily because of fatigue, or extends beyond the range the athlete can control — the rollout distance is valid only while trunk position is maintained.",
+    sourceRuleIds: [SOURCE_AB_WHEEL],
+  }),
+  fatigueLimitCondition({
+    conditionId: "ab_wheel_fatigue_limit",
+    description:
+      "Stop the exercise once fatigue produces repeated technical breakdown or breathing becomes uncontrolled. The set is not taken to muscular failure, and the planned repetition target is never a reason to continue.",
+    sourceRuleIds: [SOURCE_AB_WHEEL],
+  }),
+  painCondition({
+    conditionId: "ab_wheel_pain",
+    description:
+      "Stop immediately if the athlete reports pain, if the shoulders collapse or become painful, or in the presence of any documented hard exclusion for this exercise.",
+    sourceRuleIds: [SOURCE_AB_WHEEL],
+  }),
+  completionCondition({
+    conditionId: "ab_wheel_completion",
+    description: "Stop once the prescribed sets and repetitions are completed with the intended trunk position preserved.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const abWheelInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "ab_wheel_setup",
+    "setup",
+    "Place the ab wheel on a stable, non-slip surface and start from a kneeling position, holding the wheel with both hands. Kneel on a pad if required for comfort. The standing rollout is an advanced position this prescription does not cover.",
+    "high",
+    true,
+    SOURCE_AB_WHEEL,
+  ),
+  makeInstruction(
+    "ab_wheel_execution",
+    "execution",
+    "Roll the wheel forward while resisting lumbar extension, keeping the rib cage and pelvis controlled, then return using the abdominal wall, shoulders and trunk together. Move at a controlled speed — a documented option is 3 seconds out, a 1-second pause and 2 seconds back. Range of motion must be earned through control: a technically shorter repetition is preferable to a longer invalid one.",
+    "high",
+    true,
+    SOURCE_AB_WHEEL,
+  ),
+];
+
+const abWheelEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "ab_wheel",
+  moduleId: "core",
+  role: "robustness",
+  explicitMethodId: "straight_sets_repetitions",
+  numericalProfileId: "core_robustness_straight_sets_v0_1",
+  capabilities: {
+    exerciseId: "ab_wheel",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    // Both metrics the shared profile documents. `rir` is deliberately
+    // absent despite the fiche's own "Technical Repetitions in Reserve —
+    // 1 to 3": the Core module contract does not authorise that type.
+    supportedIntensityTypes: ["rpe", "technical_effort"],
+    preferredIntensityTypes: ["rpe"],
+    // "Loading Type: Bodyweight with leverage-based loading." No external
+    // load is prescribed — "External load is not normally required in the
+    // initial kneeling variation."
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["global_intent"],
+    // Both hands drive one implement through a symmetric sagittal
+    // rollout, and the fiche prescribes no per-side allocation anywhere —
+    // unlike Dead Bug or Pallof Press, whose own records say "per side".
+    // `bilateral` is the documented shape of the movement, not an
+    // inference from the knowledge base's `unilateral: false`.
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    // Exactly the two tags `straight_sets_repetitions` requires.
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["ab_wheel"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["ab_wheel_setup", "ab_wheel_execution"],
+    requiredStopConditionIds: [
+      "ab_wheel_technical_failure",
+      "ab_wheel_range_of_motion_loss",
+      "ab_wheel_fatigue_limit",
+      "ab_wheel_pain",
+      "ab_wheel_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_ab_wheel",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_AB_WHEEL, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "technical_effort"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: abWheelInstructions,
+  stopConditionDefinitions: abWheelStopConditions,
+  // "Valid Set Range — 2 to 5 sets" and "Valid Repetition Range — 3 to 12
+  // repetitions", intersected with the shared profile's own [2, 5] sets
+  // and [3, 15] repetitions. Only the repetition ceiling actually narrows.
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 2, repetitions: 3, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 5, repetitions: 12, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_AB_WHEEL],
+  },
+  // "Recommended Effort — Approximately RPE 6 to 8" is the profile's own
+  // band exactly; nothing to narrow.
+  exerciseIntensityConstraints: null,
+  // "Rest Range — 45 to 120 seconds" is the profile's own window exactly;
+  // nothing to narrow.
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_AB_WHEEL, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -8281,6 +8490,8 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
 
   rowerg_intervals: rowergIntervalsEntry,
   sprint_intervals: sprintIntervalsEntry,
+
+  ab_wheel: abWheelEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

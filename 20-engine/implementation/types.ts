@@ -239,6 +239,16 @@ export type EquipmentType =
   | "other"
   | "trap_bar"
   | "plyometric_box"
+  // An abdominal wheel specifically. Added when AB_WHEEL became
+  // prescriptible, replacing the `"other"` catch-all its own block comment
+  // already flagged as a precision loss ("it should be revisited if a
+  // dedicated `ab_wheel` `EquipmentType` is ever added"). Matching is
+  // exact and no equivalence group is built from the fiche's "Acceptable
+  // Alternatives" (barbell with rotating plates, stability ball,
+  // suspension trainer, sliding discs, towels): that same fiche states an
+  // alternative "must therefore be treated as a separate variation rather
+  // than an identical implementation".
+  | "ab_wheel"
   | "pinch_grip_implement"
   | "slam_ball"
   | "rigid_anchor_support"

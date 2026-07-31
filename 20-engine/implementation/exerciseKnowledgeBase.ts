@@ -10332,24 +10332,24 @@ export const SHOT_ENTRIES: ExerciseDefinition = {
  * Farmer Carry fiche is superseded prose, deliberately not re-read here,
  * matching the precedent already established for that id.
  *
- * KNOWN MODEL LIMITATION, flagged explicitly rather than silently
- * approximated: "Equipment Requirements — Required Equipment: Ab Wheel."
- * `EquipmentType` has no `ab_wheel` member. "Acceptable Alternatives —
- * Barbell with rotating plates, Stability Ball, Suspension Trainer, Sliding
- * Discs, Towels on a suitable surface" are explicitly framed by the fiche
- * itself as NOT equivalent implementations ("An alternative must therefore
- * be treated as a separate variation rather than an identical
- * implementation") — so no `any_of` equivalence group is built from them
- * either, matching `PUSH_PRESS`'s own precedent of not force-fitting
- * documented "alternative implement" language into an equivalence atom
- * when the source itself denies equivalence. The only remaining option
- * without inventing a new `EquipmentType` value is the catch-all `"other"`
- * member — used here, but this is a real, flagged precision loss: the
- * engine cannot distinguish "the athlete owns an Ab Wheel" from "the
- * athlete owns some unrelated, unlisted implement" when evaluating this
- * requirement. This is an honest, visible use of the existing escape
- * hatch, not a silent approximation, and it should be revisited if a
- * dedicated `ab_wheel` `EquipmentType` is ever added.
+ * RESOLVED MODEL LIMITATION: "Equipment Requirements — Required Equipment:
+ * Ab Wheel." This entry originally used the catch-all `"other"`
+ * `EquipmentType`, a flagged precision loss — the engine could not
+ * distinguish "the athlete owns an Ab Wheel" from "the athlete owns some
+ * unrelated, unlisted implement". A dedicated `ab_wheel` `EquipmentType`
+ * was added when this exercise became prescriptible, exactly as that
+ * flag anticipated, and is used here with exact matching.
+ *
+ * "Acceptable Alternatives — Barbell with rotating plates, Stability Ball,
+ * Suspension Trainer, Sliding Discs, Towels on a suitable surface" remain
+ * unrepresented: the fiche itself frames them as NOT equivalent
+ * implementations ("An alternative must therefore be treated as a separate
+ * variation rather than an identical implementation"), so no `any_of`
+ * equivalence group is built from them, matching `PUSH_PRESS`'s own
+ * precedent of not force-fitting documented "alternative implement"
+ * language into an equivalence atom when the source itself denies
+ * equivalence. Each alternative is a separate variation this entry does
+ * not represent.
  *
  * "Standard Setup — 1. Place the Ab Wheel on a stable, non-slip surface."
  * grounds a genuine `floor_safe` atom (not `safe_landing_surface`: no
@@ -10399,7 +10399,7 @@ export const AB_WHEEL: ExerciseDefinition = {
   requiredEquipment: [],
   requirements: {
     required: [
-      { kind: "all_of", items: [{ kind: "equipment", equipment: "other" }] },
+      { kind: "all_of", items: [{ kind: "equipment", equipment: "ab_wheel" }] },
       {
         kind: "all_of",
         items: [

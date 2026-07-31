@@ -5891,10 +5891,10 @@ describe("62_CORE chapter — Exercise Requirements Model batch integration", ()
   });
 
   describe("AB_WHEEL", () => {
-    test("6. eligible with the 'other' equipment placeholder, a safe floor and limited space", () => {
+    test("6. eligible with an ab wheel, a safe floor and limited space", () => {
       const input = makeValidInput({
         environment: makeEnvironment({
-          availableEquipment: [{ type: "other" }],
+          availableEquipment: [{ type: "ab_wheel" }],
           floorSafe: true,
           availableSpace: "limited",
         }),
@@ -5954,7 +5954,7 @@ describe("62_CORE chapter — Exercise Requirements Model batch integration", ()
     test("10. no dependency on jumping, throwing, a wall or a partner — none are documented for this exercise", () => {
       const input = makeValidInput({
         environment: makeEnvironment({
-          availableEquipment: [{ type: "other" }],
+          availableEquipment: [{ type: "ab_wheel" }],
           floorSafe: true,
           availableSpace: "limited",
           jumpingAllowed: false,
@@ -7303,7 +7303,7 @@ describe("Lot 1 — Force fondamentale bas du corps — Exercise Requirements Mo
   test("42. adding this batch never changes the previously integrated exercises, including AB_WHEEL and FARMER_CARRY", () => {
     const abWheelInput = makeValidInput({
       environment: makeEnvironment({
-        availableEquipment: [{ type: "other" }],
+        availableEquipment: [{ type: "ab_wheel" }],
         floorSafe: true,
         availableSpace: "limited",
       }),
@@ -7893,7 +7893,7 @@ describe("Lot 2 — Tirages du haut du corps — Exercise Requirements Model bat
 
     const abWheelInput = makeValidInput({
       environment: makeEnvironment({
-        availableEquipment: [{ type: "other" }],
+        availableEquipment: [{ type: "ab_wheel" }],
         floorSafe: true,
         availableSpace: "limited",
       }),
@@ -8428,7 +8428,7 @@ describe("Lot 3 — Poussées du haut du corps — Exercise Requirements Model b
 
     const abWheelInput = makeValidInput({
       environment: makeEnvironment({
-        availableEquipment: [{ type: "other" }],
+        availableEquipment: [{ type: "ab_wheel" }],
         floorSafe: true,
         availableSpace: "limited",
       }),
@@ -9035,7 +9035,7 @@ describe("Lot 4 — Chaine posterieure et robustness — Exercise Requirements M
 
     const abWheelInput = makeValidInput({
       environment: makeEnvironment({
-        availableEquipment: [{ type: "other" }],
+        availableEquipment: [{ type: "ab_wheel" }],
         floorSafe: true,
         availableSpace: "limited",
       }),
@@ -9521,7 +9521,7 @@ describe("Lot 5 — Ground movement et transitions — Exercise Requirements Mod
 
     const abWheelInput = makeValidInput({
       environment: makeEnvironment({
-        availableEquipment: [{ type: "other" }],
+        availableEquipment: [{ type: "ab_wheel" }],
         floorSafe: true,
         availableSpace: "limited",
       }),
@@ -9862,7 +9862,7 @@ describe("Lot 6 — Combat striking et deplacements — Exercise Requirements Mo
 
     const abWheelInput = makeValidInput({
       environment: makeEnvironment({
-        availableEquipment: [{ type: "other" }],
+        availableEquipment: [{ type: "ab_wheel" }],
         floorSafe: true,
         availableSpace: "limited",
       }),

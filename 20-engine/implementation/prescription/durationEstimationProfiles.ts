@@ -193,6 +193,20 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // numerical profile. Multiplying intervals by their duration to invent a
   // session length is not estimation from documented timing data.
   unresolvedProfile("sprint_intervals", "intervals", ["50-exercises/47_SPRINT_INTERVALS"]),
+
+  // Registry Lot 7 — Core repetition work (first `core` +
+  // `straight_sets_repetitions` entry).
+  //
+  // `"unresolved"` like every profile above. The Ab Wheel chapter is one of
+  // the most quantified in the library — sets, repetitions, rest, RPE and
+  // even phase tempos — yet it documents no setup time, no transition time
+  // and no technical margin, and gives no average seconds per repetition.
+  // Its tempo options (`3-1-2`, `2-0-2`, `4-1-2`) sum to 6, 4 and 7 seconds
+  // of movement respectively, but reading one of them as an
+  // `averageRepetitionSeconds` would be choosing a tempo the prescription
+  // never selects — the numerical profile encodes `global_intent:
+  // controlled`, not a phase timing. No value is derived from them here.
+  unresolvedProfile("ab_wheel", "sets_reps", ["50-exercises/62_CORE/10_AB_WHEEL.md"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(
