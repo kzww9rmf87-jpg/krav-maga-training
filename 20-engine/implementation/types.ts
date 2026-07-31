@@ -223,6 +223,17 @@ export type EquipmentType =
   | "mat"
   | "heavy_bag"
   | "cardio_machine"
+  // A rowing ergometer specifically, not the generic `cardio_machine`
+  // above. Added because ROWERG_INTERVALS's own "# Equipment Requirements —
+  // Required: Concept2 RowErg, or Equivalent Rowing Ergometer" names one
+  // precise apparatus, and equipment matching in `exerciseRequirements.ts`
+  // is exact: an air bike or a treadmill satisfies `cardio_machine` but not
+  // this identifier, which is exactly the distinction that fiche documents.
+  // `cardio_machine` deliberately stays in the vocabulary — every other
+  // machine-based conditioning exercise (ASSAULT_BIKE_INTERVALS) still
+  // uses it, and no equipment hierarchy or substitution rule is introduced
+  // between the two.
+  | "rowing_ergometer"
   | "open_space"
   | "wall"
   | "other"

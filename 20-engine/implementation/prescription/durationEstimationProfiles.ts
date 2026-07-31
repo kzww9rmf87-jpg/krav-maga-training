@@ -170,6 +170,17 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // Registry Lot 4 — Combat movement immediate
   unresolvedProfile("sprawl", "sets_duration", ["50-exercises/30_SPRAWL"]),
   unresolvedProfile("shot_entries", "sets_duration", ["50-exercises/36_SHOT_ENTRIES"]),
+
+  // Registry Lot 5 — Conditioning intervals (first `intervals` structure).
+  //
+  // Still `"unresolved"`, for the same reason as every profile above: the
+  // RowErg chapter documents per-interval work and recovery ranges (which
+  // the numerical profile already encodes as prescription targets), but no
+  // setup, transition or technical-margin seconds — the very fields a
+  // duration ESTIMATE needs. Deriving a total session duration by
+  // multiplying the prescribed intervals is not estimation from documented
+  // timing data, and is not done here.
+  unresolvedProfile("rowerg_intervals", "intervals", ["50-exercises/49_ROWERG_INTERVALS"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

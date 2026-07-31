@@ -9505,11 +9505,18 @@ export const ASSAULT_BIKE_INTERVALS: ExerciseDefinition = {
  * Power" above.
  *
  * "# Equipment Requirements — Required: Concept2 RowErg, or Equivalent
- * Rowing Ergometer." No dedicated `EquipmentType` value exists for a
- * rowing ergometer either; `cardio_machine` is used as the same closest
- * honest generic value already used for ASSAULT_BIKE_INTERVALS above — a
- * shared MODEL LIMITATION, not a silent approximation (see that entry's
- * own block comment for the full reasoning).
+ * Rowing Ergometer." This entry originally used `cardio_machine`, the same
+ * closest honest generic value ASSAULT_BIKE_INTERVALS still uses, and
+ * documented that as a shared MODEL LIMITATION rather than a silent
+ * approximation. That limitation is now lifted for this exercise alone: a
+ * dedicated `rowing_ergometer` `EquipmentType` was added when this exercise
+ * became prescriptible (see `exercisePrescriptionRegistry.ts`), because the
+ * fiche names one precise apparatus and equipment matching is exact — an
+ * air bike, which satisfies `cardio_machine`, is not a rowing ergometer and
+ * must not make this exercise eligible. ASSAULT_BIKE_INTERVALS is
+ * deliberately left on `cardio_machine`: its own fiche is the one to
+ * consult before narrowing it, and no equipment hierarchy, alias or
+ * substitution rule is introduced between the two identifiers here.
  */
 export const ROWERG_INTERVALS: ExerciseDefinition = {
   id: "rowerg_intervals",
@@ -9544,7 +9551,7 @@ export const ROWERG_INTERVALS: ExerciseDefinition = {
     required: [
       {
         kind: "all_of",
-        items: [{ kind: "equipment", equipment: "cardio_machine" }],
+        items: [{ kind: "equipment", equipment: "rowing_ergometer" }],
       },
     ],
   },

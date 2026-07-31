@@ -99,21 +99,46 @@ const FROZEN_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
   shot_entries: "controlled_mobility_sets_v0_1",
 };
 
+/**
+ * Entries integrated after Lot 0, which legitimately DO declare an explicit
+ * `numericalProfileId`. The freeze table above must never grow to include
+ * them: it guards pre-Lot-0 behavior, and an entry using explicit selection
+ * has no pre-Lot-0 behavior to preserve.
+ */
+const EXPLICIT_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
+  // Registry Lot 5 — the first entry on the ambiguous
+  // (conditioning, work_rest_intervals, conditioning) triple.
+  rowerg_intervals: "conditioning_long_intervals_v0_1",
+};
+
+const historicalEntries = () =>
+  Object.values(EXERCISE_PRESCRIPTION_REGISTRY).filter(
+    (entry) => !(entry.exerciseId in EXPLICIT_PROFILE_BY_EXERCISE),
+  );
+
 describe("Lot 0 — 59-entry profile freeze", () => {
-  test("the frozen table covers exactly the current registry", () => {
+  test("the frozen table covers exactly the historical registry entries", () => {
+    expect(Object.keys(FROZEN_PROFILE_BY_EXERCISE)).toHaveLength(59);
     expect(Object.keys(FROZEN_PROFILE_BY_EXERCISE).sort()).toEqual(
-      Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort(),
+      historicalEntries()
+        .map((entry) => entry.exerciseId)
+        .sort(),
     );
+    // Every registry entry is accounted for by exactly one of the two tables.
+    expect(
+      Object.keys(FROZEN_PROFILE_BY_EXERCISE).length +
+        Object.keys(EXPLICIT_PROFILE_BY_EXERCISE).length,
+    ).toBe(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).length);
   });
 
   test("no historical entry declares an explicit numericalProfileId", () => {
-    for (const entry of Object.values(EXERCISE_PRESCRIPTION_REGISTRY)) {
+    for (const entry of historicalEntries()) {
       expect(entry.numericalProfileId ?? null).toBeNull();
     }
   });
 
-  test("every entry resolves the exact pre-Lot-0 profile via the unique-triple path", () => {
-    for (const entry of Object.values(EXERCISE_PRESCRIPTION_REGISTRY)) {
+  test("every historical entry resolves the exact pre-Lot-0 profile via the unique-triple path", () => {
+    for (const entry of historicalEntries()) {
       const resolution = resolveNumericalProfile({
         moduleId: entry.moduleId,
         methodId: entry.explicitMethodId,
@@ -127,6 +152,38 @@ describe("Lot 0 — 59-entry profile freeze", () => {
         FROZEN_PROFILE_BY_EXERCISE[entry.exerciseId],
       );
       expect(resolution.resolutionSource).toBe("module_method_role_unique");
+    }
+  });
+
+  test("every post-Lot-0 entry declares its profile and resolves through the explicit path", () => {
+    for (const [exerciseId, profileId] of Object.entries(EXPLICIT_PROFILE_BY_EXERCISE)) {
+      const entry =
+        EXERCISE_PRESCRIPTION_REGISTRY[exerciseId as keyof typeof EXERCISE_PRESCRIPTION_REGISTRY];
+
+      expect(entry.numericalProfileId).toBe(profileId);
+
+      const resolution = resolveNumericalProfile({
+        moduleId: entry.moduleId,
+        methodId: entry.explicitMethodId,
+        exerciseRole: entry.role,
+        explicitProfileId: entry.numericalProfileId ?? null,
+      });
+
+      expect(resolution.ok).toBe(true);
+      if (!resolution.ok) continue;
+      expect(resolution.profile.profileId).toBe(profileId);
+      expect(resolution.resolutionSource).toBe("explicit_profile_id");
+
+      // Without the explicit id, the same triple must refuse to resolve —
+      // that is precisely why the entry has to declare one.
+      const implicit = resolveNumericalProfile({
+        moduleId: entry.moduleId,
+        methodId: entry.explicitMethodId,
+        exerciseRole: entry.role,
+      });
+      expect(implicit.ok).toBe(false);
+      if (implicit.ok) continue;
+      expect(implicit.failureCode).toBe("NUMERICAL_PROFILE_AMBIGUOUS");
     }
   });
 });
@@ -268,7 +325,7 @@ describe("Lot 0 — registry validators", () => {
     ).toEqual([]);
   });
 
-  test("the real registry raises none of the new issue codes (no entry sits on the ambiguous interval triple)", () => {
+  test("the real registry raises none of the new issue codes (the one entry on the ambiguous interval triple declares its profile explicitly)", () => {
     const issues = validatePilotRegistry().filter((issue) =>
       [
         "UNKNOWN_NUMERICAL_PROFILE",

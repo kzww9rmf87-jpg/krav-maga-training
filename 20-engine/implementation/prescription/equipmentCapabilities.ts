@@ -76,6 +76,24 @@ export const EQUIPMENT_CAPABILITY_IDS = [
   // Added for the Movement-immediate registry lot (bridging,
   // technical_stand_up, shrimping — all three document "Required: Mat").
   "mat", // Aligned 1:1 with the knowledge base's own distinct `EquipmentType` member of the same name, already used by these same three ExerciseDefinitions' own Requirements Model.
+  // Added for the first conditioning/interval registry entry
+  // (rowerg_intervals).
+  //
+  // Aligned 1:1 with the knowledge base's own `rowing_ergometer`
+  // `EquipmentType` member, added in the same change: RowErg Intervals'
+  // "# Equipment Requirements — Required: Concept2 RowErg, or Equivalent
+  // Rowing Ergometer" names one precise apparatus, and this list is matched
+  // exactly (`missingValues` in `validateCompatibility.ts`, exact string
+  // equality in `getExercisePrescriptionSource`).
+  //
+  // This is NOT an equivalence group like `loaded_carry_implement`: "or
+  // Equivalent Rowing Ergometer" names other brands of the SAME apparatus,
+  // not a choice between different implements. The generic
+  // `cardio_machine` concept is deliberately not mirrored here — no
+  // registry entry needs it, and adding it would invite exactly the
+  // hierarchy ("a rowing ergometer is a cardio machine") this vocabulary
+  // has no primitive for and does not want.
+  "rowing_ergometer",
 ] as const;
 
 export type EquipmentCapabilityId = (typeof EQUIPMENT_CAPABILITY_IDS)[number];

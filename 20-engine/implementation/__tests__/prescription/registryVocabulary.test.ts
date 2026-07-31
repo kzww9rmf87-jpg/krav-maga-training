@@ -138,8 +138,9 @@ describe("registryVocabulary — equipment capabilities", () => {
       expect(isEquipmentCapabilityId(id)).toBe(true);
     }
     // +2 for medicine_ball/wall (an earlier lot), +1 for dip_bars (Registry Lot 1 —
-    // Strength immediate), +1 for mat (Registry Lot 3 — Movement immediate).
-    expect(EQUIPMENT_CAPABILITY_IDS.length).toBe(PREVIOUSLY_EXISTING_IDS.length + 2 + 1 + 1);
+    // Strength immediate), +1 for mat (Registry Lot 3 — Movement immediate),
+    // +1 for rowing_ergometer (Registry Lot 5 — Conditioning intervals).
+    expect(EQUIPMENT_CAPABILITY_IDS.length).toBe(PREVIOUSLY_EXISTING_IDS.length + 2 + 1 + 1 + 1);
   });
 
   test("an unknown equipment identifier is still rejected after the addition", () => {
@@ -443,6 +444,8 @@ describe("registryVocabulary — carry loading modes corrected to match document
       // Registry Lot 4 — Combat movement immediate
       sprawl: ["bodyweight"],
       shot_entries: ["bodyweight"],
+      // Registry Lot 5 — Conditioning intervals
+      rowerg_intervals: ["ergometer", "machine"],
     };
     const CORRECTED_IDS = ["pinch_carry", "sandbag_carry", "zercher_carry"];
 
@@ -459,8 +462,8 @@ describe("registryVocabulary — carry loading modes corrected to match document
   });
 
   test("7. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(59);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(59);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(60);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(60);
   });
 
   test("8. every retained value (plate, sandbag, barbell) is a known, documented LoadingMode", () => {
@@ -573,12 +576,12 @@ describe("registryVocabulary — pinch_carry represents only the Bilateral Varia
     for (const [id, text] of Object.entries(OTHER_ENTRY_FIRST_INSTRUCTION)) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id as PilotExerciseId].instructionDefinitions[0].text).toBe(text);
     }
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(59);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(60);
   });
 
   test("9. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(59);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(59);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(60);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(60);
   });
 
   test("10. explicitMethodId, supportedMethodIds, supportedVolumeStructures and stop conditions are unchanged", () => {
@@ -667,6 +670,10 @@ const DOSE_NARROWING_EXCEPTIONS = [
   // profile.
   "sprawl",
   "shot_entries",
+  // Registry Lot 5 — Conditioning intervals: rowerg_intervals narrows the
+  // work-interval count only (5-10, from its own "5-12 intervals"
+  // intersected with conditioning_long_intervals_v0_1's own [4, 10]).
+  "rowerg_intervals",
 ] as const;
 
 describe("registryVocabulary — exerciseDoseConstraints", () => {
@@ -677,7 +684,7 @@ describe("registryVocabulary — exerciseDoseConstraints", () => {
       }
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseDoseConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(59);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(60);
   });
 
   test("tibialis_raise, rotator_cuff_training, soleus_raise, copenhagen_plank, hip_thrust and barbell_row narrow exerciseDoseConstraints; wrist_strengthening and chin_up do not", () => {
@@ -713,7 +720,7 @@ describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestCons
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseIntensityConstraints).toBeNull();
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(59);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(60);
   });
 
   test("weighted_pull_up and neck_training narrow exerciseIntensityConstraints; neither narrows exerciseRestConstraints", () => {

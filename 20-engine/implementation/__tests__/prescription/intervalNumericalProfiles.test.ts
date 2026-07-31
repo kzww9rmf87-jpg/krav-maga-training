@@ -574,11 +574,28 @@ describe("registry validators — entries on the interval triple", () => {
     ).toBe(true);
   });
 
-  test("no real registry entry sits on the interval triple — the 59 historical entries are untouched", () => {
+  test("rowerg_intervals is the only real registry entry on the interval triple, and it declares an explicit profile — the 59 historical entries are untouched", () => {
     const entries = Object.values(EXERCISE_PRESCRIPTION_REGISTRY);
 
-    expect(entries).toHaveLength(59);
+    expect(entries).toHaveLength(60);
+
+    const onIntervalTriple = entries.filter(
+      (entry) =>
+        entry.moduleId === INTERVAL_TRIPLE.moduleId &&
+        entry.explicitMethodId === INTERVAL_TRIPLE.methodId &&
+        entry.role === INTERVAL_TRIPLE.exerciseRole,
+    );
+
+    expect(onIntervalTriple.map((entry) => entry.exerciseId)).toEqual(["rowerg_intervals"]);
+    // The whole point of the triple being ambiguous: an entry sitting on it
+    // is only legal because it names its own profile.
+    expect(onIntervalTriple[0]?.numericalProfileId).toBe("conditioning_long_intervals_v0_1");
+
+    // Every other entry is still off the triple entirely.
     for (const entry of entries) {
+      if (entry.exerciseId === "rowerg_intervals") {
+        continue;
+      }
       expect(
         entry.moduleId === INTERVAL_TRIPLE.moduleId &&
           entry.explicitMethodId === INTERVAL_TRIPLE.methodId &&

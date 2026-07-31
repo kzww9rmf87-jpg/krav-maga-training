@@ -10200,9 +10200,13 @@ describe("Lot 7 — Conditionnement general — Exercise Requirements Model batc
   });
 
   describe("ROWERG_INTERVALS", () => {
-    test("23. eligible with a cardio machine", () => {
+    // This exercise's required equipment atom was narrowed from the generic
+    // `cardio_machine` to the precise `rowing_ergometer` when it became
+    // prescriptible (see its own block comment in exerciseKnowledgeBase.ts).
+    // Matching is exact, so the three tests below assert both directions.
+    test("23. eligible with a rowing ergometer", () => {
       const input = makeValidInput({
-        environment: makeEnvironment({ availableEquipment: [{ type: "cardio_machine" }] }),
+        environment: makeEnvironment({ availableEquipment: [{ type: "rowing_ergometer" }] }),
       });
 
       const result = checkExerciseEligibility(ROWERG_INTERVALS, input);
@@ -10211,7 +10215,7 @@ describe("Lot 7 — Conditionnement general — Exercise Requirements Model batc
       expect(result.rejectionReasons).toEqual([]);
     });
 
-    test("24. ineligible without a cardio machine", () => {
+    test("24. ineligible without a rowing ergometer — including when only a generic cardio machine is available", () => {
       const input = makeValidInput({
         environment: makeEnvironment({ availableEquipment: [] }),
       });
@@ -10220,12 +10224,22 @@ describe("Lot 7 — Conditionnement general — Exercise Requirements Model batc
 
       expect(result.eligible).toBe(false);
       expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+
+      // A generic cardio machine is not a rowing ergometer: no hierarchy,
+      // alias or substitution exists between the two identifiers.
+      const cardioMachineOnly = makeValidInput({
+        environment: makeEnvironment({ availableEquipment: [{ type: "cardio_machine" }] }),
+      });
+      const cardioMachineResult = checkExerciseEligibility(ROWERG_INTERVALS, cardioMachineOnly);
+
+      expect(cardioMachineResult.eligible).toBe(false);
+      expect(cardioMachineResult.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
     });
 
     test("25. no dependency on space, floor safety, jumping, throwing, a wall or a partner — none is documented", () => {
       const input = makeValidInput({
         environment: makeEnvironment({
-          availableEquipment: [{ type: "cardio_machine" }],
+          availableEquipment: [{ type: "rowing_ergometer" }],
           availableSpace: "very_limited",
           floorSafe: false,
           jumpingAllowed: false,
@@ -10288,7 +10302,7 @@ describe("Lot 7 — Conditionnement general — Exercise Requirements Model batc
       expect(ROPE_PULL.movementPatterns).not.toContain("anti_rotation");
     });
 
-    test("29. assault_bike_intervals vs. rowerg_intervals: identical generic cardio_machine equipment atom, but distinct movement patterns and force vectors", () => {
+    test("29. assault_bike_intervals vs. rowerg_intervals: no longer the same equipment atom — rowerg_intervals was narrowed to rowing_ergometer, assault_bike_intervals kept the generic cardio_machine — and they remain distinct in movement patterns and force vectors", () => {
       const assaultBikeEquipment = ASSAULT_BIKE_INTERVALS.requirements!.required
         .flatMap((clause) => clause.items)
         .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
@@ -10297,11 +10311,16 @@ describe("Lot 7 — Conditionnement general — Exercise Requirements Model batc
         .flatMap((clause) => clause.items)
         .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
         .map((atom) => atom.equipment);
+      // rowerg_intervals became prescriptible and its own fiche names one
+      // precise apparatus ("Concept2 RowErg, or Equivalent Rowing
+      // Ergometer"), so its atom was narrowed. assault_bike_intervals was
+      // deliberately left untouched: narrowing it needs its own fiche read.
       expect(assaultBikeEquipment).toEqual(["cardio_machine"]);
-      expect(rowergEquipment).toEqual(["cardio_machine"]);
-      expect(assaultBikeEquipment).toEqual(rowergEquipment);
+      expect(rowergEquipment).toEqual(["rowing_ergometer"]);
+      expect(assaultBikeEquipment).not.toEqual(rowergEquipment);
 
-      // Despite the shared equipment atom, the two remain distinguished by biomechanics.
+      // The two were already distinguished by biomechanics, independently of
+      // the equipment atom — that separation is unchanged.
       expect(ASSAULT_BIKE_INTERVALS.movementPatterns).toEqual(["mixed", "isometric"]);
       expect(ROWERG_INTERVALS.movementPatterns).toEqual(["horizontal_pull", "hinge", "isometric"]);
       expect(ASSAULT_BIKE_INTERVALS.forceVectors).toEqual(["mixed"]);
@@ -10806,8 +10825,12 @@ describe("Lot 8 — Combat lutte et grappling debout — Exercise Requirements M
   });
 
   test("32. adding this batch never changes the previously integrated exercises, including ROWERG_INTERVALS and FARMER_CARRY", () => {
+    // ROWERG_INTERVALS's required equipment atom was later narrowed from
+    // `cardio_machine` to `rowing_ergometer` (when it became prescriptible),
+    // which is why this test supplies the precise apparatus. That narrowing
+    // is unrelated to this batch, which still changes nothing here.
     const rowergInput = makeValidInput({
-      environment: makeEnvironment({ availableEquipment: [{ type: "cardio_machine" }] }),
+      environment: makeEnvironment({ availableEquipment: [{ type: "rowing_ergometer" }] }),
     });
     expect(checkExerciseEligibility(ROWERG_INTERVALS, rowergInput).eligible).toBe(true);
 

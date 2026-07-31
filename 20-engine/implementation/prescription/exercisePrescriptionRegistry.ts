@@ -29,11 +29,13 @@
 
 import type { CapabilityModule, Identifier } from "../types";
 import {
+  acuteSymptomCondition,
   balanceLossCondition,
   completionCondition,
   equipmentFailureCondition,
   fatigueLimitCondition,
   impactLimitCondition,
+  intervalPaceLossCondition,
   painCondition,
   rangeOfMotionLossCondition,
   technicalFailureCondition,
@@ -238,6 +240,16 @@ export const PILOT_EXERCISE_IDS = [
   // Registry Lot 4 — Combat movement immediate
   "sprawl",
   "shot_entries",
+  // Registry Lot 5 — Conditioning intervals. The first entry in this
+  // registry on the `conditioning` module, the `work_rest_intervals`
+  // method and the `intervals` volume structure, and therefore the first
+  // to declare an explicit `numericalProfileId`: its
+  // (conditioning, work_rest_intervals, conditioning) triple is shared by
+  // the three Table Group 8 profiles and never resolves implicitly.
+  // sprint_intervals, assault_bike_intervals and battle_ropes remain
+  // unintegrated — each needs its own fiche read and its own equipment
+  // resolution, and none is assumed to follow from this one.
+  "rowerg_intervals",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -7684,6 +7696,246 @@ const shotEntriesEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// RowErg Intervals
+// Source: 50-exercises/49_ROWERG_INTERVALS
+//   - Primary Classification: "Combat-Specific Conditioning" (module:
+//     conditioning), matching the knowledge base's own `module:
+//     "conditioning"` / `primaryAdaptation: "conditioning"` resolution.
+//   - Equipment Requirements: "Required: Concept2 RowErg, or Equivalent
+//     Rowing Ergometer. Optional: Heart Rate Monitor, Power Display."
+//   - Loading Profile: "Typical Volume: 5-12 intervals. Work: 15
+//     seconds-5 minutes. Recovery: 30 seconds-3 minutes."
+//   - Coaching Cues: "Drive with the legs first.", "Brace the trunk.",
+//     "Finish with the arms.", "Recover under control.", "Maintain stroke
+//     quality."
+//   - Common Errors: Pulling with the arms too early, Rounded lumbar
+//     spine, Excessive stroke rate, Poor recovery mechanics, Starting too
+//     aggressively.
+//   - Performance Indicators: Average Power, Split Time, Stroke Rate,
+//     Heart Rate Recovery, Power Consistency, Technical Quality.
+//   - Contraindications: Acute Lumbar Injury, Acute Rib Injury, Acute
+//     Shoulder Injury.
+//   - Skill Requirement: "Basic rowing technique should be learned before
+//     maximal intervals."
+// Method: work_rest_intervals / conditioning / conditioning
+//
+// EXPLICIT PROFILE SELECTION. This triple is shared by all three Table
+// Group 8 profiles, so it never resolves implicitly
+// (`NUMERICAL_PROFILE_AMBIGUOUS`) and `registryValidators.ts` rejects any
+// entry on it without a `numericalProfileId`. This entry declares
+// `conditioning_long_intervals_v0_1` (INT-LONG: 4/6/10 intervals,
+// 60/120/180s per interval, 30/75/120s between intervals, RPE 7/8/9).
+//
+// Why INT-LONG and not the other two:
+//   - `conditioning_short_intervals_v0_1` (INT-SHORT) documents no
+//     encodable intensity at all and is refused at validation time
+//     (`NON_EXECUTABLE_NUMERICAL_PROFILE`) — it could not prescribe this
+//     or any other exercise;
+//   - `repeated_sprint_intervals_v0_1` encodes 3-8 second all-out efforts,
+//     which is not what this fiche's own "Work: 15 seconds-5 minutes"
+//     interval envelope describes, and its `movement_intent` intensity is
+//     not documented anywhere in this chapter.
+//
+// VOLUME — honest intersection only, no conversion:
+//   - intervals: the fiche's own "5-12 intervals" intersected with the
+//     profile's own [4, 10] gives [5, 10]. Both bounds are declared (the
+//     same convention sprawl/shot_entries already use), and the generic
+//     resolver computes the intersection — a declared bound can only ever
+//     narrow, never widen (`applyExerciseDoseConstraint`);
+//   - work duration: the fiche's own "15 seconds-5 minutes" is WIDER than
+//     the selected profile's own 60-180s per interval, on both ends. It is
+//     deliberately not declared: a dose constraint cannot widen a profile,
+//     and the 15-60s part of that envelope is INT-SHORT's documented
+//     territory, not INT-LONG's. Selecting INT-LONG means prescribing the
+//     long-interval half of this fiche, which is exactly what an explicit
+//     profile selection is for;
+//   - recovery: the fiche's own "30 seconds-3 minutes" contains the
+//     profile's own 30-120s window entirely, so there is nothing to
+//     narrow — `exerciseRestConstraints` stays null.
+//
+// DOCUMENTED PRECISION LOSS (distance). The fiche documents distance as a
+// real prescription dimension — "# Variations: 250 m Repeats, 500 m
+// Repeats, 1000 m Repeats" and "# Loading Profile — Progression:
+// Distance" — and `work_rest_intervals` lists `distance` among its
+// optional volume fields. `conditioning_long_intervals_v0_1` encodes no
+// distance rule, so a distance-based RowErg interval CANNOT be prescribed
+// through this entry, and none is invented here: no metre figure is
+// converted into seconds, and no `distanceMeters` dose constraint is
+// declared (the resolver would reject it with
+// `EXERCISE_DOSE_CONSTRAINT_INVALID`, since the selected profile's volume
+// structure does not use that dimension). Prescribing "500 m repeats"
+// needs a documented distance-scoped interval profile, which is a
+// numerical-table change, not a registry entry.
+//
+// INTENSITY. Only `rpe` is claimed. 33_EXERCISE_PRESCRIPTION_CAPABILITIES'
+// own "Exercise Family 11 — Ergometer Conditioning" also lists
+// heart_rate, pace, velocity and resistance_category, and this fiche's own
+// Optional equipment (Heart Rate Monitor, Power Display) would supply
+// them — but `IntensityRangeRule` cannot encode beats per minute, pace,
+// power or any aerobic reference type (see
+// `conditioning_short_intervals_v0_1`'s own comment for the full
+// analysis), and this chapter documents no number for any of them
+// anyway. Claiming a capability the numerical model cannot represent
+// would make `supportedIntensityTypes` a wish list rather than a
+// contract. The profile's own RPE 7-9 rule is used unchanged
+// (`exerciseIntensityConstraints: null`) — the fiche documents no RPE
+// figure of its own to narrow it with.
+//
+// TEMPO. `global_intent` is declared because Family 11 documents it for
+// this exercise family, but `work_rest_intervals` forbids tempo and the
+// profile carries no tempo rule, so the resolved prescription's tempo is
+// `null`. Capability and prescription are two different statements.
+//
+// STOP CONDITIONS — the six categories `work_rest_intervals` requires, no
+// more. Two categories documented elsewhere for this exercise are
+// knowingly absent:
+//   - `equipment_failure`, named by Family 11's own "Required Stop
+//     Conditions", has only a set-scoped factory
+//     (`equipmentFailureCondition`: scope "set", action "end_set") — a
+//     boundary this method does not have, since `sets` is one of its
+//     `forbiddenVolumeFields`. Writing an interval-scoped variant would
+//     mean inventing its scope, action and recoverability, which
+//     28_STOP_CONDITIONS.md forbids for a category it does not document
+//     for this structure (the same reasoning `intervalPaceLossCondition`
+//     already records for the continuous-aerobic case);
+//   - `intensity_limit`, `environmental_hazard` and `time_limit`, named by
+//     the conditioning MODULE contract, have no factory at all and no
+//     documented shape. Neither the resolver nor `validatePrescription`
+//     enforces module-level categories today, so this entry prescribes
+//     completely without them — a documented gap in the module contract's
+//     coverage, not a gap invented here.
+// -----------------------------------------------------------------------------
+
+const SOURCE_ROWERG_INTERVALS = "50-exercises/49_ROWERG_INTERVALS";
+
+const rowergIntervalsStopConditions: StopConditionDefinition[] = [
+  intervalPaceLossCondition({
+    conditionId: "rowerg_intervals_pace_loss",
+    description:
+      "Stop the interval if the split time lengthens, average power falls or power consistency is lost — the fiche's own performance indicators for this exercise.",
+    sourceRuleIds: [SOURCE_ROWERG_INTERVALS, SOURCE_METHOD_CATALOGUE],
+  }),
+  technicalFailureCondition({
+    conditionId: "rowerg_intervals_technical_failure",
+    description:
+      "Stop the set if the arms pull too early, the lumbar spine rounds, the stroke rate becomes excessive or recovery mechanics deteriorate.",
+    sourceRuleIds: [SOURCE_ROWERG_INTERVALS],
+  }),
+  fatigueLimitCondition({
+    conditionId: "rowerg_intervals_fatigue_limit",
+    description:
+      "Stop the exercise once accumulated fatigue prevents meeting the documented work target on the remaining intervals.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_ROWERG_INTERVALS],
+  }),
+  acuteSymptomCondition({
+    conditionId: "rowerg_intervals_acute_symptom",
+    description:
+      "Stop immediately if an acute symptom appears at any point during the intervals or the recoveries.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+  painCondition({
+    conditionId: "rowerg_intervals_pain",
+    description:
+      "Stop immediately if pain occurs, or in the presence of an acute lumbar, rib or shoulder injury.",
+    sourceRuleIds: [SOURCE_ROWERG_INTERVALS],
+  }),
+  completionCondition({
+    conditionId: "rowerg_intervals_completion",
+    description:
+      "Stop once the prescribed work intervals and their per-interval duration are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const rowergIntervalsInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "rowerg_intervals_setup",
+    "setup",
+    "Use a Concept2 RowErg or an equivalent rowing ergometer; a heart-rate monitor and a power display are optional. Basic rowing technique should be learned before maximal intervals.",
+    "high",
+    true,
+    SOURCE_ROWERG_INTERVALS,
+  ),
+  makeInstruction(
+    "rowerg_intervals_execution",
+    "execution",
+    "Drive with the legs first, brace the trunk, finish with the arms, recover under control and maintain stroke quality. Do not start the interval too aggressively.",
+    "high",
+    true,
+    SOURCE_ROWERG_INTERVALS,
+  ),
+];
+
+const rowergIntervalsEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "rowerg_intervals",
+  moduleId: "conditioning",
+  role: "conditioning",
+  explicitMethodId: "work_rest_intervals",
+  numericalProfileId: "conditioning_long_intervals_v0_1",
+  capabilities: {
+    exerciseId: "rowerg_intervals",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["work_rest_intervals"],
+    supportedVolumeStructures: ["intervals"],
+    supportedIntensityTypes: ["rpe"],
+    preferredIntensityTypes: ["rpe"],
+    // 33_EXERCISE_PRESCRIPTION_CAPABILITIES.md, "Exercise Family 11 —
+    // Ergometer Conditioning": "ergometer", "machine". Both are true of
+    // this apparatus, and this fiche's own "# Movement Context:
+    // Machine-Based" corroborates the second.
+    supportedLoadingModes: ["ergometer", "machine"],
+    supportedTempoTypes: ["global_intent"],
+    // Family 11's own documented laterality. Not force-fitted to
+    // "bilateral": a fixed, symmetrical machine stroke has no side to
+    // resolve, and `not_applicable` is the vocabulary's own value for
+    // exactly that. Consistent with the knowledge base's `unilateral:
+    // false`, which asserts the absence of unilateral work, not the
+    // presence of a bilateral/unilateral decision.
+    laterality: "not_applicable",
+    volumeInterpretations: ["interval_total"],
+    // Exactly the three tags `work_rest_intervals` requires. No extra tag
+    // is claimed: `cyclical_conditioning` is required by
+    // `continuous_aerobic_duration` alone, and nothing in this pipeline
+    // reads an unrequired tag.
+    capabilityTags: ["interval_structure", "timed_effort", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["rowing_ergometer"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["rowerg_intervals_setup", "rowerg_intervals_execution"],
+    requiredStopConditionIds: [
+      "rowerg_intervals_pace_loss",
+      "rowerg_intervals_technical_failure",
+      "rowerg_intervals_fatigue_limit",
+      "rowerg_intervals_acute_symptom",
+      "rowerg_intervals_pain",
+      "rowerg_intervals_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_rowerg_intervals",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_ROWERG_INTERVALS, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: rowergIntervalsInstructions,
+  stopConditionDefinitions: rowergIntervalsStopConditions,
+  // "# Loading Profile — Typical Volume: 5-12 intervals", intersected with
+  // the selected profile's own [4, 10]. Only the interval count is
+  // constrained; see the block comment above for why the fiche's wider
+  // work-duration envelope and its documented distance variations are
+  // deliberately not encoded here.
+  exerciseDoseConstraints: {
+    minimumDose: { sets: null, repetitions: null, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: 5 },
+    maximumDose: { sets: null, repetitions: null, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: 10 },
+    sourceRuleIds: [SOURCE_ROWERG_INTERVALS],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_ROWERG_INTERVALS, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -7766,6 +8018,8 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
 
   sprawl: sprawlEntry,
   shot_entries: shotEntriesEntry,
+
+  rowerg_intervals: rowergIntervalsEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>
