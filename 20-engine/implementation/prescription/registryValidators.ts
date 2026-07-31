@@ -15,6 +15,10 @@
 
 import type { Identifier } from "../types";
 import { getTrainingMethodContract } from "./contracts";
+import {
+  NUMERICAL_PRESCRIPTION_PROFILES,
+  getNumericalPrescriptionProfileById,
+} from "./prescriptionKnowledge";
 import { findUnknownEquipmentCapabilities } from "./equipmentCapabilities";
 import { isKnownAthleteReferenceType } from "./athleteReferenceCatalog";
 import { getDurationEstimationProfile } from "./durationEstimationProfiles";
@@ -29,7 +33,10 @@ export type RegistryIssueCode =
   | "DUPLICATE_IDENTIFIER"
   | "EMPTY_SOURCE_RULE_ID"
   | "INCOHERENT_CAPABILITY_TAG"
-  | "IMPOSSIBLE_METHOD_STRUCTURE_EQUIPMENT_COMBINATION";
+  | "IMPOSSIBLE_METHOD_STRUCTURE_EQUIPMENT_COMBINATION"
+  | "UNKNOWN_NUMERICAL_PROFILE"
+  | "NUMERICAL_PROFILE_TRIPLE_MISMATCH"
+  | "AMBIGUOUS_TRIPLE_REQUIRES_EXPLICIT_PROFILE";
 
 export interface RegistryIssue {
   code: RegistryIssueCode;
@@ -102,6 +109,48 @@ export function validateRegistryEntry(entry: ExercisePrescriptionRegistryEntry):
         message: `Method "${entry.explicitMethodId}" requires capability tag "${requiredTag}", but the entry does not declare it.`,
       });
     }
+  }
+
+  const declaredProfileId = entry.numericalProfileId ?? null;
+  const tripleCandidates = NUMERICAL_PRESCRIPTION_PROFILES.filter(
+    (profile) =>
+      profile.moduleId === entry.moduleId &&
+      profile.methodId === entry.explicitMethodId &&
+      profile.exerciseRole === entry.role,
+  );
+
+  if (declaredProfileId !== null) {
+    const declaredProfile = getNumericalPrescriptionProfileById(declaredProfileId);
+
+    if (declaredProfile === null) {
+      issues.push({
+        code: "UNKNOWN_NUMERICAL_PROFILE",
+        exerciseId,
+        message: `numericalProfileId "${declaredProfileId}" does not exist in NUMERICAL_PRESCRIPTION_PROFILES.`,
+      });
+    } else if (
+      declaredProfile.moduleId !== entry.moduleId ||
+      declaredProfile.methodId !== entry.explicitMethodId ||
+      declaredProfile.exerciseRole !== entry.role
+    ) {
+      issues.push({
+        code: "NUMERICAL_PROFILE_TRIPLE_MISMATCH",
+        exerciseId,
+        message:
+          `numericalProfileId "${declaredProfileId}" is defined for ` +
+          `${declaredProfile.moduleId}/${declaredProfile.methodId}/${declaredProfile.exerciseRole}, ` +
+          `not this entry's ${entry.moduleId}/${entry.explicitMethodId}/${entry.role}.`,
+      });
+    }
+  } else if (tripleCandidates.length > 1) {
+    issues.push({
+      code: "AMBIGUOUS_TRIPLE_REQUIRES_EXPLICIT_PROFILE",
+      exerciseId,
+      message:
+        `${tripleCandidates.length} numerical profiles share this entry's triple ` +
+        `${entry.moduleId}/${entry.explicitMethodId}/${entry.role} ` +
+        `(${tripleCandidates.map((profile) => profile.profileId).join(", ")}) — an explicit numericalProfileId is required.`,
+    });
   }
 
   if (!entry.capabilities.supportedMethodIds.includes(entry.explicitMethodId)) {

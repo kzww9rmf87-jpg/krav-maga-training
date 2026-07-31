@@ -123,6 +123,14 @@ export interface PrescribeExerciseInput {
    */
   exerciseRestConstraints?: ExerciseRestConstraints | null;
 
+  /**
+   * Explicit numerical profile selection supplied by the registry entry —
+   * forwarded unchanged to every numerical resolver. Required whenever
+   * several profiles share this exercise's module/method/role triple;
+   * absent or `null` preserves the historical unique-triple lookup.
+   */
+  numericalProfileId?: Identifier | null;
+
   supportedIntensityTypes: readonly IntensityType[];
   athleteReferences?: readonly IntensityReference[];
   preferredIntensityType?: IntensityType | null;
@@ -299,6 +307,7 @@ export const prescribeExercise = (
     laterality: input.laterality,
     lateralityRequired: input.lateralityRequired,
     exerciseDoseConstraints: input.exerciseDoseConstraints,
+    numericalProfileId: input.numericalProfileId,
     sourceRuleIds: [
       ...(input.sourceRuleIds ?? []),
       ...method.sourceRuleIds,
@@ -325,6 +334,7 @@ export const prescribeExercise = (
     preferredIntensityType: input.preferredIntensityType,
     loadRounding: input.loadRounding,
     exerciseIntensityConstraints: input.exerciseIntensityConstraints,
+    numericalProfileId: input.numericalProfileId,
     sourceRuleIds: [
       ...(input.sourceRuleIds ?? []),
       ...method.sourceRuleIds,
@@ -348,6 +358,7 @@ export const prescribeExercise = (
     role: input.role,
     rangeContext: input.rangeContext,
     exerciseRestConstraints: input.exerciseRestConstraints,
+    numericalProfileId: input.numericalProfileId,
     sourceRuleIds: [
       ...(input.sourceRuleIds ?? []),
       ...method.sourceRuleIds,
@@ -372,6 +383,7 @@ export const prescribeExercise = (
     rangeContext: input.rangeContext,
     supportedTempoTypes: input.supportedTempoTypes,
     preferredTempoType: input.preferredTempoType,
+    numericalProfileId: input.numericalProfileId,
     sourceRuleIds: [
       ...(input.sourceRuleIds ?? []),
       ...method.sourceRuleIds,
@@ -386,6 +398,26 @@ export const prescribeExercise = (
       input,
       "tempo",
       tempo.message,
+      { method, compatibility, volume, intensity, rest, tempo },
+    );
+  }
+
+  // Defense in depth: the four numerical resolvers must have resolved the
+  // exact same profile. Static data plus deterministic resolution makes a
+  // divergence impossible today — this turns that assumption into a
+  // verified invariant instead of a silent one.
+  const resolvedProfileIds = unique([
+    volume.profileId,
+    intensity.profileId,
+    rest.profileId,
+    tempo.profileId,
+  ]);
+
+  if (resolvedProfileIds.length !== 1) {
+    return fail(
+      input,
+      "validation",
+      `Numerical resolvers disagree on the prescription profile: ${resolvedProfileIds.join(", ")}.`,
       { method, compatibility, volume, intensity, rest, tempo },
     );
   }

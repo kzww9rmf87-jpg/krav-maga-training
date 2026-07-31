@@ -47,7 +47,10 @@ import type { IntensityReferenceType, IntensityType, TempoType } from "./types";
 import type { ExerciseRole } from "./types";
 import type { TrainingMethodId } from "./contracts";
 import type { PrescribeExerciseInput } from "./prescribeExercise";
-import type { RangeContext } from "./prescriptionKnowledge";
+import type {
+  NumericalPrescriptionProfileId,
+  RangeContext,
+} from "./prescriptionKnowledge";
 import type { IntensityReference } from "./types";
 import type { ExerciseDoseConstraints } from "./resolveVolume";
 import type { ExerciseIntensityConstraints } from "./resolveIntensity";
@@ -118,6 +121,15 @@ export interface ExercisePrescriptionRegistryEntry {
    * profile exactly.
    */
   exerciseRestConstraints: ExerciseRestConstraints | null;
+  /**
+   * Explicit numerical profile selection for this entry. Required whenever
+   * several `NumericalPrescriptionProfile`s share this entry's
+   * (moduleId, explicitMethodId, role) triple — enforced by
+   * `registryValidators.ts` (`AMBIGUOUS_TRIPLE_REQUIRES_EXPLICIT_PROFILE`).
+   * Absent or `null` preserves the historical unique-triple lookup exactly;
+   * every entry predating this field keeps it absent.
+   */
+  numericalProfileId?: NumericalPrescriptionProfileId | null;
   sourceRuleIds: readonly Identifier[];
 }
 
@@ -7874,6 +7886,7 @@ export function getExercisePrescriptionSource(
       exerciseDoseConstraints: entry.exerciseDoseConstraints,
       exerciseIntensityConstraints: entry.exerciseIntensityConstraints,
       exerciseRestConstraints: entry.exerciseRestConstraints,
+      numericalProfileId: entry.numericalProfileId ?? null,
       loadRounding: context.loadRounding,
       sourceRuleIds: entry.sourceRuleIds,
     },

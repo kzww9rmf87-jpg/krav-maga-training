@@ -470,6 +470,7 @@
         "stage": "prescription_generation",
         "decision": "Volume resolved for exercise \"bench_press\".",
         "reasons": [
+          "profile=strength_primary_straight_sets_v0_1 (selection=module_method_role_unique)",
           "structure=sets_reps, sets=3, reps=5"
         ],
         "affectedExerciseIds": [

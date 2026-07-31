@@ -135,7 +135,11 @@ function buildStageEntries(
       id: idFor("volume"),
       decision: volume.ok ? `Volume resolved for exercise "${exerciseId}".` : `Volume resolution failed for exercise "${exerciseId}".`,
       reasons: volume.ok
-        ? [summarizeVolume(volume.volume), ...volume.narrowingNotes]
+        ? [
+            `profile=${volume.profileId} (selection=${volume.profileResolutionSource})`,
+            summarizeVolume(volume.volume),
+            ...volume.narrowingNotes,
+          ]
         : [volume.message],
       sourceRuleIds: volume.sourceRuleIds,
     });
