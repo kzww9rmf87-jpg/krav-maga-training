@@ -143,8 +143,8 @@ describe("registry Lot 3 — shared numerical profile", () => {
     expect(matches[0].volume.distance).toBeNull();
   });
 
-  test("the total number of NumericalPrescriptionProfiles is 18 (12 historical + the 3 Table Group 8 interval profiles + the Table Group 13 Core repetition profile + the Table Group 4 ISO-GRIP profile + the Table Group 14 power-interval profile; this lot added none)", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(18);
+  test("the total number of NumericalPrescriptionProfiles is 19 (12 historical + the 3 Table Group 8 interval profiles + the Table Group 13 Core repetition profile + the Table Group 4 ISO-GRIP profile + the Table Group 14 power-interval profile + the Table Group 15 Grip repetition profile; this lot added none)", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(19);
   });
 });
 
@@ -514,8 +514,8 @@ describe("registry Lot 3 — duration estimation profiles", () => {
     });
   }
 
-  test("no duration profile has any effect on the numerical prescription profiles (now 18) or on the 51 historical entries", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(18);
+  test("no duration profile has any effect on the numerical prescription profiles (now 19) or on the 51 historical entries", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(19);
     expect(getDurationEstimationProfile("duration_profile_bench_press").ok).toBe(false);
   });
 });

@@ -1167,6 +1167,93 @@ export const NUMERICAL_PRESCRIPTION_PROFILES = [
     requiresSportSpecificSubtype: false,
     sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
   },
+  {
+    // Profile GRIP-REPETITION-STRENGTH, Table Group 15. Triple
+    // (grip, straight_sets_repetitions, secondary) is UNIQUE, so implicit
+    // resolution already selects it; consumers declare the id anyway, for
+    // the same auditability reason ab_wheel and plate_pinch do.
+    //
+    // This profile does NOT claim a family discovered across several
+    // records. It implements a module rule that 65_GRIP/00_OVERVIEW.md now
+    // states directly, under "General Prescription Ranges → Grip Repetition
+    // Strength". Every value below is that section's — sets 3-5,
+    // repetitions 2-8, 1-3 RIR, 90-240 s rest, controlled tempo — not any
+    // single exercise's. The doctrine is owned by the module; an exercise
+    // narrows it.
+    //
+    // The module needed the rule because its other five prescription ranges
+    // count short maximal efforts, seconds of holding, or controlled
+    // repetitions at low-to-moderate loading for tissue exposure. None
+    // describes a near-maximal whole movement whose repetition ceiling is
+    // set by the hands rather than by the prime movers.
+    //
+    // The role is `secondary` because that chapter's own "Placement Within
+    // the Session" states grip work "is usually placed after primary
+    // technical and strength work" — not because `secondary` happened to
+    // satisfy a validator.
+    //
+    // UNIT SCOPE, enforced by the table and repeated here: this profile
+    // covers COMPLETE repetitions of a whole movement only. Rope ascents,
+    // hand-over-hand pulls, distance, timed holds and timed intervals are
+    // all excluded, because the chapter's own Volume Metrics section
+    // forbids combining incompatible volume measures. That exclusion is not
+    // a preference: `RepetitionTarget.unit` is fixed to `repetitions` and
+    // the three repetition `VolumeInterpretation` values express LATERALITY,
+    // not unit, so no future entry can smuggle another unit in.
+    //
+    // Normals follow the tables' Integer Resolution convention (3-5 → 4;
+    // 2-8 → 5; 90-240 → 165). The RIR range is encoded in the same
+    // min/normal/max form `strength_primary_straight_sets_v0_1` and
+    // `functional_hypertrophy_primary_v0_1` already use, so range-context
+    // selection behaves identically to those two — a range-position
+    // convention, deliberately not re-interpreted here.
+    //
+    // Tempo is `global_intent: controlled`, the literal wording of the
+    // module rule. Phase timing is NOT representable by `NumericalTempoRule`
+    // (global_intent / phase_intent / isometric_hold / none only), so a
+    // record's documented eccentric duration stays in its own instructions
+    // — the documented precision loss Table Group 13 already records.
+    profileId: "grip_repetition_strength_v0_1",
+    version: "0.1",
+    moduleId: "grip",
+    methodId: "straight_sets_repetitions",
+    exerciseRole: "secondary",
+    volume: {
+      structure: "sets_reps",
+      sets: integerRange(3, 4, 5),
+      repetitions: { type: "fixed_range", range: integerRange(2, 5, 8) },
+      duration: null,
+      distance: null,
+      rounds: null,
+      workIntervals: null,
+    },
+    intensity: [
+      {
+        type: "rir",
+        min: 1,
+        normal: 2,
+        max: 3,
+        unit: "repetitions",
+        referenceType: null,
+        sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_INTENSITY_MODEL],
+      },
+    ],
+    rest: {
+      scope: "between_sets",
+      seconds: integerRange(90, 165, 240),
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    tempo: {
+      type: "global_intent",
+      globalIntent: "controlled",
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    minimumDose: { ...emptyDose(), sets: 3, repetitions: 2 },
+    maximumDose: { ...emptyDose(), sets: 5, repetitions: 8 },
+    requiresExerciseSpecificLoadRule: false,
+    requiresSportSpecificSubtype: false,
+    sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
+  },
 ] as const satisfies readonly NumericalPrescriptionProfile[];
 
 export const selectRangeValue = (

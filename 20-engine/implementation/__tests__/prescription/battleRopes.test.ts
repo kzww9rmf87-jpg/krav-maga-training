@@ -102,8 +102,8 @@ describe("battle_ropes — registry, knowledge base, profile and equipment count
     expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(76);
   });
 
-  test("3. the numerical profiles stay at 18 — this lot created none", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(18);
+  test("3. the numerical profiles stayed at 18 for this lot — a later lot added GRIP-REPETITION-STRENGTH, bringing the total to 19", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(19);
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID)).toHaveLength(1);
   });
 
@@ -858,8 +858,8 @@ describe("battle_ropes — determinism, validation and non-regression", () => {
     ]);
   });
 
-  test("39. this lot created no numerical profile and no Table Group value moved", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(18);
+  test("39. this lot created no numerical profile and no Table Group value moved — a later lot added GRIP-REPETITION-STRENGTH", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(19);
 
     // The doctrine this entry consumes is byte-for-byte what the previous lot
     // published — narrowing happens at the entry, never in the table.

@@ -185,10 +185,11 @@ describe("ISO-GRIP — the profile mirrors the canonical table", () => {
     }
   });
 
-  test("the Grip module now has both halves: one carry profile, one isometric profile", () => {
+  test("the Grip module's three profiles cover three DIFFERENT units — carried distance, held seconds, complete repetitions", () => {
     const gripProfiles = NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.moduleId === "grip");
     expect(gripProfiles.map((p) => p.profileId).sort()).toEqual([
       "distance_carry_strength_grip_v0_1",
+      "grip_repetition_strength_v0_1",
       "timed_isometric_grip_v0_1",
     ]);
 
@@ -197,6 +198,19 @@ describe("ISO-GRIP — the profile mirrors the canonical table", () => {
     expect(carry.volume.structure).toBe("sets_distance");
     expect(profile().volume.distance).toBeNull();
     expect(carry.volume.duration).toBeNull();
+
+    // The Grip chapter's own Volume Metrics section forbids combining
+    // incompatible volume measures; the three profiles keep them apart, each
+    // owning exactly one and leaving the other two null.
+    const repetition = getNumericalPrescriptionProfileById("grip_repetition_strength_v0_1")!;
+    expect(repetition.methodId).toBe("straight_sets_repetitions");
+    expect(repetition.volume.structure).toBe("sets_reps");
+    expect(repetition.volume.distance).toBeNull();
+    expect(repetition.volume.duration).toBeNull();
+    expect(profile().volume.repetitions).toBeNull();
+    expect(carry.volume.repetitions).toBeNull();
+
+    expect(new Set(gripProfiles.map((p) => p.volume.structure)).size).toBe(3);
   });
 });
 

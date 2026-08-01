@@ -2065,6 +2065,196 @@ heavy_bag_power_intervals:  intervals 3–8   work 10–30 s   rest 30–90 s
 
 ---
 
+# Table Group 15 — Grip Repetition Strength
+
+## Objective
+
+Grip-integrated pulling and pressing strength, counted in complete
+repetitions, where grip difficulty rather than the prime movers sets the
+repetition ceiling.
+
+## Profile GRIP-REPETITION-STRENGTH
+
+```text
+profileId: grip_repetition_strength_v0_1
+moduleId: grip
+methodId: straight_sets_repetitions
+exerciseRole: secondary
+```
+
+This triple is unique in the profile set; implicit resolution already
+selects it. Consumers declare the id explicitly all the same, so the
+selection is auditable in the Decision Trace rather than inferred.
+
+The role is `secondary` because `65_GRIP/00_OVERVIEW.md`'s own "Placement
+Within the Session" states that grip work "is usually placed after primary
+technical and strength work", and "may be placed earlier only when grip
+strength is the primary objective". A primary-role variant would be a
+separate profile.
+
+## Module Source
+
+This group does NOT claim a pre-existing family discovered across several
+records. It implements a module rule that `65_GRIP/00_OVERVIEW.md` now
+states directly, under "General Prescription Ranges → Grip Repetition
+Strength": purpose, admissible and excluded exercises, sets, repetitions,
+intensity, rest, tempo, progression and limits of use.
+
+Every number below is that section's, not any single exercise's. The
+doctrine is owned by the module; an exercise narrows it.
+
+Why the module needed the rule: the chapter's other five prescription
+ranges count short maximal efforts, seconds of holding, or controlled
+repetitions at low to moderate loading for tissue exposure. None describes
+a near-maximal whole movement whose repetition ceiling is set by the hands.
+
+## Admissible Exercises
+
+Exercises whose prescribed unit is a complete repetition of the whole
+movement and whose limiting factor is grip security.
+
+`towel_pull_up` is the first consumer. It is an example of the category,
+never its definition.
+
+## Units Included
+
+```text
+complete repetitions of the whole movement (total_repetitions)
+```
+
+## Units Excluded
+
+The chapter's own "Volume Metrics" section requires this, stating that
+"CAS must avoid combining incompatible volume measures without context"
+and listing total repetitions, maximal closes and finger contacts as
+distinct metrics:
+
+- rope ascents (a climb is a bout of many hand transitions);
+- hand-over-hand pulls (a repetition of one hand, not of the movement);
+- distance — Table Group 5 covers loaded carries;
+- timed holds and isometric variations — Table Group 4 covers those;
+- timed work intervals;
+- gripper closes and finger contacts.
+
+No future entry may absorb any of these by declaring a different
+`volumeInterpretation`: the model fixes a repetition's unit to
+`repetitions`, and the three repetition interpretations it offers
+(`total_repetitions`, `repetitions_per_side`,
+`alternating_total_repetitions`) express LATERALITY, not unit. Representing
+climbs or hand pulls would require extending a closed vocabulary that the
+public session-output contract reuses, which is a separate decision.
+
+### Volume
+
+```text
+sets: 3–5
+repetitions: 2–8
+```
+
+Normal:
+
+```text
+4 sets × 5 repetitions
+```
+
+Normals follow the Integer Resolution convention above (3–5 → 4; 2–8 → 5).
+
+### Intensity
+
+```text
+1–3 RIR
+```
+
+Normal:
+
+```text
+2 RIR
+```
+
+Repetitions in reserve, not RPE and not a load percentage. The chapter's
+own "Intensity Determinants" section states that "Grip intensity is not
+represented accurately by external load alone" and lists handle diameter,
+surface friction, finger position and proximity to grip failure among its
+determinants — none of which is encodable as a numeric target. A reserve
+counted against grip security is the one documented quantity that is.
+
+The range is encoded `min: 1, normal: 2, max: 3`, the same form Table
+Group 1's STR-PRIMARY and Table Group 2's HYP-PRIMARY already use for
+their own documented RIR ranges. Range-context selection therefore behaves
+identically to those two profiles: `reduced` takes the low end, `high` the
+high end of the documented range. That is a range-position convention, not
+a difficulty dial, and it is not re-interpreted here.
+
+### Rest
+
+```text
+90–240 seconds
+```
+
+Normal:
+
+```text
+165 seconds
+```
+
+Between sets.
+
+### Tempo
+
+```text
+type: global_intent
+globalIntent: controlled
+```
+
+The module rule states "Controlled throughout, with a controlled descent."
+`controlled` is a literal member of the movement-intent vocabulary.
+
+Phase timing is **not representable** by a numerical profile's tempo rule,
+which admits only `global_intent`, `phase_intent`, `isometric_hold` or
+`none`. An exercise record documenting a specific eccentric duration keeps
+that figure in its own instructions — the same documented precision loss
+Table Group 13 already records for phase-timed core work.
+
+### Minimum Dose
+
+```text
+3 sets × 2 repetitions
+```
+
+### Maximum Dose
+
+```text
+5 sets × 8 repetitions
+```
+
+The maximum boundaries must not be combined automatically.
+
+### Exercise-Specific Narrowing
+
+An exercise narrows this envelope to its own documented prescriptions and
+never widens it. Where a record documents several prescriptions counted in
+complete repetitions, their union is what it may declare.
+
+```text
+towel_pull_up:  sets 3–5   repetitions 2–8   rest 90–240 s
+```
+
+### Limits of Use
+
+This profile must not be used:
+
+- when the prescribed unit is anything other than a complete repetition;
+- when the limiting factor is the prime movers rather than the grip — that
+  is ordinary strength work, and Table Groups 1, 2 and 12 cover it;
+- for an isometric variation of the same exercise — Table Group 4 covers
+  timed grip holds, and `plate_pinch` already consumes it;
+- to keep accumulating volume once grip security is lost. The module rule
+  terminates the set at that point regardless of the repetitions
+  remaining, which is why every consumer must declare a technical-failure
+  and an equipment-failure stop condition.
+
+---
+
 # Exercise-Specific Numerical Requirement
 
 The generic profiles above are insufficient for final execution when an exercise requires:

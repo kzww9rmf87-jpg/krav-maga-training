@@ -643,6 +643,111 @@ Typical prescription:
 - no persistent forearm pump,
 - emphasis on circulation and movement quality.
 
+## Grip Repetition Strength
+
+### Purpose
+
+Grip-integrated pulling and pressing strength, where a complete repetition
+of a whole movement is the unit of work and grip difficulty is the
+dominant constraint on that movement.
+
+This category exists because the ranges above cannot express it. Maximum
+Grip Strength counts short maximal efforts, Grip Strength Endurance and
+Long-Duration Grip Endurance count seconds of holding, and Tissue Capacity
+counts controlled repetitions at low to moderate loading for progressive
+exposure. None of them describes a near-maximal movement whose repetition
+ceiling is set by the hands rather than by the prime movers.
+
+### Admissible Exercises
+
+Exercises whose prescribed unit is a **complete repetition of the whole
+movement**, and whose limiting factor is grip security rather than the
+prime movers.
+
+Towel Pull-Up is the first documented example. The category is defined by
+the unit and the limiting factor, not by that exercise: any future grip
+exercise counted in complete repetitions belongs here.
+
+### Excluded Exercises
+
+This category must not absorb work counted in any other unit, in keeping
+with the Volume Metrics rule below:
+
+- rope ascents — a climb is a bout composed of many hand transitions, not
+  a repetition of a movement;
+- hand-over-hand pulls — a repetition of one hand's action, not of the
+  whole movement;
+- distance travelled — Loaded Carries cover that;
+- timed holds and isometric variations — Grip Strength Endurance and
+  Long-Duration Grip Endurance cover those;
+- timed work intervals and conditioning intervals;
+- gripper closes and finger contacts.
+
+An exercise may contribute one of its prescriptions to this category
+without every one of its variations belonging to it.
+
+### Sets
+
+Typical range:
+
+- 3 to 5 sets.
+
+### Repetitions
+
+Typical range:
+
+- 2 to 8 complete repetitions,
+- the lower half for strength emphasis,
+- the upper half for strength-endurance emphasis.
+
+### Intensity
+
+Expressed as repetitions in reserve:
+
+- 1 to 3 repetitions in reserve.
+
+Repetitions in reserve is the honest metric here because grip work is not
+represented accurately by external load alone, as the Intensity
+Determinants above state. A repetition remains available only while the
+grip remains secure, so the reserve is counted against grip security, not
+against the prime movers.
+
+### Rest
+
+Typical range:
+
+- 90 seconds to 4 minutes,
+- the upper half for strength emphasis,
+- the lower half for strength-endurance emphasis.
+
+### Tempo
+
+Controlled throughout, with a controlled descent.
+
+The descent must never be uncontrolled: releasing tension abruptly under a
+grip-limited hold is both a technical failure and a safety failure.
+Exercise records may document a specific eccentric duration; that phase
+timing belongs in the exercise's own instructions.
+
+### Progression
+
+- repetition count within the range,
+- grip difficulty of the implement,
+- reduced assistance,
+- added external load only for well-adapted athletes,
+- never by sacrificing controlled descent.
+
+### Limits of Use
+
+This category must not be used:
+
+- when the prescribed unit is anything other than a complete repetition;
+- when the limiting factor is the prime movers rather than the grip — that
+  is ordinary strength work and belongs to the Strength module;
+- to prescribe an isometric variation of the same exercise;
+- to accumulate volume once grip security is lost, which terminates the
+  set regardless of the repetitions remaining.
+
 ---
 
 # Volume Metrics

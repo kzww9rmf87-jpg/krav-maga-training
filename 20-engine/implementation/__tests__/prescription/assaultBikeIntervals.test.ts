@@ -101,8 +101,8 @@ describe("assault_bike_intervals — registry, knowledge base, profile and equip
     expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(76);
   });
 
-  test("3. the numerical profiles stay at 18 — this lot created none", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(18);
+  test("3. the numerical profiles stayed at 18 for this lot — a later lot added GRIP-REPETITION-STRENGTH, bringing the total to 19", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(19);
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID)).toHaveLength(1);
   });
 
@@ -862,8 +862,8 @@ describe("assault_bike_intervals — determinism, validation and doctrine integr
     ]);
   });
 
-  test("41. this lot created no numerical profile", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(18);
+  test("41. this lot created no numerical profile — the later Grip repetition lot did, bringing the total to 19", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(19);
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID)).toHaveLength(1);
   });
 
