@@ -91,8 +91,8 @@ describe("rowerg_intervals — registry, knowledge base and profile counts", () 
     // 59 historical + rowerg_intervals (this lot) + sprint_intervals
     // (Registry Lot 6). The two lists below are what this test actually
     // guards; the total is derived from them, never the other way round.
-    expect(PILOT_EXERCISE_IDS).toHaveLength(68);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(68);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(69);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(69);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
     expect(PILOT_EXERCISE_IDS).toContain(EXERCISE_ID);
   });
@@ -141,7 +141,7 @@ describe("rowerg_intervals — registry, knowledge base and profile counts", () 
     // test keeps proving what it was written to prove — that rowerg_intervals
     // was the only exercise this lot introduced — instead of silently
     // absorbing any future addition.
-    const ADDED_BY_LATER_LOTS = ["sprint_intervals", "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals"] as const;
+    const ADDED_BY_LATER_LOTS = ["sprint_intervals", "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up"] as const;
 
     expect(HISTORICAL_IDS).toHaveLength(59);
     expect([...HISTORICAL_IDS, EXERCISE_ID, ...ADDED_BY_LATER_LOTS].sort()).toEqual(
@@ -690,7 +690,7 @@ describe("rowerg_intervals — determinism, non-mutation and non-regression", ()
     // The 59 entries that predate this lot: everything except this lot's own
     // entry and the ids added by later lots (each of which has its own
     // non-regression coverage in its own test file).
-    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "sprint_intervals", "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals"];
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "sprint_intervals", "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up"];
     const historicalIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(historicalIds).toHaveLength(59);
 

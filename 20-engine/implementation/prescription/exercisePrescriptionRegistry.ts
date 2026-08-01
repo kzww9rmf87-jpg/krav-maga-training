@@ -303,6 +303,10 @@ export const PILOT_EXERCISE_IDS = [
   // sentence independently, which is what a generic profile is for. Adds no
   // profile and changes no doctrine.
   "assault_bike_intervals",
+  // Registry Lot 14 — first consumer of Table Group 15's own
+  // GRIP-REPETITION-STRENGTH profile, and the first Grip entry counted in
+  // complete repetitions rather than carried metres or held seconds.
+  "towel_pull_up",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -10063,6 +10067,270 @@ const assaultBikeIntervalsEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Towel Pull-Up
+// Source: 50-exercises/65_GRIP/10_TOWEL_PULL_UP.md
+//   - Primary Classification: "Grip Strength" (module grip), matching the
+//     knowledge base's own resolution.
+//   - Equipment: "A towel is draped securely over a stable pull-up bar."
+//   - Prescription Variables: "Repetitions — 1 to 6 for strength, 4 to 8
+//     for strength endurance"; "Sets — 3 to 5"; "Tempo — controlled
+//     ascent, brief top pause, 2 to 4 second eccentric, no uncontrolled
+//     drop"; "Rest — 2 to 4 minutes for strength, 90 to 180 seconds for
+//     strength endurance".
+//   - Strength Prescription: "3 to 5 sets, 2 to 5 repetitions, 2 to 4
+//     minutes rest, 1 to 3 repetitions in reserve, complete grip control."
+//   - Strength-Endurance Prescription: "3 to 4 sets, 4 to 8 repetitions,
+//     90 to 180 seconds rest, submaximal grip fatigue, no uncontrolled
+//     slipping."
+//   - Isometric Variation: "5 to 20 seconds, 2 to 4 sets" — NOT this entry.
+//   - Key Technical Cues: "Crush the towel.", "Keep the wrists strong.",
+//     "Pull the elbows toward the ribs.", "Keep the chest tall.", "Do not
+//     shrug into the ears.", "Keep the ribs down.", "Minimize swinging.",
+//     "Control the descent.", "Stop before the hands begin to slip
+//     uncontrollably."
+//   - Common Errors: Passive Shoulder Position, Excessive Swinging, Wrist
+//     Collapse, Elbows Flare Excessively, Neck Reaching, Uncontrolled
+//     Descent, Grip Failure Before Technical Failure.
+//   - Safety Rules: "Use a strong towel without visible damage.", "Place
+//     the towel over a stable pull-up bar.", "Confirm that the bar is
+//     secure.", "Keep the landing area clear.", "Do not continue after
+//     grip security is lost.", "Do not use an unstable door-mounted
+//     setup.", "Terminate immediately if numbness, sharp pain or sudden
+//     weakness occurs."
+//   - Technical Complexity: "Moderate."
+// Method: straight_sets_repetitions / grip / secondary
+//   (grip_repetition_strength_v0_1 — sets 3/4/5, reps 2/5/8, RIR 1/2/3,
+//   rest 90/165/240 s, tempo global_intent controlled)
+//
+// PROFILE. Table Group 15's own profile, whose triple
+// (grip, straight_sets_repetitions, secondary) is UNIQUE — implicit
+// resolution would already select it. The id is declared explicitly all
+// the same: this entry is the profile's first consumer, and naming the
+// selection at the entry keeps the decision auditable in the Decision
+// Trace rather than inferred from the absence of a competitor. The same
+// convention ab_wheel and plate_pinch already use.
+//
+// THE DOCTRINE IS THE MODULE'S, NOT THIS ENTRY'S. Table Group 15 was
+// written from `65_GRIP/00_OVERVIEW.md`'s own new "Grip Repetition
+// Strength" rule, and that rule owns every number in the profile. This
+// entry contributes nothing to the envelope — it narrows it. Had this
+// exercise's figures been used to BUILD the envelope, the profile would
+// have been a towel-pull-up profile wearing a generic name, which the
+// preceding audit refused.
+//
+// VARIANT REPRESENTED — the complete towel pull-up, and only that. The
+// chapter documents four other things this entry does NOT represent:
+//   - the Isometric Variation (5-20 s holds) — a different unit entirely,
+//     covered by Table Group 4 and excluded in writing by the module rule;
+//   - the Assisted Variation (bands, foot support, partner, machine);
+//   - weighted towel pull-ups, "reserved for advanced athletes with
+//     established tissue tolerance";
+//   - eccentric-only descents.
+// None of them is mixed into the numbers below.
+//
+// NARROWING — the union of the chapter's two repetition prescriptions,
+// which is exactly what Table Group 15's narrowing rule permits:
+//   - sets: Strength 3-5 and Strength-Endurance 3-4 give 3-5, which IS the
+//     profile's own envelope. Declared anyway, as ab_wheel and battle_ropes
+//     already do, so the entry states its own documented range rather than
+//     relying on the envelope happening to match;
+//   - repetitions: Strength 2-5 and Strength-Endurance 4-8 give 2-8, again
+//     the profile's own envelope, declared for the same reason;
+//   - rest: Strength 120-240 s and Strength-Endurance 90-180 s give
+//     90-240 s, the profile's own window.
+// The chapter's wider "Prescription Variables — 1 to 6 repetitions for
+// strength" is NOT used: the named Strength Prescription says 2 to 5, and
+// this registry takes the named prescription over the variable range, the
+// same discipline plate_pinch already applied to its own three named
+// prescriptions.
+//
+// INTENSITY. `rir` only, 1-3 from "1 to 3 repetitions in reserve" in the
+// Strength Prescription — the single quantified intensity figure anywhere
+// in this chapter. No RPE exists in it, and none is invented.
+// Everything else the chapter lists under "Intensity" is a DETERMINANT,
+// not a target: bodyweight, assistance level, towel thickness, towel
+// material, grip height, range of motion, repetition count and proximity
+// to grip failure. The module chapter states the general form of this
+// rule — "Grip intensity is not represented accurately by external load
+// alone" — so none of them becomes a number here. In particular towel
+// thickness is not converted into a resistance category, and bodyweight is
+// not converted into a percentage: the loading mode is bodyweight and the
+// reserve is counted against grip security.
+//
+// TEMPO. `global_intent: controlled`, resolved from the profile, matching
+// this chapter's "controlled ascent" and "Control the descent" and the
+// module rule's "Controlled throughout, with a controlled descent".
+// DOCUMENTED PRECISION LOSS: the chapter's "2 to 4 second eccentric" is
+// phase timing, which `NumericalTempoRule` cannot represent
+// (global_intent / phase_intent / isometric_hold / none only). The figure
+// is therefore carried where it is actionable — in the execution
+// instruction — exactly as Table Group 13 records for phase-timed core
+// work. No phase duration is fabricated in the numbers.
+//
+// EQUIPMENT. `pull_up_bar` AND `towel`, the two atoms the knowledge base
+// already gates on. `towel` is added to the prescription vocabulary by
+// this lot and aligned 1:1 with the pre-existing `EquipmentType` member;
+// the ExerciseDefinition is not modified. Matching is exact and no
+// equivalence is created: a rope, a strap, a suspension trainer and a
+// thick-grip attachment all fail, which is what keeps this entry disjoint
+// from the rope exercises the module rule excludes.
+// The knowledge base additionally gates `sufficient_space` at
+// "very_limited"; that environment atom stays where it is, and no
+// capability id is invented to mirror it.
+//
+// LATERALITY. `bilateral` with `total_repetitions`. "The athlete grips one
+// end of the towel with each hand" and both hands pull the same body
+// upward in one movement — a repetition is one complete movement, counted
+// once. Nothing is per side and nothing is multiplied.
+//
+// STOP CONDITIONS — six. `straight_sets_repetitions` requires three
+// (technical_failure, pain, completion); the GRIP MODULE contract requires
+// five (adding fatigue_limit and equipment_failure), and both existing
+// grip entries already declare more than the method minimum
+// (plate_pinch four, pinch_carry five). All six declared here are
+// documented by this chapter:
+//   - equipment_failure covers the towel tearing, slipping or an unstable
+//     bar, all named in Safety Rules, and the documented "Grip Failure
+//     Before Technical Failure" error;
+//   - range_of_motion_loss covers "Neck Reaching → false range
+//     completion" and the prescribed bottom position.
+// The module's sixth required category, `balance_loss`, is deliberately
+// ABSENT: this chapter documents no balance concern anywhere (checked
+// directly), and declaring it would mean inventing one.
+// -----------------------------------------------------------------------------
+
+const SOURCE_TOWEL_PULL_UP = "50-exercises/65_GRIP/10_TOWEL_PULL_UP.md";
+
+const towelPullUpStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "towel_pull_up_technical_failure",
+    description:
+      "Stop the set on technical breakdown: hanging passively without scapular control, using momentum to swing up, wrists collapsing under load, or elbows flaring away from the ribs.",
+    sourceRuleIds: [SOURCE_TOWEL_PULL_UP],
+  }),
+  equipmentFailureCondition({
+    conditionId: "towel_pull_up_equipment_failure",
+    description:
+      "Stop immediately if the hands begin to slide, if the towel shows damage or begins to tear, or if the bar or its mounting moves. Grip security lost is the end of the set, whatever repetitions remain.",
+    sourceRuleIds: [SOURCE_TOWEL_PULL_UP],
+  }),
+  rangeOfMotionLossCondition({
+    conditionId: "towel_pull_up_range_of_motion_loss",
+    description:
+      "Stop the set when the prescribed top position can no longer be reached without extending the neck to bring the chin over the hands, or when the prescribed bottom position is no longer reached under control.",
+    sourceRuleIds: [SOURCE_TOWEL_PULL_UP],
+  }),
+  fatigueLimitCondition({
+    conditionId: "towel_pull_up_fatigue_limit",
+    description:
+      "Stop the exercise once grip quality and pulling mechanics can no longer both be maintained. Repetitions continue only while both remain acceptable.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_TOWEL_PULL_UP],
+  }),
+  painCondition({
+    conditionId: "towel_pull_up_pain",
+    description:
+      "Stop immediately if pain occurs, and terminate at once on numbness, sharp pain or sudden weakness. Avoid maximal effort with irritated finger or elbow tendons.",
+    sourceRuleIds: [SOURCE_TOWEL_PULL_UP],
+  }),
+  completionCondition({
+    conditionId: "towel_pull_up_completion",
+    description: "Stop once the prescribed sets and repetitions are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const towelPullUpInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "towel_pull_up_setup",
+    "setup",
+    "Drape one strong towel, without visible damage, securely over a stable pull-up bar and confirm the bar is secure; do not use an unstable door-mounted setup. The towel must be long enough to permit a secure hold without excessive bunching. Hold one towel end in each hand at approximately shoulder width or slightly narrower, thumbs wrapped when possible, wrists controlled, shoulders actively stabilized, ribs controlled, pelvis neutral and the body aligned beneath the grip. Keep the landing area clear.",
+    "critical",
+    true,
+    SOURCE_TOWEL_PULL_UP,
+  ),
+  makeInstruction(
+    "towel_pull_up_execution",
+    "execution",
+    "Establish an active hang, brace the trunk and initiate the pull by driving the elbows down toward the ribs. Crush the towel, keep the wrists strong and the chest tall, do not shrug into the ears and minimize swinging. Reach the prescribed top position without craning the neck, then lower under control over roughly 2 to 4 seconds to the prescribed bottom position while maintaining shoulder integrity. Repeat only while grip quality and pulling mechanics remain acceptable, and stop before the hands begin to slip uncontrollably.",
+    "high",
+    true,
+    SOURCE_TOWEL_PULL_UP,
+  ),
+];
+
+const towelPullUpEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "towel_pull_up",
+  moduleId: "grip",
+  role: "secondary",
+  explicitMethodId: "straight_sets_repetitions",
+  numericalProfileId: "grip_repetition_strength_v0_1",
+  capabilities: {
+    exerciseId: "towel_pull_up",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    // The single quantified intensity figure in this chapter. Every other
+    // "Intensity" item it lists is a determinant, not a target.
+    supportedIntensityTypes: ["rir"],
+    preferredIntensityTypes: ["rir"],
+    // "# Movement Description" — the athlete's own bodyweight. The weighted
+    // and assisted variations are documented but not represented here.
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    // Exactly the two tags `straight_sets_repetitions` requires.
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    // "A towel is draped securely over a stable pull-up bar" — two atoms,
+    // the same two the knowledge base gates on.
+    requiredEquipmentCapabilities: ["pull_up_bar", "towel"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["towel_pull_up_setup", "towel_pull_up_execution"],
+    requiredStopConditionIds: [
+      "towel_pull_up_technical_failure",
+      "towel_pull_up_equipment_failure",
+      "towel_pull_up_range_of_motion_loss",
+      "towel_pull_up_fatigue_limit",
+      "towel_pull_up_pain",
+      "towel_pull_up_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_towel_pull_up",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_TOWEL_PULL_UP, SOURCE_MODULE_PROFILES],
+  },
+  supportedIntensityTypes: ["rir"],
+  preferredIntensityType: "rir",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: "global_intent",
+  instructionDefinitions: towelPullUpInstructions,
+  stopConditionDefinitions: towelPullUpStopConditions,
+  // The union of this chapter's two repetition prescriptions: sets 3-5
+  // (Strength 3-5, Strength-Endurance 3-4) and repetitions 2-8 (Strength
+  // 2-5, Strength-Endurance 4-8). Both match the profile's own envelope,
+  // and are declared anyway so the entry states its own documented range.
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: 2, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 5, repetitions: 8, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_TOWEL_PULL_UP],
+  },
+  // Null: the profile documents exactly one intensity rule and this chapter
+  // documents exactly the same 1-3 RIR range. There is nothing to narrow
+  // and nothing to choose between.
+  exerciseIntensityConstraints: null,
+  // "Rest — 2 to 4 minutes for strength, 90 to 180 seconds for strength
+  // endurance" — union 90-240 s, which IS the profile's own window.
+  // Declared so the entry states its own documented range.
+  exerciseRestConstraints: {
+    scope: "between_sets",
+    minimumSeconds: 90,
+    maximumSeconds: 240,
+    sourceRuleIds: [SOURCE_TOWEL_PULL_UP],
+  },
+  sourceRuleIds: [SOURCE_TOWEL_PULL_UP, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 
 /**
  * Statically typed as `Record<PilotExerciseId, ...>` — TypeScript refuses
@@ -10155,6 +10423,7 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   heavy_bag_power_intervals: heavyBagPowerIntervalsEntry,
   battle_ropes: battleRopesEntry,
   assault_bike_intervals: assaultBikeIntervalsEntry,
+  towel_pull_up: towelPullUpEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

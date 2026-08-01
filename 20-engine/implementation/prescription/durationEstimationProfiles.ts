@@ -294,6 +294,19 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // "Frequency: 1-3 sessions/week" is a planning-layer figure, not session
   // timing.
   unresolvedProfile("assault_bike_intervals", "intervals", ["50-exercises/48_ASSAULT_BIKE_INTERVALS"]),
+
+  // Registry Lot 14 — first Grip repetition entry.
+  //
+  // `"unresolved"`. This chapter quantifies sets, repetitions, rest and an
+  // eccentric phase, and every one of them is a prescription target
+  // resolved by `resolveVolume`, `resolveRest` or carried in the
+  // instructions — none is an estimate of how long the exercise takes.
+  // Nothing here gives the fields below: no time to drape and check the
+  // towel, no transition time, no per-set time, no technical margin.
+  // Multiplying repetitions by the eccentric duration would restate a
+  // prescription as an estimate, and would ignore the setup this exercise
+  // demands most: confirming the bar and the towel before every set.
+  unresolvedProfile("towel_pull_up", "sets_reps", ["50-exercises/65_GRIP/10_TOWEL_PULL_UP.md"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

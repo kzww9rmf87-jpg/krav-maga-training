@@ -522,11 +522,21 @@ describe("GRIP-REPETITION-STRENGTH — genericity and non-regression", () => {
     ).toHaveLength(1);
   });
 
-  test("25. no registry entry consumes it yet, and the registry is untouched by this doctrine lot", () => {
+  test("25. exactly one entry consumes it, and it NARROWS rather than defines the envelope", () => {
     const consumers = Object.values(EXERCISE_PRESCRIPTION_REGISTRY).filter(
       (entry) => entry.numericalProfileId === PROFILE_ID,
     );
-    expect(consumers).toHaveLength(0);
+    expect(consumers.map((entry) => entry.exerciseId)).toEqual(["towel_pull_up"]);
+
+    // The consumer's declared bounds sit INSIDE the module envelope. The
+    // envelope was written from the module rule, not from this exercise.
+    const consumer = consumers[0]!;
+    expect(consumer.exerciseDoseConstraints?.minimumDose?.sets).toBeGreaterThanOrEqual(
+      profile().volume.sets!.min,
+    );
+    expect(consumer.exerciseDoseConstraints?.maximumDose?.repetitions).toBeLessThanOrEqual(
+      profile().volume.repetitions!.range.max,
+    );
 
     // rope_climb and rope_pull remain out: their units are excluded by the
     // doctrine itself, not merely unimplemented.

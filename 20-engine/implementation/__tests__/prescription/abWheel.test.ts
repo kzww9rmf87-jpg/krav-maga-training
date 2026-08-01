@@ -94,8 +94,8 @@ function prescribe(rangeContext: PrescriptionExecutionContext["rangeContext"] = 
 
 describe("ab_wheel — registry, knowledge base and profile counts", () => {
   test("11. the registry grew from 61 to exactly 62 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(68);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(68);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(69);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(69);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -143,7 +143,7 @@ describe("ab_wheel — registry, knowledge base and profile counts", () => {
 
     // Ids added by lots AFTER this one, listed explicitly so this test keeps
     // proving that ab_wheel was the only exercise this lot added.
-    const ADDED_BY_LATER_LOTS = ["dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals"] as const;
+    const ADDED_BY_LATER_LOTS = ["dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up"] as const;
 
     expect(PREVIOUS_IDS).toHaveLength(61);
     expect([...PREVIOUS_IDS, EXERCISE_ID, ...ADDED_BY_LATER_LOTS].sort()).toEqual(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort());
@@ -230,10 +230,26 @@ describe("ab_wheel — equipment", () => {
       expect(sourceResult.ok).toBe(false);
     }
 
-    // No equivalence group was created for the alternatives.
-    for (const alternative of ["stability_ball", "suspension_trainer", "sliding_discs", "towel"]) {
+    // No equivalence group was created for the alternatives. Three of them
+    // are not part of the vocabulary at all.
+    for (const alternative of ["stability_ball", "suspension_trainer", "sliding_discs"]) {
       expect(isEquipmentCapabilityId(alternative)).toBe(false);
     }
+
+    // `towel` DID join the vocabulary when towel_pull_up was integrated,
+    // which makes this guarantee stronger rather than weaker: the id now
+    // exists and still does not satisfy ab_wheel, because matching is exact
+    // string equality and no equivalence was created from this fiche's
+    // "Acceptable Alternatives".
+    expect(isEquipmentCapabilityId("towel")).toBe(true);
+    const withTowel = getExercisePrescriptionSource(EXERCISE_ID, {
+      ...VALID_CONTEXT,
+      availableEquipmentCapabilities: ["towel"],
+    });
+    expect(withTowel.ok).toBe(false);
+    expect(EXERCISE_PRESCRIPTION_REGISTRY[EXERCISE_ID].capabilities.requiredEquipmentCapabilities).toEqual([
+      "ab_wheel",
+    ]);
   });
 
   test("18b. the environment gates the knowledge base documents still apply", () => {
@@ -679,7 +695,7 @@ describe("ab_wheel — determinism, non-mutation and non-regression", () => {
 
     // The 61 entries that predate this lot: everything except this lot's own
     // entry and the ids added by later lots, each covered by its own file.
-    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals"];
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up"];
     const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(61);
 

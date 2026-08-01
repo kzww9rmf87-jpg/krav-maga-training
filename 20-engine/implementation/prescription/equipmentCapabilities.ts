@@ -173,6 +173,19 @@ export const EQUIPMENT_CAPABILITY_IDS = [
   // air-resistance apparatus, which is why one generic id is honest here
   // rather than two.
   "cardio_machine",
+  // Added for the first Grip repetition entry (towel_pull_up).
+  //
+  // Aligned 1:1 with the knowledge base's own pre-existing `towel`
+  // `EquipmentType` member — nothing was added to that union and no
+  // ExerciseDefinition was touched: `towel` is already one of the two atoms
+  // this exercise gates on. The gap was the vocabulary asymmetry alone.
+  //
+  // NOT an equivalence group and NOT a substitute for anything: a towel is
+  // not a rope, a strap, a suspension trainer or a thick-grip attachment.
+  // Matching is exact, so `rope` does not satisfy it and it does not
+  // satisfy `rope` — which is what keeps towel_pull_up and the rope
+  // exercises apart at the prescription layer.
+  "towel",
 ] as const;
 
 export type EquipmentCapabilityId = (typeof EQUIPMENT_CAPABILITY_IDS)[number];

@@ -144,6 +144,11 @@ const EXPLICIT_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
   // THIRD consumer of INT-POWER, the first that was not one of the two
   // records the table group was written from.
   assault_bike_intervals: "power_intervals_v0_1",
+  // Registry Lot 14 — first consumer of Table Group 15's Grip repetition
+  // profile. Its triple (grip, straight_sets_repetitions, secondary) is
+  // UNIQUE, so implicit resolution would already select it; the id is
+  // declared for the same auditability reason ab_wheel and plate_pinch use.
+  towel_pull_up: "grip_repetition_strength_v0_1",
 };
 
 /**
