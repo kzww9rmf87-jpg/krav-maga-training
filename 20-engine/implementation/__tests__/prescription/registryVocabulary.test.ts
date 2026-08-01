@@ -460,6 +460,10 @@ describe("registryVocabulary — carry loading modes corrected to match document
       // Bodyweight"; the optional band, dumbbell and kettlebell belong to
       // documented progressions this entry does not represent.
       dead_bug: ["bodyweight"],
+      // Registry Lot 9 — Core repetition work. "# Loading Profile —
+      // Primary Load: Bodyweight"; the optional ankle weights belong to a
+      // documented progression this entry does not represent.
+      hanging_leg_raise: ["bodyweight"],
     };
     const CORRECTED_IDS = ["pinch_carry", "sandbag_carry", "zercher_carry"];
 
@@ -476,8 +480,8 @@ describe("registryVocabulary — carry loading modes corrected to match document
   });
 
   test("7. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(63);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(63);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(64);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(64);
   });
 
   test("8. every retained value (plate, sandbag, barbell) is a known, documented LoadingMode", () => {
@@ -590,12 +594,12 @@ describe("registryVocabulary — pinch_carry represents only the Bilateral Varia
     for (const [id, text] of Object.entries(OTHER_ENTRY_FIRST_INSTRUCTION)) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id as PilotExerciseId].instructionDefinitions[0].text).toBe(text);
     }
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(63);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(64);
   });
 
   test("9. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(63);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(63);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(64);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(64);
   });
 
   test("10. explicitMethodId, supportedMethodIds, supportedVolumeStructures and stop conditions are unchanged", () => {
@@ -702,6 +706,11 @@ const DOSE_NARROWING_EXCEPTIONS = [
   // repetitions (5-10 PER SIDE) and rest (its documented 20-60s window,
   // intersected with the Core doctrine floor of 45s).
   "dead_bug",
+  // Registry Lot 9 — Core repetition work: hanging_leg_raise narrows sets
+  // (3-5), repetitions (5-12) and rest (60-150s, capped by the Core
+  // doctrine ceiling of 120s) from its own "Core Strength Development"
+  // programming application.
+  "hanging_leg_raise",
 ] as const;
 
 describe("registryVocabulary — exerciseDoseConstraints", () => {
@@ -712,7 +721,7 @@ describe("registryVocabulary — exerciseDoseConstraints", () => {
       }
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseDoseConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(63);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(64);
   });
 
   test("tibialis_raise, rotator_cuff_training, soleus_raise, copenhagen_plank, hip_thrust and barbell_row narrow exerciseDoseConstraints; wrist_strengthening and chin_up do not", () => {
@@ -745,7 +754,7 @@ const INTENSITY_CONSTRAINT_EXCEPTIONS = [
  * Lot 8) is the first: its own "Recovery — 20-60 seconds" caps the Core
  * doctrine's 45-120s window at 60.
  */
-const REST_CONSTRAINT_EXCEPTIONS = ["dead_bug"] as const;
+const REST_CONSTRAINT_EXCEPTIONS = ["dead_bug", "hanging_leg_raise"] as const;
 
 describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestConstraints", () => {
   test("every pilot registry entry outside the known intensity-narrowing exceptions declares exerciseIntensityConstraints and exerciseRestConstraints as null", () => {
@@ -757,7 +766,7 @@ describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestCons
         expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).toBeNull();
       }
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(63);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(64);
   });
 
   test("dead_bug is the only entry narrowing rest, and it narrows rest alone — not intensity", () => {

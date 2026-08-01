@@ -272,6 +272,11 @@ export const PILOT_EXERCISE_IDS = [
   // it is also the first real consumer of the laterality plumbing fixed
   // just before it.
   "dead_bug",
+  // Registry Lot 9 — third Core repetition entry, and the first suspended
+  // one. Reuses `core_robustness_straight_sets_v0_1` unchanged and adds no
+  // equipment identifier: `pull_up_bar` and `safe_landing_surface` both
+  // already exist and are already what the knowledge base gates it on.
+  "hanging_leg_raise",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -8633,6 +8638,259 @@ const deadBugEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Hanging Leg Raise
+// Source: 50-exercises/62_CORE/14_HANGING_LEG_RAISE.md
+//   - Primary Adaptation: "Robustness" (explicit) — the module role below
+//     is not a convention borrowed from the other Core entries here, it is
+//     this chapter's own adaptation.
+//   - Movement Context: "Suspended, Dynamic, Long Lever, Bodyweight, Closed
+//     Grip, Open Kinetic Chain Lower Limbs".
+//   - Equipment Requirements: "Required — Stable pull-up bar or equivalent
+//     overhead structure." Optional: neutral-grip handles, gymnastics
+//     rings, captain's chair, ab straps, ankle weights, resistance band,
+//     chalk.
+//   - Space Requirements: vertical clearance for full suspension,
+//     horizontal clearance, "Stable non-slip landing area", "No nearby
+//     objects within leg-swing range".
+//   - Programming Applications — "Core Strength Development: 3-5 sets, 5-12
+//     repetitions, Controlled tempo, 60-150 seconds recovery" (see the
+//     variant note below).
+//   - Velocity Profile: "Recommended Velocity: Controlled"; concentric 1-2s,
+//     eccentric 2-4s, pauses 0-1s and 0-2s; "Ballistic Execution: Not
+//     recommended for the standard CAS variation".
+//   - Technical Failure Criteria: ten items, quoted in the stop conditions.
+//   - Fatigue Profile: "Fatigue Sensitivity: High" with a documented
+//     signature (reduced pelvic rotation, shorter range, increasing swing,
+//     faster uncontrolled lowering, grip opening).
+//   - Technical Complexity: "Level 4 — Advanced Technique".
+// Method: straight_sets_repetitions / core / robustness
+//   (core_robustness_straight_sets_v0_1 — sets 2/3/5, reps 3/10/15,
+//   RPE 6/7/8 or technical_effort high_quality, rest 45/60/120s,
+//   tempo global_intent controlled)
+//
+// PROFILE. The existing Core repetition profile, unchanged — no new profile
+// was created, and none was needed: every dimension this chapter documents
+// intersects it non-degenerately (see below).
+//
+// WHICH PROGRAMMING APPLICATION. This chapter is unusual: it documents no
+// sets/repetitions/rest in its own "# Loading Profile" (that section lists
+// only load-regulation methods), and instead gives FIVE numbered
+// "Programming Applications" — Core Strength Development, Trunk Endurance,
+// Grip and Core Integration, Bodyweight Strength, Technical Practice — each
+// with its own ranges. Picking one is a real decision, so it is made from
+// the chapter's own selection rule rather than by preference: "# CAS
+// Selection Logic — CAS may select the Hanging Leg Raise when: The target
+// adaptation includes advanced CORE STRENGTH", and "# Decision Summary —
+// The Hanging Leg Raise is an advanced suspended CORE-STRENGTH exercise".
+// The application literally named "Core Strength Development" is the one
+// CAS's own logic points at, and it is the one encoded here. The other four
+// remain documented, unrepresented alternatives — a second entry, not a
+// silent blend of five ranges.
+//
+// VOLUME — three real narrowings, all from that application:
+//   - sets: "3-5 sets" intersected with the profile's own [2, 5] → [3, 5];
+//   - repetitions: "5-12 repetitions" intersected with [3, 15] → [5, 12];
+//   - rest: "60-150 seconds recovery" intersected with the profile's own
+//     45-120s → [60, 120]. The documented ceiling of 150s sits ABOVE the
+//     Core rest doctrine's own 120s ceiling and a constraint can only
+//     narrow, so 120 stands — the mirror image of dead_bug, whose floor sat
+//     below the doctrine's.
+//
+// NOT CONVERTED. This chapter's difficulty model is explicitly non-numeric:
+// "# Loading Profile — Load Regulation Methods: Knee Flexion, Leg Length,
+// Range of Motion, Tempo, Pause Duration, External Ankle Load." None of it
+// becomes a number:
+//   - knee flexion and leg length are LEVER choices, not a repetition or
+//     load figure. The six-stage Progression Model (knee raise → partial
+//     straight-leg → full → toes-to-bar) is a variation ladder, never a
+//     numeric scale;
+//   - "thighs at or above horizontal" is a position standard, not an
+//     amplitude converted into intensity;
+//   - the Velocity Profile's phase durations are not representable by a
+//     numerical tempo rule and are not summed into anything;
+//   - External Ankle Load is Optional and explicitly gated — "CAS does not
+//     increase external load until the athlete can eliminate swing" — so no
+//     loading mode beyond bodyweight is claimed.
+//
+// LATERALITY. `bilateral` with `total_repetitions`. Both hands hang from
+// one bar and both legs move together throughout: "# Execution Standard —
+// The legs begin still and aligned beneath the body", "Raise the knees or
+// straight legs according to the prescribed variation". No "per side", "each
+// side" or alternating language appears anywhere in this chapter. This is
+// read from the execution standard, not inferred from the knowledge base's
+// `unilateral: false` — though that entry's own comment reaches the same
+// conclusion from the same text.
+//
+// INTENSITY. `technical_effort` only, like dead_bug and unlike ab_wheel.
+// This chapter documents no RPE figure anywhere (verified by direct
+// search), and its Programming Applications quantify sets, repetitions and
+// recovery but never effort. What it does document is a quality endpoint:
+// ten Technical Failure Criteria, "Maximum Recommended Loading Context —
+// Technically strict repetitions with full control", and a Fatigue Profile
+// whose whole signature is technical degradation. `technical_effort:
+// high_quality` is the profile's own documented alternative rule and the
+// Core module's first preferred intensity type.
+//
+// EQUIPMENT. `pull_up_bar` + `safe_landing_surface`, both already in the
+// vocabulary and both already what the knowledge base gates this exercise
+// on — no identifier is added. "or equivalent overhead structure" is a
+// paraphrase of the same apparatus, not an equivalence group, and the
+// Optional items (rings, captain's chair, ab straps, ankle weights, band,
+// chalk) are not promoted. `rigid_anchor_support` is deliberately NOT used:
+// it means Dragon Flag's own overhead or behind-head HAND anchor, a
+// different apparatus from a bar the athlete hangs from. `dip_bars` is not
+// used either.
+//
+// STOP CONDITIONS — five categories, every one named by this chapter's own
+// "# Technical Failure Criteria" or Fatigue Profile:
+//   - `equipment_failure` carries "The athlete loses grip security". No new
+//     factory was invented for it: `equipmentFailureCondition` already
+//     documents itself as "Loss of secure control of the
+//     implement/equipment (GRIP, dropped load, rack failure)", is scoped to
+//     the set — a real boundary for `straight_sets_repetitions`, unlike the
+//     interval case — and `pinch_carry` already uses it for exactly this
+//     grip-loss meaning;
+//   - `fatigue_limit` is included here and was NOT for dead_bug: this
+//     chapter documents "Fatigue Sensitivity: High" and a whole fatigue
+//     signature, where dead_bug rated every fatigue axis at its lowest.
+// `balance_loss`, the Core module's sixth category, stays absent: nothing
+// in a hang describes a loss of balance. Module-level categories are not
+// enforced by any resolver today — a documented gap already recorded for
+// earlier entries.
+// -----------------------------------------------------------------------------
+
+const SOURCE_HANGING_LEG_RAISE = "50-exercises/62_CORE/14_HANGING_LEG_RAISE.md";
+
+const hangingLegRaiseStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "hanging_leg_raise_technical_failure",
+    description:
+      "Stop the set if the athlete relies on repeated swinging to raise the legs, the pelvis no longer rotates posteriorly, the movement becomes almost entirely hip flexion, the shoulders collapse into a passive hang, the elbows bend substantially, the lumbar spine extends excessively at the bottom, the eccentric phase cannot be controlled, or the athlete kicks or jerks to complete a repetition.",
+    sourceRuleIds: [SOURCE_HANGING_LEG_RAISE],
+  }),
+  rangeOfMotionLossCondition({
+    conditionId: "hanging_leg_raise_range_of_motion_loss",
+    description:
+      "Stop the set if the range shortens so the thighs no longer reach at least horizontal, or if the range can only be reached by losing trunk position.",
+    sourceRuleIds: [SOURCE_HANGING_LEG_RAISE],
+  }),
+  equipmentFailureCondition({
+    conditionId: "hanging_leg_raise_grip_failure",
+    description:
+      "Stop the set as soon as grip security is lost or the hands begin to open on the bar — a suspended athlete cannot continue safely on a failing grip.",
+    sourceRuleIds: [SOURCE_HANGING_LEG_RAISE],
+  }),
+  fatigueLimitCondition({
+    conditionId: "hanging_leg_raise_fatigue_limit",
+    description:
+      "Stop the exercise once fatigue produces the documented signature: reduced pelvic rotation, increasing swing, faster uncontrolled lowering or loss of the active shoulder position. Technical quality deteriorates rapidly once grip, shoulder stability or trunk control is exhausted.",
+    sourceRuleIds: [SOURCE_HANGING_LEG_RAISE],
+  }),
+  painCondition({
+    conditionId: "hanging_leg_raise_pain",
+    description:
+      "Stop immediately if pain occurs in the shoulder, elbow, wrist, lumbar spine or hip.",
+    sourceRuleIds: [SOURCE_HANGING_LEG_RAISE],
+  }),
+  completionCondition({
+    conditionId: "hanging_leg_raise_completion",
+    description:
+      "Stop once the prescribed sets and repetitions are completed with strict execution and no swing.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const hangingLegRaiseInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "hanging_leg_raise_setup",
+    "setup",
+    "Hang from a stable pull-up bar with a secure pronated or neutral grip, with vertical clearance for full suspension, a stable non-slip area beneath and no objects within leg-swing range. Keep the arms extended, establish an active shoulder position rather than collapsing into the joints, bring the ribs down and start with the legs still and aligned beneath the body.",
+    "high",
+    true,
+    SOURCE_HANGING_LEG_RAISE,
+  ),
+  makeInstruction(
+    "hanging_leg_raise_execution",
+    "execution",
+    "Initiate by controlling the pelvis rather than throwing the legs, then raise the knees or straight legs according to the prescribed variation, producing posterior pelvic tilt until the thighs reach at least horizontal. Avoid momentum from the shoulders, spine or legs. Lower under control, keeping abdominal tension, and return to a stable hang without swinging — the next repetition begins only once the body is controlled. Ballistic execution is not part of this variation.",
+    "high",
+    true,
+    SOURCE_HANGING_LEG_RAISE,
+  ),
+];
+
+const hangingLegRaiseEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "hanging_leg_raise",
+  moduleId: "core",
+  role: "robustness",
+  explicitMethodId: "straight_sets_repetitions",
+  numericalProfileId: "core_robustness_straight_sets_v0_1",
+  capabilities: {
+    exerciseId: "hanging_leg_raise",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    // technical_effort ONLY — this chapter documents no RPE figure.
+    supportedIntensityTypes: ["technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    // "# Loading Profile — Primary Load: Bodyweight"; "# Movement Context
+    // — ... Bodyweight". The Optional ankle weights belong to a documented
+    // progression this entry does not represent.
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["global_intent"],
+    // Both legs move together throughout; no per-side language anywhere.
+    laterality: "bilateral",
+    volumeInterpretations: ["total_repetitions"],
+    // Exactly the two tags `straight_sets_repetitions` requires.
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    // Both already canonical, and both already the knowledge base's own
+    // gates for this exercise. No identifier is added by this lot.
+    requiredEquipmentCapabilities: ["pull_up_bar", "safe_landing_surface"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["hanging_leg_raise_setup", "hanging_leg_raise_execution"],
+    requiredStopConditionIds: [
+      "hanging_leg_raise_technical_failure",
+      "hanging_leg_raise_range_of_motion_loss",
+      "hanging_leg_raise_grip_failure",
+      "hanging_leg_raise_fatigue_limit",
+      "hanging_leg_raise_pain",
+      "hanging_leg_raise_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_hanging_leg_raise",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_HANGING_LEG_RAISE, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: hangingLegRaiseInstructions,
+  stopConditionDefinitions: hangingLegRaiseStopConditions,
+  // "# Programming Applications — Core Strength Development: 3-5 sets, 5-12
+  // repetitions", intersected with the shared profile's own [2, 5] sets and
+  // [3, 15] repetitions. See the block comment above for why this
+  // application, and not one of the other four, is the one encoded.
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: 5, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 5, repetitions: 12, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_HANGING_LEG_RAISE],
+  },
+  exerciseIntensityConstraints: null,
+  // "Core Strength Development: ... 60-150 seconds recovery". The
+  // documented ceiling is above the Core rest doctrine's own 120s ceiling;
+  // a constraint can only narrow, so the effective window is 60-120s.
+  // Declared as documented, intersection left to the generic resolver.
+  exerciseRestConstraints: {
+    scope: "between_sets",
+    minimumSeconds: 60,
+    maximumSeconds: 150,
+    sourceRuleIds: [SOURCE_HANGING_LEG_RAISE],
+  },
+  sourceRuleIds: [SOURCE_HANGING_LEG_RAISE, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -8721,6 +8979,7 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
 
   ab_wheel: abWheelEntry,
   dead_bug: deadBugEntry,
+  hanging_leg_raise: hangingLegRaiseEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

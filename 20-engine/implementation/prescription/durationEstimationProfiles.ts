@@ -220,6 +220,25 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // controlled`). Deriving seconds per repetition from them, then a total
   // from the repetition count, would be inventing timing data twice over.
   unresolvedProfile("dead_bug", "sets_reps", ["50-exercises/62_CORE/12_DEAD_BUG.md"]),
+
+  // Registry Lot 9 — third Core repetition entry.
+  //
+  // `"unresolved"`, and this one is the closest any chapter has come to
+  // resolvable timing data: "# Setup Time — Typical Setup Duration: 10-30
+  // seconds" is a real, bounded setup figure, and the Velocity Profile
+  // gives "Typical Concentric Duration: 1-2 seconds", "Typical Eccentric
+  // Duration: 2-4 seconds", "Bottom Pause: 0-1 second", "Top Pause: 0-2
+  // seconds".
+  //
+  // It stays unresolved all the same. Those velocity figures describe a
+  // phase-timed execution the prescription does not select — the numerical
+  // profile encodes `global_intent: controlled`, not a phase timing — so
+  // summing them into an `averageRepetitionSeconds` would attribute a tempo
+  // the athlete was never prescribed. Populating `averageSetupSeconds`
+  // alone would leave a profile that is half-real and still unusable, since
+  // `getDurationEstimationProfile` refuses anything but a fully resolved
+  // one. The honest state is unresolved until a documented model exists.
+  unresolvedProfile("hanging_leg_raise", "sets_reps", ["50-exercises/62_CORE/14_HANGING_LEG_RAISE.md"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

@@ -125,6 +125,9 @@ const EXPLICIT_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
   // Registry Lot 8 — second entry on that same unique Core repetition
   // triple, declaring the id for the same auditability reason.
   dead_bug: "core_robustness_straight_sets_v0_1",
+  // Registry Lot 9 — third entry on that same unique Core repetition
+  // triple, declaring the id for the same auditability reason.
+  hanging_leg_raise: "core_robustness_straight_sets_v0_1",
 };
 
 /**

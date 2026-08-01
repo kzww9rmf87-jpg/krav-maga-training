@@ -94,8 +94,8 @@ function prescribe(rangeContext: PrescriptionExecutionContext["rangeContext"] = 
 
 describe("ab_wheel — registry, knowledge base and profile counts", () => {
   test("11. the registry grew from 61 to exactly 62 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(63);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(63);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(64);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(64);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -143,16 +143,20 @@ describe("ab_wheel — registry, knowledge base and profile counts", () => {
 
     // Ids added by lots AFTER this one, listed explicitly so this test keeps
     // proving that ab_wheel was the only exercise this lot added.
-    const ADDED_BY_LATER_LOTS = ["dead_bug"] as const;
+    const ADDED_BY_LATER_LOTS = ["dead_bug", "hanging_leg_raise"] as const;
 
     expect(PREVIOUS_IDS).toHaveLength(61);
     expect([...PREVIOUS_IDS, EXERCISE_ID, ...ADDED_BY_LATER_LOTS].sort()).toEqual(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort());
 
-    // The Core repetition exercises named by 62_CORE's own Volume
-    // Principles that are still out of the registry. dead_bug joined in
-    // Registry Lot 8 and is accounted for above.
-    for (const id of ["hanging_leg_raise"]) {
-      expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(id);
+    // The other members of the repetition-prescribed family that
+    // 62_CORE's own Volume Principles names. dead_bug and
+    // hanging_leg_raise joined in Registry Lots 8 and 9 and are accounted
+    // for above; pallof_press and dragon_flag are in the registry only as
+    // TIMED holds, so their documented repetition variants remain
+    // unrepresented and this lot's profile gained no consumer from them.
+    for (const id of ["pallof_press", "dragon_flag"] as const) {
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].explicitMethodId).toBe("timed_isometric_sets");
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].numericalProfileId ?? null).toBeNull();
     }
   });
 });
@@ -675,7 +679,7 @@ describe("ab_wheel — determinism, non-mutation and non-regression", () => {
 
     // The 61 entries that predate this lot: everything except this lot's own
     // entry and the ids added by later lots, each covered by its own file.
-    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "dead_bug"];
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "dead_bug", "hanging_leg_raise"];
     const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(61);
 
