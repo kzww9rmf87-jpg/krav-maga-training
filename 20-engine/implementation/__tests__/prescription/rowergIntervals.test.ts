@@ -12,8 +12,9 @@
  * - the equipment narrowing: `rowing_ergometer` was added to both the
  *   knowledge base's `EquipmentType` and the prescription layer's canonical
  *   capability vocabulary, and matching is EXACT — a generic
- *   `cardio_machine` (still used by assault_bike_intervals) and an air bike
- *   both fail to satisfy it, in both layers;
+ *   `cardio_machine` (used by assault_bike_intervals, and part of this
+ *   vocabulary since that entry was integrated) and an air bike both fail
+ *   to satisfy it, in both layers, in both directions;
  * - the profile selection: `conditioning_long_intervals_v0_1`, never one of
  *   the other two interval profiles, and never by array order;
  * - the honest volume: the fiche's own "5-12 intervals" intersected with
@@ -90,8 +91,8 @@ describe("rowerg_intervals — registry, knowledge base and profile counts", () 
     // 59 historical + rowerg_intervals (this lot) + sprint_intervals
     // (Registry Lot 6). The two lists below are what this test actually
     // guards; the total is derived from them, never the other way round.
-    expect(PILOT_EXERCISE_IDS).toHaveLength(67);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(67);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(68);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(68);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
     expect(PILOT_EXERCISE_IDS).toContain(EXERCISE_ID);
   });
@@ -140,7 +141,7 @@ describe("rowerg_intervals — registry, knowledge base and profile counts", () 
     // test keeps proving what it was written to prove — that rowerg_intervals
     // was the only exercise this lot introduced — instead of silently
     // absorbing any future addition.
-    const ADDED_BY_LATER_LOTS = ["sprint_intervals", "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes"] as const;
+    const ADDED_BY_LATER_LOTS = ["sprint_intervals", "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals"] as const;
 
     expect(HISTORICAL_IDS).toHaveLength(59);
     expect([...HISTORICAL_IDS, EXERCISE_ID, ...ADDED_BY_LATER_LOTS].sort()).toEqual(
@@ -148,11 +149,16 @@ describe("rowerg_intervals — registry, knowledge base and profile counts", () 
     );
 
     // The other conditioning modalities named alongside this one in the
-    // knowledge base. heavy_bag_power_intervals was integrated by a later
-    // lot, on its own Table Group 14 profile; the other three are still OUT.
-    for (const id of ["assault_bike_intervals", "sled_push"]) {
+    // knowledge base. heavy_bag_power_intervals and assault_bike_intervals
+    // were integrated by later lots on Table Group 14; sled_push is still
+    // OUT, and battle_ropes joined too.
+    for (const id of ["sled_push"]) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(id);
     }
+    expect(EXERCISE_PRESCRIPTION_REGISTRY).toHaveProperty("assault_bike_intervals");
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.assault_bike_intervals.numericalProfileId).toBe(
+      "power_intervals_v0_1",
+    );
     expect(EXERCISE_PRESCRIPTION_REGISTRY).toHaveProperty("heavy_bag_power_intervals");
     expect(EXERCISE_PRESCRIPTION_REGISTRY.heavy_bag_power_intervals.numericalProfileId).toBe(
       "power_intervals_v0_1",
@@ -184,9 +190,13 @@ describe("rowerg_intervals — equipment", () => {
     expect(kbResult.eligible).toBe(false);
     expect(kbResult.rejectionReasons.some((reason) => reason.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
 
-    // Prescription layer: "cardio_machine" is not even part of this
-    // vocabulary, so it can never stand in for the precise identifier.
-    expect(isEquipmentCapabilityId("cardio_machine")).toBe(false);
+    // Prescription layer. `cardio_machine` joined this vocabulary when
+    // assault_bike_intervals was integrated, which makes the guarantee
+    // STRONGER rather than weaker: the two identifiers now coexist and
+    // matching is exact string equality, so neither can stand in for the
+    // other. No hierarchy, alias or substitution exists between them.
+    expect(isEquipmentCapabilityId("cardio_machine")).toBe(true);
+    expect(isEquipmentCapabilityId("rowing_ergometer")).toBe(true);
     const sourceResult = getExercisePrescriptionSource(EXERCISE_ID, {
       ...VALID_CONTEXT,
       availableEquipmentCapabilities: ["cardio_machine"],
@@ -206,6 +216,18 @@ describe("rowerg_intervals — equipment", () => {
     expect(assaultBikeEquipment).toEqual(["cardio_machine"]);
     const assaultBikeEligibility = checkExerciseEligibility(ASSAULT_BIKE_INTERVALS, cardioMachineOnly);
     expect(assaultBikeEligibility.eligible).toBe(true);
+
+    // And the reverse now holds at the prescription layer too: a rowing
+    // ergometer does not satisfy assault_bike_intervals either.
+    const bikeFromRowerg = getExercisePrescriptionSource("assault_bike_intervals", {
+      rangeContext: "normal",
+      athleteReferences: [],
+      availableEquipmentCapabilities: ["rowing_ergometer"],
+    });
+    expect(bikeFromRowerg.ok).toBe(false);
+    expect(
+      EXERCISE_PRESCRIPTION_REGISTRY.assault_bike_intervals.capabilities.requiredEquipmentCapabilities,
+    ).toEqual(["cardio_machine"]);
   });
 
   test("8. an air bike does not make rowerg_intervals eligible", () => {
@@ -668,7 +690,7 @@ describe("rowerg_intervals — determinism, non-mutation and non-regression", ()
     // The 59 entries that predate this lot: everything except this lot's own
     // entry and the ids added by later lots (each of which has its own
     // non-regression coverage in its own test file).
-    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "sprint_intervals", "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes"];
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "sprint_intervals", "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals"];
     const historicalIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(historicalIds).toHaveLength(59);
 

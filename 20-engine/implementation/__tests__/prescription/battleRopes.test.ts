@@ -91,9 +91,9 @@ const entry = () => EXERCISE_PRESCRIPTION_REGISTRY[EXERCISE_ID];
 // -----------------------------------------------------------------------------
 
 describe("battle_ropes — registry, knowledge base, profile and equipment counts", () => {
-  test("1. the registry grew from 66 to exactly 67 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(67);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(67);
+  test("1. the registry grew from 66 to exactly 67 entries; a later lot added assault_bike_intervals, bringing the total to 68", () => {
+    expect(PILOT_EXERCISE_IDS).toHaveLength(68);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(68);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -107,8 +107,8 @@ describe("battle_ropes — registry, knowledge base, profile and equipment count
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID)).toHaveLength(1);
   });
 
-  test("4. the equipment vocabulary went from 26 to 28 — battle_rope and rope_anchor_point, the two Required items", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(28);
+  test("4. the equipment vocabulary went from 26 to 28 — battle_rope and rope_anchor_point, the two Required items; a later lot added cardio_machine, bringing it to 29", () => {
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(29);
     expect(isEquipmentCapabilityId("battle_rope")).toBe(true);
     expect(isEquipmentCapabilityId("rope_anchor_point")).toBe(true);
 
@@ -132,10 +132,17 @@ describe("battle_ropes — registry, knowledge base, profile and equipment count
     expect(PILOT_EXERCISE_IDS.filter((id) => id === EXERCISE_ID)).toHaveLength(1);
   });
 
-  test("6. no other exercise was added: the conditioning modalities still blocked stay out", () => {
-    for (const id of ["assault_bike_intervals", "sled_push", "turkish_get_up", "towel_pull_up", "rope_climb", "rope_pull"]) {
+  test("6. no other exercise was added by THIS lot: the still-blocked exercises stay out, and assault_bike_intervals joined later on the same profile", () => {
+    for (const id of ["sled_push", "turkish_get_up", "towel_pull_up", "rope_climb", "rope_pull"]) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(id);
     }
+
+    // Integrated by Registry Lot 13, reusing INT-POWER unchanged and
+    // narrowing to its own documented bounds — not to this entry's.
+    const bike = EXERCISE_PRESCRIPTION_REGISTRY.assault_bike_intervals;
+    expect(bike.numericalProfileId).toBe(PROFILE_ID);
+    expect(bike.exerciseDoseConstraints?.minimumDose?.workIntervals).toBe(6);
+    expect(entry().exerciseDoseConstraints?.minimumDose?.workIntervals).toBe(5);
   });
 });
 
@@ -734,7 +741,10 @@ describe("battle_ropes — determinism, validation and non-regression", () => {
       confidence: "validated" as const,
     };
 
-    const previousIds = PILOT_EXERCISE_IDS.filter((id) => id !== EXERCISE_ID);
+    // The 66 entries that predate this lot: everything except this lot's own
+    // entry and the ids added by later lots, each covered by its own file.
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "assault_bike_intervals"];
+    const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(66);
 
     for (const id of previousIds) {

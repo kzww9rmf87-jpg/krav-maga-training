@@ -154,6 +154,25 @@ export const EQUIPMENT_CAPABILITY_IDS = [
   // mounting requirement is carried where it is actionable, in the setup
   // instruction.
   "heavy_bag",
+  // Added for the air-bike interval entry (assault_bike_intervals).
+  //
+  // Aligned 1:1 with the knowledge base's own pre-existing `cardio_machine`
+  // `EquipmentType` member — nothing was added to that union, and the
+  // ExerciseDefinition was not touched: `cardio_machine` is already the atom
+  // it gates on. The only gap this closes is the vocabulary asymmetry, the
+  // prescription layer having no way to express an atom the knowledge base
+  // already used.
+  //
+  // NOT an equivalence group in the `loaded_carry_implement` sense, and NOT
+  // a substitute for `rowing_ergometer`. Matching is exact, so a rowing
+  // ergometer does not satisfy it and it does not satisfy a rowing
+  // ergometer — the two are deliberately disjoint since `rowerg_intervals`
+  // was narrowed to its own precise id. `assault_bike_intervals` is today
+  // the only user of `cardio_machine` in either vocabulary; its own fiche
+  // documents "Assault Bike, or Echo Bike", two brands of the SAME
+  // air-resistance apparatus, which is why one generic id is honest here
+  // rather than two.
+  "cardio_machine",
 ] as const;
 
 export type EquipmentCapabilityId = (typeof EQUIPMENT_CAPABILITY_IDS)[number];

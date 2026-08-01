@@ -583,7 +583,7 @@ describe("registry validators — entries on the interval triple", () => {
   test("only the interval entries sit on the interval triple, each naming its own explicit profile — the 59 historical entries are untouched", () => {
     const entries = Object.values(EXERCISE_PRESCRIPTION_REGISTRY);
 
-    expect(entries).toHaveLength(67);
+    expect(entries).toHaveLength(68);
 
     const onIntervalTriple = entries.filter(
       (entry) =>
@@ -604,6 +604,7 @@ describe("registry validators — entries on the interval triple", () => {
       sprint_intervals: "repeated_sprint_intervals_v0_1",
       heavy_bag_power_intervals: "power_intervals_v0_1",
       battle_ropes: "power_intervals_v0_1",
+      assault_bike_intervals: "power_intervals_v0_1",
     });
 
     // Three of the four executable profiles are in use, none of them the
@@ -618,10 +619,12 @@ describe("registry validators — entries on the interval triple", () => {
     // The two entries sharing INT-POWER are told apart by their own
     // documented narrowing, never by the profile.
     const sharing = onIntervalTriple.filter((entry) => entry.numericalProfileId === "power_intervals_v0_1");
-    expect(sharing).toHaveLength(2);
+    expect(sharing).toHaveLength(3);
+    // Three entries, three DIFFERENT documented narrowings — the profile
+    // never tells them apart, their own chapters do.
     expect(
       new Set(sharing.map((entry) => entry.exerciseDoseConstraints?.maximumDose?.workIntervals)).size,
-    ).toBe(2);
+    ).toBe(3);
 
     // Every other entry is still off the triple entirely.
     const intervalEntryIds = Object.keys(profileByExerciseId);

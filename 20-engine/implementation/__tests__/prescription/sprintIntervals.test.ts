@@ -95,8 +95,8 @@ function prescribe(rangeContext: PrescriptionExecutionContext["rangeContext"] = 
 
 describe("sprint_intervals — registry, knowledge base and profile counts", () => {
   test("1. the registry grew from 60 to exactly 61 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(67);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(67);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(68);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(68);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -145,17 +145,21 @@ describe("sprint_intervals — registry, knowledge base and profile counts", () 
 
     // Ids added by lots AFTER this one, listed explicitly so this test keeps
     // proving that sprint_intervals was the only exercise this lot added.
-    const ADDED_BY_LATER_LOTS = ["ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes"] as const;
+    const ADDED_BY_LATER_LOTS = ["ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals"] as const;
 
     expect(PREVIOUS_IDS).toHaveLength(60);
     expect([...PREVIOUS_IDS, EXERCISE_ID, ...ADDED_BY_LATER_LOTS].sort()).toEqual(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort());
 
-    // The other conditioning/power modalities. heavy_bag_power_intervals was
-    // integrated by a later lot, on its own Table Group 14 profile; the other
-    // three stay out of the registry.
-    for (const id of ["assault_bike_intervals", "sled_push"]) {
+    // The other conditioning/power modalities. heavy_bag_power_intervals,
+    // battle_ropes and assault_bike_intervals were all integrated by later
+    // lots on Table Group 14; sled_push stays out of the registry.
+    for (const id of ["sled_push"]) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(id);
     }
+    expect(EXERCISE_PRESCRIPTION_REGISTRY).toHaveProperty("assault_bike_intervals");
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.assault_bike_intervals.numericalProfileId).toBe(
+      "power_intervals_v0_1",
+    );
     expect(EXERCISE_PRESCRIPTION_REGISTRY).toHaveProperty("heavy_bag_power_intervals");
     expect(EXERCISE_PRESCRIPTION_REGISTRY.heavy_bag_power_intervals.numericalProfileId).toBe(
       "power_intervals_v0_1",
@@ -785,7 +789,7 @@ describe("sprint_intervals — determinism, non-mutation and non-regression", ()
 
     // The 60 entries that predate this lot: everything except this lot's own
     // entry and the ids added by later lots, each covered by its own file.
-    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes"];
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals"];
     const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(60);
 

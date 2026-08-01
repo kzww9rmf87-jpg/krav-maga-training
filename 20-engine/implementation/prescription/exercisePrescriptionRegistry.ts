@@ -297,6 +297,12 @@ export const PILOT_EXERCISE_IDS = [
   // envelope was built from. Adds no profile: the doctrine already covers
   // it, and this entry only narrows.
   "battle_ropes",
+  // Registry Lot 13 — third consumer of Table Group 14's INT-POWER profile,
+  // and the first that was NOT one of the two records the table group was
+  // written from. Its own fiche satisfies that table's documented scope
+  // sentence independently, which is what a generic profile is for. Adds no
+  // profile and changes no doctrine.
+  "assault_bike_intervals",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -9750,6 +9756,313 @@ const battleRopesEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Assault Bike Intervals
+// Source: 50-exercises/48_ASSAULT_BIKE_INTERVALS
+//   - Primary Classification: "Combat-Specific Conditioning" (module:
+//     conditioning), matching the knowledge base's own resolution.
+//   - Equipment Requirements: "Required: Assault Bike, or Echo Bike.
+//     Optional: Heart Rate Monitor, Power Meter."
+//   - Loading Profile: "Typical Volume: 6-15 intervals. Work: 10-60
+//     seconds. Recovery: 20-180 seconds. Progression: Power Output, Work
+//     Duration, Reduced Recovery, Calories per Interval."
+//   - Physiological Profile: "Primary Energy System: Anaerobic Glycolysis.
+//     Secondary: ATP-PC, Oxidative Recovery. Typical Work Duration: 10-60
+//     seconds. Typical Recovery: 20-180 seconds."
+//   - Movement Context: "Machine-Based, Whole Body, Continuous, Explosive."
+//   - Velocity Profile: "Maximum Intent. Continuous."
+//   - Movement Pattern: "Primary: Whole-Body Cyclic Power. Secondary: Push,
+//     Pull, Lower-Body Drive, Brace."
+//   - Coaching Cues: "Push and pull aggressively.", "Drive through the
+//     legs.", "Maintain posture.", "Control breathing during recovery.",
+//     "Finish every interval with intent."
+//   - Common Errors: Starting too fast, Poor pacing, Using only the arms,
+//     Losing posture, Stopping pedaling immediately after work intervals.
+//   - Safety Profile: "Overall Risk: Very Low." Primary Risks — Poor
+//     Pacing, Insufficient Warm-Up, Grip Fatigue.
+//   - Contraindications: Acute Knee Injury, Acute Shoulder Injury, Acute
+//     Cardiovascular Contraindications.
+//   - Performance Indicators: Peak Power, Average Power, Calories,
+//     Distance, Heart Rate Recovery, Power Drop-Off, Work Consistency.
+//   - Neurological Profile: "Motor Complexity: 2/5. Skill Requirement:
+//     Beginner. Learning Curve: Very Short."
+// Method: work_rest_intervals / conditioning / conditioning
+//
+// EXPLICIT PROFILE SELECTION: `power_intervals_v0_1` (Table Group 14 /
+// INT-POWER), reused unchanged. The (conditioning, work_rest_intervals,
+// conditioning) triple is shared by FOUR profiles and never resolves
+// implicitly.
+//
+// WHY THIS EXERCISE WAS BLOCKED BEFORE, AND WHY IT NO LONGER IS. An earlier
+// audit concluded that this exercise could only sit on INT-SHORT — the only
+// Table Group 8 profile whose ranges overlapped its own — and that INT-SHORT
+// documents no encodable intensity, so the entry failed at the intensity
+// stage with INTENSITY_NOT_DOCUMENTED while its volume resolved. That
+// conclusion was correct at the time and is now obsolete: Table Group 14 did
+// not exist when it was written. Nothing about this fiche changed, and
+// INT-SHORT is untouched and still non-executable — a fourth, executable
+// profile simply appeared on the same triple.
+//
+// This entry is NOT a stretch of that table group. Table Group 14's own
+// Scope section states the family as records sharing "a Primary
+// Classification of Combat-Specific Conditioning, the same ATP-PC plus
+// anaerobic-glycolysis energy systems, and a Velocity Profile containing
+// Maximum Intent". This fiche satisfies all three literally and
+// independently: "# Primary Classification: Combat-Specific Conditioning";
+// "Primary Energy System: Anaerobic Glycolysis. Secondary: ATP-PC"; "#
+// Velocity Profile: Maximum Intent. Continuous." It is the first consumer
+// that was not one of the two records the envelope was built from, which is
+// the point of a generic profile — the doctrine is applied, never widened.
+//
+// VOLUME AND REST — the fiche's own bounds are declared, and the generic
+// resolvers compute every intersection. Nothing is pre-computed here:
+//   - intervals: documented 6-15, against the profile's own [3, 12] → 6-12;
+//   - work duration: documented 10-60 s, against [10, 40] → 10-40 s;
+//   - rest: documented 20-180 s, against [20, 90] → 20-90 s.
+// Each documented bound is wider than the profile at the ceiling and equal
+// or narrower at the floor, so the prescription always stays strictly
+// inside what this fiche documents — never above it. The upper parts of the
+// documented ranges (13-15 intervals, 41-60 s of work, 91-180 s of
+// recovery) are consequently NOT reachable through this entry: a documented
+// precision loss in the safe direction, recorded rather than resolved by
+// widening a shared envelope. Both quantified sections of this fiche agree
+// (Loading Profile and Physiological Profile give the same 10-60 s work and
+// 20-180 s recovery), so there is no narrower-source decision to make, as
+// there was for heavy_bag_power_intervals.
+// Nothing is converted: calories are not seconds, watts are not intensity,
+// cadence is not volume, the machine's virtual distance is not a real
+// distance, and the fiche's own "intervals" needed no reinterpretation at
+// all — unlike battle_ropes and heavy_bag_power_intervals, this chapter
+// already counts in intervals.
+//
+// INTENSITY. `movement_intent: explosive` only, declared through an explicit
+// `exerciseIntensityConstraints` narrowing. `explosive` is a literal word of
+// this fiche's own "# Movement Context — Machine-Based, Whole Body,
+// Continuous, Explosive", the same section slot battle_ropes sources its own
+// `explosive` from, and it is a literal member of 26_INTENSITY_MODEL's
+// movement-intent vocabulary. The Velocity Profile's "Maximum Intent"
+// corroborates it.
+// The profile's OTHER rule, `impact_intent: maximal_safe_power`, is
+// deliberately excluded and the constraint is what excludes it: nothing is
+// struck on a bike. Because `impact_intent` is the profile's FIRST
+// documented rule, omitting the constraint would have selected it silently
+// — the constraint is load-bearing, not decorative.
+// NO measured target is claimed. "Peak Power", "Average Power", "Calories",
+// "Distance", "Heart Rate Recovery", "Power Drop-Off" and "Work
+// Consistency" are all listed by this fiche as Performance INDICATORS, and
+// the heart-rate monitor and power meter are Optional instrumentation.
+// "Power Output" and "Calories per Interval" appear only as PROGRESSION
+// AXES. None of them carries a normative figure anywhere in the chapter, so
+// none becomes a prescribed target and no number is derived from any of
+// them. This is precisely the gap the original block was about, and it is
+// closed by a documented qualitative rule rather than by inventing a watt,
+// a heart rate or an RPE.
+//
+// TEMPO. `work_rest_intervals` declares `tempoPolicy: forbidden` and the
+// profile carries no tempo rule, so the resolved tempo is null.
+// `supportedTempoTypes` is empty rather than borrowed: this fiche documents
+// no tempo of any kind, and a continuous machine effort has no
+// concentric/eccentric phase to intend. This is a deliberate divergence from
+// rowerg_intervals, which declares `global_intent` because Family 11 lists
+// it for the family — the resolved outcome is identical (null in both
+// cases, the method forbidding tempo), and the tighter claim is the one this
+// chapter actually supports. The explosive character lives in the intensity
+// rule, where this fiche puts it.
+//
+// EQUIPMENT. `cardio_machine`, added to the prescription vocabulary by this
+// lot and aligned 1:1 with the atom the knowledge base ALREADY gates on —
+// the ExerciseDefinition is not modified, because that atom is exact and
+// documented ("Required: Assault Bike, or Echo Bike" names two brands of one
+// air-resistance apparatus). The only thing missing was the vocabulary
+// asymmetry: the prescription layer had no way to express an atom the
+// knowledge base already used.
+// No equivalence is created with `rowing_ergometer` — matching is exact and
+// the two are disjoint since rowerg_intervals was narrowed to its own
+// precise id, which also means this entry is today the only user of
+// `cardio_machine` in either layer. The Optional heart-rate monitor and
+// power meter are excluded, matching the established discipline of never
+// promoting an Optional item to Required.
+// KNOWN STALE COMMENT, flagged and deliberately NOT fixed here: the
+// ExerciseDefinition's own block comment still says `cardio_machine` is
+// shared with ROWERG_INTERVALS. That stopped being true when
+// rowerg_intervals was narrowed to `rowing_ergometer`. Correcting it is a
+// knowledge-base edit this lot does not need and does not make.
+//
+// ELIGIBILITY. Governed entirely by the knowledge base, whose `requirements`
+// declare exactly one atom and no environment gate at all: no space, no
+// floor safety, no landing surface, no wall, no partner and no sprint
+// permission is documented anywhere in this fiche (checked directly), and
+// none is invented here.
+//
+// LATERALITY. `not_applicable` with `interval_total`, matching Family 11's
+// own documented laterality for ergometer conditioning and the knowledge
+// base's `unilateral: false`. The fiche's "Push, Pull, Lower-Body Drive"
+// secondary patterns describe a whole-body cyclic action with no per-side
+// allocation whatsoever, and the volume is counted in intervals. No count is
+// multiplied for two arms or two legs.
+//
+// CAPABILITY FAMILY. 33_EXERCISE_PRESCRIPTION_CAPABILITIES' "Exercise Family
+// 11 — Ergometer Conditioning" describes this exercise and supplies its
+// loading modes (`ergometer`, `machine`) and laterality (`not_applicable`),
+// exactly as it does for rowerg_intervals. One deliberate departure, stated
+// rather than hidden: Family 11's Supported Intensity Types list
+// (heart_rate, pace, rpe, velocity, resistance_category) does NOT include
+// `movement_intent`. That list is family-level guidance enforced by no
+// validator; the conditioning MODULE contract, the `work_rest_intervals`
+// METHOD contract and the selected profile all admit `movement_intent`, and
+// this fiche documents one explicitly while documenting no figure for any of
+// Family 11's five types. The intensity claim is therefore sourced to the
+// chapter and 26_INTENSITY_MODEL, not to the capabilities document.
+//
+// STOP CONDITIONS — the six categories `work_rest_intervals` requires, no
+// more. Family 11's own Required Stop Conditions additionally name
+// "equipment failure"; a factory exists (`equipmentFailureCondition`) but is
+// scoped `set`/`end_set`, a boundary `work_rest_intervals` does not use, and
+// no module or method contract requires the category. That is the same
+// documented gap already recorded for rowerg_intervals, and it is unchanged
+// here. This fiche's own "Poor Pacing" risk is carried where it is
+// actionable, in the pace-loss and fatigue-limit descriptions.
+// -----------------------------------------------------------------------------
+
+const SOURCE_ASSAULT_BIKE_INTERVALS = "50-exercises/48_ASSAULT_BIKE_INTERVALS";
+
+const assaultBikeIntervalsStopConditions: StopConditionDefinition[] = [
+  intervalPaceLossCondition({
+    conditionId: "assault_bike_intervals_pace_loss",
+    description:
+      "Stop the interval when cadence or power output visibly drops and the effort becomes slow despite maximal intent. Poor pacing is this exercise's own documented primary risk, and work consistency across intervals is what the effort is for.",
+    sourceRuleIds: [SOURCE_ASSAULT_BIKE_INTERVALS, SOURCE_METHOD_CATALOGUE],
+  }),
+  technicalFailureCondition({
+    conditionId: "assault_bike_intervals_technical_failure",
+    description:
+      "Stop the interval on technical breakdown: driving with the arms alone instead of pushing and pulling while driving through the legs, or loss of posture on the machine.",
+    sourceRuleIds: [SOURCE_ASSAULT_BIKE_INTERVALS],
+  }),
+  fatigueLimitCondition({
+    conditionId: "assault_bike_intervals_fatigue_limit",
+    description:
+      "Stop the exercise once accumulated fatigue prevents finishing an interval with intent, or once grip fatigue compromises the handles. Starting too fast and grip fatigue are both documented failure modes of this exercise.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_ASSAULT_BIKE_INTERVALS],
+  }),
+  acuteSymptomCondition({
+    conditionId: "assault_bike_intervals_acute_symptom",
+    description:
+      "Stop immediately if an acute symptom appears at any point during the intervals or the recoveries, including any cardiovascular symptom.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_ASSAULT_BIKE_INTERVALS],
+  }),
+  painCondition({
+    conditionId: "assault_bike_intervals_pain",
+    description:
+      "Stop immediately if pain occurs, or in the presence of an acute knee or shoulder injury, or any acute cardiovascular contraindication.",
+    sourceRuleIds: [SOURCE_ASSAULT_BIKE_INTERVALS],
+  }),
+  completionCondition({
+    conditionId: "assault_bike_intervals_completion",
+    description:
+      "Stop once the prescribed intervals and their per-interval duration are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const assaultBikeIntervalsInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "assault_bike_intervals_setup",
+    "setup",
+    "Use an air-resistance bike: an Assault Bike or an Echo Bike. Warm up before the first interval — insufficient warm-up is a documented risk of this exercise. A heart-rate monitor and a power meter are optional and are never prescribed targets. The skill requirement is beginner level with a very short learning curve.",
+    "high",
+    true,
+    SOURCE_ASSAULT_BIKE_INTERVALS,
+  ),
+  makeInstruction(
+    "assault_bike_intervals_execution",
+    "execution",
+    "Push and pull aggressively while driving through the legs, maintain posture and finish every interval with intent. Do not start too fast and do not drive with the arms alone. Keep pedalling during the recovery rather than stopping immediately, and control breathing while recovering. Stop the interval when cadence, power or posture clearly drops.",
+    "high",
+    true,
+    SOURCE_ASSAULT_BIKE_INTERVALS,
+  ),
+];
+
+const assaultBikeIntervalsEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "assault_bike_intervals",
+  moduleId: "conditioning",
+  role: "conditioning",
+  explicitMethodId: "work_rest_intervals",
+  numericalProfileId: "power_intervals_v0_1",
+  capabilities: {
+    exerciseId: "assault_bike_intervals",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["work_rest_intervals"],
+    supportedVolumeStructures: ["intervals"],
+    // See the block comment above for why `impact_intent`, offered by the
+    // shared profile, is not claimed, and why `movement_intent` is sourced
+    // to the chapter rather than to Family 11's own list.
+    supportedIntensityTypes: ["movement_intent"],
+    preferredIntensityTypes: ["movement_intent"],
+    // Family 11 — Ergometer Conditioning, identical to rowerg_intervals.
+    supportedLoadingModes: ["ergometer", "machine"],
+    // Empty, not borrowed: this fiche documents no tempo and the method
+    // forbids it. See the block comment above.
+    supportedTempoTypes: [],
+    laterality: "not_applicable",
+    volumeInterpretations: ["interval_total"],
+    // Exactly the three tags `work_rest_intervals` requires.
+    capabilityTags: ["interval_structure", "timed_effort", "technical_quality_observation"],
+    // The atom the knowledge base already gates on, now expressible.
+    requiredEquipmentCapabilities: ["cardio_machine"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: [
+      "assault_bike_intervals_setup",
+      "assault_bike_intervals_execution",
+    ],
+    requiredStopConditionIds: [
+      "assault_bike_intervals_pace_loss",
+      "assault_bike_intervals_technical_failure",
+      "assault_bike_intervals_fatigue_limit",
+      "assault_bike_intervals_acute_symptom",
+      "assault_bike_intervals_pain",
+      "assault_bike_intervals_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_assault_bike_intervals",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_ASSAULT_BIKE_INTERVALS, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["movement_intent"],
+  preferredIntensityType: "movement_intent",
+  supportedTempoTypes: [],
+  preferredTempoType: null,
+  instructionDefinitions: assaultBikeIntervalsInstructions,
+  stopConditionDefinitions: assaultBikeIntervalsStopConditions,
+  // "# Loading Profile — Typical Volume: 6-15 intervals. Work: 10-60
+  // seconds." The fiche's own bounds are declared verbatim; the generic
+  // resolvers intersect them with the profile's [3, 12] and [10, 40] to
+  // 6-12 intervals of 10-40 seconds. No intersection is pre-computed here.
+  exerciseDoseConstraints: {
+    minimumDose: { sets: null, repetitions: null, durationSeconds: 10, distanceMeters: null, rounds: null, workIntervals: 6 },
+    maximumDose: { sets: null, repetitions: null, durationSeconds: 60, distanceMeters: null, rounds: null, workIntervals: 15 },
+    sourceRuleIds: [SOURCE_ASSAULT_BIKE_INTERVALS],
+  },
+  // Narrows the shared profile to this fiche's single documented intensity
+  // reading, and is what excludes `impact_intent` — the profile's FIRST
+  // rule, which would otherwise have been selected silently.
+  exerciseIntensityConstraints: {
+    allowedIntensityTypes: ["movement_intent"],
+    rangeConstraints: [],
+    sourceRuleIds: [SOURCE_ASSAULT_BIKE_INTERVALS, SOURCE_INTENSITY_MODEL],
+  },
+  // "# Loading Profile — Recovery: 20-180 seconds", declared verbatim and
+  // intersected by the resolver with the profile's own [20, 90].
+  exerciseRestConstraints: {
+    scope: "between_intervals",
+    minimumSeconds: 20,
+    maximumSeconds: 180,
+    sourceRuleIds: [SOURCE_ASSAULT_BIKE_INTERVALS],
+  },
+  sourceRuleIds: [SOURCE_ASSAULT_BIKE_INTERVALS, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 
 /**
  * Statically typed as `Record<PilotExerciseId, ...>` — TypeScript refuses
@@ -9841,6 +10154,7 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
 
   heavy_bag_power_intervals: heavyBagPowerIntervalsEntry,
   battle_ropes: battleRopesEntry,
+  assault_bike_intervals: assaultBikeIntervalsEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

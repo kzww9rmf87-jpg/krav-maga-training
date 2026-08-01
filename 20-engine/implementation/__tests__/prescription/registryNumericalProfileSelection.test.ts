@@ -140,6 +140,10 @@ const EXPLICIT_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
   // second consumer of INT-POWER. Two entries now share one profile on that
   // triple, which the explicit id still keeps auditable.
   battle_ropes: "power_intervals_v0_1",
+  // Registry Lot 13 — fifth entry on the ambiguous interval triple and the
+  // THIRD consumer of INT-POWER, the first that was not one of the two
+  // records the table group was written from.
+  assault_bike_intervals: "power_intervals_v0_1",
 };
 
 /**
@@ -152,6 +156,7 @@ const AMBIGUOUS_TRIPLE_EXERCISES: readonly string[] = [
   "sprint_intervals",
   "heavy_bag_power_intervals",
   "battle_ropes",
+  "assault_bike_intervals",
 ];
 
 const historicalEntries = () =>

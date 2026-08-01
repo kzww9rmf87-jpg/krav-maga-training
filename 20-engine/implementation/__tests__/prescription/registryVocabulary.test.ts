@@ -144,8 +144,10 @@ describe("registryVocabulary — equipment capabilities", () => {
     // +1 for heavy_bag (Registry Lot 11 — Combat bag power intervals),
     // +2 for battle_rope/rope_anchor_point (Registry Lot 12 — Battle ropes:
     // two Required items, each replacing an imprecise atom the knowledge
-    // base had already flagged).
-    expect(EQUIPMENT_CAPABILITY_IDS.length).toBe(PREVIOUSLY_EXISTING_IDS.length + 2 + 1 + 1 + 1 + 1 + 1 + 2);
+    // base had already flagged),
+    // +1 for cardio_machine (Registry Lot 13 — Air-bike intervals: the atom
+    // the knowledge base already gated on, finally expressible here).
+    expect(EQUIPMENT_CAPABILITY_IDS.length).toBe(PREVIOUSLY_EXISTING_IDS.length + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1);
   });
 
   test("an unknown equipment identifier is still rejected after the addition", () => {
@@ -483,6 +485,10 @@ describe("registryVocabulary — carry loading modes corrected to match document
       // supplies the resistance) and not "impact_equipment" (nothing is
       // struck).
       battle_ropes: ["rope"],
+      // Registry Lot 13 — Air-bike intervals. Identical to rowerg_intervals,
+      // both grounded in 33_EXERCISE_PRESCRIPTION_CAPABILITIES' own "Exercise
+      // Family 11 — Ergometer Conditioning".
+      assault_bike_intervals: ["ergometer", "machine"],
     };
     const CORRECTED_IDS = ["pinch_carry", "sandbag_carry", "zercher_carry"];
 
@@ -499,8 +505,8 @@ describe("registryVocabulary — carry loading modes corrected to match document
   });
 
   test("7. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(67);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(67);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(68);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(68);
   });
 
   test("8. every retained value (plate, sandbag, barbell) is a known, documented LoadingMode", () => {
@@ -613,12 +619,12 @@ describe("registryVocabulary — pinch_carry represents only the Bilateral Varia
     for (const [id, text] of Object.entries(OTHER_ENTRY_FIRST_INSTRUCTION)) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id as PilotExerciseId].instructionDefinitions[0].text).toBe(text);
     }
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(67);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(68);
   });
 
   test("9. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(67);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(67);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(68);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(68);
   });
 
   test("10. explicitMethodId, supportedMethodIds, supportedVolumeStructures and stop conditions are unchanged", () => {
@@ -742,6 +748,10 @@ const DOSE_NARROWING_EXCEPTIONS = [
   // power_intervals_v0_1's own [3, 12], and declares its own documented work
   // duration (10-40 s) even though it matches the shared envelope exactly.
   "battle_ropes",
+  // Registry Lot 13 — Air-bike intervals: declares its own documented 6-15
+  // intervals and 10-60 s, which the resolvers intersect with
+  // power_intervals_v0_1's [3, 12] and [10, 40] to 6-12 and 10-40 s.
+  "assault_bike_intervals",
 ] as const;
 
 describe("registryVocabulary — exerciseDoseConstraints", () => {
@@ -752,7 +762,7 @@ describe("registryVocabulary — exerciseDoseConstraints", () => {
       }
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseDoseConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(67);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(68);
   });
 
   test("tibialis_raise, rotator_cuff_training, soleus_raise, copenhagen_plank, hip_thrust and barbell_row narrow exerciseDoseConstraints; wrist_strengthening and chin_up do not", () => {
@@ -785,6 +795,9 @@ const INTENSITY_CONSTRAINT_EXCEPTIONS = [
   // claims movement_intent and excludes impact_intent, which is the profile's
   // first documented rule and would otherwise have been selected silently.
   "battle_ropes",
+  // Registry Lot 13 — the same shared profile and the same rule as
+  // battle_ropes, for the same reason: nothing is struck on an air bike.
+  "assault_bike_intervals",
 ] as const;
 
 /**
@@ -798,6 +811,9 @@ const REST_CONSTRAINT_EXCEPTIONS = [
   "hanging_leg_raise",
   "plate_pinch",
   "heavy_bag_power_intervals",
+  // Registry Lot 13 — declares its documented 20-180 s recovery, which the
+  // resolver intersects with the profile's own [20, 90].
+  "assault_bike_intervals",
 ] as const;
 
 /**
@@ -817,7 +833,7 @@ describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestCons
         expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).toBeNull();
       }
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(67);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(68);
   });
 
   test("every rest-narrowing entry declares its own documented window; the three set-based ones narrow rest alone, and the interval-based one is scoped between intervals", () => {

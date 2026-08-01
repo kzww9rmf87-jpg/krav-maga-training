@@ -280,6 +280,20 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // and "Typical Recovery: 24 hours" are planning-layer figures, not
   // session timing.
   unresolvedProfile("battle_ropes", "intervals", ["50-exercises/46_BATTLE_ROPES.md"]),
+
+  // Registry Lot 13 — air-bike intervals, the last conditioning modality.
+  //
+  // `"unresolved"`. This fiche quantifies WORK and RECOVERY ("Work: 10-60
+  // seconds. Recovery: 20-180 seconds") and both are prescription targets
+  // resolved by `resolveVolume` and `resolveRest` from the numerical
+  // profile — not estimates of how long the exercise takes. The chapter
+  // gives none of the fields below: no time to set the machine up, no
+  // transition time, no per-set time, no technical margin. Summing work and
+  // recovery would restate a prescription as an estimate, and would also
+  // ignore the warm-up this fiche names as a documented risk.
+  // "Frequency: 1-3 sessions/week" is a planning-layer figure, not session
+  // timing.
+  unresolvedProfile("assault_bike_intervals", "intervals", ["50-exercises/48_ASSAULT_BIKE_INTERVALS"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(
