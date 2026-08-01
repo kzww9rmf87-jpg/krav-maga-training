@@ -9087,18 +9087,35 @@ export const SLED_PUSH: ExerciseDefinition = {
  *
  * BUSINESS DISTINCTION, explicitly verified before writing began: this
  * fiche is NOT confused with the generic `rope` used by ROPE_CLIMB/
- * ROPE_PULL in `65_GRIP`, nor with `rigid_anchor_support` alone. "#
+ * ROPE_PULL in `65_GRIP`, nor with `rigid_anchor_support`. "#
  * Equipment Requirements — Required: Battle Ropes, Anchor Point." names
- * TWO distinct required items. "Battle Ropes" has no dedicated
- * `EquipmentType` value of its own (no "battle_rope" entry exists in the
- * enum); `rope` is used as the closest existing honest generic value —
- * the same escape hatch already used for ROPE_PULL's own "Anchored Load",
- * openly flagged as a MODEL LIMITATION rather than silently invented.
- * "Anchor Point" is named directly under Required (not hedged behind a
- * documented-only-for-one-variation clause the way ROPE_PULL's own
- * "safe pulley or anchor setup" was restricted to its Vertical variation)
- * — a genuinely, unconditionally required anchor, so `rigid_anchor_support`
- * IS added here, unlike ROPE_PULL's own base form.
+ * TWO distinct required items, and both now have their own exact
+ * `EquipmentType` value.
+ *
+ * BOTH ATOMS WERE CORRECTED when this exercise became prescriptible, each
+ * replacing an imprecise value this comment itself had already flagged:
+ *
+ * - "Battle Ropes" used the generic `rope`, openly recorded here as a
+ *   MODEL LIMITATION ("the closest existing honest generic value"). It now
+ *   uses `battle_rope`. The distinction is real and safety-bearing: a
+ *   climbing rope is anchored overhead and climbed, a battle rope is
+ *   anchored at floor level and driven in waves. Equipment matching is
+ *   exact, so a climbing rope no longer satisfies this exercise — which is
+ *   the point. `rope` stays untouched for ROPE_CLIMB and ROPE_PULL;
+ * - "Anchor Point" used `rigid_anchor_support`, whose scope this catalog
+ *   documents twice as a HAND-GRIP anchor (DRAGON_FLAG's own "Secure
+ *   overhead or behind-head hand anchor"; NORDIC_HAMSTRING_CURL's own
+ *   reference to "`rigid_anchor_support`'s own established hand-grip-anchor
+ *   scope"). A battle-rope anchor is a fixed structural point the ROPES
+ *   attach to and the athlete never grips, so `rope_anchor_point` is used
+ *   instead. `rigid_anchor_support` stays untouched for DRAGON_FLAG and
+ *   TOWEL_PULL_UP, which do mean a hand anchor.
+ *
+ * "Anchor Point" remains named directly under Required (not hedged behind
+ * a documented-only-for-one-variation clause the way ROPE_PULL's own "safe
+ * pulley or anchor setup" was restricted to its Vertical variation) — a
+ * genuinely, unconditionally required anchor, unlike ROPE_PULL's own base
+ * form.
  */
 export const BATTLE_ROPES: ExerciseDefinition = {
   id: "battle_ropes",
@@ -9139,8 +9156,8 @@ export const BATTLE_ROPES: ExerciseDefinition = {
       {
         kind: "all_of",
         items: [
-          { kind: "equipment", equipment: "rope" },
-          { kind: "equipment", equipment: "rigid_anchor_support" },
+          { kind: "equipment", equipment: "battle_rope" },
+          { kind: "equipment", equipment: "rope_anchor_point" },
         ],
       },
     ],
@@ -9148,7 +9165,8 @@ export const BATTLE_ROPES: ExerciseDefinition = {
   // No space/distance heading of any kind exists anywhere in this fiche
   // (checked directly — battle ropes are a stationary, anchored
   // exercise) — `sufficient_space` is therefore deliberately NOT added, a
-  // genuine checked absence, not an oversight.
+  // genuine checked absence, not an oversight. No floor-safety, jumping,
+  // throwing, wall or partner language exists either (checked directly).
   //
   // "# Neurological Profile — Skill Requirement: Beginner. Learning
   // Curve: Short." (the authoritative source — the later, separately

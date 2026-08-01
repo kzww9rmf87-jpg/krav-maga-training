@@ -108,6 +108,33 @@ export const EQUIPMENT_CAPABILITY_IDS = [
   // implementation". Building a `loaded_carry_implement`-style group from
   // them would contradict the source document.
   "ab_wheel",
+  // Added for the first battle-rope entry (battle_ropes). TWO ids, because
+  // "# Equipment Requirements — Required: Battle Ropes, Anchor Point" names
+  // two separate required items, exactly as the knowledge base already
+  // encoded them as two atoms.
+  //
+  // Both are aligned 1:1 with `EquipmentType` members added in the same
+  // change, and both REPLACE an imprecise value the knowledge base was
+  // already using:
+  //
+  // - `battle_rope` replaces the generic `rope`, which BATTLE_ROPES' own
+  //   block comment already flagged as a MODEL LIMITATION. `rope` remains
+  //   in the vocabulary for ROPE_CLIMB and ROPE_PULL, which genuinely mean
+  //   a climbing rope; matching is exact, so a climbing rope no longer
+  //   satisfies a battle-rope requirement and vice versa. NOT an
+  //   equivalence group — one implement, one id;
+  // - `rope_anchor_point` replaces `rigid_anchor_support`, whose scope this
+  //   catalog documents twice as a HAND-GRIP anchor (Dragon Flag's "Secure
+  //   overhead or behind-head hand anchor"). A battle-rope anchor is a
+  //   fixed structural point the ROPES attach to and the athlete never
+  //   grips. `rigid_anchor_support` stays untouched for dragon_flag and
+  //   towel_pull_up, which do mean a hand anchor.
+  //
+  // Neither is a substitute for the other, and no equivalence is created
+  // with rope, towel, suspension trainer, heavy_bag, sled or
+  // resistance_band.
+  "battle_rope",
+  "rope_anchor_point",
   // Added for the first combat bag entry (heavy_bag_power_intervals).
   //
   // Aligned 1:1 with the knowledge base's own pre-existing `heavy_bag`

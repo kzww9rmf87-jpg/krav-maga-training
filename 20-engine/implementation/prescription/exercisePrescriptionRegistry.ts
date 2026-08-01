@@ -292,6 +292,11 @@ export const PILOT_EXERCISE_IDS = [
   // documented interval structure fits no Table Group 8 profile, which is
   // why that table group was written before this entry existed.
   "heavy_bag_power_intervals",
+  // Registry Lot 12 — second consumer of Table Group 14's INT-POWER
+  // profile, and the exercise the other half of that table group's
+  // envelope was built from. Adds no profile: the doctrine already covers
+  // it, and this entry only narrows.
+  "battle_ropes",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -9426,6 +9431,325 @@ const heavyBagPowerIntervalsEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Battle Ropes
+// Source: 50-exercises/46_BATTLE_ROPES.md
+//   - Primary Classification: "Combat-Specific Conditioning" (module:
+//     conditioning), matching the knowledge base's own resolution.
+//   - Equipment Requirements: "Required: Battle Ropes, Anchor Point.
+//     Optional: Heart Rate Monitor, Timer."
+//   - Loading Profile: "Typical Volume: 5-12 rounds. Work: 10-40 seconds.
+//     Recovery: 20-90 seconds."
+//   - Physiological Profile: "Primary Energy System: Anaerobic Glycolysis.
+//     Secondary: ATP-PC, Oxidative Recovery. Typical Work Duration: 10-40
+//     seconds. Typical Recovery: 20-90 seconds."
+//   - Velocity Profile: "Explosive. Continuous. Maximum Intent."
+//   - Coaching Cues: "Generate force from the floor.", "Brace
+//     continuously.", "Move explosively.", "Relax between contractions.",
+//     "Maintain rhythm."
+//   - Common Errors: Using only the arms, Losing trunk stiffness,
+//     Shrugging the shoulders, Poor breathing rhythm, Technical
+//     deterioration under fatigue.
+//   - Safety Profile: "Overall Risk: Very Low." Primary Risks — Poor Trunk
+//     Position, Excessive Shoulder Elevation, Using Only the Arms.
+//   - Contraindications: Acute Shoulder / Wrist / Elbow Injury.
+//   - Performance Indicators: Wave Velocity, Wave Amplitude, Work Output,
+//     Heart Rate, Power Consistency, Technical Quality, Fatigue Resistance.
+//   - Neurological Profile: "Skill Requirement: Beginner. Learning Curve:
+//     Short."
+//   - Philosophy: "Battle Ropes train explosive intent under fatigue."
+// Method: work_rest_intervals / conditioning / conditioning
+//
+// EXPLICIT PROFILE SELECTION: `power_intervals_v0_1` (Table Group 14 /
+// INT-POWER). The (conditioning, work_rest_intervals, conditioning) triple
+// is shared by FOUR profiles and never resolves implicitly.
+//
+// This entry adds no profile and changes no doctrine. Table Group 14's
+// envelope was built from the union of TWO documented records, and this
+// fiche is the second of them — its 5-12 / 10-40 s / 20-90 s figures are
+// literally where the envelope's upper interval bound, its whole work
+// range and its whole rest range came from. The profile therefore already
+// contains this exercise exactly, and the entry only narrows.
+//
+// The other three interval profiles remain unusable here, for the reasons
+// Table Group 14 records: INT-LONG prescribes 60-180 s efforts (empty
+// against 10-40 s), INT-REPEATED-SPRINT prescribes 3-8 s efforts (empty
+// too), and INT-SHORT — the only one whose ranges overlap at all — is
+// non-executable, documenting no encodable intensity, and is refused at
+// validation time (`NON_EXECUTABLE_NUMERICAL_PROFILE`).
+//
+// VARIANT REPRESENTED — one prescription, many documented movements. This
+// fiche lists eight Variations (Alternating Waves, Double Waves, Outside
+// Circles, Inside Circles, Power Slams, Snakes, Lateral Waves, Jump Slams)
+// but exactly ONE "# Loading Profile", which covers all of them. That is
+// the opposite of plate_pinch, whose chapter documented three separately
+// quantified prescriptions and forced a choice. The ExerciseId therefore
+// represents a FAMILY of rope movements under a single prescription: the
+// execution instruction names the documented movements, and the numbers
+// stay unique. No second prescription is mixed in, and the Progressions
+// (Jumping Waves, Reactive Intervals, Contrast Training) are not
+// represented — they are documented progressions, not this entry.
+//
+// "rounds" AS THE INTERVAL COUNT. This fiche says "Typical Volume: 5-12
+// rounds" while naming the work period a "Typical Work Duration". Reading
+// its "rounds" as the interval dimension is not a decision taken here: it
+// is the reading 34_NUMERICAL_PRESCRIPTION_TABLES.md's own Table Group 14
+// already made and published, listing "Battle Ropes 5-12 rounds" as one of
+// the two records defining the family's interval envelope. It is also the
+// only encodable reading — `work_rest_intervals` forbids the `rounds`
+// volume field outright — and structurally accurate: a work period
+// followed by a recovery period, repeated, is an interval. Table Group 9's
+// combat rounds are sport-defined competition periods, which this fiche
+// never claims to be, and COMBAT-CONDITIONING-ROUNDS refuses to prescribe
+// without a sport-specific subtype this fiche does not supply.
+//
+// EQUIPMENT — two ids, both new, both replacing an imprecise atom the
+// knowledge base itself had already flagged:
+//   - `battle_rope` replaces the generic `rope`. BATTLE_ROPES' own block
+//     comment recorded that value as a MODEL LIMITATION ("the closest
+//     existing honest generic value ... openly flagged"). Matching is
+//     exact, so a climbing rope no longer satisfies this exercise, and
+//     `rope` stays untouched for rope_climb and rope_pull;
+//   - `rope_anchor_point` replaces `rigid_anchor_support`, whose scope
+//     this catalog documents twice as a HAND-GRIP anchor (dragon_flag's
+//     "Secure overhead or behind-head hand anchor"). A battle-rope anchor
+//     is a fixed structural point the ROPES attach to and the athlete
+//     never grips; reusing that value would be an alias, not a match.
+//     `rigid_anchor_support` stays untouched for dragon_flag and
+//     towel_pull_up.
+// No equivalence is created with rope, towel, suspension trainer,
+// heavy_bag, sled or resistance_band. The Optional heart-rate monitor and
+// timer are excluded, matching the established discipline of never
+// promoting an Optional item to Required — and matching the knowledge
+// base's own recorded reasoning that a timer is a programming tool.
+//
+// NO CAPABILITY FAMILY COVERS THIS EXERCISE, stated rather than
+// force-fitted. 33_EXERCISE_PRESCRIPTION_CAPABILITIES.md's fourteen
+// families include Ergometer Conditioning (Family 11) and Combat Bag and
+// Pad Work (Family 12); battle ropes are neither a machine nor bag/pad
+// work, and no rope-conditioning family exists. Every capability below is
+// therefore grounded in the METHOD contract or in this fiche directly, and
+// `sourceRuleIds` cites those two rather than a capabilities chapter that
+// does not describe this exercise.
+//
+// VOLUME — one real narrowing, one declared match:
+//   - interval count: "5-12 rounds" narrows the profile's own [3, 12].
+//     Genuinely narrower at the floor;
+//   - work duration: "10-40 seconds" IS the profile's own envelope,
+//     because the envelope was built from this fiche. Both bounds are
+//     declared anyway, as ab_wheel and sprawl already do, so the entry
+//     states its own documented range rather than relying on the envelope
+//     happening to match.
+// This fiche's two quantified sections AGREE (Loading Profile and
+// Physiological Profile both give 10-40 s work and 20-90 s recovery), so
+// unlike heavy_bag_power_intervals there is no narrower-source decision to
+// make here.
+// Nothing is converted: waves are not repetitions, slams are not seconds,
+// oscillation counts are not intensity, "Rope Speed"/"Wave Amplitude" are
+// documented PROGRESSION AXES and not volume dimensions, and no rope
+// length or weight is read as a load.
+//
+// INTENSITY. `movement_intent: explosive` only, declared through an
+// explicit `exerciseIntensityConstraints` narrowing. `explosive` is a
+// literal word of this fiche's own "# Velocity Profile: Explosive.
+// Continuous. Maximum Intent." and a literal member of 26_INTENSITY_MODEL's
+// movement-intent vocabulary — no mapping judgement is involved.
+// The profile's OTHER rule, `impact_intent: maximal_safe_power`, is
+// deliberately excluded and the narrowing is what excludes it: nothing is
+// struck here. The rope is driven, not hit, this fiche documents no impact
+// of any kind, and the impact vocabulary belongs to bag and pad work.
+// Because `impact_intent` is the profile's first documented rule, omitting
+// the constraint would have silently selected it — the constraint is
+// therefore load-bearing, not decorative.
+// No RPE, heart rate, pace, velocity or power figure exists anywhere in
+// this fiche. "Wave Velocity", "Work Output", "Heart Rate" and "Power
+// Consistency" are listed under Performance INDICATORS, and the
+// heart-rate monitor is Optional instrumentation — none is a prescribed
+// target, and no number is derived from any of them.
+//
+// TEMPO. `work_rest_intervals` declares `tempoPolicy: forbidden`, the
+// profile carries no tempo rule, and — unlike heavy_bag_power_intervals,
+// whose Family 12 documents `global_intent` for bag work — no capability
+// family documents any tempo type for this exercise. `supportedTempoTypes`
+// is therefore empty rather than borrowed, which the compatibility
+// validator accepts precisely because the method forbids tempo. The
+// explosive character of the movement lives in the intensity rule, where
+// this fiche puts it, never in a fabricated cadence.
+//
+// REST. `exerciseRestConstraints` is null. This fiche's "Recovery: 20-90
+// seconds" is EXACTLY the profile's own between-intervals window — there
+// is nothing to narrow, and a constraint that restates an envelope adds no
+// information while implying a distinction that does not exist. The same
+// reasoning already left sprint_intervals' rest constraint null. The fiche
+// documents no active/passive recovery distinction, so none is invented.
+//
+// LATERALITY. `not_applicable` with `interval_total`. This is a
+// considered choice, not a default: the single prescription covers
+// bilateral movements (Double Waves, Power Slams) AND alternating ones
+// (Alternating Waves, Snakes) without changing a single number, and the
+// volume is counted in intervals, never per arm. Declaring `alternating`
+// would describe the biomechanics of some variations while implying a
+// per-side structure the fiche never prescribes; `bilateral` would exclude
+// the variations it names first. The knowledge base's own `unilateral:
+// false` agrees, and no volume is multiplied anywhere.
+//
+// LOADING MODE. `rope` — a real, pre-existing `LoadingMode` member whose
+// meaning is exactly this: resistance supplied by a rope the athlete sets
+// in motion. This entry is its first consumer. `bodyweight` would be false
+// (an implement supplies the resistance), `plate`/`sled`/`medicine_ball`
+// name other implements, `locomotion_only` describes displacement this
+// exercise does not perform, and `impact_equipment` belongs to striking.
+//
+// STOP CONDITIONS — the six categories `work_rest_intervals` requires, no
+// more. Two categories a reader might expect are knowingly absent, and
+// their absence is sourced rather than assumed: `equipment_failure` (a
+// shifting anchor, a lost rope) and `range_of_motion_loss` are plausible,
+// but this fiche's own Safety Profile, Primary Risks and Common Errors
+// name NO anchor movement and NO loss of rope control (checked directly) —
+// declaring either would mean inventing a documented risk. Wave amplitude
+// IS documented, as a Performance Indicator and a Progression axis, and it
+// is carried where it is actionable: inside the pace-loss description,
+// alongside wave velocity and power consistency. The same module-contract
+// gap already recorded for rowerg_intervals, sprint_intervals and
+// heavy_bag_power_intervals still applies: no resolver enforces the
+// conditioning MODULE's own categories today.
+// -----------------------------------------------------------------------------
+
+const SOURCE_BATTLE_ROPES = "50-exercises/46_BATTLE_ROPES.md";
+
+const battleRopesStopConditions: StopConditionDefinition[] = [
+  intervalPaceLossCondition({
+    conditionId: "battle_ropes_pace_loss",
+    description:
+      "Stop the interval when wave velocity or wave amplitude visibly drops, or when the waves become slow and pushed rather than driven — power consistency across intervals is this exercise's own success criterion, not accumulated work.",
+    sourceRuleIds: [SOURCE_BATTLE_ROPES, SOURCE_METHOD_CATALOGUE],
+  }),
+  technicalFailureCondition({
+    conditionId: "battle_ropes_technical_failure",
+    description:
+      "Stop the interval on technical breakdown: moving with the arms alone instead of generating force from the floor, loss of trunk stiffness, or shoulders shrugging upward. Poor trunk position and excessive shoulder elevation are this exercise's documented primary risks.",
+    sourceRuleIds: [SOURCE_BATTLE_ROPES],
+  }),
+  fatigueLimitCondition({
+    conditionId: "battle_ropes_fatigue_limit",
+    description:
+      "Stop the exercise once accumulated fatigue degrades technique or breathing rhythm and explosive intent can no longer be produced. Technical deterioration under fatigue is a documented error of this exercise, not a training stimulus.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_BATTLE_ROPES],
+  }),
+  acuteSymptomCondition({
+    conditionId: "battle_ropes_acute_symptom",
+    description:
+      "Stop immediately if an acute symptom appears at any point during the intervals or the recoveries.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+  painCondition({
+    conditionId: "battle_ropes_pain",
+    description:
+      "Stop immediately if pain occurs, or in the presence of an acute shoulder, wrist or elbow injury.",
+    sourceRuleIds: [SOURCE_BATTLE_ROPES],
+  }),
+  completionCondition({
+    conditionId: "battle_ropes_completion",
+    description:
+      "Stop once the prescribed intervals and their per-interval duration are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const battleRopesInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "battle_ropes_setup",
+    "setup",
+    "Secure the battle ropes to a fixed anchor point; both are required equipment. Stand facing the anchor with the rope ends held so that force can travel from the ground through the feet, legs and core to the shoulders and arms, as this exercise's documented force path requires. A timer and a heart-rate monitor are optional. The skill requirement is beginner level with a short learning curve.",
+    "high",
+    true,
+    SOURCE_BATTLE_ROPES,
+  ),
+  makeInstruction(
+    "battle_ropes_execution",
+    "execution",
+    "Generate force from the floor, brace continuously, move explosively, relax between contractions and maintain rhythm. Any documented rope movement may be used for the interval — alternating waves, double waves, outside or inside circles, power slams, snakes, lateral waves or jump slams — but the prescribed intervals, work duration and recovery do not change with the movement chosen. Do not move with the arms alone, do not lose trunk stiffness and do not shrug the shoulders. Stop when wave velocity, wave amplitude or technical quality drops.",
+    "high",
+    true,
+    SOURCE_BATTLE_ROPES,
+  ),
+];
+
+const battleRopesEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "battle_ropes",
+  moduleId: "conditioning",
+  role: "conditioning",
+  explicitMethodId: "work_rest_intervals",
+  numericalProfileId: "power_intervals_v0_1",
+  capabilities: {
+    exerciseId: "battle_ropes",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["work_rest_intervals"],
+    supportedVolumeStructures: ["intervals"],
+    // See the block comment above for why `impact_intent`, offered by the
+    // shared profile, is not claimed: nothing is struck here.
+    supportedIntensityTypes: ["movement_intent"],
+    preferredIntensityTypes: ["movement_intent"],
+    // The `LoadingMode` value whose meaning is exactly a rope the athlete
+    // sets in motion. First consumer of that value.
+    supportedLoadingModes: ["rope"],
+    // Empty, not borrowed: the method forbids tempo and no capability
+    // family documents a tempo type for this exercise.
+    supportedTempoTypes: [],
+    laterality: "not_applicable",
+    volumeInterpretations: ["interval_total"],
+    // Exactly the three tags `work_rest_intervals` requires.
+    capabilityTags: ["interval_structure", "timed_effort", "technical_quality_observation"],
+    // "Required: Battle Ropes, Anchor Point" — two items, two exact ids.
+    requiredEquipmentCapabilities: ["battle_rope", "rope_anchor_point"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["battle_ropes_setup", "battle_ropes_execution"],
+    requiredStopConditionIds: [
+      "battle_ropes_pace_loss",
+      "battle_ropes_technical_failure",
+      "battle_ropes_fatigue_limit",
+      "battle_ropes_acute_symptom",
+      "battle_ropes_pain",
+      "battle_ropes_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_battle_ropes",
+    substitutionCapabilityTags: [],
+    // No capabilities chapter describes this exercise (see the block
+    // comment above), so the method catalogue is cited instead of one.
+    sourceRuleIds: [SOURCE_BATTLE_ROPES, SOURCE_METHOD_CATALOGUE],
+  },
+  supportedIntensityTypes: ["movement_intent"],
+  preferredIntensityType: "movement_intent",
+  supportedTempoTypes: [],
+  preferredTempoType: null,
+  instructionDefinitions: battleRopesInstructions,
+  stopConditionDefinitions: battleRopesStopConditions,
+  // "# Loading Profile — Typical Volume: 5-12 rounds. Work: 10-40
+  // seconds." The interval count genuinely narrows the profile's own
+  // [3, 12]; the work duration matches the envelope exactly, because the
+  // envelope was built from this fiche, and is declared anyway so the
+  // entry states its own documented range.
+  exerciseDoseConstraints: {
+    minimumDose: { sets: null, repetitions: null, durationSeconds: 10, distanceMeters: null, rounds: null, workIntervals: 5 },
+    maximumDose: { sets: null, repetitions: null, durationSeconds: 40, distanceMeters: null, rounds: null, workIntervals: 12 },
+    sourceRuleIds: [SOURCE_BATTLE_ROPES],
+  },
+  // Narrows the shared profile to this fiche's single documented intensity
+  // reading, and is what excludes `impact_intent` — the profile's FIRST
+  // rule, which would otherwise have been selected silently.
+  exerciseIntensityConstraints: {
+    allowedIntensityTypes: ["movement_intent"],
+    rangeConstraints: [],
+    sourceRuleIds: [SOURCE_BATTLE_ROPES, SOURCE_INTENSITY_MODEL],
+  },
+  // Null deliberately: "# Loading Profile — Recovery: 20-90 seconds" is
+  // exactly the profile's own between-intervals window, so there is
+  // nothing to narrow.
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_BATTLE_ROPES, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 
 /**
  * Statically typed as `Record<PilotExerciseId, ...>` — TypeScript refuses
@@ -9516,6 +9840,7 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   plate_pinch: platePinchEntry,
 
   heavy_bag_power_intervals: heavyBagPowerIntervalsEntry,
+  battle_ropes: battleRopesEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

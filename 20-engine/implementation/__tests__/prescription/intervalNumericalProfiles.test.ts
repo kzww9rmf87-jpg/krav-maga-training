@@ -580,10 +580,10 @@ describe("registry validators — entries on the interval triple", () => {
     ).toBe(true);
   });
 
-  test("only the interval entries sit on the interval triple, each naming a DIFFERENT explicit profile — the 59 historical entries are untouched", () => {
+  test("only the interval entries sit on the interval triple, each naming its own explicit profile — the 59 historical entries are untouched", () => {
     const entries = Object.values(EXERCISE_PRESCRIPTION_REGISTRY);
 
-    expect(entries).toHaveLength(66);
+    expect(entries).toHaveLength(67);
 
     const onIntervalTriple = entries.filter(
       (entry) =>
@@ -593,8 +593,9 @@ describe("registry validators — entries on the interval triple", () => {
     );
 
     // The whole point of the triple being ambiguous: an entry sitting on it
-    // is only legal because it names its own profile — and three entries on
-    // the same triple legitimately resolve to three DIFFERENT profiles.
+    // is only legal because it names its own profile — entries on the same
+    // triple may resolve to different profiles, or deliberately to the same
+    // one, and only the explicit id makes either case auditable.
     const profileByExerciseId = Object.fromEntries(
       onIntervalTriple.map((entry) => [entry.exerciseId, entry.numericalProfileId ?? null]),
     );
@@ -602,12 +603,25 @@ describe("registry validators — entries on the interval triple", () => {
       rowerg_intervals: "conditioning_long_intervals_v0_1",
       sprint_intervals: "repeated_sprint_intervals_v0_1",
       heavy_bag_power_intervals: "power_intervals_v0_1",
+      battle_ropes: "power_intervals_v0_1",
     });
 
-    // No two of them share a profile, and none picked the non-executable one.
+    // Three of the four executable profiles are in use, none of them the
+    // non-executable one, and every entry declares its id explicitly.
     const selected = Object.values(profileByExerciseId);
-    expect(new Set(selected).size).toBe(selected.length);
+    expect(new Set(selected).size).toBe(3);
     expect(selected).not.toContain("conditioning_short_intervals_v0_1");
+    for (const entry of onIntervalTriple) {
+      expect(entry.numericalProfileId).not.toBeNull();
+    }
+
+    // The two entries sharing INT-POWER are told apart by their own
+    // documented narrowing, never by the profile.
+    const sharing = onIntervalTriple.filter((entry) => entry.numericalProfileId === "power_intervals_v0_1");
+    expect(sharing).toHaveLength(2);
+    expect(
+      new Set(sharing.map((entry) => entry.exerciseDoseConstraints?.maximumDose?.workIntervals)).size,
+    ).toBe(2);
 
     // Every other entry is still off the triple entirely.
     const intervalEntryIds = Object.keys(profileByExerciseId);

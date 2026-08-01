@@ -265,6 +265,21 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // work and recovery would understate it by exactly the preparation this
   // exercise demands most.
   unresolvedProfile("heavy_bag_power_intervals", "intervals", ["50-exercises/27_HEAVY_BAG_POWER_INTERVALS"]),
+
+  // Registry Lot 12 — second battle-rope-family entry.
+  //
+  // `"unresolved"`. This fiche quantifies WORK and RECOVERY ("Work: 10-40
+  // seconds. Recovery: 20-90 seconds") and both are prescription targets
+  // resolved by `resolveVolume` and `resolveRest` from the numerical
+  // profile — not estimates of how long the exercise takes. The fields
+  // below want a setup duration, a transition duration, a per-set time and
+  // a technical margin, and this chapter gives none of them: nothing for
+  // securing the ropes to the anchor, nothing for laying them out, nothing
+  // for the change between rope movements. Summing work and recovery would
+  // restate a prescription as an estimate. "Frequency: 1-3 sessions/week"
+  // and "Typical Recovery: 24 hours" are planning-layer figures, not
+  // session timing.
+  unresolvedProfile("battle_ropes", "intervals", ["50-exercises/46_BATTLE_ROPES.md"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

@@ -93,8 +93,8 @@ function prescribe(rangeContext: PrescriptionExecutionContext["rangeContext"] = 
 
 describe("heavy_bag_power_intervals — registry, knowledge base, profile and equipment counts", () => {
   test("1. the registry grew from 65 to exactly 66 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(66);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(66);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(67);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(67);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -109,7 +109,7 @@ describe("heavy_bag_power_intervals — registry, knowledge base, profile and eq
   });
 
   test("4. the equipment vocabulary went from 25 to 26 — `heavy_bag`, the only identifier this lot added", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(26);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(28);
     expect(isEquipmentCapabilityId("heavy_bag")).toBe(true);
     // Aligned 1:1 with a pre-existing knowledge-base `EquipmentType` member —
     // nothing was added to that union for this entry.
@@ -133,16 +133,28 @@ describe("heavy_bag_power_intervals — registry, knowledge base, profile and eq
     expect(PILOT_EXERCISE_IDS.filter((id) => id === EXERCISE_ID)).toHaveLength(1);
   });
 
-  test("6. the other conditioning modalities named alongside this one stay out of the registry", () => {
-    for (const id of ["assault_bike_intervals", "battle_ropes", "sled_push", "turkish_get_up", "towel_pull_up"]) {
+  test("6. the other conditioning modalities named alongside this one stay out of the registry; battle_ropes joined later on the SAME profile, narrowed differently", () => {
+    for (const id of ["assault_bike_intervals", "sled_push", "turkish_get_up", "towel_pull_up"]) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(id);
     }
+
     // battle_ropes is the OTHER documented member of Table Group 14's family.
-    // The table group was built from both; only this one is integrated, and
-    // the profile envelope still covers the other's documented bounds.
+    // The table group was built from both, so the envelope still covers its
+    // documented bounds — and when it was integrated it reused this profile
+    // unchanged, narrowing to its own figures rather than moving the doctrine.
     const profile = getNumericalPrescriptionProfileById(PROFILE_ID)!;
     expect(profile.volume.workIntervals!.max).toBeGreaterThanOrEqual(12);
     expect(profile.volume.duration!.range.max).toBeGreaterThanOrEqual(40);
+
+    const ropes = EXERCISE_PRESCRIPTION_REGISTRY.battle_ropes;
+    expect(ropes.numericalProfileId).toBe(PROFILE_ID);
+    expect(ropes.exerciseDoseConstraints?.minimumDose?.workIntervals).toBe(5);
+    expect(ropes.exerciseDoseConstraints?.maximumDose?.workIntervals).toBe(12);
+    // Same profile, different documented narrowing on every shared axis.
+    const bag = EXERCISE_PRESCRIPTION_REGISTRY[EXERCISE_ID];
+    expect(bag.exerciseDoseConstraints?.maximumDose?.workIntervals).toBe(8);
+    expect(bag.exerciseDoseConstraints?.maximumDose?.durationSeconds).toBe(30);
+    expect(ropes.exerciseDoseConstraints?.maximumDose?.durationSeconds).toBe(40);
   });
 });
 
@@ -726,7 +738,10 @@ describe("heavy_bag_power_intervals — determinism and non-regression", () => {
       confidence: "validated" as const,
     };
 
-    const previousIds = PILOT_EXERCISE_IDS.filter((id) => id !== EXERCISE_ID);
+    // The 65 entries that predate this lot: everything except this lot's own
+    // entry and the ids added by later lots, each covered by its own file.
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "battle_ropes"];
+    const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(65);
 
     for (const id of previousIds) {
@@ -799,7 +814,7 @@ describe("heavy_bag_power_intervals — determinism and non-regression", () => {
 
     // Exactly one profile and one equipment id were added by this whole lot.
     expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(18);
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(26);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(28);
     expect(getNumericalPrescriptionProfileById(PROFILE_ID)!.sourceRuleIds).toEqual([
       "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
     ]);

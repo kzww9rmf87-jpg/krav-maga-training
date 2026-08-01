@@ -10020,9 +10020,11 @@ describe("Lot 7 — Conditionnement general — Exercise Requirements Model batc
   });
 
   describe("BATTLE_ROPES", () => {
-    test("11. eligible with a rope and a rigid anchor support", () => {
+    test("11. eligible with a battle rope and a rope anchor point — the two exact atoms this fiche requires", () => {
       const input = makeValidInput({
-        environment: makeEnvironment({ availableEquipment: [{ type: "rope" }, { type: "rigid_anchor_support" }] }),
+        environment: makeEnvironment({
+          availableEquipment: [{ type: "battle_rope" }, { type: "rope_anchor_point" }],
+        }),
       });
 
       const result = checkExerciseEligibility(BATTLE_ROPES, input);
@@ -10031,26 +10033,35 @@ describe("Lot 7 — Conditionnement general — Exercise Requirements Model batc
       expect(result.rejectionReasons).toEqual([]);
     });
 
-    test("12. ineligible without the rope, and ineligible without the anchor", () => {
-      const withoutRope = checkExerciseEligibility(
-        BATTLE_ROPES,
-        makeValidInput({ environment: makeEnvironment({ availableEquipment: [{ type: "rigid_anchor_support" }] }) }),
-      );
-      expect(withoutRope.eligible).toBe(false);
-      expect(withoutRope.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+    test("12. ineligible without the ropes, without the anchor, and with a CLIMBING rope or a hand anchor instead", () => {
+      const cases: Array<[string, ReadonlyArray<{ type: string }>]> = [
+        ["anchor only", [{ type: "rope_anchor_point" }]],
+        ["ropes only", [{ type: "battle_rope" }]],
+        // The reason both atoms were made precise: a climbing rope and a
+        // hand-grip anchor used to satisfy this exercise, and no longer do.
+        ["climbing rope alone", [{ type: "rope" }]],
+        ["climbing rope + hand anchor", [{ type: "rope" }, { type: "rigid_anchor_support" }]],
+        ["hand anchor alone", [{ type: "rigid_anchor_support" }]],
+        ["unrelated equipment", [{ type: "heavy_bag" }, { type: "sled" }, { type: "towel" }, { type: "resistance_band" }]],
+        ["nothing at all", []],
+      ];
 
-      const withoutAnchor = checkExerciseEligibility(
-        BATTLE_ROPES,
-        makeValidInput({ environment: makeEnvironment({ availableEquipment: [{ type: "rope" }] }) }),
-      );
-      expect(withoutAnchor.eligible).toBe(false);
-      expect(withoutAnchor.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE")).toBe(true);
+      for (const [label, availableEquipment] of cases) {
+        const result = checkExerciseEligibility(
+          BATTLE_ROPES,
+          makeValidInput({
+            environment: makeEnvironment({ availableEquipment: availableEquipment as never }),
+          }),
+        );
+        expect(result.eligible, label).toBe(false);
+        expect(result.rejectionReasons.some((r) => r.code === "EQUIPMENT_UNAVAILABLE"), label).toBe(true);
+      }
     });
 
     test("13. no dependency on space, floor safety, jumping, throwing, a wall or a partner — none is documented", () => {
       const input = makeValidInput({
         environment: makeEnvironment({
-          availableEquipment: [{ type: "rope" }, { type: "rigid_anchor_support" }],
+          availableEquipment: [{ type: "battle_rope" }, { type: "rope_anchor_point" }],
           availableSpace: "very_limited",
           floorSafe: false,
           jumpingAllowed: false,
@@ -10283,19 +10294,33 @@ describe("Lot 7 — Conditionnement general — Exercise Requirements Model batc
       expect(SPRINT_INTERVALS.primaryAdaptation).toBe("conditioning");
     });
 
-    test("28. battle_ropes vs. rope_pull: both use the generic `rope` equipment atom, but only BATTLE_ROPES genuinely requires a rigid anchor", () => {
+    test("28. battle_ropes vs. rope_pull: they no longer share ANY equipment atom — battle_ropes was narrowed to its own rope and its own anchor concept", () => {
       const battleRopesEquipment = BATTLE_ROPES.requirements!.required
         .flatMap((clause) => clause.items)
         .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
         .map((atom) => atom.equipment);
-      expect(battleRopesEquipment).toEqual(["rope", "rigid_anchor_support"]);
+      expect(battleRopesEquipment).toEqual(["battle_rope", "rope_anchor_point"]);
 
       const ropePullEquipment = ROPE_PULL.requirements!.required
         .flatMap((clause) => clause.items)
         .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
         .map((atom) => atom.equipment);
       expect(ropePullEquipment).toEqual(["rope"]);
-      expect(ropePullEquipment).not.toContain("rigid_anchor_support");
+      expect(ropePullEquipment).not.toContain("rope_anchor_point");
+
+      // The whole point of the correction: no overlap at all, so neither
+      // exercise can ever be satisfied by the other's equipment.
+      expect(battleRopesEquipment.filter((atom) => ropePullEquipment.includes(atom))).toEqual([]);
+      expect(battleRopesEquipment).not.toContain("rope");
+
+      // `rigid_anchor_support` keeps its documented hand-grip-anchor scope and
+      // is untouched by this correction — dragon_flag still uses it.
+      expect(battleRopesEquipment).not.toContain("rigid_anchor_support");
+      const dragonFlagEquipment = DRAGON_FLAG.requirements!.required
+        .flatMap((clause) => clause.items)
+        .filter((atom): atom is Extract<typeof atom, { kind: "equipment" }> => atom.kind === "equipment")
+        .map((atom) => atom.equipment);
+      expect(dragonFlagEquipment).toContain("rigid_anchor_support");
 
       // BATTLE_ROPES documents anti_rotation bracing; ROPE_PULL's own pulling patterns do not.
       expect(BATTLE_ROPES.movementPatterns).toContain("anti_rotation");

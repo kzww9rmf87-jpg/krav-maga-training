@@ -253,7 +253,24 @@ export type EquipmentType =
   | "slam_ball"
   | "rigid_anchor_support"
   | "knee_protection_pad"
-  | "farmer_handle";
+  | "farmer_handle"
+  // A battle rope specifically, not the generic `rope` used by ROPE_CLIMB
+  // and ROPE_PULL. Added when BATTLE_ROPES became prescriptible, replacing
+  // the `rope` value its own block comment already flagged as a MODEL
+  // LIMITATION ("`rope` is used as the closest existing honest generic
+  // value ... openly flagged"). The distinction is real and safety-bearing:
+  // a climbing rope is anchored overhead and climbed, a battle rope is
+  // anchored at floor level and driven in waves. Matching is exact, so a
+  // climbing rope no longer satisfies BATTLE_ROPES, and `rope` stays in the
+  // vocabulary for the two exercises that genuinely mean it.
+  | "battle_rope"
+  // The fixed structural point battle ropes are anchored to. Deliberately
+  // NOT `rigid_anchor_support`, whose scope this catalog documents twice as
+  // a HAND-GRIP anchor (Dragon Flag's "Secure overhead or behind-head hand
+  // anchor"; NORDIC_HAMSTRING_CURL's own "`rigid_anchor_support`'s own
+  // established hand-grip-anchor scope"). A rope anchor is never gripped by
+  // the athlete — reusing that value would be an alias, not a match.
+  | "rope_anchor_point";
 
 export type ExerciseComplexity =
   | "very_low"
