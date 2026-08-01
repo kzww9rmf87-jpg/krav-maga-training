@@ -18,6 +18,34 @@
  * `serializeEngineRunResult.ts`'s module comment.
  *
  * This file contains no decision logic. It defines the wire contract only.
+ *
+ * CONTRACT EVOLUTION POLICY, made explicit here rather than left implicit.
+ * The split above already encodes it, and this note only states it:
+ *
+ * - SHAPES are re-declared under `Cas*V1` names, which freezes them. Adding,
+ *   removing or retyping a field of any `Cas*V1` interface is a BREAKING
+ *   change and requires `cas-session-output.v2`.
+ * - CLOSED VOCABULARIES are imported, not re-declared, precisely so that
+ *   they track the engine. Adding a member to one is an ADDITIVE change and
+ *   stays within v1. Removing or renaming a member is breaking and requires
+ *   v2.
+ *
+ * The consequence for consumers is stated plainly: a `Cas*V1` object always
+ * has the fields this file declares, but a vocabulary-typed field may carry
+ * a member that did not exist when the consumer was written. Consumers must
+ * therefore tolerate unknown vocabulary members rather than exhaustively
+ * switching on them. This is the price of importing rather than freezing,
+ * and it was the deliberate trade: a vocabulary carries no computation to
+ * protect, so pinning it would only force a version bump every time the
+ * exercise library documents a new unit, category or method.
+ *
+ * Additions are never silent: each one names its version, its date and its
+ * reason below.
+ *
+ * v1 additive history:
+ * - 2026-08-01 — `VolumeInterpretation` gains `climbs` and `hand_pulls`, so
+ *   a rope ascent and a hand-over-hand pull can be counted as themselves
+ *   instead of being flattened into `total_repetitions`.
  */
 
 import type {

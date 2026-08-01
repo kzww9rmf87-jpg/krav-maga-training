@@ -119,7 +119,27 @@ export type VolumeInterpretation =
   | "combined_external_load"
   | "system_load"
   | "round_total"
-  | "interval_total";
+  | "interval_total"
+  // Grip movement units. Both are TOTALS, never per-side counts, and both
+  // name what is counted rather than leaving a consumer to infer it from the
+  // exercise id.
+  //
+  // `climbs` — the number of COMPLETE ascents prescribed. An ascent is a
+  // bout composed of many hand transitions; it is not a repetition of a
+  // discrete movement, not a per-side count, not a distance and not a
+  // duration. The climbed height is a separate documented variable and is
+  // never folded into this count.
+  //
+  // `hand_pulls` — the number of hand-over-hand pulls prescribed. One pull
+  // is one hand's action, not one execution of a whole movement, which is
+  // exactly why it cannot share `total_repetitions` with a pull-up.
+  //
+  // Neither is interchangeable with the other, and neither may be converted
+  // into metres, seconds or intervals. See 65_GRIP/00_OVERVIEW.md's
+  // "Volume Metrics" rule: incompatible volume measures must not be
+  // combined without context.
+  | "climbs"
+  | "hand_pulls";
 
 export interface PrescriptionLaterality {
   laterality: ExerciseLaterality;
