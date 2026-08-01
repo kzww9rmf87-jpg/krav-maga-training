@@ -895,8 +895,12 @@ End the hold when:
 profileId: timed_isometric_grip_v0_1
 moduleId: grip
 methodId: timed_isometric_sets
-exerciseRole: primary, secondary, accessory, or robustness
+exerciseRole: secondary, accessory, or robustness
 ```
+
+This role list previously opened with `primary`, which `timed_isometric_sets` does not support (`31_TRAINING_METHOD_CATALOGUE.md`, Method 2 — Timed Isometric Sets: secondary, accessory, robustness, corrective, recovery). Any entry declaring it failed `validateMethodModuleRoleContract` with `METHOD_ROLE_INCOMPATIBLE` before a single number was read. `primary` is removed rather than added to the method, because the Grip module's own primary role is already served by `distance_carry_sets` (Table Group 5).
+
+`corrective` and `recovery` are NOT added merely because the method permits them: this table documents an intensity band of RPE 7–9, which is not corrective or recovery work.
 
 ### Volume
 
@@ -917,6 +921,12 @@ Normal:
 RPE 7–9
 ```
 
+Normal:
+
+```text
+RPE 8
+```
+
 or an exercise-specific external-load rule.
 
 ### Rest
@@ -931,6 +941,14 @@ Normal:
 90 seconds
 ```
 
+### Tempo
+
+```text
+type: isometric_hold
+```
+
+This section was missing. `timed_isometric_sets` declares `tempoPolicy: required`, so a profile without a tempo rule can never prescribe — `resolveTempo` fails with `TEMPO_REQUIRED_BUT_UNDOCUMENTED` on every input, exactly as `conditioning_short_intervals_v0_1` fails on intensity. The value is the same one ISO-CORE-ROBUSTNESS already documents in this table group, and it carries no number: a timed isometric set IS an isometric hold, and `isometric_hold` is the only one of the method's two permitted tempo types that needs no additional movement intent.
+
 ### Minimum Dose
 
 ```text
@@ -941,6 +959,12 @@ Normal:
 
 ```text
 4 sets × 30 seconds
+```
+
+### Exercise-Specific Narrowing
+
+```text
+plate_pinch:  sets 3–4   hold 15–30 s   rest 90–150 s
 ```
 
 ---

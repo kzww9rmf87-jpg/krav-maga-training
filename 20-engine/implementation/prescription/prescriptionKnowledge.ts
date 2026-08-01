@@ -435,6 +435,81 @@ export const NUMERICAL_PRESCRIPTION_PROFILES = [
     sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
   },
   {
+    // Profile ISO-GRIP (Table Group 4 — Timed Isometrics). The Grip
+    // module's isometric half: Table Group 5 covers grip work prescribed as
+    // a loaded carry (`distance_carry_strength_grip_v0_1`), this one covers
+    // grip work prescribed as a timed hold.
+    //
+    // Documented in the canonical table since V0.1 but never implemented,
+    // because the table as written could not produce a prescription. Two
+    // defects were found and corrected in the table itself before this
+    // profile was written:
+    //   - its role list opened with `primary`, which
+    //     `timed_isometric_sets` does not support — every entry declaring it
+    //     failed `METHOD_ROLE_INCOMPATIBLE` before any number was read;
+    //   - it documented no tempo at all, while the method declares
+    //     `tempoPolicy: required` — `resolveTempo` would have failed with
+    //     `TEMPO_REQUIRED_BUT_UNDOCUMENTED` on every input, the same class
+    //     of non-executability `conditioning_short_intervals_v0_1` still has
+    //     on intensity.
+    //
+    // The table's corrected role list is "secondary, accessory, or
+    // robustness"; this profile encodes the first-listed, the same
+    // convention `repeated_sprint_intervals_v0_1` uses for its own
+    // multi-role table entry. An accessory or robustness variant would be a
+    // separate profile.
+    //
+    // `requiresExerciseSpecificLoadRule` mirrors the table's "or an
+    // exercise-specific external-load rule", exactly as
+    // `distance_carry_strength_grip_v0_1` mirrors the same clause: RPE
+    // resolves normally, and no absolute or body-mass load is ever invented
+    // from a plate weight the table does not give.
+    profileId: "timed_isometric_grip_v0_1",
+    version: "0.1",
+    moduleId: "grip",
+    methodId: "timed_isometric_sets",
+    exerciseRole: "secondary",
+    volume: {
+      structure: "sets_duration",
+      sets: integerRange(2, 3, 4),
+      repetitions: null,
+      duration: {
+        type: "fixed_range",
+        range: durationRange(10, 20, 30),
+        scope: "per_set",
+      },
+      distance: null,
+      rounds: null,
+      workIntervals: null,
+    },
+    intensity: [
+      {
+        type: "rpe",
+        min: 7,
+        normal: 8,
+        max: 9,
+        unit: "rpe_scale_1_10",
+        referenceType: null,
+        sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_INTENSITY_MODEL],
+      },
+    ],
+    rest: {
+      scope: "between_sets",
+      seconds: integerRange(60, 90, 150),
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    tempo: {
+      type: "isometric_hold",
+      globalIntent: null,
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    minimumDose: { ...emptyDose(), sets: 2, durationSeconds: 10 },
+    maximumDose: { ...emptyDose(), sets: 4, durationSeconds: 30 },
+    requiresExerciseSpecificLoadRule: true,
+    requiresSportSpecificSubtype: false,
+    sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
+  },
+  {
     profileId: "distance_carry_strength_grip_v0_1",
     version: "0.1",
     moduleId: "grip",
