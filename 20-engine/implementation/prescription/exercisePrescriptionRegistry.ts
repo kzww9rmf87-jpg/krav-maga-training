@@ -70,6 +70,10 @@ const SOURCE_METHOD_CATALOGUE = "31_TRAINING_METHOD_CATALOGUE_V0_1";
 const SOURCE_MODULE_PROFILES = "32_MODULE_PRESCRIPTION_PROFILES_V0_1";
 const SOURCE_NUMERICAL_TABLES = "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1";
 const SOURCE_CAPABILITIES_DOC = "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1";
+// Cited by an entry that narrows a shared profile to ONE of its documented
+// intensity readings: the narrowing rests on the exercise chapter and on
+// this vocabulary chapter jointly, so both are declared.
+const SOURCE_INTENSITY_MODEL = "26_INTENSITY_MODEL_V0_1";
 
 const SOURCE_BENCH_PRESS = "50-exercises/07_BENCH_PRESS";
 const SOURCE_BACK_SQUAT = "50-exercises/01_BACK_SQUAT";
@@ -283,6 +287,11 @@ export const PILOT_EXERCISE_IDS = [
   // documented Walking Variation through the carry profile; this entry
   // covers its static hold.
   "plate_pinch",
+  // Registry Lot 11 — first entry on the `heavy_bag` equipment capability,
+  // and the first consumer of Table Group 14's own INT-POWER profile. Its
+  // documented interval structure fits no Table Group 8 profile, which is
+  // why that table group was written before this entry existed.
+  "heavy_bag_power_intervals",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -9116,6 +9125,307 @@ const platePinchEntry: ExercisePrescriptionRegistryEntry = {
 // -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
+// Heavy Bag Power Intervals
+// Source: 50-exercises/27_HEAVY_BAG_POWER_INTERVALS
+//   - Primary Classification: "Combat-Specific Conditioning" (module:
+//     conditioning), matching the knowledge base's own resolution.
+//   - Equipment Requirements: "Required: Heavy Bag, Gloves, Hand Wraps,
+//     Timer. Optional: Heart Rate Monitor, Punch Sensor, Velocity Sensor."
+//   - Loading Profile: "Typical Duration: 3-8 rounds. Work: 10-30 seconds.
+//     Recovery: 30-90 seconds."
+//   - Physiological Profile: "Primary Energy System: ATP-PC, Anaerobic
+//     Glycolysis. Typical Work Interval: 5-30 seconds. Typical Recovery:
+//     30-120 seconds."
+//   - Velocity Profile: "Maximum Intent. Maximum Speed. Maximum Power.
+//     Velocity-Based Training Compatible: No."
+//   - Coaching Cues: "Generate force from the floor.", "Maintain technical
+//     precision.", "Strike with maximal intent.", "Recover actively.", "Do
+//     not sacrifice technique for fatigue."
+//   - Common Errors: Arm Punching, Poor Hip Rotation, Loss of Guard,
+//     Technical Breakdown, Excessive Tension.
+//   - Safety Profile: Primary Risks — Poor Wrist Alignment, Poor Shoulder
+//     Mechanics, Excessive Volume, Loss of Technique Under Fatigue.
+//   - Contraindications: Acute Hand / Wrist / Shoulder Injury, Acute
+//     Concussion.
+//   - Performance Indicators: Average Power, Peak Power, Strike Count,
+//     Strike Density, Heart Rate, Power Drop-Off, Technical Quality,
+//     Recovery Rate.
+//   - Philosophy: "Strength developed in the weight room must eventually
+//     become combat performance."
+// Method: work_rest_intervals / conditioning / conditioning
+//
+// EXPLICIT PROFILE SELECTION: `power_intervals_v0_1` (Table Group 14 /
+// INT-POWER: 3/7/12 intervals, 10/25/40s per interval, 20/55/90s between
+// intervals, `impact_intent: maximal_safe_power` then `movement_intent:
+// explosive`, no tempo). The (conditioning, work_rest_intervals,
+// conditioning) triple is now shared by FOUR profiles and never resolves
+// implicitly.
+//
+// Why a new table group and not one of the three that already existed —
+// each is arithmetically EMPTY against this fiche, on a dimension the
+// registry may only narrow, never widen:
+//   - `conditioning_short_intervals_v0_1` (INT-SHORT): 10-20 intervals
+//     against this fiche's "3-8 rounds" — no intersection. It also
+//     documents no encodable intensity and is refused at validation time
+//     (`NON_EXECUTABLE_NUMERICAL_PROFILE`), so it could not have served
+//     this entry even had the counts overlapped;
+//   - `conditioning_long_intervals_v0_1` (INT-LONG, used by
+//     rowerg_intervals): 60-180s efforts against "Work: 10-30 seconds" —
+//     no intersection, and an RPE-controlled aerobic envelope this
+//     fiche's ATP-PC energy system and "Maximum Power" contradict;
+//   - `repeated_sprint_intervals_v0_1` (INT-REPEATED-SPRINT, used by
+//     sprint_intervals): 3-8s efforts against "10-30 seconds" — no
+//     intersection either, in the opposite direction.
+// Table Group 14 was written first, from the family this fiche shares
+// with battle_ropes, and this entry narrows that envelope. It was NOT
+// written around this single exercise.
+//
+// Why NOT Table Group 9 / COMBAT-CONDITIONING-ROUNDS, despite this
+// fiche's own word "rounds": that profile refuses to prescribe without a
+// documented sport-specific subtype (`requiresSportSpecificSubtype`), and
+// its 60-180s round duration is empty against 10-30s. A combat round is a
+// sport-defined competition period; a 10-30 second maximal effort with
+// incomplete recovery is an interval — which this fiche's own title
+// ("Power INTERVALS") and Physiological Profile ("Typical Work INTERVAL")
+// both say directly.
+//
+// EQUIPMENT — one id declared, one documented gap, one deliberate
+// exclusion:
+//   - `heavy_bag` is added to the equipment vocabulary and declared. It is
+//     aligned 1:1 with the knowledge base's own pre-existing `heavy_bag`
+//     `EquipmentType` member and with 33_EXERCISE_PRESCRIPTION_
+//     CAPABILITIES' own "Exercise Family 12 — Combat Bag and Pad Work"
+//     required list ("heavy bag"). Not an equivalence group;
+//   - "Gloves" and "Hand Wraps" are genuinely Required by this fiche and
+//     "gloves" is named by Family 12 as well — but the knowledge base
+//     encodes BOTH, collectively, as a single flagged `"other"` placeholder
+//     shared with four other exercises (dip's Dip Belt, chest_supported_
+//     row's Machine, landmine_press's Landmine Attachment,
+//     nordic_hamstring_curl's Nordic Bench). There is no
+//     `requiredEquipmentCapabilities` id that could mirror `"other"`
+//     honestly, and replacing that placeholder for this exercise alone
+//     would split a doctrine the knowledge base applies uniformly.
+//     DOCUMENTED CONSEQUENCE, flagged rather than silently dropped:
+//     eligibility IS still enforced — `checkExerciseEligibility` refuses
+//     this exercise unless the athlete's environment supplies the `other`
+//     atom — and the requirement is restated at critical priority in the
+//     setup instruction. What is missing is a SECOND, prescription-layer
+//     gate, not the gate itself. Giving hand protection its own capability
+//     id needs a knowledge-base change across all five placeholder users,
+//     not a local exception here;
+//   - "Timer" is excluded, matching the knowledge base's own recorded
+//     reasoning: a timer is a programming tool for structuring intervals,
+//     not equipment the athlete interacts with during the movement. The
+//     Optional heart-rate monitor, punch sensor and velocity sensor are
+//     excluded too, matching the established discipline of never promoting
+//     an Optional item to Required.
+//
+// VOLUME AND REST — two documented sources, and the narrower one governs.
+// The Loading Profile ("3-8 rounds", "Work: 10-30 seconds", "Recovery:
+// 30-90 seconds") is the prescription section; the Physiological Profile's
+// wider "5-30 seconds" / "30-120 seconds" is descriptive physiology. The
+// same precedent already applied to rowerg_intervals and sprint_intervals
+// is applied here, and it happens to be the safe direction in both
+// dimensions. This fiche's "rounds" is read as the interval count — not as
+// a `rounds` volume field — because `work_rest_intervals` forbids that
+// field outright and this fiche's own title and Physiological Profile
+// name the same quantity an INTERVAL. That is a naming resolution
+// grounded in this fiche's own two other words for the dimension, not the
+// unit conversion this registry refuses elsewhere ("repetitions" onto
+// intervals for sprint_intervals, "rounds" onto "sets" for
+// footwork_drills/shadow_boxing/sprawl).
+//   - intervals: "3-8" narrows the profile's own [3, 12];
+//   - work duration: "10-30 seconds" narrows the profile's own [10, 40];
+//   - rest: "30-90 seconds" narrows the profile's own [20, 90] floor from
+//     20 to 30. Declared, unlike sprint_intervals' wider documented
+//     recovery, which had nothing to narrow.
+//
+// INTENSITY. `impact_intent: maximal_safe_power` only, declared through an
+// explicit `exerciseIntensityConstraints` narrowing rather than left to
+// documented rule order. The profile's second rule (`movement_intent:
+// explosive`) is deliberately excluded: `explosive` is calibrated for this
+// family's non-impact member and would UNDERSTATE this fiche, whose
+// Velocity Profile says "Maximum Intent. Maximum Speed. Maximum Power."
+// 26_INTENSITY_MODEL sanctions the impact reading directly — "bag work may
+// support technical effort or impact intent" — and `maximal_safe_power` is
+// the impact vocabulary's maximal value.
+// Average power, peak power, strike count, strike density, heart rate and
+// power drop-off are all named by this fiche as Performance INDICATORS,
+// never as prescribed targets, and its own "Velocity-Based Training
+// Compatible: No" forbids reading the velocity sensor as one. No number is
+// derived from any of them. A qualitative category rule carries no range,
+// so the prescribed intent is identical under reduced, normal and high:
+// the range context moves intervals, work duration and rest — never the
+// instruction to strike at maximal safe power.
+//
+// TEMPO. `global_intent` is declared because Family 12 documents it for
+// this family ("Formal phase timing is unsupported"), but
+// `work_rest_intervals` forbids tempo and the profile carries none, so the
+// resolved tempo is `null`.
+//
+// LATERALITY. `bilateral` with `interval_total`: striking alternates sides
+// continuously, but this fiche prescribes no per-side allocation anywhere
+// — no "per side" figure exists in its Loading Profile — and the knowledge
+// base's own `unilateral: false` says the same. The whole interval is one
+// prescribed quantity, not two halves.
+//
+// STOP CONDITIONS — the six categories `work_rest_intervals` requires, no
+// more. Family 12's own "Required Stop Conditions" additionally name
+// equipment failure, an impact-limit threshold and unsafe alignment.
+// Factories exist for the first two (`equipmentFailureCondition`,
+// `impactLimitCondition`) and both are genuinely plausible here (a bag
+// tearing from its mount; the fiche's own "Poor Wrist Alignment" and
+// "Excessive Volume" risks) — but no module or method contract requires
+// them, and this registry declares exactly what the method demands, as
+// every preceding entry does. The documented gap is the same one already
+// recorded for rowerg_intervals and sprint_intervals: module-contract and
+// family-level stop-condition categories are enforced by no resolver
+// today. This fiche's alignment and impact risks are instead carried
+// where they are actionable — inside the technical-failure and
+// fatigue-limit descriptions below.
+// -----------------------------------------------------------------------------
+
+const SOURCE_HEAVY_BAG_POWER_INTERVALS = "50-exercises/27_HEAVY_BAG_POWER_INTERVALS";
+
+const heavyBagPowerIntervalsStopConditions: StopConditionDefinition[] = [
+  intervalPaceLossCondition({
+    conditionId: "heavy_bag_power_intervals_pace_loss",
+    description:
+      "Stop the interval if power output visibly drops — strike density falls, strikes lose speed, or the athlete can no longer strike with maximal intent. Power drop-off is this exercise's own documented performance indicator, and the objective is power expression, not accumulated volume.",
+    sourceRuleIds: [SOURCE_HEAVY_BAG_POWER_INTERVALS, SOURCE_METHOD_CATALOGUE],
+  }),
+  technicalFailureCondition({
+    conditionId: "heavy_bag_power_intervals_technical_failure",
+    description:
+      "Stop the interval on technical breakdown: arm punching instead of force generated from the floor, loss of hip rotation, a dropped guard, excessive tension, or wrist and shoulder alignment that can no longer be held. Technique is never sacrificed for fatigue.",
+    sourceRuleIds: [SOURCE_HEAVY_BAG_POWER_INTERVALS],
+  }),
+  fatigueLimitCondition({
+    conditionId: "heavy_bag_power_intervals_fatigue_limit",
+    description:
+      "Stop the exercise once accumulated fatigue prevents striking at maximal intent with sound mechanics. Excessive volume and loss of technique under fatigue are documented risks of this exercise, not a training stimulus.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_HEAVY_BAG_POWER_INTERVALS],
+  }),
+  acuteSymptomCondition({
+    conditionId: "heavy_bag_power_intervals_acute_symptom",
+    description:
+      "Stop immediately if an acute symptom appears at any point during the intervals or the recoveries, including any sign of concussion.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_HEAVY_BAG_POWER_INTERVALS],
+  }),
+  painCondition({
+    conditionId: "heavy_bag_power_intervals_pain",
+    description:
+      "Stop immediately if pain occurs, or in the presence of an acute hand, wrist or shoulder injury, or an acute concussion.",
+    sourceRuleIds: [SOURCE_HEAVY_BAG_POWER_INTERVALS],
+  }),
+  completionCondition({
+    conditionId: "heavy_bag_power_intervals_completion",
+    description:
+      "Stop once the prescribed intervals and their per-interval duration are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const heavyBagPowerIntervalsInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "heavy_bag_power_intervals_setup",
+    "setup",
+    "Strike a securely mounted heavy bag. Hand wraps and gloves are required equipment for this exercise and must be worn before any striking begins — they are not optional protective gear. A timer structures the work and recovery intervals. Basic striking mechanics must be established before maximal power work; a heart-rate monitor, punch sensor and velocity sensor are optional.",
+    "critical",
+    true,
+    SOURCE_HEAVY_BAG_POWER_INTERVALS,
+  ),
+  makeInstruction(
+    "heavy_bag_power_intervals_execution",
+    "execution",
+    "Generate force from the floor, maintain technical precision and strike with maximal intent. Recover actively between intervals. Do not sacrifice technique for fatigue: no arm punching, no loss of hip rotation, no dropped guard.",
+    "high",
+    true,
+    SOURCE_HEAVY_BAG_POWER_INTERVALS,
+  ),
+];
+
+const heavyBagPowerIntervalsEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "heavy_bag_power_intervals",
+  moduleId: "conditioning",
+  role: "conditioning",
+  explicitMethodId: "work_rest_intervals",
+  numericalProfileId: "power_intervals_v0_1",
+  capabilities: {
+    exerciseId: "heavy_bag_power_intervals",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["work_rest_intervals"],
+    supportedVolumeStructures: ["intervals"],
+    // See the block comment above for why `movement_intent` is not claimed
+    // even though Family 12 and the selected profile both offer it.
+    supportedIntensityTypes: ["impact_intent"],
+    preferredIntensityTypes: ["impact_intent"],
+    // Family 12's own list is "impact_equipment", "partner_resistance",
+    // "locomotion_only". Only the first applies: this exercise strikes a
+    // bag, has no partner, and is not a displacement drill.
+    supportedLoadingModes: ["impact_equipment"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["interval_total"],
+    // Exactly the three tags `work_rest_intervals` requires.
+    capabilityTags: ["interval_structure", "timed_effort", "technical_quality_observation"],
+    // The one Required item this vocabulary can express exactly. Gloves and
+    // hand wraps stay gated by the knowledge base alone — see the block
+    // comment above.
+    requiredEquipmentCapabilities: ["heavy_bag"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: [
+      "heavy_bag_power_intervals_setup",
+      "heavy_bag_power_intervals_execution",
+    ],
+    requiredStopConditionIds: [
+      "heavy_bag_power_intervals_pace_loss",
+      "heavy_bag_power_intervals_technical_failure",
+      "heavy_bag_power_intervals_fatigue_limit",
+      "heavy_bag_power_intervals_acute_symptom",
+      "heavy_bag_power_intervals_pain",
+      "heavy_bag_power_intervals_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_heavy_bag_power_intervals",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_HEAVY_BAG_POWER_INTERVALS, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["impact_intent"],
+  preferredIntensityType: "impact_intent",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: null,
+  instructionDefinitions: heavyBagPowerIntervalsInstructions,
+  stopConditionDefinitions: heavyBagPowerIntervalsStopConditions,
+  // "# Loading Profile — Typical Duration: 3-8 rounds. Work: 10-30
+  // seconds", narrowing the profile's own [3, 12] intervals and [10, 40]
+  // seconds. See the block comment above for why the Loading Profile
+  // governs over the Physiological Profile's wider figures, and why
+  // "rounds" is read here as the interval count.
+  exerciseDoseConstraints: {
+    minimumDose: { sets: null, repetitions: null, durationSeconds: 10, distanceMeters: null, rounds: null, workIntervals: 3 },
+    maximumDose: { sets: null, repetitions: null, durationSeconds: 30, distanceMeters: null, rounds: null, workIntervals: 8 },
+    sourceRuleIds: [SOURCE_HEAVY_BAG_POWER_INTERVALS],
+  },
+  // Narrows the shared profile to this fiche's single documented intensity
+  // reading. See the block comment above.
+  exerciseIntensityConstraints: {
+    allowedIntensityTypes: ["impact_intent"],
+    rangeConstraints: [],
+    sourceRuleIds: [SOURCE_HEAVY_BAG_POWER_INTERVALS, SOURCE_INTENSITY_MODEL],
+  },
+  // "# Loading Profile — Recovery: 30-90 seconds", raising the profile's
+  // own 20-second floor to 30. The ceiling already matches.
+  exerciseRestConstraints: {
+    scope: "between_intervals",
+    minimumSeconds: 30,
+    maximumSeconds: 90,
+    sourceRuleIds: [SOURCE_HEAVY_BAG_POWER_INTERVALS],
+  },
+  sourceRuleIds: [SOURCE_HEAVY_BAG_POWER_INTERVALS, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 
 /**
  * Statically typed as `Record<PilotExerciseId, ...>` — TypeScript refuses
@@ -9204,6 +9514,8 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   dead_bug: deadBugEntry,
   hanging_leg_raise: hangingLegRaiseEntry,
   plate_pinch: platePinchEntry,
+
+  heavy_bag_power_intervals: heavyBagPowerIntervalsEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

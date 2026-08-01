@@ -86,9 +86,9 @@ function prescribe(rangeContext: PrescriptionExecutionContext["rangeContext"] = 
 // -----------------------------------------------------------------------------
 
 describe("plate_pinch — registry, knowledge base, profile and equipment counts", () => {
-  test("1. the registry grew from 64 to exactly 65 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(65);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(65);
+  test("1. the registry grew from 64 to exactly 65 entries; a later lot added heavy_bag_power_intervals, bringing the total to 66", () => {
+    expect(PILOT_EXERCISE_IDS).toHaveLength(66);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(66);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -102,8 +102,8 @@ describe("plate_pinch — registry, knowledge base, profile and equipment counts
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID)).toHaveLength(1);
   });
 
-  test("4. the equipment vocabulary stays at 25 — this lot added no identifier", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(25);
+  test("4. the equipment vocabulary stayed at 25 for this lot — the later heavy_bag_power_intervals lot added `heavy_bag`, bringing it to 26", () => {
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(26);
     expect(isEquipmentCapabilityId("plates")).toBe(true);
   });
 
@@ -139,8 +139,14 @@ describe("plate_pinch — registry, knowledge base, profile and equipment counts
       "rowerg_intervals", "sprint_intervals", "ab_wheel", "dead_bug", "hanging_leg_raise",
     ] as const;
 
+    // Ids added by lots AFTER this one, listed explicitly so this test keeps
+    // proving that plate_pinch was the only exercise this lot added.
+    const ADDED_BY_LATER_LOTS = ["heavy_bag_power_intervals"] as const;
+
     expect(PREVIOUS_IDS).toHaveLength(64);
-    expect([...PREVIOUS_IDS, EXERCISE_ID].sort()).toEqual(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort());
+    expect([...PREVIOUS_IDS, EXERCISE_ID, ...ADDED_BY_LATER_LOTS].sort()).toEqual(
+      Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort(),
+    );
   });
 });
 
@@ -729,7 +735,10 @@ describe("plate_pinch — determinism, non-mutation and non-regression", () => {
       confidence: "validated" as const,
     };
 
-    const previousIds = PILOT_EXERCISE_IDS.filter((id) => id !== EXERCISE_ID);
+    // The 64 entries that predate this lot: everything except this lot's own
+    // entry and the ids added by later lots, each covered by its own file.
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "heavy_bag_power_intervals"];
+    const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(64);
 
     for (const id of previousIds) {
@@ -808,7 +817,7 @@ describe("plate_pinch — determinism, non-mutation and non-regression", () => {
 
     // No equipment identifier was added, and exactly one profile was —
     // the canonical ISO-GRIP, which now has a consumer.
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(25);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(26);
     expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(18);
     expect(getNumericalPrescriptionProfileById(PROFILE_ID)!.sourceRuleIds).toEqual([
       "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",

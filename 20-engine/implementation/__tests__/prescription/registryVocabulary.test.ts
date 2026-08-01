@@ -140,8 +140,9 @@ describe("registryVocabulary — equipment capabilities", () => {
     // +2 for medicine_ball/wall (an earlier lot), +1 for dip_bars (Registry Lot 1 —
     // Strength immediate), +1 for mat (Registry Lot 3 — Movement immediate),
     // +1 for rowing_ergometer (Registry Lot 5 — Conditioning intervals),
-    // +1 for ab_wheel (Registry Lot 7 — Core repetition work).
-    expect(EQUIPMENT_CAPABILITY_IDS.length).toBe(PREVIOUSLY_EXISTING_IDS.length + 2 + 1 + 1 + 1 + 1);
+    // +1 for ab_wheel (Registry Lot 7 — Core repetition work),
+    // +1 for heavy_bag (Registry Lot 11 — Combat bag power intervals).
+    expect(EQUIPMENT_CAPABILITY_IDS.length).toBe(PREVIOUSLY_EXISTING_IDS.length + 2 + 1 + 1 + 1 + 1 + 1);
   });
 
   test("an unknown equipment identifier is still rejected after the addition", () => {
@@ -467,6 +468,12 @@ describe("registryVocabulary — carry loading modes corrected to match document
       // Registry Lot 10 — Grip isometric hold. "Equipment: Weight Plates"
       // — the load is the implement itself.
       plate_pinch: ["plate"],
+      // Registry Lot 11 — Combat bag power intervals. The only entry using
+      // "impact_equipment", per 33_EXERCISE_PRESCRIPTION_CAPABILITIES.md's
+      // own "Exercise Family 12 — Combat Bag and Pad Work". The family's
+      // other two modes (partner_resistance, locomotion_only) do not apply:
+      // there is no partner and this is not a displacement drill.
+      heavy_bag_power_intervals: ["impact_equipment"],
     };
     const CORRECTED_IDS = ["pinch_carry", "sandbag_carry", "zercher_carry"];
 
@@ -483,8 +490,8 @@ describe("registryVocabulary — carry loading modes corrected to match document
   });
 
   test("7. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(65);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(65);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(66);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(66);
   });
 
   test("8. every retained value (plate, sandbag, barbell) is a known, documented LoadingMode", () => {
@@ -597,12 +604,12 @@ describe("registryVocabulary — pinch_carry represents only the Bilateral Varia
     for (const [id, text] of Object.entries(OTHER_ENTRY_FIRST_INSTRUCTION)) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id as PilotExerciseId].instructionDefinitions[0].text).toBe(text);
     }
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(65);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(66);
   });
 
   test("9. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(65);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(65);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(66);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(66);
   });
 
   test("10. explicitMethodId, supportedMethodIds, supportedVolumeStructures and stop conditions are unchanged", () => {
@@ -718,6 +725,10 @@ const DOSE_NARROWING_EXCEPTIONS = [
   // and hold duration (15-30s) from its own Strength-Endurance
   // prescription.
   "plate_pinch",
+  // Registry Lot 11 — Combat bag power intervals: heavy_bag_power_intervals
+  // narrows the interval count (3-8) and the work duration (10-30s) from its
+  // own Loading Profile, against power_intervals_v0_1's own [3, 12] / [10, 40].
+  "heavy_bag_power_intervals",
 ] as const;
 
 describe("registryVocabulary — exerciseDoseConstraints", () => {
@@ -728,7 +739,7 @@ describe("registryVocabulary — exerciseDoseConstraints", () => {
       }
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseDoseConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(65);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(66);
   });
 
   test("tibialis_raise, rotator_cuff_training, soleus_raise, copenhagen_plank, hip_thrust and barbell_row narrow exerciseDoseConstraints; wrist_strengthening and chin_up do not", () => {
@@ -753,6 +764,10 @@ const INTENSITY_CONSTRAINT_EXCEPTIONS = [
   ...ROBUSTNESS_EXERCISE_IDS,
   "weighted_pull_up",
   "neck_training",
+  // Registry Lot 11 — the first entry to narrow BOTH intensity and rest.
+  // power_intervals_v0_1 documents two intensity rules and this entry claims
+  // exactly one of them (impact_intent), rather than relying on rule order.
+  "heavy_bag_power_intervals",
 ] as const;
 
 /**
@@ -761,7 +776,19 @@ const INTENSITY_CONSTRAINT_EXCEPTIONS = [
  * Lot 8) is the first: its own "Recovery — 20-60 seconds" caps the Core
  * doctrine's 45-120s window at 60.
  */
-const REST_CONSTRAINT_EXCEPTIONS = ["dead_bug", "hanging_leg_raise", "plate_pinch"] as const;
+const REST_CONSTRAINT_EXCEPTIONS = [
+  "dead_bug",
+  "hanging_leg_raise",
+  "plate_pinch",
+  "heavy_bag_power_intervals",
+] as const;
+
+/**
+ * The subset of the above scoped BETWEEN SETS. heavy_bag_power_intervals is
+ * deliberately excluded: it is the first rest-narrowing entry on an INTERVAL
+ * structure, so its documented recovery is scoped `between_intervals`.
+ */
+const BETWEEN_SETS_REST_EXCEPTIONS = ["dead_bug", "hanging_leg_raise", "plate_pinch"] as const;
 
 describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestConstraints", () => {
   test("every pilot registry entry outside the known intensity-narrowing exceptions declares exerciseIntensityConstraints and exerciseRestConstraints as null", () => {
@@ -773,17 +800,31 @@ describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestCons
         expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).toBeNull();
       }
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(65);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(66);
   });
 
-  test("every rest-narrowing entry narrows rest alone — never intensity — and each declares its own documented window", () => {
+  test("every rest-narrowing entry declares its own documented window; the three set-based ones narrow rest alone, and the interval-based one is scoped between intervals", () => {
     for (const id of REST_CONSTRAINT_EXCEPTIONS) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).not.toBeNull();
-      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseIntensityConstraints).toBeNull();
-      // Every one is scoped between sets and sourced to its own chapter.
-      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints?.scope).toBe("between_sets");
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints?.sourceRuleIds).toHaveLength(1);
     }
+
+    for (const id of BETWEEN_SETS_REST_EXCEPTIONS) {
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseIntensityConstraints).toBeNull();
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints?.scope).toBe("between_sets");
+    }
+
+    // The one interval-structured entry: a different rest scope, and the only
+    // entry in the registry narrowing intensity AND rest together.
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.heavy_bag_power_intervals.exerciseRestConstraints).toEqual({
+      scope: "between_intervals",
+      minimumSeconds: 30,
+      maximumSeconds: 90,
+      sourceRuleIds: ["50-exercises/27_HEAVY_BAG_POWER_INTERVALS"],
+    });
+    expect(
+      EXERCISE_PRESCRIPTION_REGISTRY.heavy_bag_power_intervals.exerciseIntensityConstraints,
+    ).not.toBeNull();
 
     // The three windows are genuinely different, and each is the chapter's
     // own — not a shared default copied across entries.

@@ -564,12 +564,24 @@ describe("registry Lot 3 — distinctions from named precedents", () => {
     expect(footworkDrills.explicitMethodId).toBe("controlled_mobility_sets");
   });
 
-  test("shadow_boxing vs. heavy_bag_power_intervals: shadow_boxing requires no equipment and stays module movement; heavy_bag_power_intervals (module conditioning at the KB level) remains entirely unintegrated and is never conflated with shadow_boxing's own entry", () => {
+  test("shadow_boxing vs. heavy_bag_power_intervals: heavy_bag_power_intervals entered the registry in a later lot, and the two remain separate on every dimension this lot's entry fixed", () => {
     const shadowBoxing = EXERCISE_PRESCRIPTION_REGISTRY.shadow_boxing;
     const heavyBagKb = EXERCISE_KNOWLEDGE_BASE.find((e) => e.id === "heavy_bag_power_intervals")!;
     expect(shadowBoxing.capabilities.requiredEquipmentCapabilities).toEqual([]);
     expect(heavyBagKb.module).toBe("conditioning");
-    expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty("heavy_bag_power_intervals");
+
+    // Integrated by Registry Lot 11, on its own module, method, profile and
+    // equipment — nothing from this lot's shadow_boxing entry was reused or
+    // extended to it, and the distinction the original test guarded is now
+    // asserted directly rather than by absence.
+    const heavyBag = EXERCISE_PRESCRIPTION_REGISTRY.heavy_bag_power_intervals;
+    expect(heavyBag.moduleId).toBe("conditioning");
+    expect(shadowBoxing.moduleId).toBe("movement");
+    expect(heavyBag.explicitMethodId).toBe("work_rest_intervals");
+    expect(heavyBag.explicitMethodId).not.toBe(shadowBoxing.explicitMethodId);
+    expect(heavyBag.capabilities.requiredEquipmentCapabilities).toEqual(["heavy_bag"]);
+    expect(heavyBag.numericalProfileId).toBe("power_intervals_v0_1");
+    expect(shadowBoxing.numericalProfileId ?? null).not.toBe("power_intervals_v0_1");
   });
 
   test("technical_stand_up vs. turkish_get_up: technical_stand_up is a duration-based technical set (movement/controlled_mobility_sets, mat, no explicit per-side structure); turkish_get_up remains entirely unintegrated in the registry", () => {
@@ -610,8 +622,8 @@ describe("registry Lot 3 — registry validation and non-regression", () => {
   });
 
   test("the registry now contains exactly 57 active exercises (51 + 6 Lot 3 exercises)", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(65);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(65);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(66);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(66);
   });
 
   test("no historical entry was removed: all 51 previously-existing ids are still present", () => {

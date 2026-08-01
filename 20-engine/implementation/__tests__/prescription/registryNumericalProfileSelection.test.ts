@@ -131,6 +131,11 @@ const EXPLICIT_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
   // Registry Lot 10 — first entry on the Grip isometric triple, which is
   // also unique; the id is declared for the same auditability reason.
   plate_pinch: "timed_isometric_grip_v0_1",
+  // Registry Lot 11 — third entry on the ambiguous interval triple, and the
+  // first consumer of Table Group 14's own INT-POWER profile. Its triple is
+  // now shared by four profiles, so the explicit id is mandatory, not
+  // merely auditable.
+  heavy_bag_power_intervals: "power_intervals_v0_1",
 };
 
 /**
@@ -138,7 +143,11 @@ const EXPLICIT_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
  * dropping the explicit id must fail with NUMERICAL_PROFILE_AMBIGUOUS —
  * that is the whole reason they declare one.
  */
-const AMBIGUOUS_TRIPLE_EXERCISES: readonly string[] = ["rowerg_intervals", "sprint_intervals"];
+const AMBIGUOUS_TRIPLE_EXERCISES: readonly string[] = [
+  "rowerg_intervals",
+  "sprint_intervals",
+  "heavy_bag_power_intervals",
+];
 
 const historicalEntries = () =>
   Object.values(EXERCISE_PRESCRIPTION_REGISTRY).filter(

@@ -580,10 +580,10 @@ describe("registry validators — entries on the interval triple", () => {
     ).toBe(true);
   });
 
-  test("only the interval entries sit on the interval triple, each naming a different explicit profile — the 59 historical entries are untouched", () => {
+  test("only the interval entries sit on the interval triple, each naming a DIFFERENT explicit profile — the 59 historical entries are untouched", () => {
     const entries = Object.values(EXERCISE_PRESCRIPTION_REGISTRY);
 
-    expect(entries).toHaveLength(65);
+    expect(entries).toHaveLength(66);
 
     const onIntervalTriple = entries.filter(
       (entry) =>
@@ -593,15 +593,21 @@ describe("registry validators — entries on the interval triple", () => {
     );
 
     // The whole point of the triple being ambiguous: an entry sitting on it
-    // is only legal because it names its own profile — and two entries on
-    // the same triple can legitimately resolve to two different profiles.
+    // is only legal because it names its own profile — and three entries on
+    // the same triple legitimately resolve to three DIFFERENT profiles.
     const profileByExerciseId = Object.fromEntries(
       onIntervalTriple.map((entry) => [entry.exerciseId, entry.numericalProfileId ?? null]),
     );
     expect(profileByExerciseId).toEqual({
       rowerg_intervals: "conditioning_long_intervals_v0_1",
       sprint_intervals: "repeated_sprint_intervals_v0_1",
+      heavy_bag_power_intervals: "power_intervals_v0_1",
     });
+
+    // No two of them share a profile, and none picked the non-executable one.
+    const selected = Object.values(profileByExerciseId);
+    expect(new Set(selected).size).toBe(selected.length);
+    expect(selected).not.toContain("conditioning_short_intervals_v0_1");
 
     // Every other entry is still off the triple entirely.
     const intervalEntryIds = Object.keys(profileByExerciseId);

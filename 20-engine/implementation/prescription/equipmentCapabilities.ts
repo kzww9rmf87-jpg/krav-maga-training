@@ -108,6 +108,25 @@ export const EQUIPMENT_CAPABILITY_IDS = [
   // implementation". Building a `loaded_carry_implement`-style group from
   // them would contradict the source document.
   "ab_wheel",
+  // Added for the first combat bag entry (heavy_bag_power_intervals).
+  //
+  // Aligned 1:1 with the knowledge base's own pre-existing `heavy_bag`
+  // `EquipmentType` member — nothing was added to that union for this id.
+  // 33_EXERCISE_PRESCRIPTION_CAPABILITIES' own "Exercise Family 12 —
+  // Combat Bag and Pad Work" names "heavy bag" first in its Required
+  // Equipment Capabilities, and 27_HEAVY_BAG_POWER_INTERVALS names it
+  // first under "Required".
+  //
+  // NOT an equivalence group: a heavy bag is one apparatus. Family 12 also
+  // names pads, mitts and kick shields, but those are DIFFERENT implements
+  // serving different exercises, not interchangeable with a heavy bag, and
+  // no entry needs them yet — none is added speculatively.
+  //
+  // Family 12's "secure bag mounting" is deliberately NOT mirrored as a
+  // separate id: no fiche documents it as its own Required item, and the
+  // mounting requirement is carried where it is actionable, in the setup
+  // instruction.
+  "heavy_bag",
 ] as const;
 
 export type EquipmentCapabilityId = (typeof EQUIPMENT_CAPABILITY_IDS)[number];

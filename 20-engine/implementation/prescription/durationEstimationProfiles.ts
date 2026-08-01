@@ -252,6 +252,19 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // the change between hands. Copying the prescribed hold into
   // `perSetSeconds` would restate a prescription as an estimate.
   unresolvedProfile("plate_pinch", "sets_duration", ["50-exercises/65_GRIP/11_PLATE_PINCH.md"]),
+
+  // Registry Lot 11 — first combat bag entry.
+  //
+  // `"unresolved"`. This fiche quantifies the WORK and the RECOVERY
+  // ("Work: 10-30 seconds. Recovery: 30-90 seconds") and both are
+  // prescription targets, resolved by `resolveVolume` and `resolveRest`
+  // from the numerical profile — not estimates of how long the exercise
+  // takes. Nothing in the chapter gives the fields below: no time to wrap
+  // hands and put gloves on, no time to set up at the bag, no transition
+  // time, no technical margin. Deriving a session duration by summing
+  // work and recovery would understate it by exactly the preparation this
+  // exercise demands most.
+  unresolvedProfile("heavy_bag_power_intervals", "intervals", ["50-exercises/27_HEAVY_BAG_POWER_INTERVALS"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(
