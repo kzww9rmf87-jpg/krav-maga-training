@@ -1945,6 +1945,126 @@ ab_wheel:  sets 2–5 (matches the shared envelope exactly)   reps 3–12
 
 ---
 
+# Table Group 14 — Power Intervals
+
+Table Group 8 covers three general work-rest interval families: short aerobic-power intervals (INT-SHORT), long aerobic intervals (INT-LONG) and repeated sprints (INT-REPEATED-SPRINT). None of them covers a fourth, distinct structure the exercise library documents: a small number of short, maximal-INTENT efforts against a resistance the athlete drives, separated by incomplete recovery.
+
+That structure does not fit any existing group, and the gap is arithmetic rather than editorial:
+
+- INT-SHORT prescribes 10–20 intervals. The documented power-interval records run 3–12, so INT-SHORT's interval count does not intersect the shorter of them at all. INT-SHORT is also non-executable, documenting no encodable intensity;
+- INT-LONG prescribes 60–180 second efforts, which no power-interval record reaches;
+- INT-REPEATED-SPRINT prescribes 3–8 second efforts, which every power-interval record exceeds;
+- INT-SPRINT prescribes 120–240 seconds of rest, above the ceiling of every power-interval record.
+
+## Profile INT-POWER
+
+```text
+profileId: power_intervals_v0_1
+moduleId: conditioning
+methodId: work_rest_intervals
+exerciseRole: conditioning
+```
+
+This triple is shared with the three Table Group 8 profiles. Any registry entry on it must declare an explicit `numericalProfileId`; implicit resolution refuses the triple and never picks by array order.
+
+### Scope
+
+The power-interval family, as documented by the exercise library:
+
+```text
+Heavy Bag Power Intervals   3–8 rounds    work 10–30 s   recovery 30–90 s
+Battle Ropes                5–12 rounds   work 10–40 s   recovery 20–90 s
+```
+
+Both records share a Primary Classification of "Combat-Specific Conditioning", the same ATP-PC plus anaerobic-glycolysis energy systems, and a Velocity Profile containing "Maximum Intent". That shared framing — not any single exercise — is the scope of this group.
+
+Each member narrows the envelope below to its own documented bounds. The envelope is never widened per exercise.
+
+### Volume
+
+```text
+work intervals: 3–12
+work duration: 10–40 seconds per interval
+```
+
+Normal:
+
+```text
+7 intervals × 25 seconds
+```
+
+The bounds are the family's documented extremes, the same envelope-then-narrow construction Table Groups 11 and 13 already use. The normals follow the Integer Resolution convention above: 3–12 resolves to 7 (the lower integer of an even-width range, exactly as INT-REPEATED-SPRINT's own 3–8 resolves to 5), and 10–40 resolves to 25.
+
+### Intensity
+
+Two documented rules. Neither record states an RPE figure anywhere, and neither is asked to.
+
+```text
+impact_intent: maximal_safe_power
+```
+
+for power intervals whose resistance is struck. `26_INTENSITY_MODEL.md` sanctions this directly — "bag work may support technical effort or impact intent", and `impact_intent` "represents the intended force of striking, throwing, landing or contact". `maximal_safe_power` is the finite impact vocabulary's maximal value, mapped from a record's own "Maximum Power" exactly as INT-REPEATED-SPRINT maps "all-out" to `movement_intent: maximal_safe_speed`.
+
+```text
+movement_intent: explosive
+```
+
+for power intervals that are not impact work. `explosive` is a literal member of the documented movement-intent vocabulary and a literal word in the Battle Ropes Velocity Profile.
+
+An exercise claims whichever of the two its own record and capability family document — never both, and never one it does not document.
+
+Heart rate, pace, velocity and power output remain unencodable here for the same reason they are unencodable in INT-SHORT: `IntensityRangeRule` admits no unit or reference type for them. Records listing power meters or heart-rate monitors list them as optional instrumentation, never as a prescribed target.
+
+### Rest
+
+```text
+20–90 seconds
+```
+
+Normal:
+
+```text
+55 seconds
+```
+
+Between intervals. Bounds are the family's documented extremes; the normal follows Integer Resolution.
+
+### Tempo
+
+Forbidden. `work_rest_intervals` declares `tempoPolicy: forbidden`, so this group documents no tempo rule, exactly like the three Table Group 8 profiles.
+
+### Minimum Dose
+
+```text
+3 intervals × 10 seconds
+```
+
+### Maximum Dose
+
+```text
+12 intervals × 40 seconds
+```
+
+The maximum boundaries must not be combined automatically.
+
+### Limits of Use
+
+This profile must not be used for:
+
+- aerobic interval work — INT-LONG covers that, at RPE 7–9 over 60–180 second efforts;
+- repeated maximal sprints — INT-REPEATED-SPRINT covers those, at 3–8 seconds;
+- sport-specific combat rounds — Table Group 9 covers those, and COMBAT-CONDITIONING-ROUNDS explicitly refuses to prescribe without a sport-specific subtype.
+
+A record using the word "rounds" for its interval count does not by itself belong to Table Group 9. A combat round is a sport-defined competition period; a 10–40 second maximal effort with incomplete recovery is an interval, whatever the record calls it.
+
+### Exercise-Specific Narrowing
+
+```text
+heavy_bag_power_intervals:  intervals 3–8   work 10–30 s   rest 30–90 s
+```
+
+---
+
 # Exercise-Specific Numerical Requirement
 
 The generic profiles above are insufficient for final execution when an exercise requires:

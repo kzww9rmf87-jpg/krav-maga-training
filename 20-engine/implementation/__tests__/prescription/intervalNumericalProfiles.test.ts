@@ -42,6 +42,10 @@ const INTERVAL_PROFILE_IDS = [
   "conditioning_short_intervals_v0_1",
   "conditioning_long_intervals_v0_1",
   "repeated_sprint_intervals_v0_1",
+  // Table Group 14. A fourth profile joined the triple; every loop below now
+  // covers it, so the triple's ambiguity guarantees are asserted over the
+  // complete candidate set rather than a frozen subset of it.
+  "power_intervals_v0_1",
 ] as const;
 
 const resolverInput = (profileId: string) =>
@@ -58,7 +62,7 @@ const resolverInput = (profileId: string) =>
 // -----------------------------------------------------------------------------
 
 describe("Table Group 8 — documented profile values", () => {
-  test("exactly the three interval profiles exist, all on the interval triple, version 0.1", () => {
+  test("exactly the four interval profiles exist, all on the interval triple, version 0.1", () => {
     for (const profileId of INTERVAL_PROFILE_IDS) {
       const profile = getNumericalPrescriptionProfileById(profileId);
 
@@ -246,7 +250,7 @@ describe("executability of the interval profiles", () => {
 // -----------------------------------------------------------------------------
 
 describe("interval triple ambiguity", () => {
-  test("findDuplicateProfileTriples reports exactly the interval triple with the three profile ids", () => {
+  test("findDuplicateProfileTriples reports exactly the interval triple with the four profile ids", () => {
     const duplicates = findDuplicateProfileTriples();
 
     expect(duplicates).toHaveLength(1);
@@ -256,7 +260,7 @@ describe("interval triple ambiguity", () => {
     );
   });
 
-  test("implicit resolution on the triple fails with NUMERICAL_PROFILE_AMBIGUOUS and lists all three candidates", () => {
+  test("implicit resolution on the triple fails with NUMERICAL_PROFILE_AMBIGUOUS and lists all four candidates", () => {
     const result = resolveNumericalProfile({ ...INTERVAL_TRIPLE });
 
     expect(result.ok).toBe(false);
@@ -455,6 +459,7 @@ describe("resolveRest — interval profiles", () => {
       conditioning_short_intervals_v0_1: { reduced: 15, normal: 30, high: 60 },
       conditioning_long_intervals_v0_1: { reduced: 30, normal: 75, high: 120 },
       repeated_sprint_intervals_v0_1: { reduced: 20, normal: 40, high: 60 },
+      power_intervals_v0_1: { reduced: 20, normal: 55, high: 90 },
     } as const;
 
     for (const profileId of INTERVAL_PROFILE_IDS) {
@@ -531,10 +536,11 @@ describe("registry validators — entries on the interval triple", () => {
     }
   });
 
-  test("declaring either executable interval profile satisfies the validator", () => {
+  test("declaring any executable interval profile satisfies the validator", () => {
     for (const profileId of [
       "conditioning_long_intervals_v0_1",
       "repeated_sprint_intervals_v0_1",
+      "power_intervals_v0_1",
     ] as const) {
       const issues = validateRegistryEntry(syntheticIntervalEntry(profileId));
 

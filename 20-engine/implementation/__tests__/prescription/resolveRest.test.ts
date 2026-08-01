@@ -528,9 +528,9 @@ describe("resolveRest — controlled_mobility_sets_v0_1's documented zero-rest f
 // strictly positive rest minimum, or has no rest concept at all
 // (`not_applicable` / `seconds: null`) — neither path is reachable by
 // this guard change.
-describe("resolveRest — non-regression across all 17 numerical prescription profiles", () => {
-  test("exactly 17 profiles exist, and controlled_mobility_sets_v0_1 is the only one with a documented rest minimum of 0", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(17);
+describe("resolveRest — non-regression across all 18 numerical prescription profiles", () => {
+  test("exactly 18 profiles exist, and controlled_mobility_sets_v0_1 is the only one with a documented rest minimum of 0", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(18);
 
     const zeroFloorProfiles = NUMERICAL_PRESCRIPTION_PROFILES.filter(
       (profile) => profile.rest !== null && profile.rest.seconds !== null && profile.rest.seconds.min === 0,
@@ -542,11 +542,11 @@ describe("resolveRest — non-regression across all 17 numerical prescription pr
     const otherProfiles = NUMERICAL_PRESCRIPTION_PROFILES.filter(
       (profile) => profile.profileId !== "controlled_mobility_sets_v0_1",
     );
-    expect(otherProfiles).toHaveLength(16);
+    expect(otherProfiles).toHaveLength(17);
 
     for (const profile of otherProfiles) {
       for (const rangeContext of ["reduced", "normal", "high"] as const) {
-        // Explicit profile selection: the three interval profiles share one
+        // Explicit profile selection: the four interval profiles share one
         // triple, so implicit resolution would fail with
         // NUMERICAL_PROFILE_AMBIGUOUS — which is not what this test guards.
         const result = resolveRest({
@@ -577,7 +577,7 @@ describe("resolveRest — non-regression across all 17 numerical prescription pr
               ? profile.rest.seconds.normal
               : profile.rest.seconds.max;
 
-        // Every one of these 14 profiles documents a strictly positive
+        // Every one of these profiles documents a strictly positive
         // minimum — confirms none of them were ever exposed to the
         // REST_VALUE_INVALID defect in the first place.
         expect(profile.rest.seconds.min).toBeGreaterThan(0);

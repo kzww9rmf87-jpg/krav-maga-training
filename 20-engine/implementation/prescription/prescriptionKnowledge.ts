@@ -1091,6 +1091,82 @@ export const NUMERICAL_PRESCRIPTION_PROFILES = [
     requiresSportSpecificSubtype: false,
     sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
   },
+  {
+    // Profile INT-POWER, Table Group 14. Fourth profile on the shared
+    // (conditioning, work_rest_intervals, conditioning) triple: any entry
+    // using it MUST declare an explicit `numericalProfileId`, and implicit
+    // resolution refuses the triple rather than picking by array order.
+    //
+    // This is not a duplicate of Table Group 8. Each of the three existing
+    // interval profiles is arithmetically empty against the documented
+    // power-interval family: INT-SHORT prescribes 10-20 intervals (vs 3-12)
+    // and is itself non-executable; INT-LONG prescribes 60-180 s efforts;
+    // INT-REPEATED-SPRINT prescribes 3-8 s efforts; INT-SPRINT prescribes
+    // 120-240 s of rest. The gap is structural, not editorial.
+    //
+    // The envelope is the union of the family's two documented members
+    // (Heavy Bag Power Intervals 3-8 x 10-30 s / 30-90 s; Battle Ropes
+    // 5-12 x 10-40 s / 20-90 s), narrowed per exercise by the registry and
+    // never widened — the same construction Table Groups 11 and 13 use.
+    // Normals follow the tables' "Integer Resolution" convention (3-12 → 7,
+    // lower integer of an even-width range, exactly as INT-REPEATED-SPRINT's
+    // own 3-8 → 5; 10-40 → 25; 20-90 → 55).
+    //
+    // Two intensity rules, both qualitative, because neither documented
+    // record states an RPE anywhere. `impact_intent: maximal_safe_power`
+    // serves struck resistances — 26_INTENSITY_MODEL sanctions it directly
+    // ("bag work may support technical effort or impact intent") and
+    // `maximal_safe_power` is the impact vocabulary's maximal value, mapped
+    // from a record's "Maximum Power" exactly as INT-REPEATED-SPRINT maps
+    // "all-out" to `maximal_safe_speed`. `movement_intent: explosive` serves
+    // non-impact power intervals and is a literal word in the Battle Ropes
+    // Velocity Profile. An exercise claims whichever ONE its own record
+    // documents, by narrowing; nothing here forces both.
+    //
+    // Tempo is null because `work_rest_intervals` declares
+    // `tempoPolicy: forbidden`, like the three Table Group 8 profiles.
+    profileId: "power_intervals_v0_1",
+    version: "0.1",
+    moduleId: "conditioning",
+    methodId: "work_rest_intervals",
+    exerciseRole: "conditioning",
+    volume: {
+      structure: "intervals",
+      sets: null,
+      repetitions: null,
+      duration: {
+        type: "fixed_range",
+        range: durationRange(10, 25, 40),
+        scope: "per_interval",
+      },
+      distance: null,
+      rounds: null,
+      workIntervals: integerRange(3, 7, 12),
+    },
+    intensity: [
+      {
+        type: "impact_intent",
+        value: "maximal_safe_power",
+        sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_INTENSITY_MODEL],
+      },
+      {
+        type: "movement_intent",
+        value: "explosive",
+        sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_INTENSITY_MODEL],
+      },
+    ],
+    rest: {
+      scope: "between_intervals",
+      seconds: integerRange(20, 55, 90),
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    tempo: null,
+    minimumDose: { ...emptyDose(), workIntervals: 3, durationSeconds: 10 },
+    maximumDose: { ...emptyDose(), workIntervals: 12, durationSeconds: 40 },
+    requiresExerciseSpecificLoadRule: false,
+    requiresSportSpecificSubtype: false,
+    sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
+  },
 ] as const satisfies readonly NumericalPrescriptionProfile[];
 
 export const selectRangeValue = (

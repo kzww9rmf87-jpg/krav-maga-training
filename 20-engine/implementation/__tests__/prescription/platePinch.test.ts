@@ -97,8 +97,8 @@ describe("plate_pinch — registry, knowledge base, profile and equipment counts
     expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(76);
   });
 
-  test("3. the numerical profiles went from 16 to 17 — ISO-GRIP, implemented once, by the preceding commit", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(17);
+  test("3. the numerical profiles went from 16 to 17 — ISO-GRIP, implemented once, by the preceding commit; a later lot added INT-POWER, bringing the total to 18", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(18);
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID)).toHaveLength(1);
   });
 
@@ -809,7 +809,7 @@ describe("plate_pinch — determinism, non-mutation and non-regression", () => {
     // No equipment identifier was added, and exactly one profile was —
     // the canonical ISO-GRIP, which now has a consumer.
     expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(25);
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(17);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(18);
     expect(getNumericalPrescriptionProfileById(PROFILE_ID)!.sourceRuleIds).toEqual([
       "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
     ]);

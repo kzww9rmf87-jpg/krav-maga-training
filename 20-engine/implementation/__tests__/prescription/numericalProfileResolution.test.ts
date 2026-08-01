@@ -229,6 +229,7 @@ describe("resolveNumericalProfile — documented profile set", () => {
     expect([...result.candidateProfileIds].sort()).toEqual([
       "conditioning_long_intervals_v0_1",
       "conditioning_short_intervals_v0_1",
+      "power_intervals_v0_1",
       "repeated_sprint_intervals_v0_1",
     ]);
   });
@@ -261,6 +262,7 @@ describe("findDuplicateProfileTriples", () => {
     expect([...(duplicates[0]?.profileIds ?? [])].sort()).toEqual([
       "conditioning_long_intervals_v0_1",
       "conditioning_short_intervals_v0_1",
+      "power_intervals_v0_1",
       "repeated_sprint_intervals_v0_1",
     ]);
   });

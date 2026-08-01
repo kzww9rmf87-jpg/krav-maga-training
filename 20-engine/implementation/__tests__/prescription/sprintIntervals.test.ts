@@ -105,8 +105,8 @@ describe("sprint_intervals — registry, knowledge base and profile counts", () 
     expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(76);
   });
 
-  test("3. the numerical prescription profiles number 17 — this lot created none", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(17);
+  test("3. the numerical prescription profiles number 18 — this lot created none", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(18);
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((profile) => profile.profileId === PROFILE_ID)).toHaveLength(1);
   });
 
@@ -336,7 +336,7 @@ describe("sprint_intervals — numerical profile selection", () => {
       throw new Error("Expected the ambiguous triple to refuse implicit resolution.");
     }
     expect(implicit.failureCode).toBe("NUMERICAL_PROFILE_AMBIGUOUS");
-    expect(implicit.candidateProfileIds).toHaveLength(3);
+    expect(implicit.candidateProfileIds).toHaveLength(4);
     expect(implicit.candidateProfileIds).toContain(PROFILE_ID);
 
     // Two registry entries share this exact triple and resolve differently:
