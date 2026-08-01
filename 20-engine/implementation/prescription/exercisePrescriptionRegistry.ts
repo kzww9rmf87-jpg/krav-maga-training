@@ -277,6 +277,12 @@ export const PILOT_EXERCISE_IDS = [
   // equipment identifier: `pull_up_bar` and `safe_landing_surface` both
   // already exist and are already what the knowledge base gates it on.
   "hanging_leg_raise",
+  // Registry Lot 10 — first entry on the `grip` module with the
+  // `timed_isometric_sets` method, and the first consumer of Table Group
+  // 4's own ISO-GRIP profile. `pinch_carry` already covers this chapter's
+  // documented Walking Variation through the carry profile; this entry
+  // covers its static hold.
+  "plate_pinch",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -8891,6 +8897,223 @@ const hangingLegRaiseEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Plate Pinch
+// Source: 50-exercises/65_GRIP/11_PLATE_PINCH.md
+//   - Exercise Identity: "Primary Pattern: Isometric Grip. Secondary
+//     Pattern: Loaded Hold. Equipment: Weight Plates. Complexity: Low.
+//     Unilateral or Bilateral: Unilateral or Bilateral."
+//   - Prescription Variables: "Sets — 3 to 5"; "Hold Duration — 5 to 15
+//     seconds for strength, 15 to 30 seconds for strength endurance, 30 to
+//     60 seconds for endurance"; "Rest — 90 seconds to 3 minutes".
+//   - Strength-Endurance Prescription: "3 to 4 sets, 15 to 30 second
+//     holds, 90 to 180 seconds rest, submaximal loading, consistent wrist
+//     position."
+//   - Key Technical Cues and Common Errors: quoted in the stop conditions.
+//   - Safety Rules: "Use intact plates with safe edges", "Keep the floor
+//     area clear", "Do not hold plates over the feet", "Wear suitable
+//     footwear", "Keep the plates close to the body", "Stop before
+//     uncontrolled slipping", "Do not use damaged or oily plates".
+// Method: timed_isometric_sets / grip / secondary
+//   (timed_isometric_grip_v0_1 — sets 2/3/4, hold 10/20/30s per set,
+//   RPE 7/8/9, rest 60/90/150s, tempo isometric_hold)
+//
+// PROFILE. Table Group 4's own ISO-GRIP profile, whose two documentation
+// defects were corrected and implemented immediately before this entry.
+// The role is `secondary`: the corrected table's first-listed, and the
+// highest the method actually supports — `timed_isometric_sets` does not
+// admit `primary`, which is why the Grip module's primary grip work stays
+// with `distance_carry_sets`.
+//
+// WHICH PRESCRIPTION. This chapter documents three named prescriptions
+// over the same movement — Strength (5-15s holds), Strength-Endurance
+// (15-30s), Endurance (30-60s). This entry encodes the
+// STRENGTH-ENDURANCE one, and the choice is arithmetic rather than
+// aesthetic: it is the only one of the three whose hold range sits
+// entirely inside ISO-GRIP's own 10-30 second envelope. Strength would
+// lose its 5-10s half to the profile's floor, and Endurance would
+// collapse onto the single point {30} against its ceiling. The other two
+// remain documented, unrepresented alternatives — a second entry, never a
+// blend.
+//
+// VOLUME — three real narrowings, all from that prescription:
+//   - sets: "3 to 4 sets" intersected with the profile's own [2, 4] →
+//     [3, 4];
+//   - hold: "15 to 30 second holds" intersected with [10, 30] → [15, 30];
+//   - rest: "90 to 180 seconds rest" intersected with the profile's own
+//     60-150s → [90, 150]. The documented 180s ceiling sits above the
+//     table's own 150s and a constraint can only narrow, so 150 stands.
+//
+// NOT CONVERTED. This chapter's difficulty model is explicitly
+// multi-factor and non-numeric: "Load is determined by: plate weight,
+// number of plates, plate thickness, surface friction, unilateral or
+// bilateral execution, and hold duration." None of it becomes a number
+// here — no plate weight, count or thickness is turned into an intensity,
+// a set count or a duration, and no second is turned into a repetition.
+// The documented "Distance — 10 to 30 metres" belongs to the Walking
+// Variation, which `pinch_carry` already covers through the carry profile;
+// it is not folded into this static hold.
+//
+// LATERALITY. `bilateral` with `total_duration`, representing the
+// chapter's own "# Bilateral Variation — The athlete holds one plate
+// combination in each hand", whose stated benefits are "efficient
+// bilateral training, symmetrical loading ... easier integration into
+// general strength sessions". Both hands hold simultaneously, so the
+// prescribed 20 seconds is 20 seconds total, not 20 per side.
+//
+// The chapter's "# Unilateral Variation — The athlete holds the plate
+// combination in one hand" is deliberately NOT represented: it would be
+// `unilateral` with `duration_per_side`, and the Prescription Variables
+// carry no "per side" qualifier to tell us whether the documented 15-30
+// seconds would then be per hand or total. That question is unanswerable
+// from this chapter, so the variant that does not raise it is the one
+// encoded, and the other is left to a separate entry.
+//
+// INTENSITY. The profile's own RPE 7-9, unchanged. This chapter documents
+// no RPE figure: its Strength-Endurance prescription says "submaximal
+// loading", which describes the LOAD, not the effort — a submaximal plate
+// held to near grip failure for 15-30 seconds is a high-effort set, and
+// the two statements do not conflict. Since no numeric effort of its own
+// exists to narrow the band with, `exerciseIntensityConstraints` stays
+// null, exactly as for rowerg_intervals against INT-LONG's fallback RPE.
+// The profile's `requiresExerciseSpecificLoadRule` keeps any absolute or
+// body-mass load out: no plate weight is ever fabricated.
+//
+// STOP CONDITIONS — four categories. `timed_isometric_sets` requires
+// technical_failure, pain and completion; `equipment_failure` is added
+// because this chapter's own termination rule is exactly that — "End the
+// set before grip security is lost", "terminate the set at the first clear
+// loss of control". It reuses the EXISTING `equipmentFailureCondition`,
+// whose contract already names grip and whose set scope is a real boundary
+// for this method, the same reuse `hanging_leg_raise` and `pinch_carry`
+// already make.
+//
+// `fatigue_limit` is deliberately absent: this chapter's documented set
+// endpoint is grip security, not fatigue ("The set ends before
+// uncontrolled slipping occurs"), and its Fatigue Profile records limited
+// systemic cost. The Safety Rules' foot-protection guidance ("Do not hold
+// plates over the feet", "Wear suitable footwear") is a SETUP precaution,
+// not a termination trigger, and lives in the setup instruction; no
+// `environmental_hazard` factory exists and none was invented.
+// -----------------------------------------------------------------------------
+
+const SOURCE_PLATE_PINCH = "50-exercises/65_GRIP/11_PLATE_PINCH.md";
+
+const platePinchStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "plate_pinch_technical_failure",
+    description:
+      "Stop the set if the fingers hook under the rim instead of pinching, the wrist flexes excessively, the plates rest against the thigh, the shoulder elevates, or the plates lose their even alignment.",
+    sourceRuleIds: [SOURCE_PLATE_PINCH],
+  }),
+  equipmentFailureCondition({
+    conditionId: "plate_pinch_grip_failure",
+    description:
+      "Terminate the set at the first clear loss of control: as soon as the plates begin to slide, tilt or rotate, or grip security is lost. Never attempt to save a failing hold.",
+    sourceRuleIds: [SOURCE_PLATE_PINCH],
+  }),
+  painCondition({
+    conditionId: "plate_pinch_pain",
+    description:
+      "Stop immediately if thumb, finger, wrist or medial-elbow pain occurs, or in the presence of an acute thumb, finger or wrist injury.",
+    sourceRuleIds: [SOURCE_PLATE_PINCH],
+  }),
+  completionCondition({
+    conditionId: "plate_pinch_completion",
+    description: "Stop once the prescribed sets and hold duration are completed and the plates are lowered under control.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const platePinchInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "plate_pinch_setup",
+    "setup",
+    "Use intact weight plates with safe edges and clean, dry smooth surfaces — never damaged or oily ones. Keep the floor area clear, wear suitable footwear and never hold the plates over the feet. Align the plates evenly, place the thumb on one side and the fingers on the opposite side, keep the wrist close to neutral, the shoulder controlled and the ribs stacked. This entry prescribes the bilateral variation: one plate combination in each hand.",
+    "critical",
+    true,
+    SOURCE_PLATE_PINCH,
+  ),
+  makeInstruction(
+    "plate_pinch_execution",
+    "execution",
+    "Squeeze the plates firmly before lifting, then stand upright and maintain pressure through the thumb and fingertips for the prescribed hold. Keep the plates vertical and close to the body, the wrist neutral and the shoulder down and stable. Do not hook the fingers under the rim and do not rest the plates against the thigh. End the set before grip security is lost, then lower the plates under control.",
+    "high",
+    true,
+    SOURCE_PLATE_PINCH,
+  ),
+];
+
+const platePinchEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "plate_pinch",
+  moduleId: "grip",
+  role: "secondary",
+  explicitMethodId: "timed_isometric_sets",
+  numericalProfileId: "timed_isometric_grip_v0_1",
+  capabilities: {
+    exerciseId: "plate_pinch",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["timed_isometric_sets"],
+    supportedVolumeStructures: ["sets_duration"],
+    // The profile's only documented metric. No absolute plate load is
+    // claimed — this chapter gives no weight figure anywhere.
+    supportedIntensityTypes: ["rpe"],
+    preferredIntensityTypes: ["rpe"],
+    // "Equipment: Weight Plates" — the load is the implement itself.
+    supportedLoadingModes: ["plate"],
+    supportedTempoTypes: ["isometric_hold"],
+    // The documented Bilateral Variation: one combination in each hand,
+    // held simultaneously. See the block comment for why the Unilateral
+    // Variation is not represented here.
+    laterality: "bilateral",
+    volumeInterpretations: ["total_duration"],
+    // Exactly the three tags `timed_isometric_sets` requires.
+    capabilityTags: ["timed_effort", "tempo_control", "technical_quality_observation"],
+    // Already canonical, and already the knowledge base's own gate.
+    requiredEquipmentCapabilities: ["plates"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["plate_pinch_setup", "plate_pinch_execution"],
+    requiredStopConditionIds: [
+      "plate_pinch_technical_failure",
+      "plate_pinch_grip_failure",
+      "plate_pinch_pain",
+      "plate_pinch_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_plate_pinch",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_PLATE_PINCH, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: ["isometric_hold"],
+  preferredTempoType: null,
+  instructionDefinitions: platePinchInstructions,
+  stopConditionDefinitions: platePinchStopConditions,
+  // "# Strength-Endurance Prescription — 3 to 4 sets, 15 to 30 second
+  // holds", intersected with the shared profile's own [2, 4] sets and
+  // [10, 30] seconds.
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: null, durationSeconds: 15, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 4, repetitions: null, durationSeconds: 30, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_PLATE_PINCH],
+  },
+  // "submaximal loading" is qualitative and describes the load, not the
+  // effort — there is no numeric effort here to narrow RPE 7-9 with.
+  exerciseIntensityConstraints: null,
+  // "90 to 180 seconds rest". The documented ceiling sits above the
+  // table's own 150s; a constraint can only narrow, so the effective
+  // window is 90-150s. Declared as documented, intersection left to the
+  // generic resolver.
+  exerciseRestConstraints: {
+    scope: "between_sets",
+    minimumSeconds: 90,
+    maximumSeconds: 180,
+    sourceRuleIds: [SOURCE_PLATE_PINCH],
+  },
+  sourceRuleIds: [SOURCE_PLATE_PINCH, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 // Registry
 // -----------------------------------------------------------------------------
 
@@ -8980,6 +9203,7 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   ab_wheel: abWheelEntry,
   dead_bug: deadBugEntry,
   hanging_leg_raise: hangingLegRaiseEntry,
+  plate_pinch: platePinchEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

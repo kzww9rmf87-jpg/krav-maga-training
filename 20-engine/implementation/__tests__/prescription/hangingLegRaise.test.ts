@@ -97,8 +97,8 @@ function prescribe(rangeContext: PrescriptionExecutionContext["rangeContext"] = 
 
 describe("hanging_leg_raise — registry, knowledge base, profile and equipment counts", () => {
   test("1. the registry grew from 63 to exactly 64 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(64);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(64);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(65);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(65);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -152,8 +152,12 @@ describe("hanging_leg_raise — registry, knowledge base, profile and equipment 
       "rowerg_intervals", "sprint_intervals", "ab_wheel", "dead_bug",
     ] as const;
 
+    // Ids added by lots AFTER this one, listed explicitly so this test keeps
+    // proving that hanging_leg_raise was the only exercise this lot added.
+    const ADDED_BY_LATER_LOTS = ["plate_pinch"] as const;
+
     expect(PREVIOUS_IDS).toHaveLength(63);
-    expect([...PREVIOUS_IDS, EXERCISE_ID].sort()).toEqual(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort());
+    expect([...PREVIOUS_IDS, EXERCISE_ID, ...ADDED_BY_LATER_LOTS].sort()).toEqual(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort());
 
     // pallof_press and dragon_flag complete 62_CORE's repetition-prescribed
     // family, but both are in the registry only as TIMED holds — their
@@ -750,7 +754,10 @@ describe("hanging_leg_raise — determinism, non-mutation and non-regression", (
       confidence: "validated" as const,
     };
 
-    const previousIds = PILOT_EXERCISE_IDS.filter((id) => id !== EXERCISE_ID);
+    // The 63 entries that predate this lot: everything except this lot's own
+    // entry and the ids added by later lots, each covered by its own file.
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "plate_pinch"];
+    const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(63);
 
     for (const id of previousIds) {

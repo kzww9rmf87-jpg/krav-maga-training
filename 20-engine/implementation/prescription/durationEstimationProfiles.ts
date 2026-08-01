@@ -239,6 +239,19 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // `getDurationEstimationProfile` refuses anything but a fully resolved
   // one. The honest state is unresolved until a documented model exists.
   unresolvedProfile("hanging_leg_raise", "sets_reps", ["50-exercises/62_CORE/14_HANGING_LEG_RAISE.md"]),
+
+  // Registry Lot 10 — first Grip isometric entry.
+  //
+  // `"unresolved"`, and the distinction matters here more than anywhere:
+  // this chapter documents a HOLD DURATION ("15 to 30 second holds") and
+  // that is a prescription target, resolved by `resolveVolume` from the
+  // numerical profile. It is not an estimate of how long the exercise
+  // takes. The fields below want setup time, transition time, a
+  // per-set time and a technical margin — and the chapter gives none of
+  // them: no setup duration, nothing for aligning the plates, nothing for
+  // the change between hands. Copying the prescribed hold into
+  // `perSetSeconds` would restate a prescription as an estimate.
+  unresolvedProfile("plate_pinch", "sets_duration", ["50-exercises/65_GRIP/11_PLATE_PINCH.md"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

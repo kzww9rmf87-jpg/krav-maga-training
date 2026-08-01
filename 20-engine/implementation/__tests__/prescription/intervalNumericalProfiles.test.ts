@@ -577,7 +577,7 @@ describe("registry validators — entries on the interval triple", () => {
   test("only the interval entries sit on the interval triple, each naming a different explicit profile — the 59 historical entries are untouched", () => {
     const entries = Object.values(EXERCISE_PRESCRIPTION_REGISTRY);
 
-    expect(entries).toHaveLength(64);
+    expect(entries).toHaveLength(65);
 
     const onIntervalTriple = entries.filter(
       (entry) =>

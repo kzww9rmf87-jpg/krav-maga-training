@@ -128,6 +128,9 @@ const EXPLICIT_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
   // Registry Lot 9 — third entry on that same unique Core repetition
   // triple, declaring the id for the same auditability reason.
   hanging_leg_raise: "core_robustness_straight_sets_v0_1",
+  // Registry Lot 10 — first entry on the Grip isometric triple, which is
+  // also unique; the id is declared for the same auditability reason.
+  plate_pinch: "timed_isometric_grip_v0_1",
 };
 
 /**

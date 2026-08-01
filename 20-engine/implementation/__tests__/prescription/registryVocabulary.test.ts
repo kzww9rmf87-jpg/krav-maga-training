@@ -464,6 +464,9 @@ describe("registryVocabulary — carry loading modes corrected to match document
       // Primary Load: Bodyweight"; the optional ankle weights belong to a
       // documented progression this entry does not represent.
       hanging_leg_raise: ["bodyweight"],
+      // Registry Lot 10 — Grip isometric hold. "Equipment: Weight Plates"
+      // — the load is the implement itself.
+      plate_pinch: ["plate"],
     };
     const CORRECTED_IDS = ["pinch_carry", "sandbag_carry", "zercher_carry"];
 
@@ -480,8 +483,8 @@ describe("registryVocabulary — carry loading modes corrected to match document
   });
 
   test("7. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(64);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(64);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(65);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(65);
   });
 
   test("8. every retained value (plate, sandbag, barbell) is a known, documented LoadingMode", () => {
@@ -594,12 +597,12 @@ describe("registryVocabulary — pinch_carry represents only the Bilateral Varia
     for (const [id, text] of Object.entries(OTHER_ENTRY_FIRST_INSTRUCTION)) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id as PilotExerciseId].instructionDefinitions[0].text).toBe(text);
     }
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(64);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(65);
   });
 
   test("9. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(64);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(64);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(65);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(65);
   });
 
   test("10. explicitMethodId, supportedMethodIds, supportedVolumeStructures and stop conditions are unchanged", () => {
@@ -711,6 +714,10 @@ const DOSE_NARROWING_EXCEPTIONS = [
   // doctrine ceiling of 120s) from its own "Core Strength Development"
   // programming application.
   "hanging_leg_raise",
+  // Registry Lot 10 — Grip isometric hold: plate_pinch narrows sets (3-4)
+  // and hold duration (15-30s) from its own Strength-Endurance
+  // prescription.
+  "plate_pinch",
 ] as const;
 
 describe("registryVocabulary — exerciseDoseConstraints", () => {
@@ -721,7 +728,7 @@ describe("registryVocabulary — exerciseDoseConstraints", () => {
       }
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseDoseConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(64);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(65);
   });
 
   test("tibialis_raise, rotator_cuff_training, soleus_raise, copenhagen_plank, hip_thrust and barbell_row narrow exerciseDoseConstraints; wrist_strengthening and chin_up do not", () => {
@@ -754,7 +761,7 @@ const INTENSITY_CONSTRAINT_EXCEPTIONS = [
  * Lot 8) is the first: its own "Recovery — 20-60 seconds" caps the Core
  * doctrine's 45-120s window at 60.
  */
-const REST_CONSTRAINT_EXCEPTIONS = ["dead_bug", "hanging_leg_raise"] as const;
+const REST_CONSTRAINT_EXCEPTIONS = ["dead_bug", "hanging_leg_raise", "plate_pinch"] as const;
 
 describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestConstraints", () => {
   test("every pilot registry entry outside the known intensity-narrowing exceptions declares exerciseIntensityConstraints and exerciseRestConstraints as null", () => {
@@ -766,19 +773,37 @@ describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestCons
         expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).toBeNull();
       }
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(64);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(65);
   });
 
-  test("dead_bug is the only entry narrowing rest, and it narrows rest alone — not intensity", () => {
+  test("every rest-narrowing entry narrows rest alone — never intensity — and each declares its own documented window", () => {
     for (const id of REST_CONSTRAINT_EXCEPTIONS) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).not.toBeNull();
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseIntensityConstraints).toBeNull();
+      // Every one is scoped between sets and sourced to its own chapter.
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints?.scope).toBe("between_sets");
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints?.sourceRuleIds).toHaveLength(1);
     }
+
+    // The three windows are genuinely different, and each is the chapter's
+    // own — not a shared default copied across entries.
     expect(EXERCISE_PRESCRIPTION_REGISTRY.dead_bug.exerciseRestConstraints).toEqual({
       scope: "between_sets",
       minimumSeconds: 20,
       maximumSeconds: 60,
       sourceRuleIds: ["50-exercises/62_CORE/12_DEAD_BUG.md"],
+    });
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.hanging_leg_raise.exerciseRestConstraints).toEqual({
+      scope: "between_sets",
+      minimumSeconds: 60,
+      maximumSeconds: 150,
+      sourceRuleIds: ["50-exercises/62_CORE/14_HANGING_LEG_RAISE.md"],
+    });
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.plate_pinch.exerciseRestConstraints).toEqual({
+      scope: "between_sets",
+      minimumSeconds: 90,
+      maximumSeconds: 180,
+      sourceRuleIds: ["50-exercises/65_GRIP/11_PLATE_PINCH.md"],
     });
   });
 
