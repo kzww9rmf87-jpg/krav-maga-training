@@ -185,10 +185,12 @@ describe("ISO-GRIP — the profile mirrors the canonical table", () => {
     }
   });
 
-  test("the Grip module's three profiles cover three DIFFERENT units — carried distance, held seconds, complete repetitions", () => {
+  test("the Grip module's five profiles cover five DIFFERENT units — carried distance, held seconds, complete repetitions, ascents, hand pulls", () => {
     const gripProfiles = NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.moduleId === "grip");
     expect(gripProfiles.map((p) => p.profileId).sort()).toEqual([
       "distance_carry_strength_grip_v0_1",
+      "grip_climb_strength_v0_1",
+      "grip_hand_pull_work_v0_1",
       "grip_repetition_strength_v0_1",
       "timed_isometric_grip_v0_1",
     ]);
@@ -210,7 +212,15 @@ describe("ISO-GRIP — the profile mirrors the canonical table", () => {
     expect(profile().volume.repetitions).toBeNull();
     expect(carry.volume.repetitions).toBeNull();
 
+    // Three of the five share `sets_reps` as a STRUCTURE while counting three
+    // different things; the unit is carried by the consuming entry's
+    // `volumeInterpretation`, never by the structure.
     expect(new Set(gripProfiles.map((p) => p.volume.structure)).size).toBe(3);
+    const setsReps = gripProfiles.filter((p) => p.volume.structure === "sets_reps");
+    expect(setsReps.map((p) => p.profileId).sort()).toEqual(["grip_climb_strength_v0_1", "grip_hand_pull_work_v0_1", "grip_repetition_strength_v0_1"]);
+    // And their repetition envelopes are genuinely different, because the
+    // units are.
+    expect(new Set(setsReps.map((p) => JSON.stringify(p.volume.repetitions))).size).toBe(3);
   });
 });
 

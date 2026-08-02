@@ -93,8 +93,8 @@ describe("dead_bug — registry, knowledge base and profile counts", () => {
     expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(76);
   });
 
-  test("3. the numerical prescription profiles stay at 19 — this lot created none", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(19);
+  test("3. the numerical prescription profiles stay at 21 — this lot created none", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(21);
   });
 
   test("4. dead_bug exists in both the knowledge base and the registry, with consistent identifiers", () => {

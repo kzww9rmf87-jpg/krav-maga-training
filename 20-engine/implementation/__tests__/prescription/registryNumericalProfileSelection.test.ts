@@ -162,6 +162,9 @@ const AMBIGUOUS_TRIPLE_EXERCISES: readonly string[] = [
   "heavy_bag_power_intervals",
   "battle_ropes",
   "assault_bike_intervals",
+  // The Grip repetition triple became shared when Table Groups 16 and 17
+  // added two more profiles counting two other units on it.
+  "towel_pull_up",
 ];
 
 const historicalEntries = () =>

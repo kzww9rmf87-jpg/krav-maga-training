@@ -190,10 +190,24 @@ const AMBIGUOUS_TRIPLE = {
   exerciseRole: "conditioning",
 } as const;
 
+/**
+ * The Grip repetition triple became shared when Table Groups 16 and 17
+ * added two more profiles counting two other units on it — ascents and
+ * hand-over-hand pulls, neither of which is a repetition.
+ */
+const GRIP_AMBIGUOUS_TRIPLE = {
+  moduleId: "grip",
+  methodId: "straight_sets_repetitions",
+  exerciseRole: "secondary",
+} as const;
+
 const isOnAmbiguousTriple = (profile: NumericalPrescriptionProfile): boolean =>
-  profile.moduleId === AMBIGUOUS_TRIPLE.moduleId &&
-  profile.methodId === AMBIGUOUS_TRIPLE.methodId &&
-  profile.exerciseRole === AMBIGUOUS_TRIPLE.exerciseRole;
+  [AMBIGUOUS_TRIPLE, GRIP_AMBIGUOUS_TRIPLE].some(
+    (triple) =>
+      profile.moduleId === triple.moduleId &&
+      profile.methodId === triple.methodId &&
+      profile.exerciseRole === triple.exerciseRole,
+  );
 
 describe("resolveNumericalProfile — documented profile set", () => {
   test("every unique documented triple resolves implicitly and matches the legacy helper", () => {
@@ -255,16 +269,27 @@ describe("findDuplicateProfileTriples", () => {
   test("the documented profile set contains exactly the interval triple as duplicate", () => {
     const duplicates = findDuplicateProfileTriples();
 
-    expect(duplicates).toHaveLength(1);
-    expect(duplicates[0]?.moduleId).toBe("conditioning");
-    expect(duplicates[0]?.methodId).toBe("work_rest_intervals");
-    expect(duplicates[0]?.exerciseRole).toBe("conditioning");
-    expect([...(duplicates[0]?.profileIds ?? [])].sort()).toEqual([
+    expect(duplicates).toHaveLength(2);
+    const interval = duplicates.find((duplicate) => duplicate.moduleId === "conditioning")!;
+    expect(interval.moduleId).toBe("conditioning");
+    expect(interval.methodId).toBe("work_rest_intervals");
+    expect(interval.exerciseRole).toBe("conditioning");
+    expect([...interval.profileIds].sort()).toEqual([
       "conditioning_long_intervals_v0_1",
       "conditioning_short_intervals_v0_1",
       "power_intervals_v0_1",
       "repeated_sprint_intervals_v0_1",
     ]);
+
+    // The Grip module gained a second ambiguous triple when three profiles
+    // began counting three different units on it.
+    const grip = duplicates.find((duplicate) => duplicate.moduleId === "grip");
+    expect(grip).toMatchObject({
+      moduleId: "grip",
+      methodId: "straight_sets_repetitions",
+      exerciseRole: "secondary",
+    });
+    expect([...(grip?.profileIds ?? [])].sort()).toEqual(["grip_climb_strength_v0_1", "grip_hand_pull_work_v0_1", "grip_repetition_strength_v0_1"]);
   });
 
   test("an injected duplicate triple is reported with both profile ids", () => {

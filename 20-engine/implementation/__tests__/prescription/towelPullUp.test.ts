@@ -112,8 +112,8 @@ describe("towel_pull_up — registry, knowledge base, profile and equipment coun
     expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(76);
   });
 
-  test("3. the numerical profiles went from 18 to 19 — the Grip repetition profile, by the preceding commit", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(19);
+  test("3. the numerical profiles went from 18 to 21 — the Grip repetition profile plus the Grip climb and hand-pull profiles", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(21);
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID)).toHaveLength(1);
   });
 
@@ -242,23 +242,24 @@ describe("towel_pull_up — profile, volume and narrowing", () => {
     high: { sets: 5, reps: 8, rir: 3, rest: 240 },
   } as const;
 
-  test("11. the entry declares grip_repetition_strength_v0_1, whose triple is unique", () => {
+  test("11. the entry declares grip_repetition_strength_v0_1 on a triple now SHARED by three units", () => {
     expect(entry().numericalProfileId).toBe(PROFILE_ID);
     expect(entry().moduleId).toBe("grip");
     expect(entry().explicitMethodId).toBe("straight_sets_repetitions");
     expect(entry().role).toBe("secondary");
 
-    // Unique triple: implicit resolution already selects it. The explicit id
-    // is declared for auditability, exactly as ab_wheel and plate_pinch do.
+    // The triple was unique when this entry was written; Table Groups 16 and
+    // 17 then joined it with ascents and hand pulls. The explicit id, already
+    // declared for auditability, is now load-bearing.
     const implicit = resolveNumericalProfile({
       moduleId: entry().moduleId,
       methodId: entry().explicitMethodId,
       exerciseRole: entry().role,
     });
-    expect(implicit.ok).toBe(true);
-    if (implicit.ok) {
-      expect(implicit.profile.profileId).toBe(PROFILE_ID);
-      expect(implicit.resolutionSource).toBe("module_method_role_unique");
+    expect(implicit.ok).toBe(false);
+    if (!implicit.ok) {
+      expect(implicit.failureCode).toBe("NUMERICAL_PROFILE_AMBIGUOUS");
+      expect([...implicit.candidateProfileIds].sort()).toEqual(["grip_climb_strength_v0_1", "grip_hand_pull_work_v0_1", "grip_repetition_strength_v0_1"]);
     }
     const volumeTrace = prescribe().trace.volume;
     if (!volumeTrace.ok) throw new Error("Expected the volume trace to resolve.");
@@ -737,17 +738,24 @@ describe("towel_pull_up — prescription, engine and non-regression", () => {
       expect(source, resolver).not.toContain("grip_repetition_strength");
     }
 
-    // VolumeInterpretation was NOT extended: this entry uses a value that
-    // already existed, and the closed vocabulary is unchanged.
+    // This entry uses `total_repetitions`, a value that already existed. The
+    // vocabulary later gained `climbs` and `hand_pulls` for the rope
+    // exercises — an additive v1 change that left this entry untouched, which
+    // is what "the shapes are frozen, the vocabularies track the engine"
+    // means in practice.
     const types = readFileSync(new URL("../../prescription/types.ts", import.meta.url), "utf-8");
     const union = types.slice(
       types.indexOf("export type VolumeInterpretation ="),
       types.indexOf("export interface PrescriptionLaterality"),
     );
     expect(union).toContain('"total_repetitions"');
-    for (const invented of ["climbs", "hand_pulls", "ascents"]) {
-      expect(union, invented).not.toContain(invented);
-    }
+    expect(entry().capabilities.volumeInterpretations).toEqual(["total_repetitions"]);
+    expect(entry().capabilities.volumeInterpretations).not.toContain("climbs");
+    expect(entry().capabilities.volumeInterpretations).not.toContain("hand_pulls");
+
+    // And the contract is still v1: shapes unchanged, vocabulary additive.
+    const contract = readFileSync(new URL("../../sessionOutput/types.ts", import.meta.url), "utf-8");
+    expect(contract).toContain('contractVersion: "cas-session-output.v1"');
   });
 
   test("38. + 39. rope_climb and rope_pull remain unintegrated — the doctrine excludes their units", () => {

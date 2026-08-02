@@ -510,7 +510,7 @@ describe("INT-POWER — the three Table Group 8 profiles are untouched", () => {
     }
   });
 
-  test("24. the interval triple is still the only duplicated triple in the documented set", () => {
+  test("24. the interval triple is a duplicated triple and keeps exactly its four profiles", () => {
     const counts = new Map<string, string[]>();
     for (const candidate of NUMERICAL_PRESCRIPTION_PROFILES) {
       const key = `${candidate.moduleId}|${candidate.methodId}|${candidate.exerciseRole}`;
@@ -518,8 +518,17 @@ describe("INT-POWER — the three Table Group 8 profiles are untouched", () => {
     }
 
     const duplicated = [...counts.entries()].filter(([, ids]) => ids.length > 1);
-    expect(duplicated).toHaveLength(1);
-    expect(duplicated[0]?.[0]).toBe("conditioning|work_rest_intervals|conditioning");
-    expect(duplicated[0]?.[1]).toHaveLength(4);
+    // Two triples are shared now: this one, and the Grip repetition triple
+    // whose three profiles count three different units.
+    expect(duplicated).toHaveLength(2);
+
+    const interval = duplicated.find(([key]) => key === "conditioning|work_rest_intervals|conditioning");
+    expect(interval).toBeDefined();
+    expect(interval?.[1]).toHaveLength(4);
+
+    const grip = duplicated.find(([key]) => key === "grip|straight_sets_repetitions|secondary");
+    expect(grip?.[1].slice().sort()).toEqual(["grip_climb_strength_v0_1", "grip_hand_pull_work_v0_1", "grip_repetition_strength_v0_1"]);
+    // The two never overlap.
+    expect(interval?.[1].filter((id) => grip?.[1].includes(id))).toEqual([]);
   });
 });

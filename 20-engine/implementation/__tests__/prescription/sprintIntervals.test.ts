@@ -105,8 +105,8 @@ describe("sprint_intervals — registry, knowledge base and profile counts", () 
     expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(76);
   });
 
-  test("3. the numerical prescription profiles number 19 — this lot created none", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(19);
+  test("3. the numerical prescription profiles number 21 — this lot created none", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(21);
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((profile) => profile.profileId === PROFILE_ID)).toHaveLength(1);
   });
 

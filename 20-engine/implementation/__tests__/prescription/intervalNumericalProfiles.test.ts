@@ -250,14 +250,29 @@ describe("executability of the interval profiles", () => {
 // -----------------------------------------------------------------------------
 
 describe("interval triple ambiguity", () => {
-  test("findDuplicateProfileTriples reports exactly the interval triple with the four profile ids", () => {
+  test("findDuplicateProfileTriples reports the interval triple with its four profile ids, alongside the Grip triple", () => {
     const duplicates = findDuplicateProfileTriples();
 
-    expect(duplicates).toHaveLength(1);
-    expect(duplicates[0]).toMatchObject(INTERVAL_TRIPLE);
-    expect([...(duplicates[0]?.profileIds ?? [])].sort()).toEqual(
+    expect(duplicates).toHaveLength(2);
+
+    const intervalDuplicate = duplicates.find(
+      (duplicate) => duplicate.methodId === INTERVAL_TRIPLE.methodId,
+    );
+    expect(intervalDuplicate).toMatchObject(INTERVAL_TRIPLE);
+    expect([...(intervalDuplicate?.profileIds ?? [])].sort()).toEqual(
       [...INTERVAL_PROFILE_IDS].sort(),
     );
+
+    // The Grip triple is the second, and the two never overlap.
+    const gripDuplicate = duplicates.find(
+      (duplicate) => duplicate.methodId === "straight_sets_repetitions",
+    );
+    expect(gripDuplicate).toMatchObject({
+      moduleId: "grip",
+      methodId: "straight_sets_repetitions",
+      exerciseRole: "secondary",
+    });
+    expect([...(gripDuplicate?.profileIds ?? [])].sort()).toEqual(["grip_climb_strength_v0_1", "grip_hand_pull_work_v0_1", "grip_repetition_strength_v0_1"]);
   });
 
   test("implicit resolution on the triple fails with NUMERICAL_PROFILE_AMBIGUOUS and lists all four candidates", () => {
@@ -285,9 +300,17 @@ describe("interval triple ambiguity", () => {
     }
   });
 
-  test("every non-interval documented triple is still unique and unaffected", () => {
+  test("every documented triple outside the two ambiguous ones is still unique and unaffected", () => {
+    // A second ambiguous triple appeared when the Grip module gained three
+    // profiles counting three different units. It is excluded here for the
+    // same reason the interval one is: this test guards UNIQUE triples.
+    const GRIP_TRIPLE_IDS: readonly string[] = ["grip_climb_strength_v0_1", "grip_hand_pull_work_v0_1", "grip_repetition_strength_v0_1"];
+
     for (const profile of NUMERICAL_PRESCRIPTION_PROFILES) {
       if (INTERVAL_PROFILE_IDS.includes(profile.profileId as (typeof INTERVAL_PROFILE_IDS)[number])) {
+        continue;
+      }
+      if (GRIP_TRIPLE_IDS.includes(profile.profileId)) {
         continue;
       }
 

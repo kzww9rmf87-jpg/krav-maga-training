@@ -2137,12 +2137,16 @@ distinct metrics:
 - gripper closes and finger contacts.
 
 No future entry may absorb any of these by declaring a different
-`volumeInterpretation`: the model fixes a repetition's unit to
-`repetitions`, and the three repetition interpretations it offers
+`volumeInterpretation`. The three REPETITION interpretations
 (`total_repetitions`, `repetitions_per_side`,
-`alternating_total_repetitions`) express LATERALITY, not unit. Representing
-climbs or hand pulls would require extending a closed vocabulary that the
-public session-output contract reuses, which is a separate decision.
+`alternating_total_repetitions`) express LATERALITY, not unit, so none of
+them can turn a repetition into something else.
+
+Climbs and hand pulls were subsequently given their own vocabulary members
+— an additive `cas-session-output.v1` change, recorded in that contract's
+own additive history — and Table Groups 16 and 17 own them. They remain
+outside THIS group: a separate interpretation is what puts an exercise in a
+separate family, never what lets it join this one.
 
 ### Volume
 
@@ -2252,6 +2256,254 @@ This profile must not be used:
   terminates the set at that point regardless of the repetitions
   remaining, which is why every consumer must declare a technical-failure
   and an equipment-failure stop condition.
+
+---
+
+# Table Group 16 — Grip Climb Strength
+
+## Objective
+
+Grip-integrated climbing strength, counted in complete ascents.
+
+## Profile GRIP-CLIMB-STRENGTH
+
+```text
+profileId: grip_climb_strength_v0_1
+moduleId: grip
+methodId: straight_sets_repetitions
+exerciseRole: secondary
+```
+
+This triple is now shared with Table Group 15's GRIP-REPETITION-STRENGTH and
+Table Group 17's GRIP-HAND-PULL-WORK. Any registry entry on it must declare
+an explicit `numericalProfileId`; implicit resolution refuses the triple and
+never picks by array order.
+
+The role is `secondary`, from `65_GRIP/00_OVERVIEW.md`'s own "Placement
+Within the Session" — grip work "is usually placed after primary technical
+and strength work" — the same source Table Group 15 uses.
+
+## Module Source
+
+Created, not discovered. `65_GRIP/00_OVERVIEW.md` states the rule under
+"General Prescription Ranges → Grip Climb Strength": purpose, admissible and
+excluded exercises, sets, climbs, intensity, rest, tempo, progression and
+limits of use. Every number below is that section's.
+
+## Units Included
+
+```text
+complete ascents (climbs)
+```
+
+## Units Excluded
+
+- hand-over-hand pulls — Table Group 17 covers those;
+- complete repetitions of a whole movement — Table Group 15 covers those;
+- climbed height, which is a described variable and never a volume
+  dimension: an ascent is counted, its height is not converted into a count;
+- distance, timed holds and timed intervals.
+
+### Volume
+
+```text
+sets: 3–5
+climbs: 1–5
+```
+
+Normal:
+
+```text
+4 sets × 3 climbs
+```
+
+The climb count travels in the profile's `repetitions` field, because that
+is the only integer-count field the `sets_reps` structure has. It is NOT a
+repetition, and the consuming entry says so by declaring
+`volumeInterpretation: climbs` — the vocabulary member added for exactly
+this purpose. Normals follow the Integer Resolution convention (3–5 → 4;
+1–5 → 3).
+
+### Intensity
+
+```text
+technical_effort: high_quality
+```
+
+No RIR and no RPE. An ascent cannot be left partly in reserve — a climb
+abandoned mid-rope is a descent under compromised grip, which this
+category's own safety rule forbids — so the module rule prescribes the
+technical standard the effort must preserve instead.
+
+### Rest
+
+```text
+120–300 seconds
+```
+
+Normal:
+
+```text
+210 seconds
+```
+
+Between sets.
+
+### Tempo
+
+```text
+type: global_intent
+globalIntent: controlled
+```
+
+The module rule states "Controlled ascent and controlled descent."
+
+### Minimum Dose
+
+```text
+3 sets × 1 climb
+```
+
+### Maximum Dose
+
+```text
+5 sets × 5 climbs
+```
+
+The maximum boundaries must not be combined automatically.
+
+### Exercise-Specific Narrowing
+
+```text
+rope_climb:  sets 3–5   climbs 1–5   rest 120–300 s
+```
+
+### Limits of Use
+
+- never for a unit other than a complete ascent;
+- never to prescribe partial climbs counted as hand transitions;
+- never to keep accumulating volume once grip security is lost.
+
+---
+
+# Table Group 17 — Grip Hand-Pull Work
+
+## Objective
+
+Grip-integrated hand-over-hand pulling, counted in individual pulls.
+
+## Profile GRIP-HAND-PULL-WORK
+
+```text
+profileId: grip_hand_pull_work_v0_1
+moduleId: grip
+methodId: straight_sets_repetitions
+exerciseRole: secondary
+```
+
+Third profile on the same shared triple; the explicit-id rule above applies
+identically.
+
+## Module Source
+
+Created, not discovered, and stated in `65_GRIP/00_OVERVIEW.md` under
+"General Prescription Ranges → Grip Hand-Pull Work".
+
+## Units Included
+
+```text
+hand-over-hand pulls (hand_pulls)
+```
+
+## Units Excluded
+
+- complete ascents — Table Group 16 covers those;
+- complete repetitions of a whole movement — Table Group 15 covers those;
+- the same exercise prescribed by distance travelled — Table Group 5 covers
+  loaded carries;
+- the same exercise prescribed as timed work intervals.
+
+A record may contribute its pull-counted prescriptions to this group while
+its distance-based and interval-based prescriptions stay outside it.
+
+### Volume
+
+```text
+sets: 3–5
+hand pulls: 6–20
+```
+
+Normal:
+
+```text
+4 sets × 13 hand pulls
+```
+
+The pull count travels in the `repetitions` field for the same structural
+reason as Table Group 16, and the consuming entry declares
+`volumeInterpretation: hand_pulls`. Normals follow Integer Resolution
+(3–5 → 4; 6–20 → 13).
+
+### Intensity
+
+```text
+technical_effort: high_quality
+```
+
+External resistance is a documented determinant — sled weight, rope angle,
+friction, rope diameter, pulling position — but the records qualify it in
+words, never in figures, and the chapter states that grip intensity is not
+represented accurately by external load alone. No qualitative resistance
+level is converted into a number.
+
+### Rest
+
+```text
+90–240 seconds
+```
+
+Normal:
+
+```text
+165 seconds
+```
+
+Between sets.
+
+### Tempo
+
+```text
+type: global_intent
+globalIntent: controlled
+```
+
+The module rule states "Controlled throughout, at a consistent cadence."
+
+### Minimum Dose
+
+```text
+3 sets × 6 hand pulls
+```
+
+### Maximum Dose
+
+```text
+5 sets × 20 hand pulls
+```
+
+The maximum boundaries must not be combined automatically.
+
+### Exercise-Specific Narrowing
+
+```text
+rope_pull:  sets 3–5   hand pulls 6–20   rest 90–240 s
+```
+
+### Limits of Use
+
+- never for a unit other than a hand-over-hand pull;
+- never to prescribe the same exercise by distance or by timed interval;
+- never to keep accumulating volume once grip security is lost.
 
 ---
 

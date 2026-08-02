@@ -242,23 +242,25 @@ describe("GRIP-REPETITION-STRENGTH — triple, role and executability", () => {
     expect(matches).toHaveLength(1);
     expect(profile().version).toBe("0.1");
     expect(profile().sourceRuleIds).toEqual(["34_NUMERICAL_PRESCRIPTION_TABLES_V0_1"]);
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(19);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(21);
   });
 
-  test("10. the profile is executable, and its triple is UNIQUE so implicit resolution already selects it", () => {
+  test("10. the profile is executable; its triple was unique when written and is now SHARED with the two rope-unit profiles", () => {
     expect(isExecutableNumericalProfile(profile())).toBe(true);
     expect(profile().intensity.length).toBeGreaterThan(0);
 
+    // Table Groups 16 and 17 joined the same triple with their own units, so
+    // implicit resolution now refuses it — which is the correct outcome, and
+    // exactly why every consumer declares its id explicitly.
+    const implicit = resolveNumericalProfile({ ...TRIPLE });
+    expect(implicit.ok).toBe(false);
+    if (!implicit.ok) {
+      expect(implicit.failureCode).toBe("NUMERICAL_PROFILE_AMBIGUOUS");
+      expect([...implicit.candidateProfileIds].sort()).toEqual(["grip_climb_strength_v0_1", "grip_hand_pull_work_v0_1", "grip_repetition_strength_v0_1"]);
+    }
     expect(
       hasExecutableNumericalProfile(TRIPLE.moduleId, TRIPLE.methodId, TRIPLE.exerciseRole),
-    ).toBe(true);
-
-    const implicit = resolveNumericalProfile({ ...TRIPLE });
-    expect(implicit.ok).toBe(true);
-    if (implicit.ok) {
-      expect(implicit.profile.profileId).toBe(PROFILE_ID);
-      expect(implicit.resolutionSource).toBe("module_method_role_unique");
-    }
+    ).toBe(false);
 
     const explicit = resolveNumericalProfile({ ...TRIPLE, explicitProfileId: PROFILE_ID });
     expect(explicit.ok && explicit.profile.profileId).toBe(PROFILE_ID);
@@ -516,7 +518,7 @@ describe("GRIP-REPETITION-STRENGTH — genericity and non-regression", () => {
     }
 
     // Exactly one profile was added, and every triple stays resolvable.
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(19);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(21);
     expect(
       NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID),
     ).toHaveLength(1);

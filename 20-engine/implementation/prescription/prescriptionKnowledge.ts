@@ -1254,6 +1254,122 @@ export const NUMERICAL_PRESCRIPTION_PROFILES = [
     requiresSportSpecificSubtype: false,
     sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
   },
+  {
+    // Profile GRIP-CLIMB-STRENGTH, Table Group 16. Second profile on the
+    // (grip, straight_sets_repetitions, secondary) triple, which is
+    // therefore no longer unique: every entry on it must declare an
+    // explicit `numericalProfileId`.
+    //
+    // Created, not discovered, and 65_GRIP/00_OVERVIEW.md states the rule
+    // under "General Prescription Ranges → Grip Climb Strength". The module
+    // owns every number here; an exercise narrows them.
+    //
+    // A COMPLETE ASCENT IS NOT A REPETITION. The count travels in the
+    // `repetitions` field only because that is the single integer-count
+    // field the `sets_reps` structure has; the consuming entry declares
+    // `volumeInterpretation: climbs`, the vocabulary member added for
+    // exactly this purpose, so nothing downstream reads it as a repetition.
+    // Climbed height is a described variable of the exercise and is never
+    // converted into a count.
+    //
+    // Intensity is `technical_effort: high_quality`, not RIR: an ascent
+    // cannot be left partly in reserve, because a climb abandoned mid-rope
+    // is a descent under compromised grip, which the module rule's own
+    // safety clause forbids.
+    profileId: "grip_climb_strength_v0_1",
+    version: "0.1",
+    moduleId: "grip",
+    methodId: "straight_sets_repetitions",
+    exerciseRole: "secondary",
+    volume: {
+      structure: "sets_reps",
+      sets: integerRange(3, 4, 5),
+      repetitions: { type: "fixed_range", range: integerRange(1, 3, 5) },
+      duration: null,
+      distance: null,
+      rounds: null,
+      workIntervals: null,
+    },
+    intensity: [
+      {
+        type: "technical_effort",
+        value: "high_quality",
+        sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_INTENSITY_MODEL],
+      },
+    ],
+    rest: {
+      scope: "between_sets",
+      seconds: integerRange(120, 210, 300),
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    tempo: {
+      type: "global_intent",
+      globalIntent: "controlled",
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    minimumDose: { ...emptyDose(), sets: 3, repetitions: 1 },
+    maximumDose: { ...emptyDose(), sets: 5, repetitions: 5 },
+    requiresExerciseSpecificLoadRule: false,
+    requiresSportSpecificSubtype: false,
+    sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
+  },
+  {
+    // Profile GRIP-HAND-PULL-WORK, Table Group 17. Third profile on the same
+    // shared triple; the explicit-id rule applies identically.
+    //
+    // Created, not discovered, and stated in 65_GRIP/00_OVERVIEW.md under
+    // "General Prescription Ranges → Grip Hand-Pull Work".
+    //
+    // A HAND-OVER-HAND PULL IS ONE HAND'S ACTION, not one execution of a
+    // whole movement. It shares the `repetitions` field for the same
+    // structural reason as Table Group 16 and is disambiguated by
+    // `volumeInterpretation: hand_pulls`. A record's distance-based and
+    // interval-based prescriptions stay outside this family entirely — no
+    // metre becomes a pull and no second becomes a pull.
+    //
+    // Intensity is `technical_effort: high_quality`. External resistance is
+    // a documented determinant (sled weight, rope angle, friction, rope
+    // diameter, pulling position) but the records qualify it in words, never
+    // in figures, and the chapter states that grip intensity is not
+    // represented accurately by external load alone. No qualitative
+    // resistance level is converted into a number.
+    profileId: "grip_hand_pull_work_v0_1",
+    version: "0.1",
+    moduleId: "grip",
+    methodId: "straight_sets_repetitions",
+    exerciseRole: "secondary",
+    volume: {
+      structure: "sets_reps",
+      sets: integerRange(3, 4, 5),
+      repetitions: { type: "fixed_range", range: integerRange(6, 13, 20) },
+      duration: null,
+      distance: null,
+      rounds: null,
+      workIntervals: null,
+    },
+    intensity: [
+      {
+        type: "technical_effort",
+        value: "high_quality",
+        sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_INTENSITY_MODEL],
+      },
+    ],
+    rest: {
+      scope: "between_sets",
+      seconds: integerRange(90, 165, 240),
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    tempo: {
+      type: "global_intent",
+      globalIntent: "controlled",
+      sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_REST_TEMPO],
+    },
+    minimumDose: { ...emptyDose(), sets: 3, repetitions: 6 },
+    maximumDose: { ...emptyDose(), sets: 5, repetitions: 20 },
+    requiresExerciseSpecificLoadRule: false,
+    requiresSportSpecificSubtype: false,
+    sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
+  },
 ] as const satisfies readonly NumericalPrescriptionProfile[];
 
 export const selectRangeValue = (

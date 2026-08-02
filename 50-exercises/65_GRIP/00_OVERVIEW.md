@@ -748,6 +748,171 @@ This category must not be used:
 - to accumulate volume once grip security is lost, which terminates the
   set regardless of the repetitions remaining.
 
+## Grip Climb Strength
+
+### Purpose
+
+Grip-integrated climbing strength, where a complete ascent is the unit of
+work and grip security is what ends the effort.
+
+An ascent is not a repetition. It is a bout composed of many hand
+transitions, and the Volume Metrics rule below forbids counting it as one.
+It needs its own category for that reason alone.
+
+### Admissible Exercises
+
+Exercises whose prescribed unit is a **complete ascent** of a climbable
+implement, and whose limiting factor is grip security rather than the prime
+movers.
+
+Rope Climb is the first documented example. Any future climbing exercise
+counted in complete ascents belongs here.
+
+### Excluded Exercises
+
+- work counted in hand-over-hand pulls — Grip Hand-Pull Work covers that;
+- work counted in complete repetitions of a whole movement — Grip
+  Repetition Strength covers that;
+- timed holds, carried distance and timed intervals.
+
+Climbed HEIGHT is a documented variable of the exercise, never a volume
+dimension of this category: an ascent is counted, its height is described.
+
+### Sets
+
+Typical range:
+
+- 3 to 5 sets.
+
+### Climbs
+
+Typical range:
+
+- 1 to 5 complete ascents per set.
+
+### Intensity
+
+Expressed as technical effort, at high quality.
+
+No repetitions-in-reserve figure is available here and none is invented: an
+ascent cannot be left partly in reserve, because a climb abandoned mid-rope
+is a descent under compromised grip, which the safety rules of this category
+forbid. What the records document instead is the technical standard the
+effort must preserve, so that is what the category prescribes.
+
+### Rest
+
+Typical range:
+
+- 2 to 5 minutes.
+
+### Tempo
+
+Controlled ascent and controlled descent.
+
+The descent is never a drop: grip is at its weakest at the end of an ascent,
+and that is precisely when an uncontrolled descent occurs.
+
+### Progression
+
+- number of ascents,
+- climbed height,
+- reduced assistance (foot lock, leg drive, partial height, seated start),
+- rope characteristics,
+- never by descending under exhausted grip.
+
+### Limits of Use
+
+This category must not be used:
+
+- when the prescribed unit is anything other than a complete ascent;
+- to prescribe partial climbs counted as hand transitions;
+- to accumulate volume once grip security is lost, which terminates the set
+  regardless of the ascents remaining.
+
+## Grip Hand-Pull Work
+
+### Purpose
+
+Grip-integrated pulling where the athlete draws a resistance in
+hand-over-hand fashion, and one pull of one hand is the unit of work.
+
+A hand-over-hand pull is one hand's action, not one execution of a whole
+movement. It is therefore neither a repetition nor an ascent, and the Volume
+Metrics rule below forbids treating it as either.
+
+### Admissible Exercises
+
+Exercises whose prescribed unit is a **hand-over-hand pull** and whose
+limiting factor is grip security.
+
+Rope Pull is the first documented example. Any future hand-over-hand pulling
+exercise counted in pulls belongs here.
+
+### Excluded Exercises
+
+- complete ascents — Grip Climb Strength covers those;
+- complete repetitions of a whole movement — Grip Repetition Strength
+  covers those;
+- the same exercise prescribed by distance travelled — Loaded Carries cover
+  distance;
+- the same exercise prescribed as timed work intervals.
+
+An exercise may contribute one of its prescriptions to this category without
+its distance-based or interval-based prescriptions belonging to it.
+
+### Sets
+
+Typical range:
+
+- 3 to 5 sets.
+
+### Hand Pulls
+
+Typical range:
+
+- 6 to 20 hand-over-hand pulls per set.
+
+### Intensity
+
+Expressed as technical effort, at high quality.
+
+External resistance is a documented determinant here — sled weight, rope
+angle, friction, rope diameter and pulling position all change the demand —
+but the records qualify it in words rather than figures, and the Intensity
+Determinants above already state that grip intensity is not represented
+accurately by external load alone. A qualitative resistance level is
+therefore not encoded as a number; what is prescribed is the technical
+standard the pulls must preserve.
+
+### Rest
+
+Typical range:
+
+- 90 seconds to 4 minutes.
+
+### Tempo
+
+Controlled throughout, at a consistent cadence.
+
+No uncontrolled slipping, and no trunk compensation to replace grip.
+
+### Progression
+
+- number of hand pulls,
+- external resistance,
+- rope diameter and friction,
+- pulling position,
+- never by allowing the rope to slip through the hands.
+
+### Limits of Use
+
+This category must not be used:
+
+- when the prescribed unit is anything other than a hand-over-hand pull;
+- to prescribe the same exercise by distance or by timed interval;
+- to accumulate volume once grip security is lost.
+
 ---
 
 # Volume Metrics
