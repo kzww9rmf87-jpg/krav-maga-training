@@ -8334,6 +8334,106 @@ export const BRIDGING: ExerciseDefinition = {
  * kind of adjustment already established for MED_BALL_SCOOP_TOSS
  * (rounding "Low to Moderate" up) and DRAGON_FLAG (Level 5 in 62_CORE) —
  * not an invented constraint.
+ *
+ * ---------------------------------------------------------------------------
+ * V0.1 REGISTRY CLOSURE — this is the ONE ExerciseDefinition of the 76 with
+ * no `exercisePrescriptionRegistry.ts` entry, and it stays that way BY
+ * DESIGN rather than by omission. `20-engine/36_REGISTRY_V0_1_CLOSURE.md`
+ * carries the full audit; the operative findings are recorded here so the
+ * next lot does not have to re-derive them.
+ *
+ * WHAT IS ALREADY DOCUMENTED, and would require no invention:
+ *
+ * - candidate method `straight_sets_repetitions` — the only method whose
+ *   contract fits. `controlled_mobility_sets` (the method all eight
+ *   existing movement entries use) declares `repetitions` a FORBIDDEN
+ *   volume field, and this fiche counts its volume in repetitions;
+ *   `timed_isometric_sets` would need a hold this fiche never prescribes.
+ *   Both `31_TRAINING_METHOD_CATALOGUE.md` Method 1 and
+ *   `32_MODULE_PRESCRIPTION_PROFILES.md` Module 2 authorize the pair
+ *   movement + straight_sets_repetitions;
+ * - volume "# Loading Profile — Typical Volume: 2-5 sets, 1-5 repetitions
+ *   per side", quoted literally;
+ * - laterality — "# Movement Context: ... Unilateral" AND "1-5 repetitions
+ *   per side", stated TWICE and never deduced from the biomechanics.
+ *   Resolves to `unilateral` with volumeInterpretation
+ *   `repetitions_per_side`, which `validateCompatibility.ts` accepts with
+ *   no conversion whatsoever. This exercise is the only `unilateral: true`
+ *   entry among the twelve movement exercises;
+ * - intensity `technical_effort: high_quality`, from "# Velocity Profile —
+ *   Controlled, Technical. Movement quality always precedes speed." and
+ *   the coaching cues. It is the ONLY honest intensity available: no RPE
+ *   and no RIR figure appears anywhere in this fiche, and "# Loading
+ *   Profile — Typical Intensity: Light to Moderate" is a qualitative
+ *   progression axis rather than a value — `IntensityCategoryRule` cannot
+ *   carry `resistance_category` at all (its `type` admits only
+ *   movement_intent, technical_effort and impact_intent), so no profile
+ *   rule could express those words even though the module permits the
+ *   type;
+ * - equipment `any_of[kettlebell, dumbbell]`, already encoded below. This
+ *   is also the only movement exercise whose requirement is an external
+ *   implement rather than a mat, a partner, a wall or floor space.
+ *
+ * THE THREE BLOCKERS, none of which engineering may resolve on its own:
+ *
+ * BLOCKER 1 — NO INTER-SET REST IS DOCUMENTED, while the candidate method
+ * requires one. `straight_sets_repetitions` declares `restPolicy:
+ * "required"`, and `31_TRAINING_METHOD_CATALOGUE.md` adds that "the exact
+ * rest type and value must be defined by the numerical profile". This
+ * fiche's only time values are "# Recovery Profile — Typical Recovery: 24
+ * hours" and "# Loading Profile — Frequency: 1-3 sessions/week", both
+ * INTER-SESSION recovery, plus "Move slowly."/"Own every transition."/
+ * "Never rush.", which are intra-set technical guidance. None of them is
+ * an inter-set rest, and none converts into seconds without invention.
+ *
+ * BLOCKER 2 — THE SESSION ROLE IS UNDECIDABLE.
+ * `straight_sets_repetitions` supports primary/secondary/accessory/
+ * robustness/corrective and NOT `technical`; the movement module allows
+ * technical/corrective/primer/secondary/accessory/recovery. The
+ * intersection is exactly {secondary, accessory, corrective} — so this
+ * would also be the first movement entry at a non-technical role. The
+ * fiche does not choose: "# Recovery Profile — Can be integrated into
+ * warm-ups, strength sessions or recovery days" spans three different
+ * roles and therefore determines none. Contrast
+ * `grip_repetition_strength_v0_1`, whose `secondary` role is grounded in
+ * `65_GRIP/00_OVERVIEW.md`'s own "Placement Within the Session" section;
+ * this fiche has no equivalent section.
+ *
+ * BLOCKER 3 — NO GENERIC MOVEMENT DOCTRINE EXISTS TO CARRY IT, and none
+ * can honestly be written today. No numerical profile exists on the triple
+ * (movement, straight_sets_repetitions, *) among the 23. Creating a
+ * doctrine before its second consumer IS permitted — Table Group 15 and
+ * Table Group 19 both state in writing that they were created rather than
+ * discovered — but both satisfy two conditions this exercise cannot: each
+ * is OWNED by a chapter document that was edited to carry it
+ * (`65_GRIP/00_OVERVIEW.md`, `64_POWER/00_OVERVIEW.md`), and each NAMES
+ * admissible future consumers (prowler pushes and explosive sled drags;
+ * any movement whose repetition ceiling is set by the hands). The movement
+ * module has no chapter at all — `50-exercises/` holds 62_CORE,
+ * 63_PLYOMETRICS, 64_POWER, 65_GRIP, 66_CARRIES and 67_BALLISTICS, and no
+ * movement chapter — and no second member is nameable among the 76: the
+ * other eleven movement exercises are all bilateral and none requires an
+ * external load, sharing with this one only the fact that some of them
+ * count repetitions, which Table Group 15's own "Units Excluded" section
+ * forbids as a grouping criterion. The remaining precedent, Partner
+ * Grappling Rounds, is the opposite case: written into
+ * `32_MODULE_PRESCRIPTION_PROFILES.md` from THREE documented members, with
+ * its volume validated as the union of their three Loading Profiles. Here
+ * there is nothing to intersect with.
+ *
+ * DECISION: this exercise stays in the KNOWLEDGE BASE and out of the
+ * PRESCRIPTION REGISTRY for V0.1. It remains fully selectable, filterable
+ * on its four acute contraindications, explainable and substitutable —
+ * only numerical prescription is closed to it. Integration requires an
+ * explicit business decision on the rest band and on the session role,
+ * plus an explicitly assumed doctrine. It must never be unblocked by
+ * reading "# Physiological Profile — Typical Set Duration: 20-60 seconds"
+ * as a volume: that field is a physiological descriptor present in 32
+ * fiches (BACK_SQUAT and PULL_UP both carry "5-40 seconds"), it is cited
+ * as a volume source nowhere in the registry, and ROTATOR_CUFF_TRAINING
+ * carries the identical "20-60 seconds" while being prescribed in
+ * sets x repetitions.
+ * ---------------------------------------------------------------------------
  */
 export const TURKISH_GET_UP: ExerciseDefinition = {
   id: "turkish_get_up",
