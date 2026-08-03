@@ -48,93 +48,52 @@ function toSource(input: PrescribeExerciseInput): ExercisePrescriptionSource {
 // -----------------------------------------------------------------------------
 
 /**
- * Every `EquipmentType` a fully-equipped gym declares. Built from the
- * knowledge base's own vocabulary rather than a hand-written list, so a new
- * `EquipmentType` never silently narrows this scenario's environment.
+ * A real barbell gym: free weights and a bar, no cable, no band, no
+ * declared `open_space`.
+ *
+ * This scenario deliberately no longer relies on a hand-written capability
+ * list. When this test was written for Lot 1 it did, and the omissions it
+ * observed (`pallof_press`, `assault_bike_intervals`) were artifacts of
+ * that missing translation — Lot 2 derives capabilities from the
+ * environment, so those two now prescribe correctly and can no longer
+ * demonstrate anything.
+ *
+ * The omission asserted below is a GENUINE one that survives Lot 2:
+ * `hollow_body_hold` is eligible on space alone (the Knowledge Base gates
+ * it on `space >= very_limited` and no equipment) but its registry entry
+ * requires the `open_space` capability, which this athlete never declared.
+ * The two layers genuinely disagree about what the exercise needs, and no
+ * equipment derivation can or should paper over that — see
+ * `deriveEquipmentCapabilities.test.ts`, which records the same three
+ * asymmetries from the other side.
  */
-const FULLY_EQUIPPED_GYM = [
+const BARBELL_GYM = [
   "bodyweight",
   "barbell",
-  "dumbbell",
-  "kettlebell",
-  "medicine_ball",
-  "sandbag",
-  "cable_machine",
-  "resistance_band",
-  "pull_up_bar",
-  "dip_bars",
   "bench",
   "rack",
   "plates",
-  "sled",
-  "rope",
-  "towel",
-  "box",
-  "mat",
-  "heavy_bag",
-  "cardio_machine",
-  "rowing_ergometer",
-  "open_space",
-  "wall",
-  "trap_bar",
-  "plyometric_box",
-  "ab_wheel",
-  "pinch_grip_implement",
-  "slam_ball",
-  "rigid_anchor_support",
-  "knee_protection_pad",
-  "farmer_handle",
-  "battle_rope",
-  "rope_anchor_point",
+  "pull_up_bar",
+  "dumbbell",
+  "kettlebell",
 ] as const;
-
-/**
- * A barbell-gym capability set that deliberately omits
- * `cable_or_band_resistance` and `cardio_machine`. This is not a contrived
- * restriction: `PrescriptionExecutionContext.availableEquipmentCapabilities`
- * uses a different vocabulary from `TrainingEnvironment.availableEquipment`
- * (`EquipmentCapabilityId` vs `EquipmentType`, with no mapping between them
- * in V0.1), so an athlete whose environment declares a cable machine can
- * still end up without the capability that `pallof_press` requires. That
- * mismatch is exactly what produced the audit's silent drop.
- */
-const BARBELL_GYM_CAPABILITIES: readonly Identifier[] = [
-  "barbell",
-  "bench",
-  "rack",
-  "plates",
-  "dumbbell",
-  "kettlebell",
-  "pull_up_bar",
-  "mat",
-  "open_space",
-];
 
 function makeRealKnowledgeBaseInput(): EngineInput {
   return makeValidInput({
-    // A combat athlete, not the bare fixture default. `primaryCombatSport`
-    // feeds `transferValue` scoring, and without it the `core` module ranks
-    // the bodyweight-only `hollow_body_hold` first — which prescribes fine
-    // and hides the very gap this scenario exists to reproduce.
     athleteProfile: makeAthleteProfile({
       experience: { generalTrainingLevel: "intermediate", primaryCombatSport: "krav_maga" },
     }),
     environment: {
       locationType: "gym",
-      availableEquipment: FULLY_EQUIPPED_GYM.map((type) => ({ type })),
-      availableSpace: "large",
-      usableWall: true,
-      throwingAllowed: true,
-      jumpingAllowed: true,
-      sprintingAllowed: true,
+      availableEquipment: BARBELL_GYM.map((type) => ({ type })),
+      availableSpace: "moderate",
       floorSafe: true,
-      partnerAvailable: true,
     },
     request: makeRequest({
       requestId: "audit-lot-1",
       durationMinutes: 45,
       primaryObjective: { adaptationDomain: "maximum_strength" },
-      requiredModules: ["grip", "core", "conditioning"],
+      requiredModules: ["core"],
     }),
   });
 }
@@ -142,7 +101,11 @@ function makeRealKnowledgeBaseInput(): EngineInput {
 /**
  * Runs the real scenario the way a caller must today: one pass to learn
  * which exercises were selected, then a source lookup, then the real run.
- * (Collapsing this into a single call is Lot 2/4 work, not this lot's.)
+ * (Collapsing this into a single call is later work, not this lot's.)
+ *
+ * Equipment capabilities are derived by CAS from the same
+ * `TrainingEnvironment` the engine already received — the caller supplies no
+ * capability list at all.
  */
 function runRealKnowledgeBaseScenario() {
   const input = makeRealKnowledgeBaseInput();
@@ -161,7 +124,7 @@ function runRealKnowledgeBaseScenario() {
   const { sources } = buildEngineSessionPrescriptionSources(selectedExerciseIds, {
     rangeContext: "normal",
     athleteReferences: [],
-    availableEquipmentCapabilities: BARBELL_GYM_CAPABILITIES,
+    environment: input.environment,
   });
 
   const result = runEngine(input, undefined, sources);
@@ -177,43 +140,30 @@ describe("selected-but-unprescribed exercises — real knowledge base end to end
     const { selectedExerciseIds, result } = runRealKnowledgeBaseScenario();
 
     // 1. Several exercises are present in the session draft.
-    expect(selectedExerciseIds).toEqual([
-      "chest_supported_row",
-      "plate_pinch",
-      "pallof_press",
-      "assault_bike_intervals",
-    ]);
+    expect(selectedExerciseIds).toEqual(["chest_supported_row", "hollow_body_hold"]);
 
     if (result.prescription?.status !== "prescribed") {
       throw new Error(`Expected status "prescribed", got "${result.prescription?.status}".`);
     }
 
-    // 2. + 3. The primary exercise is prescribed; support exercises are not.
+    // 2. + 3. The primary exercise is prescribed; the support one is not.
     const prescribedIds = result.prescription.session.exercises.map(
       (prescribedExercise) => prescribedExercise.prescription.exerciseId,
     );
-    expect(prescribedIds).toEqual(["chest_supported_row", "plate_pinch"]);
+    expect(prescribedIds).toEqual(["chest_supported_row"]);
 
     // 4. The status deliberately stays "prescribed" — unchanged by this lot.
     expect(result.prescription.status).toBe("prescribed");
 
-    // 5. + 7. + 8. The omitted exercises are named, with role and exact code.
+    // 5. + 7. + 8. The omitted exercise is named, with role and exact code.
     expect(result.prescription.unprescribedSelectedExercises).toEqual([
       {
-        exerciseId: "pallof_press",
+        exerciseId: "hollow_body_hold",
         moduleId: "core",
         required: false,
         reasonCode: "PRESCRIPTION_SOURCE_NOT_PROVIDED",
         reason:
-          'No prescription source data (role, capabilities, instructions, stop conditions, athlete references, load profile) is available for exercise "pallof_press".',
-      },
-      {
-        exerciseId: "assault_bike_intervals",
-        moduleId: "conditioning",
-        required: false,
-        reasonCode: "PRESCRIPTION_SOURCE_NOT_PROVIDED",
-        reason:
-          'No prescription source data (role, capabilities, instructions, stop conditions, athlete references, load profile) is available for exercise "assault_bike_intervals".',
+          'No prescription source data (role, capabilities, instructions, stop conditions, athlete references, load profile) is available for exercise "hollow_body_hold".',
       },
     ]);
 
@@ -242,8 +192,7 @@ describe("selected-but-unprescribed exercises — real knowledge base end to end
 
     // 10. Warnings are consistent with the decision — one per omission.
     expect(result.decisionTrace.warnings).toEqual([
-      'Exercise "pallof_press" (module "core") was selected for this session but could not be prescribed (PRESCRIPTION_SOURCE_NOT_PROVIDED).',
-      'Exercise "assault_bike_intervals" (module "conditioning") was selected for this session but could not be prescribed (PRESCRIPTION_SOURCE_NOT_PROVIDED).',
+      'Exercise "hollow_body_hold" (module "core") was selected for this session but could not be prescribed (PRESCRIPTION_SOURCE_NOT_PROVIDED).',
     ]);
   });
 
@@ -264,15 +213,14 @@ describe("selected-but-unprescribed exercises — real knowledge base end to end
     if (omissions === undefined) {
       throw new Error("A freshly serialized output must always carry unprescribedSelectedExercises.");
     }
-    expect(omissions.map((gap) => gap.exerciseId)).toEqual(["pallof_press", "assault_bike_intervals"]);
+    expect(omissions.map((gap) => gap.exerciseId)).toEqual(["hollow_body_hold"]);
 
-    // The omitted exercises are still visible in the session draft — this
-    // lot removes nothing from the athlete's session.
+    // The omitted exercise is still visible in the session draft — this lot
+    // removes nothing from the athlete's session.
     const draftIds = output.sessionDraft.modules.flatMap((sessionModule) =>
       sessionModule.exercises.map((exercise) => exercise.exerciseId),
     );
-    expect(draftIds).toContain("pallof_press");
-    expect(draftIds).toContain("assault_bike_intervals");
+    expect(draftIds).toContain("hollow_body_hold");
 
     // Every omitted exercise resolves to a display name, so a consumer can
     // render it without reaching into any engine-internal catalog.
@@ -280,7 +228,7 @@ describe("selected-but-unprescribed exercises — real knowledge base end to end
       expect(output.exerciseReferences[gap.exerciseId]).toBeDefined();
     }
 
-    expect(output.decisionTrace.warnings).toHaveLength(2);
+    expect(output.decisionTrace.warnings).toHaveLength(1);
   });
 
   test("12. + 13. the scenario is deterministic and never mutates the knowledge base", () => {

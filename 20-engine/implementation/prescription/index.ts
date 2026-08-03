@@ -35,6 +35,7 @@ export * from "./prescribeEngineSession";
 // Canonical registry vocabularies (equipment, athlete references, duration
 // profiles, source-rule identifier convention) and cross-entry validators
 export * from "./equipmentCapabilities";
+export * from "./deriveEquipmentCapabilities";
 export * from "./athleteReferenceCatalog";
 export * from "./durationEstimationProfiles";
 export * from "./sourceRuleIdentifiers";

@@ -24,8 +24,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { runEngine } from "../index";
-import type { ExercisePrescriptionSource } from "../prescription/buildPrescriptionInput";
-import { getExercisePrescriptionSource } from "../prescription/exercisePrescriptionRegistry";
+import { buildEngineSessionPrescriptionSources } from "../prescription/buildEngineSessionPrescriptionSources";
 import { serializeEngineRunResult } from "../sessionOutput/serializeEngineRunResult";
 import { makeExercise, makeValidInput } from "../__tests__/fixtures";
 import { makeOneRepMaxReference } from "../__tests__/prescription/fixtures";
@@ -50,24 +49,32 @@ const FIXTURE_PATH = path.join(SCRIPT_DIRECTORY, "..", "sessionOutput", "fixture
  * prone to drifting from what actually generated the committed file.
  */
 export function buildScenario() {
-  const input = makeValidInput();
+  // The environment declares equipment, never capabilities: CAS derives
+  // `barbell`/`bench`/`rack`/`plates` itself via `deriveEquipmentCapabilities`.
+  // Before that derivation existed this scenario hand-wrote the capability
+  // list, which is exactly the caller-side translation the engine now owns.
+  const input = makeValidInput({
+    environment: {
+      locationType: "gym",
+      availableEquipment: [{ type: "barbell" }, { type: "bench" }, { type: "rack" }, { type: "plates" }],
+      availableSpace: "moderate",
+    },
+  });
   // Matches the real pilot prescription registry's "bench_press" entry
   // (module "strength", role "primary") — the same scenario already
   // exercised end to end in `runEnginePrescription.test.ts`.
   const exercise = makeExercise({ id: "bench_press", name: "Bench Press" });
 
-  const sourceResult = getExercisePrescriptionSource("bench_press", {
+  const { sources, failures } = buildEngineSessionPrescriptionSources(["bench_press"], {
     rangeContext: "normal",
     athleteReferences: [makeOneRepMaxReference({ value: 100 })],
-    availableEquipmentCapabilities: ["barbell", "bench", "rack", "plates"],
+    environment: input.environment,
   });
-  if (!sourceResult.ok) {
-    throw new Error(`Fixture scenario setup failed: ${sourceResult.message}`);
+  if (failures.length > 0) {
+    throw new Error(`Fixture scenario setup failed: ${failures.map((failure) => failure.message).join(" ")}`);
   }
 
-  const prescriptionSources = new Map<string, ExercisePrescriptionSource>([["bench_press", sourceResult.source]]);
-
-  return { input, exercises: [exercise], prescriptionSources };
+  return { input, exercises: [exercise], prescriptionSources: sources };
 }
 
 function main(): void {
