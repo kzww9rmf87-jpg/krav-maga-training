@@ -104,7 +104,7 @@ describe("heavy_bag_power_intervals — registry, knowledge base, profile and eq
   });
 
   test("3. the numerical profiles went from 17 to 18 — INT-POWER, implemented once, by the preceding commit; a later lot added GRIP-REPETITION-STRENGTH, bringing the total to 22", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID)).toHaveLength(1);
   });
 
@@ -813,7 +813,7 @@ describe("heavy_bag_power_intervals — determinism and non-regression", () => {
     ]);
 
     // Exactly one profile and one equipment id were added by this whole lot.
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
     expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(32);
     expect(getNumericalPrescriptionProfileById(PROFILE_ID)!.sourceRuleIds).toEqual([
       "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",

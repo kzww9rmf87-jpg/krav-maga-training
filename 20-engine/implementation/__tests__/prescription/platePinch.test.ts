@@ -98,7 +98,7 @@ describe("plate_pinch — registry, knowledge base, profile and equipment counts
   });
 
   test("3. the numerical profiles went from 16 to 17 — ISO-GRIP, implemented once, by the preceding commit; later lots added INT-POWER then GRIP-REPETITION-STRENGTH, bringing the total to 22", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID)).toHaveLength(1);
   });
 
@@ -820,7 +820,7 @@ describe("plate_pinch — determinism, non-mutation and non-regression", () => {
     // running totals and have since moved: later lots added heavy_bag, then
     // battle_rope/rope_anchor_point, and the Table Group 14 profile.
     expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(32);
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
     expect(getNumericalPrescriptionProfileById(PROFILE_ID)!.sourceRuleIds).toEqual([
       "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
     ]);

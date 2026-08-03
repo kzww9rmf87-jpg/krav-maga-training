@@ -645,6 +645,111 @@ secondary
 
 Primary explosive quality must not be degraded to preserve optional work.
 
+## Loaded Locomotion Power
+
+This section is a module rule, not an exercise description. It states how CAS prescribes explosive displacement of an external resistance, generically, for any exercise that qualifies.
+
+**It is created here, and it does not claim to formalize a family this documentation already recognized.** `50-exercises/64_POWER/00_OVERVIEW.md` previously named four Loaded Power Categories — Upper-Body Propulsive, Pulling, Receiving and Ballistic Derivatives — all written from barbell derivatives performed on the spot, and all measuring work in repetitions. None could express an effort whose work is a distance covered under load. That document now carries the missing category; this section is its prescription rule.
+
+### Objective
+
+Develop horizontal force production, acceleration and repeated explosive output by driving an external resistance across the ground, while preserving posture and velocity.
+
+The adaptation is power. Metabolic cost is a documented consequence of some members, never the reason this rule is selected.
+
+### Admissible Exercises
+
+An exercise may use this rule when its own chapter documents all of the following:
+
+- an external resistance displaced across the ground by the athlete;
+- explosive or accelerative intent as the prescribed velocity;
+- repeated separate efforts, rather than one continuous bout;
+- a distance and a duration per effort.
+
+Sled Push is the first qualifying exercise. Future prowler pushes and explosive sled drags qualify on the same four criteria; nothing in this rule is written around one implement.
+
+### Excluded Exercises
+
+- loaded carries, where the load is held rather than driven and the objective is trunk and grip capacity under sustained load — `distance_carry_sets` covers those, and it is forbidden to this module;
+- continuous heavy walking or marching, which is one bout rather than repeated efforts;
+- unresisted sprinting, which has no external resistance to accelerate;
+- harness-towed resisted sprinting, which is documented as a variation of sprint work and is governed by sprint doctrine, not by this rule;
+- long conditioning intervals, where rest is chosen to sustain fatigue rather than to preserve output;
+- maximal-strength work without displacement, which belongs to the strength module.
+
+### Structure
+
+```text
+work intervals × duration per interval × distance per interval
+```
+
+Work intervals and duration per interval are required; distance per interval is required by this rule specifically, because a locomotor effort without a distance is not described. Sets, repetitions and rounds are forbidden by the method's own structure.
+
+### Distance and Duration Are Both Volume
+
+Neither is derived from the other, and neither is an indicator.
+
+CAS must not convert metres into seconds or seconds into metres. Doing so would fabricate a prescribed velocity, and would collapse the very distinction that makes velocity loss a usable termination signal.
+
+### Intensity
+
+```text
+movement_intent
+```
+
+The prescribed intent is explosive. Velocity, absolute load, percentage of one-rep-max and percentage of body mass are all permitted by the module but must not be supplied unless an exercise chapter documents a figure. No chapter in this category does.
+
+`resistance_category` is likewise not used: the model has no categorical resistance scale a profile rule can carry, and the qualitative loading words the chapters use — light through very heavy — have no documented conversion into one. Load remains a progression axis. See "Load" in the Power overview.
+
+### Rest Between Efforts
+
+```text
+120–240 seconds
+```
+
+Normal:
+
+```text
+180 seconds
+```
+
+```text
+ruleId: POWER_LOADED_LOCOMOTION_REST_V0_1
+```
+
+**This band is an engineering decision, stated as one.** No exercise chapter in this category documents inter-effort rest. It is never attributable to an exercise chapter, and it is not copied from a Strength, Loaded Carry or conditioning band. It adopts the Power overview's own Peak Power Development rest figure — the only rest range that document states — and applies it to repeated locomotor efforts, for the reasons recorded there.
+
+The normal value follows the Integer Resolution convention of `34_NUMERICAL_PRESCRIPTION_TABLES.md`.
+
+### Tempo
+
+Tempo is forbidden by the method, and this rule does not seek an exception.
+
+Explosive intent is an INTENSITY statement here, not a tempo. A concentric-eccentric tempo would describe phases a continuous locomotor effort does not have.
+
+### Stop Conditions
+
+Required categories are the method's own:
+
+```text
+pace_loss
+technical_failure
+fatigue_limit
+pain
+acute_symptom
+completion
+```
+
+`pace_loss` is the governing quality threshold for this rule: it carries the loss of acceleration that the Velocity Principle names as the end of the useful stimulus. An exercise whose own chapter documents a balance, equipment or surface concern may declare the corresponding category in addition.
+
+### Limits of Use
+
+- never for work whose load is carried rather than driven;
+- never to prescribe a number for load;
+- never to convert between distance and duration;
+- never as a conditioning structure — when rest is shortened to accumulate fatigue, the adaptation target has changed and the prescription belongs to the conditioning module;
+- never to accumulate efforts once acceleration or posture has stopped being maintained.
+
 ---
 
 # Module 4 — Strength

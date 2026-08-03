@@ -155,6 +155,26 @@ const SOURCE_REST_TEMPO = "27_REST_TEMPO_RULES_V0_1";
  */
 const SOURCE_PARTNER_GRAPPLING_REST = "MOVEMENT_PARTNER_GRAPPLING_REST_V0_1";
 
+/**
+ * The Power-module rest doctrine for repeated loaded locomotor efforts,
+ * written in 32_MODULE_PRESCRIPTION_PROFILES.md ("Module 3 — Power → Loaded
+ * Locomotion Power → Rest Between Efforts") and in
+ * 50-exercises/64_POWER/00_OVERVIEW.md for this lot.
+ *
+ * Its own identifier for the same reason as the partner-grappling band above:
+ * no exercise chapter in this category documents inter-effort rest, so the
+ * one number Table Group 19 cannot read off a chapter stays individually
+ * traceable to the decision that created it, and can never be mistaken for a
+ * value read off the sled push chapter.
+ *
+ * Unlike the partner-grappling band, this one is not invented from first
+ * principles: it ADOPTS the Power overview's own Peak Power Development rest
+ * figure (2-4 minutes), the only rest range that document states, and applies
+ * it to repeated locomotor efforts. That adoption is itself the engineering
+ * decision, and it is recorded rather than performed silently.
+ */
+const SOURCE_LOADED_LOCOMOTION_REST = "POWER_LOADED_LOCOMOTION_REST_V0_1";
+
 const integerRange = (min: number, normal: number, max: number): IntegerRange => ({
   min,
   normal,
@@ -1506,6 +1526,136 @@ export const NUMERICAL_PRESCRIPTION_PROFILES = [
     // subtype is required, and none is faked.
     requiresSportSpecificSubtype: false,
     sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_PARTNER_GRAPPLING_REST],
+  },
+  {
+    // -------------------------------------------------------------------------
+    // Table Group 19 — Loaded Locomotion Power
+    //
+    // The generic envelope for repeated explosive displacement of an external
+    // resistance across the ground.
+    //
+    // TRIPLE. `power / work_rest_intervals / secondary` is unique — no other
+    // profile sits on `power / work_rest_intervals` at any role — so implicit
+    // resolution succeeds. Consumers declare the id anyway, by the
+    // auditability convention Table Group 15 established.
+    //
+    // The role is the only honest option the contracts leave, and the reason
+    // is documentary rather than mechanical. `work_rest_intervals` does not
+    // support `primary`; the power module authorizes it at `conditioning`,
+    // `secondary` and `technical` only. `conditioning` would contradict
+    // 64_POWER/00_OVERVIEW.md's own "Power Versus Conditioning" section, which
+    // states that exercises from this category appear in conditioning only
+    // when the engine explicitly changes the adaptation target. `technical` is
+    // reserved by that same document for low-load Technical Acquisition.
+    //
+    // THE FAMILY WAS CREATED, NOT FOUND — the Table Group 15 situation, not
+    // the Table Group 14 situation, and it is declared as such. The Power
+    // overview named four Loaded Power Categories (Upper-Body Propulsive,
+    // Pulling, Receiving, Ballistic Derivatives), every one written from
+    // barbell derivatives performed on the spot and every one measuring work
+    // in repetitions. None can express an effort whose work is a distance
+    // covered under load. The category was written to close that gap; this
+    // profile implements it. It is not written around one exercise: the
+    // category is defined by mechanics, and its four admissibility criteria
+    // are stated in the module rule.
+    //
+    // VOLUME. Three dimensions, all required by this rule, all read from the
+    // source chapter and NONE derived from another:
+    //
+    //   work intervals  4-12    "# Loading Profile — Typical Volume: 4-12 pushes"
+    //   distance       10-40 m  same line: "10-40 meters"
+    //   duration        5-40 s  "# Physiological Profile — Typical Duration"
+    //
+    // The duration comes from a different section than the other two, which is
+    // the established precedent: sprint_intervals already takes its prescribed
+    // duration from its own Physiological Profile.
+    //
+    // DISTANCE AND DURATION ARE BOTH VOLUME, and this is the decisive property
+    // of this table. Neither is an indicator of the other, and the engine must
+    // never convert between them: a fabricated metres-per-second would invent
+    // a prescribed velocity the documentation does not state, and would
+    // destroy the very distinction that makes loss of speed a usable
+    // termination signal. `intervals` permits exactly this shape —
+    // `requiredVolumeFields` are work_intervals and duration, and distance is
+    // an OPTIONAL field of the same structure, so all three coexist without
+    // any structural strain.
+    //
+    // Normals by the Integer Resolution convention: 4-12 -> 8, 5-40 -> 22,
+    // 10-40 -> 25.
+    //
+    // INTENSITY = `movement_intent: explosive`, one rule and only one.
+    // "# Velocity Profile — Typical Training: Explosive. Accelerative." —
+    // `explosive` is the literal word, the same resolution battle_ropes and
+    // assault_bike_intervals already use. `maximal_acceleration` is NOT used:
+    // "Accelerative" is an adjective describing the effort, not a claim of
+    // maximal acceleration, and the stronger value would overstate the source.
+    //
+    // LOAD IS NOT DOSED, and the reason is structural rather than editorial.
+    // The chapters describe loading qualitatively ("Light to Very Heavy") and
+    // `IntensityCategoryRule` accepts only movement_intent, technical_effort
+    // and impact_intent — so `resistance_category` cannot be carried by a
+    // profile rule at all, whatever the module allows. Absolute load,
+    // percentage_1rm and percentage_body_mass would each require a figure no
+    // chapter gives. Load therefore stays a documented progression axis, the
+    // same reading that kept Power Output and Calories out of
+    // assault_bike_intervals.
+    //
+    // REST IS AN ENGINEERING DECISION, sourced to its own rule id and never to
+    // a chapter — see SOURCE_LOADED_LOCOMOTION_REST above. It adopts the Power
+    // overview's own Peak Power Development band (2-4 minutes), the only rest
+    // figure that document states, rather than inventing one or borrowing a
+    // Strength, Loaded Carry or conditioning band.
+    //
+    // TEMPO is null: the method forbids it, and a continuous locomotor effort
+    // has no concentric-eccentric phases to time. Explosive intent is carried
+    // by the intensity rule, which is where it belongs.
+    // -------------------------------------------------------------------------
+    profileId: "loaded_locomotion_power_intervals_v0_1",
+    version: "0.1",
+    moduleId: "power",
+    methodId: "work_rest_intervals",
+    exerciseRole: "secondary",
+    volume: {
+      structure: "intervals",
+      sets: null,
+      repetitions: null,
+      duration: {
+        type: "fixed_range",
+        range: durationRange(5, 22, 40),
+        scope: "per_interval",
+      },
+      distance: {
+        type: "fixed_range",
+        range: distanceRange(10, 25, 40),
+        scope: "per_interval",
+      },
+      rounds: null,
+      workIntervals: integerRange(4, 8, 12),
+    },
+    intensity: [
+      {
+        type: "movement_intent",
+        value: "explosive",
+        sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_INTENSITY_MODEL],
+      },
+    ],
+    rest: {
+      scope: "between_intervals",
+      seconds: integerRange(120, 180, 240),
+      sourceRuleIds: [
+        SOURCE_NUMERICAL_TABLES,
+        SOURCE_REST_TEMPO,
+        SOURCE_LOADED_LOCOMOTION_REST,
+      ],
+    },
+    tempo: null,
+    minimumDose: { ...emptyDose(), workIntervals: 4, durationSeconds: 5, distanceMeters: 10 },
+    maximumDose: { ...emptyDose(), workIntervals: 12, durationSeconds: 40, distanceMeters: 40 },
+    // Load is a progression axis in this category, never a prescribed number,
+    // so no exercise-specific load rule is demanded of consumers.
+    requiresExerciseSpecificLoadRule: false,
+    requiresSportSpecificSubtype: false,
+    sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_LOADED_LOCOMOTION_REST],
   },
 ] as const satisfies readonly NumericalPrescriptionProfile[];
 

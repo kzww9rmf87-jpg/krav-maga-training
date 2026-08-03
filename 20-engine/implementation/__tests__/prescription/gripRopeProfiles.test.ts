@@ -242,7 +242,7 @@ describe("Grip rope profiles — triple, role and executability", () => {
       expect(profile(id).sourceRuleIds).toEqual(["34_NUMERICAL_PRESCRIPTION_TABLES_V0_1"]);
       expect(profile(id).version).toBe("0.1");
     }
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
   });
 });
 

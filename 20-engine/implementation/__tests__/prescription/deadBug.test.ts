@@ -94,7 +94,7 @@ describe("dead_bug — registry, knowledge base and profile counts", () => {
   });
 
   test("3. the numerical prescription profiles stay at 22 — this lot created none", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
   });
 
   test("4. dead_bug exists in both the knowledge base and the registry, with consistent identifiers", () => {

@@ -932,7 +932,7 @@ describe("Partner Grappling Rounds — genericity and non-regression", () => {
 
     // Exactly one method and one profile were added.
     expect(TRAINING_METHOD_IDS).toHaveLength(10);
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
   });
 
   test("35. the whole registry still validates, and every previously resolvable triple still resolves", () => {

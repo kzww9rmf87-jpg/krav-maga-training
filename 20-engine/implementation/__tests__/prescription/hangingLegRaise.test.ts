@@ -108,7 +108,7 @@ describe("hanging_leg_raise — registry, knowledge base, profile and equipment 
   });
 
   test("3. the numerical prescription profiles stay at 22 — this lot created none", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
   });
 
   test("4. the equipment vocabulary stayed at 25 for this lot — the later heavy_bag_power_intervals lot added `heavy_bag`, bringing it to 26", () => {

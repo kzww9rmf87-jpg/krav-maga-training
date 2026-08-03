@@ -242,7 +242,7 @@ describe("GRIP-REPETITION-STRENGTH — triple, role and executability", () => {
     expect(matches).toHaveLength(1);
     expect(profile().version).toBe("0.1");
     expect(profile().sourceRuleIds).toEqual(["34_NUMERICAL_PRESCRIPTION_TABLES_V0_1"]);
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
   });
 
   test("10. the profile is executable; its triple was unique when written and is now SHARED with the two rope-unit profiles", () => {
@@ -518,7 +518,7 @@ describe("GRIP-REPETITION-STRENGTH — genericity and non-regression", () => {
     }
 
     // Exactly one profile was added, and every triple stays resolvable.
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
     expect(
       NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID),
     ).toHaveLength(1);

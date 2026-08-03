@@ -232,6 +232,24 @@ CAS examples:
 - Jump Shrug
 - selected Push Press executions
 
+## Loaded Locomotion Power
+
+Exercises in which the athlete accelerates an external resistance by moving it across the ground, rather than by projecting or catching an implement from a fixed stance.
+
+**This category is created here as a module rule. It does not claim to describe a family this document already recognized.** The four categories above were written from barbell derivatives performed on the spot, and every one of them measures work in repetitions of a movement. None of them can express an effort whose work is a distance covered under load. That gap is the reason this category exists, and it is stated rather than papered over.
+
+Primary qualities:
+
+- horizontal force production,
+- acceleration against external resistance,
+- repeated explosive effort with minimal eccentric cost.
+
+The category is defined by the mechanics — an external resistance displaced across the ground with maximal accelerative intent — and not by any single exercise. The Sled Push is the first documented example; any future exercise whose chapter documents repeated explosive displacement of an external load belongs here on the same terms.
+
+### Why This Is Not Conditioning
+
+The distinguishing question is what limits the effort. Here the limiter is the athlete's ability to keep accelerating the load, and the effort ends when acceleration and posture stop being maintained — not when a target work-to-rest ratio has been served. An identical movement prescribed for metabolic accumulation, with rest chosen to sustain fatigue rather than output, is conditioning work and belongs to the conditioning module's own interval doctrine.
+
 ---
 
 # Exercises Included
@@ -566,6 +584,54 @@ Typical structure:
 - no fatigue-driven repetition targets.
 
 Technical practice must not be misclassified as high-output power work.
+
+## Loaded Locomotion Power
+
+**Created here as a module rule, and stated as one.** The four structures above prescribe repetitions per set, because they were written for barbell derivatives performed on the spot. A loaded locomotor effort has no repetitions to count: its work is a distance covered under load, within a duration, repeated as separate efforts. The ranges below therefore describe a structure this document did not previously carry.
+
+Typical structure:
+
+- 4 to 12 separate efforts,
+- 10 to 40 metres per effort,
+- 5 to 40 seconds per effort,
+- maximal accelerative intent throughout,
+- rest sufficient to preserve acceleration between efforts,
+- termination when acceleration or posture can no longer be maintained.
+
+### Distance and Duration Are Both Prescribed
+
+Both are volume, and neither is an indicator of the other. Distance states how far the load travels in one effort; duration states how long that effort lasts. The same distance covered more slowly is a different stimulus, which is precisely why the Velocity Principle above treats loss of speed as a termination signal.
+
+CAS must never derive one from the other. Converting metres into seconds, or seconds into metres, would invent a velocity the chapter does not prescribe and would erase the distinction the two dimensions exist to preserve.
+
+### Load
+
+Load is a progression axis in this category, not a prescribed number.
+
+Exercise chapters here describe loading qualitatively — light through very heavy — and CAS has no documented scale that converts those words into a resistance, a percentage of body mass or an absolute weight. Inventing one would contradict the Core Principle above, which states that no universal load maximizes power for every exercise or athlete.
+
+What is prescribed instead is the intent and the termination criterion: accelerate maximally, and stop when acceleration decays. Load is selected by the athlete or coach to permit that, and it is progressed as a documented axis.
+
+### Rest Between Efforts
+
+Typical range:
+
+- 2 to 4 minutes between efforts.
+
+```text
+ruleId: POWER_LOADED_LOCOMOTION_REST_V0_1
+```
+
+**This band is an engineering decision made here, and it is stated as one.** No exercise chapter in this category documents inter-effort rest — the Sled Push chapter names rest only as a progression axis, never as a range — so the band must never be attributed to an exercise chapter.
+
+It is not invented from nothing either, and it is not borrowed from another module. It ADOPTS this document's own Peak Power Development band, which is the only rest figure the Power category states, and applies it to repeated locomotor efforts. The reasoning:
+
+- rest exists to restore output, which is this document's own stated Rest Policy for the whole category — "sufficient rest to preserve acceleration";
+- the floor is 2 minutes, because below it phosphocreatine restoration is incomplete for efforts of this length and the work drifts into glycolytic conditioning, which the "Power Versus Conditioning" section above separates explicitly;
+- the ceiling is 4 minutes, because beyond it the session stops being a repeated-effort stimulus and becomes a sequence of unrelated single efforts;
+- it is deliberately NOT a Strength band, a Loaded Carry band or a conditioning interval band: those are governed by other modules, serve other adaptations, and none of them is written to preserve acceleration.
+
+An exercise chapter that documents its own inter-effort rest overrides this band by narrowing, as any exercise-specific constraint does.
 
 ---
 

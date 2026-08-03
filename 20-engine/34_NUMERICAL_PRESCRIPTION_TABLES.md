@@ -2651,6 +2651,152 @@ The decisive difference from `combat_technical_rounds_v0_1`.
 
 ---
 
+# Table Group 19 — Loaded Locomotion Power
+
+## Objective
+
+Repeated explosive displacement of an external resistance across the ground, counted in separate efforts, each with a documented distance and duration.
+
+## Profile LOADED-LOCOMOTION-POWER
+
+```text
+profileId: loaded_locomotion_power_intervals_v0_1
+moduleId: power
+methodId: work_rest_intervals
+exerciseRole: secondary
+```
+
+This triple is unique — no other profile sits on `power / work_rest_intervals` at any role — so implicit resolution succeeds. Consuming entries should still declare the id explicitly, by the auditability convention Table Group 15 established.
+
+The role is `secondary` because it is the only honest option the contracts leave, and the reason is documentary rather than mechanical. `work_rest_intervals` does not support `primary` at all, and the power module authorizes it only at `conditioning`, `secondary` and `technical`. Of those three, `conditioning` would contradict the Power overview's own "Power Versus Conditioning" section, which states that exercises from this category appear in conditioning only when the engine explicitly changes the adaptation target; and `technical` is reserved by that document for low-load Technical Acquisition, which does not describe an exercise whose Motor Complexity is Low and whose Skill Requirement is Beginner.
+
+## Module Source
+
+The module rule is `32_MODULE_PRESCRIPTION_PROFILES.md`, "Module 3 — Power → Loaded Locomotion Power", and the category it implements is `50-exercises/64_POWER/00_OVERVIEW.md`, "Loaded Power Categories → Loaded Locomotion Power" and "General Prescription Ranges → Loaded Locomotion Power".
+
+**Like Table Group 15, and unlike Table Group 14, the family was CREATED rather than found.** The Power overview previously named four Loaded Power Categories, all written from barbell derivatives performed on the spot and all measuring work in repetitions; none could express an effort whose work is a distance covered under load. The rule was written to close that gap and this table implements it. This table does not claim to formalize a pre-existing family, and it is not written around one exercise: the category is defined by the mechanics, and any exercise meeting its four admissibility criteria consumes it on the same terms.
+
+## Structure
+
+```text
+intervals
+```
+
+## Volume — Work Intervals
+
+```text
+minimum: 4
+normal:  8
+maximum: 12
+```
+
+## Duration Per Interval
+
+```text
+minimum:  5 seconds
+normal:  22 seconds
+maximum: 40 seconds
+scope:   per_interval
+```
+
+## Distance Per Interval
+
+```text
+minimum: 10 metres
+normal:  25 metres
+maximum: 40 metres
+scope:   per_interval
+```
+
+**Distance and duration are both prescribed volume, and neither is derived from the other.** They come from different sections of the source chapter and are carried independently. CAS must never convert metres into seconds or seconds into metres: doing so would fabricate a prescribed velocity the documentation does not state, and would destroy the distinction that makes loss of speed a usable termination signal.
+
+Normals follow the Integer Resolution convention: 4–12 → 8, 5–40 → 22, 10–40 → 25.
+
+## Intensity
+
+```text
+movement_intent: explosive
+```
+
+One rule, and only one. Velocity, absolute load, percentage of one-rep-max, percentage of body mass and RPE are all permitted by the module but none is supplied: no chapter in this category documents a figure for any of them.
+
+`resistance_category` is not used either, and the reason is structural rather than editorial: `IntensityCategoryRule` accepts only `movement_intent`, `technical_effort` and `impact_intent`, so a categorical resistance value cannot be carried by a profile rule at all. The qualitative loading words the chapters use — light through very heavy — therefore stay a progression axis, exactly as the module rule states.
+
+## Rest
+
+```text
+scope:   between_intervals
+minimum: 120 seconds
+normal:  180 seconds
+maximum: 240 seconds
+```
+
+```text
+ruleId: POWER_LOADED_LOCOMOTION_REST_V0_1
+```
+
+**An engineering decision, declared as one, and traceable through its own rule id.** No exercise chapter in this category documents inter-effort rest. The band adopts the Power overview's own Peak Power Development figure — the only rest range that document states — and applies it to repeated locomotor efforts. It must never be attributed to an exercise chapter, and it is not a Strength, Loaded Carry or conditioning band.
+
+## Tempo
+
+```text
+none
+```
+
+Forbidden by the method. Explosive intent lives in the intensity rule; a locomotor effort has no concentric-eccentric phases to time.
+
+## Minimum Dose
+
+```text
+work intervals: 4
+duration:       5 seconds
+distance:       10 metres
+```
+
+## Maximum Dose
+
+```text
+work intervals: 12
+duration:       40 seconds
+distance:       40 metres
+```
+
+## Narrowing
+
+An entry declares its own chapter's bounds and the generic resolvers compute the intersection. A constraint narrows and never widens; a documented value outside this envelope becomes unreachable and that loss is recorded by the entry rather than resolved by moving the envelope.
+
+## Exercise-Specific Load
+
+```text
+not required
+```
+
+Load is a progression axis in this category, never a prescribed number, so no exercise-specific load rule is demanded.
+
+## Sport-Specific Subtype
+
+```text
+not required
+```
+
+Nothing in this category is sport-bound.
+
+## Admissible Future Consumers
+
+Any exercise whose chapter documents all four of: an external resistance displaced across the ground; explosive or accelerative prescribed velocity; repeated separate efforts; and a distance and duration per effort. Prowler pushes and explosive sled drags qualify on those criteria alone.
+
+## Limits of Use
+
+- never for a loaded carry, where the load is held rather than driven;
+- never for unresisted or harness-towed sprinting;
+- never for one continuous bout;
+- never to prescribe a number for load;
+- never to convert between distance and duration;
+- never as a conditioning structure — shortening rest to accumulate fatigue changes the adaptation target and moves the prescription to another module;
+- never to keep accumulating efforts once acceleration or posture has stopped being maintained.
+
+---
+
 # Exercise-Specific Numerical Requirement
 
 The generic profiles above are insufficient for final execution when an exercise requires:

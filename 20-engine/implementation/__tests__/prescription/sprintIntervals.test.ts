@@ -106,7 +106,7 @@ describe("sprint_intervals — registry, knowledge base and profile counts", () 
   });
 
   test("3. the numerical prescription profiles number 22 — this lot created none", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((profile) => profile.profileId === PROFILE_ID)).toHaveLength(1);
   });
 

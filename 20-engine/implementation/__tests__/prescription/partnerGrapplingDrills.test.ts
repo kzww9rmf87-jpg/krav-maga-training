@@ -186,7 +186,7 @@ describe("partner grappling drills — registry, knowledge base, profile and equ
   });
 
   test("3. the numerical profiles stay at 22 — this lot created none", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
     expect(getNumericalPrescriptionProfileById(PROFILE_ID)).toBeDefined();
     expect(TRAINING_METHOD_IDS).toHaveLength(10);
   });

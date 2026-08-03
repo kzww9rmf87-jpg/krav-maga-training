@@ -129,7 +129,7 @@ describe("registry Lot 1 — shared numerical profiles", () => {
   });
 
   test("the total number of NumericalPrescriptionProfiles is 22 (12 historical + the 3 Table Group 8 interval profiles + the Table Group 13 Core repetition profile + the Table Group 4 ISO-GRIP profile + the Table Group 14 power-interval profile + the Table Group 15 Grip repetition profile; this lot added none + the Table Group 16 and 17 Grip climb and hand-pull profiles + the Table Group 18 partner-grappling profile)", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
   });
 });
 

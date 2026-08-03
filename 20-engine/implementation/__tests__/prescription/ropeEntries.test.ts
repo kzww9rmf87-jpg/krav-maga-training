@@ -127,7 +127,7 @@ describe("rope entries — registry, knowledge base, profile and equipment count
   });
 
   test("3. the numerical profiles stay at 22 — this lot created none", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
     for (const { profile } of BOTH) {
       expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === profile)).toHaveLength(1);
     }

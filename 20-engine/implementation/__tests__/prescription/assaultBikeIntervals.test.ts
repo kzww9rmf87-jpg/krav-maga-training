@@ -102,7 +102,7 @@ describe("assault_bike_intervals — registry, knowledge base, profile and equip
   });
 
   test("3. the numerical profiles stayed at 18 for this lot — a later lot added GRIP-REPETITION-STRENGTH, bringing the total to 22", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID)).toHaveLength(1);
   });
 
@@ -870,7 +870,7 @@ describe("assault_bike_intervals — determinism, validation and doctrine integr
   });
 
   test("41. this lot created no numerical profile — the later Grip repetition lot did, bringing the total to 22", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID)).toHaveLength(1);
   });
 

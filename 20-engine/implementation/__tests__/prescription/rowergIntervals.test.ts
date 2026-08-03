@@ -103,7 +103,7 @@ describe("rowerg_intervals — registry, knowledge base and profile counts", () 
   });
 
   test("3. the numerical prescription profiles number 22 — this lot created none", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
   });
 
   test("4. rowerg_intervals exists in both the knowledge base and the registry, with consistent identifiers", () => {

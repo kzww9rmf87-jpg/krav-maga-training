@@ -103,7 +103,7 @@ describe("battle_ropes — registry, knowledge base, profile and equipment count
   });
 
   test("3. the numerical profiles stayed at 18 for this lot — a later lot added GRIP-REPETITION-STRENGTH, bringing the total to 22", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID)).toHaveLength(1);
   });
 
@@ -866,7 +866,7 @@ describe("battle_ropes — determinism, validation and non-regression", () => {
   });
 
   test("39. this lot created no numerical profile and no Table Group value moved — a later lot added GRIP-REPETITION-STRENGTH", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
 
     // The doctrine this entry consumes is byte-for-byte what the previous lot
     // published — narrowing happens at the entry, never in the table.
