@@ -126,8 +126,8 @@ describe("rope entries — registry, knowledge base, profile and equipment count
     expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(76);
   });
 
-  test("3. the numerical profiles stay at 21 — this lot created none", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(21);
+  test("3. the numerical profiles stay at 22 — this lot created none", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
     for (const { profile } of BOTH) {
       expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === profile)).toHaveLength(1);
     }

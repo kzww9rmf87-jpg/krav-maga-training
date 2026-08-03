@@ -46,6 +46,12 @@
  * - 2026-08-01 — `VolumeInterpretation` gains `climbs` and `hand_pulls`, so
  *   a rope ascent and a hand-over-hand pull can be counted as themselves
  *   instead of being flattened into `total_repetitions`.
+ * - 2026-08-03 — `TrainingMethodId` gains `partner_grappling_rounds`, so
+ *   resisted partner grappling has a method of its own instead of being
+ *   forced through `combat_rounds`, whose contract requires impact
+ *   equipment, an impact-limit rule and a sport-specific subtype. Additive:
+ *   `CasExercisePrescriptionV1.methodId` may now carry this member, and no
+ *   `Cas*V1` shape changed.
  */
 
 import type {

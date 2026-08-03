@@ -528,9 +528,9 @@ describe("resolveRest — controlled_mobility_sets_v0_1's documented zero-rest f
 // strictly positive rest minimum, or has no rest concept at all
 // (`not_applicable` / `seconds: null`) — neither path is reachable by
 // this guard change.
-describe("resolveRest — non-regression across all 21 numerical prescription profiles", () => {
-  test("exactly 21 profiles exist, and controlled_mobility_sets_v0_1 is the only one with a documented rest minimum of 0", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(21);
+describe("resolveRest — non-regression across all 22 numerical prescription profiles", () => {
+  test("exactly 22 profiles exist, and controlled_mobility_sets_v0_1 is the only one with a documented rest minimum of 0", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
 
     const zeroFloorProfiles = NUMERICAL_PRESCRIPTION_PROFILES.filter(
       (profile) => profile.rest !== null && profile.rest.seconds !== null && profile.rest.seconds.min === 0,
@@ -542,7 +542,7 @@ describe("resolveRest — non-regression across all 21 numerical prescription pr
     const otherProfiles = NUMERICAL_PRESCRIPTION_PROFILES.filter(
       (profile) => profile.profileId !== "controlled_mobility_sets_v0_1",
     );
-    expect(otherProfiles).toHaveLength(20);
+    expect(otherProfiles).toHaveLength(21);
 
     for (const profile of otherProfiles) {
       for (const rangeContext of ["reduced", "normal", "high"] as const) {

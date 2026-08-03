@@ -37,6 +37,12 @@ export const TRAINING_METHOD_IDS = [
   "continuous_aerobic_duration",
   "controlled_mobility_sets",
   "recovery_duration_work",
+  // Resisted partner grappling organized in rounds. Deliberately NOT a
+  // widening of `combat_rounds`: that contract requires the
+  // `impact_equipment` capability and the `impact_limit` and
+  // `equipment_failure` stop-condition categories, none of which a
+  // bare-handed clinch drill can honestly declare. See the contract below.
+  "partner_grappling_rounds",
 ] as const;
 
 export type TrainingMethodId = (typeof TRAINING_METHOD_IDS)[number];
@@ -99,7 +105,25 @@ export type PrescriptionCapabilityRequirement =
   | "technical_quality_observation"
   | "impact_equipment"
   | "cyclical_conditioning"
-  | "safe_throwing_space";
+  | "safe_throwing_space"
+  /**
+   * A resisting human training partner is structurally required: the
+   * prescribed work does not exist without one, and the resistance comes
+   * from that partner rather than from an implement.
+   *
+   * The exact counterpart of `impact_equipment` for grappling — one names
+   * the object that receives force, the other names the person who returns
+   * it. The `partner_resistance` LoadingMode (`validateCompatibility.ts`)
+   * already existed and describes the same fact from the loading side; this
+   * is the capability side, which is what a method contract can require.
+   *
+   * The requirement lives here rather than being restated per exercise on
+   * purpose: it belongs to the METHOD, so every future exercise using that
+   * method inherits it and none can opt out. The knowledge base's own
+   * `human_assistance: partner` requirement still governs ELIGIBILITY — the
+   * two are different gates on different layers, not a duplicated rule.
+   */
+  | "partner_resistance";
 
 // -----------------------------------------------------------------------------
 // Method contract
@@ -634,6 +658,142 @@ export const TRAINING_METHOD_CONTRACTS = {
     maximumDoseRuleId: "MAX_DOSE_RECOVERY_DURATION_WORK_V0_1",
     sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_NUMERICAL_TABLES],
   },
+
+  // ---------------------------------------------------------------------------
+  // Method 10 — Partner Grappling Rounds
+  //
+  // WHY THIS IS A NEW METHOD AND NOT A WIDENING OF `combat_rounds`.
+  //
+  // Four independent structural blockers, every one of them verifiable in
+  // the `combat_rounds` contract above rather than a matter of taste:
+  //
+  //  1. `requiredExerciseCapabilities` contains `impact_equipment`. A
+  //     bare-handed clinch drill has no impact equipment, so every grappling
+  //     entry would fail `validateCompatibility` with
+  //     `EXERCISE_REQUIRED_CAPABILITY_MISSING` — unless it falsely declared
+  //     a capability tag it does not have.
+  //  2. `requiredStopConditionCategories` contains `impact_limit` AND
+  //     `equipment_failure`. Neither is documented by any of the three
+  //     grappling chapters (checked directly): there is no impact to limit
+  //     and no implement to fail. Prescription would fail at the
+  //     `stop_conditions` stage, or succeed only on two invented conditions.
+  //  3. `supportedModules` is `["power", "conditioning"]`, and the movement
+  //     module's own `forbiddenMethods` lists `combat_rounds`. Both would
+  //     have to be edited, and the consequence is not local: `combat_rounds`
+  //     would become reachable from `movement` for STRIKING exercises too,
+  //     which is exactly the isolation the forbidden-list encodes today.
+  //  4. Table Group 9's own doctrine makes `combat_rounds` sport-bound:
+  //     `combat_technical_rounds_v0_1` carries
+  //     `requiresSportSpecificSubtype: true`, and the table states the
+  //     work-to-rest ratio "must come from the athlete's combat sport" and
+  //     "must not use one universal work-to-rest ratio". The three drills
+  //     this method serves are explicitly cross-discipline — each rates
+  //     five stars for Wrestling, BJJ, Judo, Sambo and MMA at once — so no
+  //     single sport subtype describes them.
+  //
+  // Weakening any of those four to save one method identifier would trade a
+  // precise contract for a permissive one. The catalogue documents
+  // `movement` among `combat_rounds`' POTENTIAL modules; the implementation
+  // deliberately narrowed it, and this method exists so that narrowing can
+  // stay.
+  //
+  // WHAT IS SHARED. The structural family is `combat_rounds` — the family
+  // vocabulary is closed and describes SHAPE (repetition_sets, timed_sets,
+  // intervals, …), and this is the same shape: repeated rounds of a
+  // documented duration. Same family, different method, different contract.
+  // ---------------------------------------------------------------------------
+  partner_grappling_rounds: {
+    methodId: "partner_grappling_rounds",
+    name: "Partner Grappling Rounds",
+    family: "combat_rounds",
+    version: "0.1",
+    status: "documented",
+    // Movement only. This method is not offered to `power` or
+    // `conditioning`: those already have `combat_rounds` and
+    // `work_rest_intervals`, and the knowledge base places all three
+    // grappling drills in `movement`.
+    supportedModules: ["movement"],
+    // A subset of the movement module's own allowed roles. `primer`,
+    // `corrective` and `recovery` are excluded: resisted work against a
+    // live opponent is neither a warm-up, a correction nor recovery.
+    supportedRoles: ["technical", "secondary", "accessory"],
+    volumeStructure: "rounds_duration",
+    requiredVolumeFields: ["rounds", "duration"],
+    optionalVolumeFields: [],
+    // `laterality` is forbidden, unlike `combat_rounds` where it is
+    // optional. A clinch exchange is not allocated per side: both athletes
+    // use both sides continuously, and the round is the unit. Declaring it
+    // optional would leave the door open to a per-side round count, which
+    // no chapter documents and which the drills cannot mean.
+    forbiddenVolumeFields: [
+      "sets",
+      "repetitions",
+      "distance",
+      "work_intervals",
+      "laterality",
+    ],
+    // `impact_intent` is absent — no strike is prescribed, so there is no
+    // impact whose intent could be dosed. `heart_rate` and `pace` are
+    // absent: neither is measurable in a clinch exchange without equipment
+    // no chapter requires. The three that remain are exactly the three the
+    // movement module allows and that a partner drill can honestly carry.
+    allowedIntensityTypes: ["technical_effort", "movement_intent", "rpe"],
+    requiredIntensityTypes: [],
+    // Rest between rounds is required. See Table Group 18 and
+    // 32_MODULE_PRESCRIPTION_PROFILES.md's "Partner Grappling Rounds"
+    // doctrine for the band and for the explicit statement that the band is
+    // an engineering decision, not a value read off an exercise chapter.
+    restPolicy: "required",
+    // Forbidden, for the same reason `combat_rounds` forbids it and one
+    // reason of its own: the rhythm of a resisted exchange is set by the
+    // opponent. All three chapters describe velocity as "Reactive" and
+    // "Variable" — words that mean the tempo is not the athlete's to
+    // prescribe.
+    tempoPolicy: "forbidden",
+    allowedTempoTypes: [],
+    stopConditionPolicy: "required",
+    // Eight categories: `combat_rounds`' eight, minus the two that assume
+    // impact and equipment, plus the two that a resisting human introduces.
+    //
+    // - `intensity_limit` — the partner's resistance exceeded the level the
+    //   drill is being run at. This is the one intensity channel a partner
+    //   drill genuinely has, and it is a stop condition rather than a dosed
+    //   value precisely because no chapter quantifies resistance.
+    // - `manual_termination` — either athlete asks to stop. Grappling is
+    //   the only family in the library where a SECOND person can end the
+    //   work, and no other category expresses that.
+    //
+    // `range_of_motion_loss` is deliberately absent: none of the three
+    // chapters documents a range-of-motion concern (checked directly). The
+    // movement module lists it, but module-level categories are not
+    // enforced by any resolver — an entry may still declare it when its own
+    // chapter documents one.
+    requiredStopConditionCategories: [
+      "technical_failure",
+      "coordination_loss",
+      "balance_loss",
+      "intensity_limit",
+      "pain",
+      "acute_symptom",
+      "manual_termination",
+      "completion",
+    ],
+    // Structurally parallel to `combat_rounds`, with `impact_equipment`
+    // replaced by `partner_resistance` — the same slot, the other contact
+    // model.
+    requiredExerciseCapabilities: [
+      "round_structure",
+      "technical_quality_observation",
+      "partner_resistance",
+    ],
+    minimumDoseRuleId: "MIN_DOSE_PARTNER_GRAPPLING_ROUNDS_V0_1",
+    maximumDoseRuleId: "MAX_DOSE_PARTNER_GRAPPLING_ROUNDS_V0_1",
+    sourceRuleIds: [
+      SOURCE_METHOD_CATALOGUE,
+      SOURCE_MODULE_PROFILES,
+      SOURCE_NUMERICAL_TABLES,
+    ],
+  },
 } as const satisfies Record<TrainingMethodId, TrainingMethodContract>;
 
 // -----------------------------------------------------------------------------
@@ -732,7 +892,19 @@ export const MODULE_PRESCRIPTION_CONTRACTS = {
         "corrective",
         "recovery",
       ], 5),
+      // Last in preference order on purpose. Resisted partner work is the
+      // most specialized and most fatiguing way this module can be
+      // prescribed; it must never be selected ahead of controlled mobility
+      // or repetition work when both are authorized.
+      authorization("partner_grappling_rounds", [
+        "technical",
+        "secondary",
+        "accessory",
+      ], 6, ["Requires a resisting training partner."]),
     ],
+    // `combat_rounds` stays forbidden here. `partner_grappling_rounds` was
+    // added precisely so that this line would not have to move: striking
+    // rounds remain unreachable from the movement module.
     forbiddenMethods: [
       "distance_carry_sets",
       "combat_rounds",

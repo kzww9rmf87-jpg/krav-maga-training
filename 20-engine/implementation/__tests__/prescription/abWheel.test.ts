@@ -104,8 +104,8 @@ describe("ab_wheel — registry, knowledge base and profile counts", () => {
     expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(76);
   });
 
-  test("13. the numerical prescription profiles went from 15 to 16 with the Core repetition profile; later lots added ISO-GRIP, INT-POWER then GRIP-REPETITION-STRENGTH, bringing the total to 21", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(21);
+  test("13. the numerical prescription profiles went from 15 to 16 with the Core repetition profile; later lots added ISO-GRIP, INT-POWER then GRIP-REPETITION-STRENGTH, bringing the total to 22", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID)).toHaveLength(1);
   });
 

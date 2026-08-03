@@ -165,3 +165,102 @@ export function intervalPaceLossCondition(spec: StopConditionSpec): StopConditio
 export function acuteSymptomCondition(spec: StopConditionSpec): StopConditionDefinition {
   return buildDefinition(spec, "acute_symptom", "exercise", "acute_symptom_report", "stop_exercise", "critical", "not_recoverable", "continuous");
 }
+
+// -----------------------------------------------------------------------------
+// Round-scoped family — `partner_grappling_rounds`
+//
+// Why these are separate factories rather than reuses of the set-scoped ones
+// above: `rounds_duration` lists `sets` in its `forbiddenVolumeFields`, so a
+// `scope: "set"` / `action: "end_set"` / `evaluationTiming: "during_set"`
+// condition would name a boundary that does not exist in the prescription it
+// is attached to. This is exactly the defect `intervalPaceLossCondition`
+// documents for the interval family, and nothing downstream would catch it —
+// `resolveStopConditions` and `validatePrescription` check category coverage
+// and copy `scope` through verbatim.
+//
+// `painCondition`, `acuteSymptomCondition` and `completionCondition` need no
+// round variant: all three are already `scope: "exercise"`, which is a real
+// boundary in every structure. (`painCondition`'s `during_set` TIMING is a
+// known historical inconsistency, documented at that factory; 71 registry
+// entries resolve through it and changing them is not this lot's business.)
+//
+// The shapes below follow 25_PRESCRIPTION_RULES.md's "Stop Condition
+// Priority" ladder — Emergency medical → Pain or acute symptom → Safety or
+// equipment failure → Technical failure → Method-specific quality threshold
+// → Intensity threshold → Volume completion — mapped onto the same
+// priorities the set-scoped factories already use for those tiers.
+// -----------------------------------------------------------------------------
+
+/**
+ * Repeated technical breakdown during a round. The round-structure analogue
+ * of `technicalFailureCondition`, same "Technical failure" tier, therefore
+ * the same `high` / `recoverable_same_exercise` shape.
+ */
+export function roundTechnicalFailureCondition(spec: StopConditionSpec): StopConditionDefinition {
+  return buildDefinition(spec, "technical_failure", "round", "technical_breakdown", "end_round", "high", "recoverable_same_exercise", "during_round");
+}
+
+/**
+ * Loss of balance, stance or footing during a round. The round-structure
+ * analogue of `balanceLossCondition`, unchanged tier.
+ */
+export function roundBalanceLossCondition(spec: StopConditionSpec): StopConditionDefinition {
+  return buildDefinition(spec, "balance_loss", "round", "balance_loss", "end_round", "high", "recoverable_same_exercise", "during_round");
+}
+
+/**
+ * Loss of coordinated control of the exchange — position, posture or
+ * connection no longer under the athlete's control.
+ *
+ * First active factory for `coordination_loss`, a category that has existed
+ * in the vocabulary and in the movement module's
+ * `requiredStopConditionCategories` without an implementation. Its source is
+ * the `partner_grappling_rounds` method contract, which requires it, plus
+ * the movement module profile, which lists it — the two source types
+ * 28_STOP_CONDITIONS.md accepts for activating a category.
+ *
+ * Placed in the "Safety" tier (`high`) alongside `balance_loss`: losing
+ * control of a resisting opponent is where a grappling injury happens, and
+ * both describe the same class of failure.
+ */
+export function roundCoordinationLossCondition(spec: StopConditionSpec): StopConditionDefinition {
+  return buildDefinition(spec, "coordination_loss", "round", "coordination_loss", "end_round", "high", "recoverable_same_exercise", "during_round");
+}
+
+/**
+ * The partner's resistance rose above the level the drill is being run at.
+ *
+ * First active factory for `intensity_limit`. This is the ONE intensity
+ * channel a partner drill genuinely has, and it is a stop condition rather
+ * than a dosed value because no chapter quantifies partner resistance —
+ * Table Group 18 says so explicitly.
+ *
+ * `medium`, from the ladder's "Intensity threshold" tier, which sits below
+ * technical failure and above volume completion.
+ * `recoverable_after_adjustment` is the accurate recoverability: the
+ * correction is the partner dialling resistance back, after which the work
+ * continues — it is not a reason to abandon the exercise.
+ */
+export function partnerResistanceLimitCondition(spec: StopConditionSpec): StopConditionDefinition {
+  return buildDefinition(spec, "intensity_limit", "round", "partner_resistance_excessive", "end_round", "medium", "recoverable_after_adjustment", "during_round");
+}
+
+/**
+ * Either athlete asks to stop.
+ *
+ * First active factory for `manual_termination`. Grappling is the only
+ * family in the library where a SECOND person can end the work, and no other
+ * category expresses that: the signal carries no stated cause, so the engine
+ * cannot classify it as pain, fatigue or technical failure.
+ *
+ * `continuous` timing — the signal is honoured whenever it is given, not
+ * only while a round is being scored. `end_round` and
+ * `recoverable_after_adjustment` because a stop request is not by itself a
+ * medical event: `pain` and `acute_symptom` remain the `critical` /
+ * `stop_exercise` channels for that, and they fire on their own. `high`
+ * places it in the safety tier, below those two and above technical failure
+ * ties.
+ */
+export function manualTerminationCondition(spec: StopConditionSpec): StopConditionDefinition {
+  return buildDefinition(spec, "manual_termination", "round", "stop_requested_by_either_partner", "end_round", "high", "recoverable_after_adjustment", "continuous");
+}

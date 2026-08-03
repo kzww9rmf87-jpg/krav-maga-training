@@ -107,8 +107,8 @@ describe("hanging_leg_raise — registry, knowledge base, profile and equipment 
     expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(76);
   });
 
-  test("3. the numerical prescription profiles stay at 21 — this lot created none", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(21);
+  test("3. the numerical prescription profiles stay at 22 — this lot created none", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
   });
 
   test("4. the equipment vocabulary stayed at 25 for this lot — the later heavy_bag_power_intervals lot added `heavy_bag`, bringing it to 26", () => {

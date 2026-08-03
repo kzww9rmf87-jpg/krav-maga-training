@@ -298,6 +298,8 @@ controlled_mobility_sets
 straight_sets_repetitions
 power_repetition_sets
 recovery_duration_work
+timed_isometric_sets
+partner_grappling_rounds
 ```
 
 ## Preferred Method Order
@@ -307,7 +309,22 @@ controlled_mobility_sets
 → straight_sets_repetitions
 → power_repetition_sets
 → recovery_duration_work
+→ timed_isometric_sets
+→ partner_grappling_rounds
 ```
+
+`partner_grappling_rounds` is last on purpose. Resisted partner work is the most specialized and most fatiguing way this module can be prescribed, and it must never be selected ahead of controlled mobility or repetition work when both are authorized.
+
+## Forbidden Methods
+
+```text
+distance_carry_sets
+combat_rounds
+work_rest_intervals
+continuous_aerobic_duration
+```
+
+`combat_rounds` remains forbidden. `partner_grappling_rounds` exists so that this prohibition does not have to move: striking rounds stay unreachable from this module.
 
 ## Allowed Roles
 
@@ -374,6 +391,141 @@ recovery
 → technical
 → primer
 ```
+
+---
+
+## Partner Grappling Rounds
+
+This section is a module rule, not an exercise description. It states how CAS prescribes resisted standing grappling, generically, for any exercise that qualifies. It is written from the shared structure of a documented family and must not be read as a description of any single drill.
+
+### Objective
+
+Develop positional control, tactile decision-making and technical efficiency against a resisting human opponent, organized in rounds, without prescribing a strike.
+
+The adaptation is technical and neuromotor first. Conditioning is a documented consequence in some members of the family, never the reason this method is selected.
+
+### Partner Is Mandatory
+
+The work does not exist without a second person. A training partner is required, and the requirement is structural rather than per-exercise: it is declared on the method contract (`partner_resistance`), so every exercise using this method inherits it and none can waive it.
+
+The knowledge base's own `human_assistance: partner` requirement governs whether an exercise is ELIGIBLE at all. These are two gates on two layers and both apply; neither replaces the other.
+
+### Admissible Exercises
+
+An exercise may use this rule when its own chapter documents all of the following:
+
+- a standing partner drill with continuous engagement;
+- resistance supplied by the partner rather than by an implement;
+- a volume expressed as rounds × duration;
+- a technical standard the work must preserve.
+
+### Excluded Exercises
+
+- anything prescribing a strike, a throw to the ground or an impact target — those belong to `combat_rounds` and to a sport-specific subtype;
+- ground grappling, which no chapter in this family documents and whose safety and stop conditions differ;
+- unresisted technical drills, which are movement work in sets, not rounds;
+- work requiring impact equipment;
+- work whose volume is documented in sets, repetitions or distance rather than rounds.
+
+### Structure
+
+```text
+rounds × duration per round
+```
+
+Rounds and round duration are both required. Sets, repetitions, distance and intervals are forbidden, and so is laterality: a clinch exchange is not allocated per side.
+
+### Controlled Resistance
+
+Resistance is the defining variable of this method and CAS does not dose it.
+
+Exercise chapters in this family describe resistance as a PROGRESSION axis — the thing that increases as the athlete advances — and none of them defines resistance levels. Converting a progression axis into a prescribed value would invent a scale the library does not have.
+
+CAS therefore prescribes the technical standard the exchange must preserve, and treats resistance that exceeds the level the drill is being run at as a reason to end the round, not as a number in the prescription. A future `resistance_category` scale may change this; until one is documented generically, none is used.
+
+### Intensity
+
+```text
+technical_effort
+```
+
+RPE and RIR are permitted by the module but must not be supplied unless an exercise chapter documents one. No chapter in this family does.
+
+`movement_intent` is permitted but must not be used generically: members of this family disagree about velocity, some documenting explosive action and others prioritizing quality over speed.
+
+### Rest Between Rounds
+
+```text
+60–180 seconds
+```
+
+Normal:
+
+```text
+120 seconds
+```
+
+```text
+ruleId: MOVEMENT_PARTNER_GRAPPLING_REST_V0_1
+```
+
+**This band is an engineering decision made here, and it is stated as one.** No exercise chapter in this family documents inter-round rest — their only time values are round duration and inter-session recovery. The band must never be attributed to an exercise chapter, and it is not copied from Table Group 9, whose striking band is different and whose own rule forbids reusing one ratio across sports.
+
+The decision and its reasoning:
+
+- rest exists to restore TECHNICAL quality and grip, not to reach full metabolic recovery — every chapter in this family names sustained technical quality as its success criterion;
+- the floor is 60 seconds, because below one minute a pair cannot reset grips and position, and the round boundary becomes nominal: the work would be continuous, which is a different structure and a different method;
+- the ceiling is 180 seconds, because beyond three minutes the tactile and positional adaptation that justifies the drill decays and the session becomes intermittent conditioning;
+- the normal value follows the Integer Resolution convention of `34_NUMERICAL_PRESCRIPTION_TABLES.md`.
+
+An exercise chapter that does document its own inter-round rest overrides this band by narrowing, exactly as any other exercise-specific constraint does.
+
+### Tempo
+
+Tempo is forbidden.
+
+The rhythm of a resisted exchange is set by the opponent, not by the athlete. A tempo prescription would describe something the athlete cannot control.
+
+### Permitted Contact
+
+Contact is continuous, controlled and non-striking: grips, clinch, pressure and positional control.
+
+Striking, submission to failure and takedowns finished on the ground are outside this rule. An exercise documenting them needs a different method and its own safety analysis.
+
+### Safety
+
+- both athletes must know the drill's objective and its agreed level of resistance before the round starts;
+- either athlete may end the round at any moment, for any reason, without justifying it;
+- a documented contraindication in either athlete removes the exercise; it is never scaled down to fit;
+- resistance is agreed before the round, not negotiated during it.
+
+### Stop Conditions
+
+Required categories:
+
+```text
+technical_failure
+coordination_loss
+balance_loss
+intensity_limit
+pain
+acute_symptom
+manual_termination
+completion
+```
+
+`intensity_limit` carries excessive partner resistance. `manual_termination` carries a stop requested by either athlete — a signal no other category expresses, because it names no cause and the engine must not infer one.
+
+`impact_limit` and `equipment_failure` must not be declared: this rule prescribes no impact and requires no implement.
+
+`range_of_motion_loss` is not required generically — no chapter in this family documents a range-of-motion concern — but an exercise whose own chapter documents one may declare it.
+
+### Limits of Use
+
+- never for a drill without a resisting partner;
+- never to prescribe a number for partner resistance;
+- never as a substitute for sport-specific round structures, which belong to `combat_rounds` and require a sport subtype;
+- never to accumulate rounds once technical quality has stopped being maintained — the technical standard is the governing constraint, not the round count.
 
 ---
 

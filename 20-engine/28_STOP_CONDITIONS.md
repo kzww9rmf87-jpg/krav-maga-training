@@ -42,7 +42,8 @@ This document covers, for the current implementation:
 * the four Training Methods that currently require stop conditions (all nine method contracts declare `stopConditionPolicy: "required"`, but only four are used by an active exercise);
 * how stop conditions are resolved, validated and represented in the Decision Trace;
 * fallback behaviour when a required category is missing;
-* the nine categories that exist in the vocabulary or are required by contracts but have no active factory yet.
+* the round-scoped factory family, and the three categories activated with it (Section 20a);
+* the six categories that exist in the vocabulary or are required by contracts but have no active factory yet.
 
 It does not cover module selection, scoring, volume resolution, intensity resolution or rest/tempo resolution — those are documented in `26_INTENSITY_MODEL.md`, `27_REST_TEMPO_RULES.md`, `31_TRAINING_METHOD_CATALOGUE.md`, `32_MODULE_PRESCRIPTION_PROFILES.md` and `33_EXERCISE_PRESCRIPTION_CAPABILITIES.md`.
 
@@ -342,20 +343,66 @@ There is no fallback that invents a stop condition. If a required category or id
 
 ---
 
+# Round-Scoped Factories and the Partner Grappling Method
+
+`partner_grappling_rounds` (Method 10, `31_TRAINING_METHOD_CATALOGUE.md`) introduced the first `rounds_duration` method with an implemented numerical profile, and with it a family of **round-scoped factories** in `stopConditionRegistry.ts`.
+
+## Why Round-Scoped Factories Exist
+
+`rounds_duration` lists `sets` among its forbidden volume fields. A `scope: "set"` / `action: "end_set"` / `evaluationTiming: "during_set"` condition attached to such a prescription would name a boundary that does not exist in it. Nothing downstream catches this: `resolveStopConditions` and `validatePrescription` check category coverage and copy `scope` through verbatim.
+
+This is the same reasoning that produced `intervalPaceLossCondition` for the interval family, applied to rounds.
+
+`painCondition`, `acuteSymptomCondition` and `completionCondition` need no round variant: all three already resolve at `scope: "exercise"`, which is a real boundary in every volume structure.
+
+## Shapes
+
+```text
+roundTechnicalFailureCondition
+  technical_failure  round  technical_breakdown              end_round  high    recoverable_same_exercise      during_round
+
+roundBalanceLossCondition
+  balance_loss       round  balance_loss                     end_round  high    recoverable_same_exercise      during_round
+
+roundCoordinationLossCondition
+  coordination_loss  round  coordination_loss                end_round  high    recoverable_same_exercise      during_round
+
+partnerResistanceLimitCondition
+  intensity_limit    round  partner_resistance_excessive     end_round  medium  recoverable_after_adjustment   during_round
+
+manualTerminationCondition
+  manual_termination round  stop_requested_by_either_partner end_round  high    recoverable_after_adjustment   continuous
+```
+
+Priorities follow `25_PRESCRIPTION_RULES.md`'s "Stop Condition Priority" ladder — Emergency medical → Pain or acute symptom → Safety or equipment failure → Technical failure → Method-specific quality threshold → Intensity threshold → Volume completion — mapped onto the priorities the set-scoped factories already use for those tiers.
+
+## Three Categories Activated
+
+`coordination_loss`, `intensity_limit` and `manual_termination` moved from Section 20 to active status here. Each meets the three conditions this document requires:
+
+* **a real source** — the `partner_grappling_rounds` method contract requires all three, and `32_MODULE_PRESCRIPTION_PROFILES.md`'s "Partner Grappling Rounds" module rule states what each one carries. `coordination_loss` was additionally already required by the movement module profile;
+* **an explicit shape** — scope, trigger type, action, priority and recoverability are fixed above and justified at each factory;
+* **dedicated tests** — `partnerGrapplingRounds.test.ts`.
+
+Their meanings, which are what makes them distinct rather than redundant:
+
+* `coordination_loss` — control of the exchange is gone: position, posture or connection is no longer the athlete's. Safety tier, alongside `balance_loss`;
+* `intensity_limit` — the partner's resistance rose above the level the drill is being run at. This is the one intensity channel a partner drill has, and it is a stop condition rather than a dosed value precisely because no chapter quantifies partner resistance. Its recoverability is `recoverable_after_adjustment` because the correction is the partner dialling back, not abandoning the exercise;
+* `manual_termination` — either athlete asks to stop. Grappling is the only family in the library where a second person can end the work, and the signal carries no stated cause, so the engine must not classify it as pain, fatigue or technical failure. `pain` and `acute_symptom` remain the `critical` / `stop_exercise` channels and fire independently.
+
+---
+
 # Future Stop Condition Extensions
 
-The following nine categories exist in the `StopConditionCategory` vocabulary, or are required by at least one Training Method or Capability Module contract, but have **no active factory** in `stopConditionRegistry.ts` today:
+The following six categories exist in the `StopConditionCategory` vocabulary, or are required by at least one Training Method or Capability Module contract, but have **no active factory** in `stopConditionRegistry.ts` today:
 
 ```text
 acute_symptom
-coordination_loss
-intensity_limit
 pace_loss
 range_of_motion_loss
 environmental_hazard
 time_limit
 medical
-manual_termination
 ```
 
 For each:

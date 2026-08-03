@@ -112,8 +112,8 @@ describe("towel_pull_up — registry, knowledge base, profile and equipment coun
     expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(76);
   });
 
-  test("3. the numerical profiles went from 18 to 21 — the Grip repetition profile plus the Grip climb and hand-pull profiles", () => {
-    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(21);
+  test("3. the numerical profiles went from 18 to 21 — the Grip repetition profile plus the Grip climb and hand-pull profiles; the partner-grappling lot then brought the total to 22", () => {
+    expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(22);
     expect(NUMERICAL_PRESCRIPTION_PROFILES.filter((p) => p.profileId === PROFILE_ID)).toHaveLength(1);
   });
 

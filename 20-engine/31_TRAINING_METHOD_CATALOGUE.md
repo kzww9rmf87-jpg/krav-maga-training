@@ -175,6 +175,7 @@ work_rest_intervals
 continuous_aerobic_duration
 controlled_mobility_sets
 recovery_duration_work
+partner_grappling_rounds
 ```
 
 These methods form the minimum representative set required to cover:
@@ -188,7 +189,8 @@ These methods form the minimum representative set required to cover:
 - conditioning intervals;
 - aerobic work;
 - mobility;
-- and recovery.
+- recovery;
+- and resisted partner grappling rounds.
 
 ---
 
@@ -1090,6 +1092,149 @@ At minimum:
 - acute symptom;
 - inability to maintain recovery intensity;
 - planned duration completion.
+
+---
+
+# Method 10 — Partner Grappling Rounds
+
+## Identifier
+
+```text
+partner_grappling_rounds
+```
+
+## Purpose
+
+Organize resisted standing grappling against a live training partner into repeated rounds of a prescribed duration.
+
+## Family
+
+```text
+combat_rounds
+```
+
+The family names the STRUCTURE — repeated rounds of a documented duration — and this method shares that structure with Method 5. It does not share Method 5's contract, and the family vocabulary is not extended.
+
+## Why This Is Not Combat Rounds
+
+Method 5 cannot serve resisted grappling, for four reasons that are properties of its contract rather than matters of preference:
+
+1. it requires the `impact_equipment` exercise capability, which a bare-handed clinch drill does not have;
+2. it requires the `impact_limit` and `equipment_failure` stop-condition categories, neither of which any grappling chapter documents — there is no impact to limit and no implement to fail;
+3. its supported modules are `power` and `conditioning`, and the movement module forbids it; widening both would make striking rounds reachable from the movement module, which is precisely what that prohibition prevents;
+4. Table Group 9 binds it to a sport-specific subtype and states that its work-to-rest ratio "must come from the athlete's combat sport". The exercises this method serves are explicitly cross-discipline.
+
+Method 5 is left exactly as it is.
+
+## Volume Structure
+
+```text
+rounds_duration
+```
+
+## Supported Modules
+
+```text
+movement
+```
+
+Deliberately a single module. `power` and `conditioning` already have `combat_rounds` and `work_rest_intervals`, and the knowledge base places resisted partner drills in `movement`.
+
+## Supported Roles
+
+```text
+technical
+secondary
+accessory
+```
+
+A subset of the movement module's own roles. `primer`, `corrective` and `recovery` are excluded: resisted work against a live opponent is neither a warm-up, a correction nor recovery.
+
+## Required Volume Fields
+
+```text
+rounds
+duration
+```
+
+## Forbidden Volume Fields
+
+```text
+sets
+repetitions
+distance
+workIntervals
+laterality
+```
+
+`laterality` is forbidden rather than optional. A clinch exchange is not allocated per side — both athletes use both sides continuously, and the round is the unit.
+
+## Required Additional Fields
+
+```text
+rest between rounds
+technical instruction
+stop conditions
+```
+
+## Allowed Intensity Types
+
+```text
+technical_effort
+movement_intent
+rpe
+```
+
+`impact_intent` is excluded: no strike is prescribed, so there is no impact whose intent could be dosed. `heart_rate` and `pace` are excluded: neither is measurable in a clinch exchange without equipment no chapter requires.
+
+## Partner Resistance Is Not An Intensity Metric
+
+Partner resistance is the defining variable of this method and it is deliberately not dosed. Exercise chapters describe resistance as a progression AXIS, not as a prescribed level, and no chapter defines resistance levels. Excessive resistance is carried as a stop condition (`intensity_limit`), which is what the documents support.
+
+Inventing a `controlled_resistance` or `progressive_partner_resistance` value would require a generic, documented scale that does not exist. None is created here.
+
+## Rest Policy
+
+Rest between rounds is required.
+
+No exercise chapter in this family documents inter-round rest. The band is a Movement-module doctrine decision, stated in `32_MODULE_PRESCRIPTION_PROFILES.md`, and it is never attributed to an exercise chapter.
+
+## Tempo Policy
+
+```text
+forbidden
+```
+
+The rhythm of a resisted exchange is set by the opponent. Chapters in this family describe velocity as "Reactive" and "Variable" — which means the tempo is not the athlete's to prescribe.
+
+## Required Exercise Capabilities
+
+```text
+round_structure
+technical_quality_observation
+partner_resistance
+```
+
+Structurally parallel to Method 5, with `impact_equipment` replaced by `partner_resistance` — the same slot, the other contact model. The requirement lives on the method so that every exercise using it inherits a mandatory partner and none can opt out.
+
+## Stop-Condition Policy
+
+```text
+required
+```
+
+At minimum:
+
+- technical deterioration;
+- loss of coordinated control of the exchange;
+- loss of balance, stance or footing;
+- partner resistance above the level the drill is being run at;
+- pain;
+- dizziness or acute symptom;
+- a stop requested by either athlete;
+- planned round completion.
+
+`impact_limit` and `equipment_failure` are absent by construction. A stop requested by either athlete is unique to this method: grappling is the only family in which a second person can end the work.
 
 ---
 

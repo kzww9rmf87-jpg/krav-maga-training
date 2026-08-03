@@ -142,6 +142,19 @@ const SOURCE_NUMERICAL_TABLES = "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1";
 const SOURCE_INTENSITY_MODEL = "26_INTENSITY_MODEL_V0_1";
 const SOURCE_REST_TEMPO = "27_REST_TEMPO_RULES_V0_1";
 
+/**
+ * The Movement-module rest doctrine for resisted partner rounds, written in
+ * 32_MODULE_PRESCRIPTION_PROFILES.md ("Module 2 — Movement → Partner
+ * Grappling Rounds → Rest Between Rounds") for this lot.
+ *
+ * It exists as its own identifier, separate from `SOURCE_REST_TEMPO`, so
+ * that the one number in Table Group 18 that NO exercise chapter documents
+ * is individually traceable to the engineering decision that created it —
+ * and can never be mistaken for a value read off pummeling, wall_wrestling
+ * or grip_fighting.
+ */
+const SOURCE_PARTNER_GRAPPLING_REST = "MOVEMENT_PARTNER_GRAPPLING_REST_V0_1";
+
 const integerRange = (min: number, normal: number, max: number): IntegerRange => ({
   min,
   normal,
@@ -1369,6 +1382,130 @@ export const NUMERICAL_PRESCRIPTION_PROFILES = [
     requiresExerciseSpecificLoadRule: false,
     requiresSportSpecificSubtype: false,
     sourceRuleIds: [SOURCE_NUMERICAL_TABLES],
+  },
+  {
+    // -------------------------------------------------------------------------
+    // Table Group 18 — Partner Grappling Rounds
+    //
+    // The generic envelope for resisted standing grappling organized in
+    // rounds. It serves a real, documented family — three chapters that
+    // share a Primary Classification ("Combat-Specific Technique"), a
+    // Secondary Classification ("Partner Drill"), a Movement Context
+    // ("Standing / Partner / Continuous / Combat Specific") and a Loading
+    // Profile expressed as rounds × minutes. This is the Table Group 14
+    // situation, not the turkish_get_up or sled_push situation: the family
+    // was found, not invented around one exercise.
+    //
+    // TRIPLE. `movement / partner_grappling_rounds / technical` is unique —
+    // this is the only profile on the new method — so implicit resolution
+    // succeeds. Consumers should still declare the id explicitly, by the
+    // auditability convention Table Group 15 established.
+    //
+    // VOLUME = the UNION of the three chapters' Loading Profiles, exactly as
+    // Table Group 14 took the union of its two members:
+    //
+    //   pummeling       3–8  rounds   120–300 s   ("3–8 rounds, 2–5 minutes")
+    //   wall_wrestling  3–8  rounds   120–300 s   ("3–8 rounds, 2–5 minutes")
+    //   grip_fighting   3–10 rounds    30–180 s   ("3–10 rounds, 30 seconds–3 minutes")
+    //   ------------------------------------------------------------------
+    //   union           3–10 rounds    30–300 s
+    //
+    // and the union passes the validity test Table Group 14 set for itself:
+    // BOTH normals fall inside ALL THREE members' own ranges, so no chapter
+    // is prescribed a normal it never documents.
+    //
+    //   rounds   3–10  → 6.5 → 6 by Integer Resolution (round down)
+    //                    6 ∈ 3–8 ✓   6 ∈ 3–8 ✓   6 ∈ 3–10 ✓
+    //   duration 30–300 → 165
+    //                    165 ∈ 120–300 ✓   165 ∈ 120–300 ✓   165 ∈ 30–180 ✓
+    //
+    // The intersection (3–8 rounds, 120–180 s) is non-empty too, so one
+    // profile genuinely serves all three; a second profile would only split
+    // a family the documents keep together. Each entry narrows to its own
+    // chapter's bounds in Phase 5 and the generic resolvers compute the
+    // intersections, exactly as assault_bike_intervals does.
+    //
+    // INTENSITY = `technical_effort: high_quality`, and nothing else. No
+    // RPE and no RIR appear in any of the three chapters (counted directly:
+    // zero occurrences). What all three DO state is the technical standard —
+    // each names "Technical quality remains high" as a Success Criterion,
+    // each lists "Technical" in its Velocity Profile, and pummeling adds
+    // "Movement quality is prioritized over speed."
+    //
+    // PARTNER RESISTANCE IS NOT DOSED HERE, and that is a decision, not an
+    // omission. All three chapters list resistance under "Progression"
+    // ("Resistance", "Partner Skill"), which is a progression AXIS, not a
+    // prescribed value — the same reading that kept Power Output and
+    // Calories out of assault_bike_intervals. No chapter defines resistance
+    // levels, and the three do not even name the axis identically. The
+    // engine carries excessive resistance as a STOP CONDITION
+    // (`intensity_limit`) instead of a dosed number: that is what the
+    // documents support.
+    //
+    // `movement_intent` is deliberately unused although the method allows
+    // it: wall_wrestling and grip_fighting say "Explosive", pummeling says
+    // quality over speed. A generic profile cannot claim a velocity two of
+    // its three members document and the third contradicts.
+    //
+    // REST IS A NEW ENGINEERING DECISION, SOURCED TO DOCTRINE, NEVER TO A
+    // CHAPTER. None of the three chapters documents inter-round rest
+    // (checked directly: their only time values are round duration and
+    // 24–48 h inter-session recovery). The band below comes from
+    // 32_MODULE_PRESCRIPTION_PROFILES.md's "Partner Grappling Rounds"
+    // section, written for this lot, and its `sourceRuleIds` say so — it is
+    // NOT attributed to pummeling, wall_wrestling or grip_fighting, and it
+    // is NOT Table Group 9's striking band (60/60/120), which is a
+    // different band with a different normal and which that table forbids
+    // reusing across sports anyway.
+    //
+    // TEMPO is null: the method forbids it, and a resisted exchange has no
+    // tempo the athlete sets.
+    // -------------------------------------------------------------------------
+    profileId: "partner_grappling_rounds_technical_v0_1",
+    version: "0.1",
+    moduleId: "movement",
+    methodId: "partner_grappling_rounds",
+    exerciseRole: "technical",
+    volume: {
+      structure: "rounds_duration",
+      sets: null,
+      repetitions: null,
+      duration: {
+        type: "fixed_range",
+        range: durationRange(30, 165, 300),
+        scope: "per_round",
+      },
+      distance: null,
+      rounds: integerRange(3, 6, 10),
+      workIntervals: null,
+    },
+    intensity: [
+      {
+        type: "technical_effort",
+        value: "high_quality",
+        sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_INTENSITY_MODEL],
+      },
+    ],
+    rest: {
+      scope: "between_rounds",
+      seconds: integerRange(60, 120, 180),
+      sourceRuleIds: [
+        SOURCE_NUMERICAL_TABLES,
+        SOURCE_REST_TEMPO,
+        SOURCE_PARTNER_GRAPPLING_REST,
+      ],
+    },
+    tempo: null,
+    minimumDose: { ...emptyDose(), rounds: 3, durationSeconds: 30 },
+    maximumDose: { ...emptyDose(), rounds: 10, durationSeconds: 300 },
+    requiresExerciseSpecificLoadRule: false,
+    // The decisive difference from `combat_technical_rounds_v0_1`. That
+    // profile is sport-bound by its own table; this family is explicitly
+    // cross-discipline — each of the three chapters rates five stars for
+    // Wrestling, BJJ, Judo, Sambo and MMA simultaneously — so no sport
+    // subtype is required, and none is faked.
+    requiresSportSpecificSubtype: false,
+    sourceRuleIds: [SOURCE_NUMERICAL_TABLES, SOURCE_PARTNER_GRAPPLING_REST],
   },
 ] as const satisfies readonly NumericalPrescriptionProfile[];
 

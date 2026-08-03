@@ -73,6 +73,7 @@ work_rest_intervals
 continuous_aerobic_duration
 controlled_mobility_sets
 recovery_duration_work
+partner_grappling_rounds
 ```
 
 Only the module-method-role combinations defined in this document may be implemented.
@@ -2504,6 +2505,149 @@ rope_pull:  sets 3–5   hand pulls 6–20   rest 90–240 s
 - never for a unit other than a hand-over-hand pull;
 - never to prescribe the same exercise by distance or by timed interval;
 - never to keep accumulating volume once grip security is lost.
+
+---
+
+# Table Group 18 — Partner Grappling Rounds
+
+## Objective
+
+Resisted standing grappling against a live partner, counted in rounds of a documented duration.
+
+## Profile PARTNER-GRAPPLING-ROUNDS
+
+```text
+profileId: partner_grappling_rounds_technical_v0_1
+moduleId: movement
+methodId: partner_grappling_rounds
+exerciseRole: technical
+```
+
+This triple is unique — it is the only profile on this method — so implicit resolution succeeds. Consuming entries should still declare the id explicitly, by the auditability convention Table Group 15 established.
+
+## Module Source
+
+The module rule is `32_MODULE_PRESCRIPTION_PROFILES.md`, "Module 2 — Movement → Partner Grappling Rounds". Unlike Table Group 15, the family was FOUND, not created: three chapters share a Primary Classification ("Combat-Specific Technique"), a Secondary Classification ("Partner Drill"), a Movement Context ("Standing / Partner / Continuous / Combat Specific") and a Loading Profile expressed as rounds × minutes.
+
+## Why Not Table Group 9
+
+Table Group 9 is bound to a sport-specific subtype and states that its work-to-rest ratio must come from the athlete's combat sport. The members of this family are explicitly cross-discipline, each rating maximum transfer to Wrestling, Brazilian Jiu-Jitsu, Judo, Sambo and MMA simultaneously. Its method also requires impact equipment, an impact-limit rule and an equipment-failure rule, none of which apply here.
+
+## Documented Family Ranges
+
+```text
+pummeling        3–8  rounds   120–300 seconds
+wall_wrestling   3–8  rounds   120–300 seconds
+grip_fighting    3–10 rounds    30–180 seconds
+```
+
+### Rounds
+
+```text
+3–10 rounds
+```
+
+Normal:
+
+```text
+6 rounds
+```
+
+### Round Duration
+
+```text
+30–300 seconds
+```
+
+Normal:
+
+```text
+165 seconds
+```
+
+The envelope is the UNION of the three documented ranges, as Table Group 14 took the union of its two members, and it passes the validity test Table Group 14 set for itself: **both normals fall inside all three members' own ranges**, so no member is prescribed a normal its own chapter never documents.
+
+```text
+rounds   3–10   → 6.5 → 6  (Integer Resolution, rounded down)
+                  6 ∈ 3–8   6 ∈ 3–8   6 ∈ 3–10
+duration 30–300 → 165
+                  165 ∈ 120–300   165 ∈ 120–300   165 ∈ 30–180
+```
+
+The intersection (3–8 rounds, 120–180 seconds) is also non-empty, which is why one profile serves all three members. A second profile would split a family the documents keep together.
+
+### Intensity
+
+```text
+technical_effort: high_quality
+```
+
+No RPE and no RIR. Neither appears anywhere in any chapter of this family. What all three do state is the technical standard: each names sustained technical quality as a success criterion and each lists "Technical" in its Velocity Profile.
+
+`movement_intent` is not used generically. Members disagree about velocity — two document explosive action, one prioritizes movement quality over speed — and a generic profile cannot claim a velocity one of its members contradicts.
+
+### Partner Resistance Is Not Dosed
+
+Resistance appears in every chapter under Progression, which is a progression AXIS, not a prescribed level, and no chapter defines resistance levels. This is the same reading that kept power output and calorie targets out of the interval profiles.
+
+Excessive resistance is carried by the `intensity_limit` stop condition instead. Nothing in this table converts a qualitative resistance description into a number.
+
+### Rest
+
+```text
+60–180 seconds
+```
+
+Normal:
+
+```text
+120 seconds
+```
+
+Between rounds.
+
+```text
+ruleId: MOVEMENT_PARTNER_GRAPPLING_REST_V0_1
+```
+
+**This is the one value in this table that no exercise chapter documents.** It comes from the Movement-module rule named above, which states it as an engineering decision and gives its reasoning. It carries its own rule identifier so it can never be mistaken for a value read off a chapter, and it is not Table Group 9's striking band.
+
+### Tempo
+
+```text
+none
+```
+
+The method forbids tempo: the rhythm of a resisted exchange is set by the opponent.
+
+### Minimum Dose
+
+```text
+3 rounds × 30 seconds
+```
+
+### Maximum Dose
+
+```text
+10 rounds × 300 seconds
+```
+
+The maximum boundaries must not be combined automatically.
+
+### Sport-Specific Subtype
+
+```text
+not required
+```
+
+The decisive difference from `combat_technical_rounds_v0_1`.
+
+### Limits of Use
+
+- never for a drill without a resisting partner;
+- never to prescribe a number for partner resistance;
+- never as a substitute for a sport-specific round structure;
+- never to keep accumulating rounds once technical quality has stopped being maintained.
 
 ---
 
