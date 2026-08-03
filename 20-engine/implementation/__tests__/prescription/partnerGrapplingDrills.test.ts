@@ -171,8 +171,8 @@ function betweenRoundsRest(id: string, rangeContext: PrescriptionExecutionContex
 
 describe("partner grappling drills — registry, knowledge base, profile and equipment counts", () => {
   test("1. the registry grew from 71 to exactly 74 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -192,7 +192,7 @@ describe("partner grappling drills — registry, knowledge base, profile and equ
   });
 
   test("4. the equipment vocabulary went from 31 to 32 — `usable_wall`, the only identifier this lot added", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(32);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(33);
     expect(isEquipmentCapabilityId("usable_wall")).toBe(true);
 
     // It mirrors the knowledge base's own EnvironmentCapability name, the
@@ -218,12 +218,19 @@ describe("partner grappling drills — registry, knowledge base, profile and equ
   });
 
   test("6. no other exercise was added: the 71 previous ids plus these three account for every key", () => {
-    const previousIds = PILOT_EXERCISE_IDS.filter((id) => !(DRILL_IDS as readonly string[]).includes(id));
+    // sled_push was added by a later lot (Registry Lot 21) and is covered by
+    // its own file, so it is excluded here exactly as this lot's own three are.
+    const ADDED_BY_LATER_LOTS: readonly string[] = ["sled_push"];
+    const previousIds = PILOT_EXERCISE_IDS.filter(
+      (id) => !(DRILL_IDS as readonly string[]).includes(id) && !ADDED_BY_LATER_LOTS.includes(id),
+    );
     expect(previousIds).toHaveLength(71);
-    expect([...previousIds, ...DRILL_IDS].sort()).toEqual(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort());
+    expect([...previousIds, ...DRILL_IDS, ...ADDED_BY_LATER_LOTS].sort()).toEqual(
+      Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort(),
+    );
 
-    // The two exercises still blocked on doctrine stay out.
-    for (const id of ["sled_push", "turkish_get_up"]) {
+    // The one exercise still blocked on doctrine stays out.
+    for (const id of ["turkish_get_up"]) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(id);
     }
   });
@@ -869,7 +876,9 @@ describe("partner grappling drills — registry health and non-regression", () =
   });
 
   test("46. no regression on the 71 previous entries: each still prescribes with its own declared equipment", () => {
-    const previousIds = PILOT_EXERCISE_IDS.filter((id) => !(DRILL_IDS as readonly string[]).includes(id));
+    const previousIds = PILOT_EXERCISE_IDS.filter(
+      (id) => !(DRILL_IDS as readonly string[]).includes(id) && id !== "sled_push",
+    );
     expect(previousIds).toHaveLength(71);
 
     for (const id of previousIds) {

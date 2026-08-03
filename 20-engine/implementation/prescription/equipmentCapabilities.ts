@@ -222,6 +222,28 @@ export const EQUIPMENT_CAPABILITY_IDS = [
   // cage, and `usable_wall` represents only the function both share — a
   // vertical, resistant surface an opponent can be controlled against.
   "usable_wall",
+  // Added for `sled_push` (Registry Lot 21).
+  //
+  // Aligned 1:1 with the knowledge base's own pre-existing `sled`
+  // `EquipmentType` member, which SLED_PUSH already gates on; no
+  // ExerciseDefinition was modified and the gap was vocabulary asymmetry
+  // alone — the same situation `cardio_machine`, `towel` and `rope` closed.
+  // A `sled` LoadingMode already existed too, so this is the last of the
+  // three layers to gain the identifier.
+  //
+  // ONE ATOM, NOT TWO. The chapter names "Weighted Sled" as a single
+  // Required item and has no separate load or plate heading, so `plates` is
+  // deliberately NOT required alongside it — the knowledge base made exactly
+  // that call, in writing, and this mirrors it. "Harness" and "Resistance
+  // Straps" are Optional and add nothing.
+  //
+  // NOT an equivalence group and NOT a substitute for anything: matching is
+  // exact, so no carry implement, no ergometer and no anchored load
+  // satisfies it. "Suitable Surface", the chapter's second Required item,
+  // has no equipment identifier and is not given one here — the knowledge
+  // base already carries it as the `floor_safe` environment capability, and
+  // that is an eligibility gate rather than an implement.
+  "sled",
 ] as const;
 
 export type EquipmentCapabilityId = (typeof EQUIPMENT_CAPABILITY_IDS)[number];

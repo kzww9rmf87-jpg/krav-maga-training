@@ -342,6 +342,23 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   unresolvedProfile("pummeling", "rounds_duration", ["50-exercises/31_PUMMELING"]),
   unresolvedProfile("wall_wrestling", "rounds_duration", ["50-exercises/32_WALL_WRESTLING"]),
   unresolvedProfile("grip_fighting", "rounds_duration", ["50-exercises/33_GRIP_FIGHTING"]),
+
+  // Registry Lot 21 — the first loaded locomotion entry.
+  //
+  // `"unresolved"`, and the temptation to resolve it is stronger here than
+  // anywhere else in this file, which is exactly why it is refused. This
+  // chapter quantifies efforts, metres AND seconds, so a per-interval time
+  // looks available — but the 5-40 s it documents is the prescribed work
+  // duration resolved by `resolveVolume`, not an estimate of elapsed session
+  // time. Copying it into `perIntervalSeconds` would restate a prescription
+  // as an estimate, the error already refused for towel_pull_up, the rope
+  // entries and the three partner drills.
+  //
+  // What the chapter genuinely does not give: the time to load the sled and
+  // verify the surface, the time to walk it back to the start between
+  // efforts — which for a 40 m push is a real and unavoidable cost — and any
+  // technical margin. None of them is documented, and none is invented.
+  unresolvedProfile("sled_push", "intervals", ["50-exercises/17_SLED_PUSH"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

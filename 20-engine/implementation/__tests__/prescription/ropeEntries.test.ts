@@ -116,8 +116,8 @@ const readChapter = (relative: string) =>
 
 describe("rope entries — registry, knowledge base, profile and equipment counts", () => {
   test("1. the registry grew from 69 to exactly 71 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -134,7 +134,7 @@ describe("rope entries — registry, knowledge base, profile and equipment count
   });
 
   test("4. the equipment vocabulary went from 30 to 31 — `rope`, the only identifier this lot added", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(32);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(33);
     expect(isEquipmentCapabilityId("rope")).toBe(true);
     // No anchor or load id was invented for either chapter.
     for (const invented of ["climbing_rope", "anchored_load", "rope_anchor", "pulling_sled"]) {
@@ -617,7 +617,7 @@ describe("rope entries — session, engine and non-regression", () => {
     // The three partner grappling drills were added by a later lot (Registry
     // Lot 20) and are covered by their own file, so they are excluded here
     // exactly as this lot's own two entries are.
-    const ADDED_BY_LATER_LOTS: readonly string[] = ["pummeling", "wall_wrestling", "grip_fighting"];
+    const ADDED_BY_LATER_LOTS: readonly string[] = ["pummeling", "wall_wrestling", "grip_fighting", "sled_push"];
     const previousIds = PILOT_EXERCISE_IDS.filter(
       (id) => id !== CLIMB.id && id !== PULL.id && !ADDED_BY_LATER_LOTS.includes(id),
     );

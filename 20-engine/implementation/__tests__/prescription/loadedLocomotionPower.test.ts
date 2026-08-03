@@ -590,21 +590,27 @@ describe("Loaded Locomotion Power — validation, genericity and non-regression"
     expect(withDistance).toEqual(["distance_carry_strength_grip_v0_1", PROFILE_ID]);
   });
 
-  test("27. no registry entry was added — the registry stays at 74 and sled_push is still absent", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
+  test("27. the profile is consumed by exactly the one exercise it was built for — and by nothing else", () => {
+    // This assertion was "no registry entry was added — the registry stays at
+    // 74" while the doctrine shipped alone. Registry Lot 21 consumed it, which
+    // is what it was for; what still has to hold is that NOTHING ELSE moved
+    // onto the new profile, and that the doctrine was not quietly widened to
+    // fit a second exercise it was never written for.
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
     expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(76);
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(32);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(33);
 
-    expect(PILOT_EXERCISE_IDS as readonly string[]).not.toContain(FUTURE_EXERCISE);
-    expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(FUTURE_EXERCISE);
+    const consumers = Object.values(EXERCISE_PRESCRIPTION_REGISTRY).filter(
+      (registryEntry) => registryEntry.numericalProfileId === PROFILE_ID,
+    );
+    expect(consumers.map((registryEntry) => registryEntry.exerciseId)).toEqual([FUTURE_EXERCISE]);
 
-    // And no existing entry was moved onto the new profile.
-    for (const registryEntry of Object.values(EXERCISE_PRESCRIPTION_REGISTRY)) {
-      expect(registryEntry.numericalProfileId ?? null).not.toBe(PROFILE_ID);
-    }
-
-    // The knowledge base already holds sled_push; only the registry lags.
-    expect(EXERCISE_KNOWLEDGE_BASE.some((exercise) => exercise.id === FUTURE_EXERCISE)).toBe(true);
+    // Nothing else declares the power/work_rest_intervals triple either.
+    const onTriple = Object.values(EXERCISE_PRESCRIPTION_REGISTRY).filter(
+      (registryEntry) =>
+        registryEntry.moduleId === "power" && registryEntry.explicitMethodId === METHOD_ID,
+    );
+    expect(onTriple.map((registryEntry) => registryEntry.exerciseId)).toEqual([FUTURE_EXERCISE]);
   });
 });

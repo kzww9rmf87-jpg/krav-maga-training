@@ -155,7 +155,10 @@ describe("registryVocabulary — equipment capabilities", () => {
     // base's own EnvironmentCapability name, mirrored here as
     // safe_landing_surface already is; deliberately NOT the `wall` id, which
     // is documented as a target for a thrown implement).
-    expect(EQUIPMENT_CAPABILITY_IDS.length).toBe(PREVIOUSLY_EXISTING_IDS.length + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 1 + 1 + 1);
+    // +1 for sled (Registry Lot 21 — Sled push: the knowledge base's own
+    // pre-existing EquipmentType, finally expressible here; one atom, never
+    // sled + plates).
+    expect(EQUIPMENT_CAPABILITY_IDS.length).toBe(PREVIOUSLY_EXISTING_IDS.length + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 1 + 1 + 1 + 1);
   });
 
   test("an unknown equipment identifier is still rejected after the addition", () => {
@@ -513,6 +516,10 @@ describe("registryVocabulary — carry loading modes corrected to match document
       pummeling: ["partner_resistance"],
       wall_wrestling: ["partner_resistance"],
       grip_fighting: ["partner_resistance"],
+      // Registry Lot 21 — locomotion against an external resistance. Not
+      // `locomotion_only`, which asserts there is no external resistance at
+      // all, and not `machine`.
+      sled_push: ["sled"],
     };
     const CORRECTED_IDS = ["pinch_carry", "sandbag_carry", "zercher_carry"];
 
@@ -529,8 +536,8 @@ describe("registryVocabulary — carry loading modes corrected to match document
   });
 
   test("7. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
   });
 
   test("8. every retained value (plate, sandbag, barbell) is a known, documented LoadingMode", () => {
@@ -643,12 +650,12 @@ describe("registryVocabulary — pinch_carry represents only the Bilateral Varia
     for (const [id, text] of Object.entries(OTHER_ENTRY_FIRST_INSTRUCTION)) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id as PilotExerciseId].instructionDefinitions[0].text).toBe(text);
     }
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
   });
 
   test("9. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
   });
 
   test("10. explicitMethodId, supportedMethodIds, supportedVolumeStructures and stop conditions are unchanged", () => {
@@ -792,6 +799,11 @@ const DOSE_NARROWING_EXCEPTIONS = [
   "pummeling",
   "wall_wrestling",
   "grip_fighting",
+  // Registry Lot 21 — declares its own chapter's bounds across all three
+  // dimensions. They equal Table Group 19's envelope, because that table was
+  // written from this chapter; the entry states them anyway so it carries its
+  // own documented range, the rope_pull precedent.
+  "sled_push",
 ] as const;
 
 describe("registryVocabulary — exerciseDoseConstraints", () => {
@@ -802,7 +814,7 @@ describe("registryVocabulary — exerciseDoseConstraints", () => {
       }
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseDoseConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
   });
 
   test("tibialis_raise, rotator_cuff_training, soleus_raise, copenhagen_plank, hip_thrust and barbell_row narrow exerciseDoseConstraints; wrist_strengthening and chin_up do not", () => {
@@ -886,7 +898,7 @@ describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestCons
         expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).toBeNull();
       }
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
   });
 
   test("every rest-narrowing entry declares its own documented window; the three set-based ones narrow rest alone, and the interval-based one is scoped between intervals", () => {

@@ -102,8 +102,8 @@ const entry = () => EXERCISE_PRESCRIPTION_REGISTRY[EXERCISE_ID];
 
 describe("towel_pull_up — registry, knowledge base, profile and equipment counts", () => {
   test("1. the registry grew from 68 to exactly 69 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -118,7 +118,7 @@ describe("towel_pull_up — registry, knowledge base, profile and equipment coun
   });
 
   test("4. the equipment vocabulary went from 29 to 30 — `towel`, the only identifier this lot added", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(32);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(33);
     expect(isEquipmentCapabilityId("towel")).toBe(true);
     expect(isEquipmentCapabilityId("pull_up_bar")).toBe(true);
     // No substitute was invented alongside it.
@@ -142,7 +142,10 @@ describe("towel_pull_up — registry, knowledge base, profile and equipment coun
     // pummeling, wall_wrestling and grip_fighting were on this list when this
     // lot shipped; Registry Lot 20 integrated them on the Partner Grappling
     // Rounds foundation, leaving only the two doctrine-blocked exercises.
-    for (const id of ["sled_push", "turkish_get_up"]) {
+    // sled_push was on this list when this lot shipped; Registry Lot 21
+    // integrated it on the Loaded Locomotion Power doctrine. Only
+    // turkish_get_up remains, and it is blocked on doctrine rather than code.
+    for (const id of ["turkish_get_up"]) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(id);
     }
 
@@ -695,7 +698,7 @@ describe("towel_pull_up — prescription, engine and non-regression", () => {
 
     // The 68 entries that predate this lot: everything except this lot's own
     // entry and the ids added by later lots, each covered by its own file.
-    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting"];
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting", "sled_push"];
     const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(68);
 
@@ -772,7 +775,7 @@ describe("towel_pull_up — prescription, engine and non-regression", () => {
   });
 
   test("38. + 39. rope_climb and rope_pull were integrated on their OWN units, never absorbed into this one", () => {
-    for (const id of ["rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting"]) {
+    for (const id of ["rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting", "sled_push"]) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY).toHaveProperty(id);
       expect(EXERCISE_KNOWLEDGE_BASE.some((e) => e.id === id)).toBe(true);
     }

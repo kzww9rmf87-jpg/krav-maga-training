@@ -97,8 +97,8 @@ function prescribe(rangeContext: PrescriptionExecutionContext["rangeContext"] = 
 
 describe("hanging_leg_raise — registry, knowledge base, profile and equipment counts", () => {
   test("1. the registry grew from 63 to exactly 64 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -112,7 +112,7 @@ describe("hanging_leg_raise — registry, knowledge base, profile and equipment 
   });
 
   test("4. the equipment vocabulary stayed at 25 for this lot — the later heavy_bag_power_intervals lot added `heavy_bag`, bringing it to 26", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(32);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(33);
     // Both ids this entry needs already existed.
     expect(isEquipmentCapabilityId("pull_up_bar")).toBe(true);
     expect(isEquipmentCapabilityId("safe_landing_surface")).toBe(true);
@@ -154,7 +154,7 @@ describe("hanging_leg_raise — registry, knowledge base, profile and equipment 
 
     // Ids added by lots AFTER this one, listed explicitly so this test keeps
     // proving that hanging_leg_raise was the only exercise this lot added.
-    const ADDED_BY_LATER_LOTS = ["plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting"] as const;
+    const ADDED_BY_LATER_LOTS = ["plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting", "sled_push"] as const;
 
     expect(PREVIOUS_IDS).toHaveLength(63);
     expect([...PREVIOUS_IDS, EXERCISE_ID, ...ADDED_BY_LATER_LOTS].sort()).toEqual(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort());
@@ -756,7 +756,7 @@ describe("hanging_leg_raise — determinism, non-mutation and non-regression", (
 
     // The 63 entries that predate this lot: everything except this lot's own
     // entry and the ids added by later lots, each covered by its own file.
-    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting"];
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting", "sled_push"];
     const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(63);
 

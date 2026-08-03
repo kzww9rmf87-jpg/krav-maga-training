@@ -95,8 +95,8 @@ function prescribe(rangeContext: PrescriptionExecutionContext["rangeContext"] = 
 
 describe("sprint_intervals — registry, knowledge base and profile counts", () => {
   test("1. the registry grew from 60 to exactly 61 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -145,7 +145,7 @@ describe("sprint_intervals — registry, knowledge base and profile counts", () 
 
     // Ids added by lots AFTER this one, listed explicitly so this test keeps
     // proving that sprint_intervals was the only exercise this lot added.
-    const ADDED_BY_LATER_LOTS = ["ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting"] as const;
+    const ADDED_BY_LATER_LOTS = ["ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting", "sled_push"] as const;
 
     expect(PREVIOUS_IDS).toHaveLength(60);
     expect([...PREVIOUS_IDS, EXERCISE_ID, ...ADDED_BY_LATER_LOTS].sort()).toEqual(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort());
@@ -153,7 +153,9 @@ describe("sprint_intervals — registry, knowledge base and profile counts", () 
     // The other conditioning/power modalities. heavy_bag_power_intervals,
     // battle_ropes and assault_bike_intervals were all integrated by later
     // lots on Table Group 14; sled_push stays out of the registry.
-    for (const id of ["sled_push"]) {
+    // sled_push was absent when this lot shipped; Registry Lot 21 integrated
+    // it. turkish_get_up is the only exercise still outside the registry.
+    for (const id of ["turkish_get_up"]) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(id);
     }
     expect(EXERCISE_PRESCRIPTION_REGISTRY).toHaveProperty("assault_bike_intervals");
@@ -789,7 +791,7 @@ describe("sprint_intervals — determinism, non-mutation and non-regression", ()
 
     // The 60 entries that predate this lot: everything except this lot's own
     // entry and the ids added by later lots, each covered by its own file.
-    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting"];
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting", "sled_push"];
     const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(60);
 

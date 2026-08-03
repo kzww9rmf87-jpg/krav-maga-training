@@ -391,8 +391,8 @@ describe("strength accessory batch — registry validation and non-regression", 
   });
 
   test("the registry now contains exactly 44 active exercises", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
   });
 
   for (const id of STRENGTH_ACCESSORY_EXERCISE_IDS) {

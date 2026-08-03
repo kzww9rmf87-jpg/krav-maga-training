@@ -326,6 +326,12 @@ export const PILOT_EXERCISE_IDS = [
   "pummeling",
   "wall_wrestling",
   "grip_fighting",
+  // Registry Lot 21 — first consumer of Table Group 19's Loaded Locomotion
+  // Power profile, first entry to prescribe a distance and a duration at
+  // once, and the first power-module entry on an interval structure. Adds no
+  // profile: the doctrine commit already created it, and this entry only
+  // declares its own documented bounds.
+  "sled_push",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -11338,6 +11344,255 @@ const gripFightingEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Registry Lot 21 — Sled Push
+// Source: 50-exercises/17_SLED_PUSH
+//
+// The first consumer of Table Group 19's Loaded Locomotion Power profile, the
+// first entry in the registry to prescribe a DISTANCE AND A DURATION at once,
+// and the first power-module entry on an interval structure.
+//
+// WHAT IS REPRESENTED: the repeated explosive push. Four to twelve separate
+// efforts, each of a documented distance and duration, each accelerating a
+// loaded sled, with recovery between them.
+//
+// WHAT IS NOT, and stays unrepresented rather than folded in:
+//
+// - continuous heavy marching — this chapter documents repeated efforts, not
+//   one bout, and `intervals` could not express a single continuous effort
+//   anyway;
+// - maximal-strength work — a heavy sled held static is not this chapter's
+//   prescription, and the module rule excludes displacement-free work;
+// - "Harness Push", a named Variation, whose harness is Optional equipment
+//   here and whose towed form belongs to sprint doctrine;
+// - "Backward Sled Push" and "Single-Arm Push", named Variations with no
+//   prescription of their own in this chapter;
+// - loaded carries and long conditioning intervals, both excluded in writing
+//   by the module rule.
+//
+// TRIPLE. `power / work_rest_intervals / secondary`, unique across the
+// profiles, so implicit resolution already selects Table Group 19's profile;
+// the id is declared anyway, by the auditability convention Table Group 15
+// established. The role is read from the documents, not chosen to satisfy a
+// validator — see the Table Group's own reasoning.
+//
+// NARROWING. There is none to perform, and that is a property of this entry
+// rather than an omission: Table Group 19 was written from this chapter, so
+// the envelope and the chapter's own bounds are the same numbers. The entry
+// declares them anyway — the rope_pull precedent, where the chapter's range
+// also equalled its module envelope and was stated so the entry carries its
+// own documented range rather than relying on a profile to speak for it. The
+// generic resolvers compute an intersection that happens to be the identity.
+//
+// THREE DIMENSIONS, AND NO CONVERSION BETWEEN THEM:
+//
+//   work intervals  4-12    "# Loading Profile — Typical Volume: 4-12 pushes"
+//   distance       10-40 m  same line: "10-40 meters"
+//   duration        5-40 s  "# Physiological Profile — Typical Duration"
+//
+// The duration is read from a different section than the other two, which is
+// the established precedent — sprint_intervals already takes its prescribed
+// duration from its own Physiological Profile. Metres are never derived from
+// seconds nor seconds from metres.
+//
+// "PUSHES" MAPS TO `workIntervals`, and the chapter supports the reading
+// directly: "4-12 pushes" counts discrete efforts, each covering a documented
+// distance and separated by recovery. It is not a repetition count of a
+// movement performed on the spot, and `intervals` forbids `repetitions`
+// anyway.
+//
+// INTENSITY. `movement_intent: explosive`, the profile's only rule, so
+// `exerciseIntensityConstraints` is null — there is nothing to narrow and a
+// constraint object would only restate it. "Light to Very Heavy" is NOT
+// encoded: it is qualitative, the model has no categorical resistance rule
+// type a profile can carry, and Table Group 19 records load as a progression
+// axis. Load, Distance, Speed and Rest are this chapter's four named
+// Progression axes; none of them becomes a prescribed number here.
+//
+// REST. `exerciseRestConstraints` is null. This chapter documents no
+// inter-effort rest — "Rest" appears only among the Progression axes — so the
+// profile's 120/180/240 s band applies unnarrowed, still sourced to
+// `POWER_LOADED_LOCOMOTION_REST_V0_1` so the one value no chapter supports
+// stays traceable to the decision that created it.
+//
+// EQUIPMENT. `sled` only, mirroring the knowledge base exactly. That
+// definition states in its own comment why "Weighted Sled" is ONE atom and
+// not `sled` + `plates`, and this entry does not second-guess it.
+// "Suitable Surface", the chapter's second Required item, has NO equipment
+// identifier and is deliberately given none: the knowledge base already gates
+// on it as the `floor_safe` environment capability, and the prescription
+// layer has no environment atoms for `floor_safe` or `sufficient_space` at
+// all — sprint_intervals, whose knowledge-base requirements are the same
+// shape, likewise declares no equipment capability for them. The requirement
+// is carried at critical priority in the setup instruction instead, and this
+// documented limitation is recorded rather than resolved by bending a
+// neighbouring atom.
+// -----------------------------------------------------------------------------
+
+const SOURCE_SLED_PUSH = "50-exercises/17_SLED_PUSH";
+
+const sledPushStopConditions: StopConditionDefinition[] = [
+  // The interval family's own pace factory: scoped to the interval, because
+  // `intervals` has no sets. This is the governing quality threshold for
+  // Loaded Locomotion Power — the Power overview's Velocity Principle names
+  // loss of speed as the end of the useful stimulus.
+  intervalPaceLossCondition({
+    conditionId: "sled_push_pace_loss",
+    description:
+      "End the effort when the sled stops accelerating and the push becomes a grind: speed visibly dropping within the effort, steps shortening under load, or the athlete no longer able to finish every metre at the intended pace.",
+    sourceRuleIds: [SOURCE_SLED_PUSH, SOURCE_METHOD_CATALOGUE],
+  }),
+  // Set-scoped, like the four interval entries that precede it. A known,
+  // pre-existing inconsistency of this factory with the `intervals`
+  // structure, documented at the round-scoped family in
+  // `stopConditionRegistry.ts`; inventing a sled-specific factory to dodge it
+  // would fracture the interval family for one exercise.
+  technicalFailureCondition({
+    conditionId: "sled_push_technical_failure",
+    description:
+      "Stop on technical breakdown: bending at the waist instead of leaning from the ankles, excessive trunk flexion, overstriding, looking down, or losing body tension between steps.",
+    sourceRuleIds: [SOURCE_SLED_PUSH],
+  }),
+  // "# Safety Profile — Primary Risks: ... Loss of Foot Traction." The one
+  // risk this chapter names that no other required category covers, and the
+  // reason its "Suitable Surface" requirement exists. The power module lists
+  // `balance_loss` among its categories; this entry can declare it honestly
+  // because the chapter documents the concern, unlike towel_pull_up and the
+  // rope entries, which omitted it for exactly the opposite reason.
+  balanceLossCondition({
+    conditionId: "sled_push_balance_loss",
+    description:
+      "Stop if the feet lose traction on the surface, if the athlete slips or stumbles under the sled, or if the drive can no longer be applied from a stable base.",
+    sourceRuleIds: [SOURCE_SLED_PUSH],
+  }),
+  fatigueLimitCondition({
+    conditionId: "sled_push_fatigue_limit",
+    description:
+      "Stop the exercise when accumulated fatigue prevents the athlete from accelerating the sled, rather than continuing to accumulate efforts at reduced output.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_SLED_PUSH],
+  }),
+  painCondition({
+    conditionId: "sled_push_pain",
+    description:
+      "Stop immediately if pain occurs, in particular knee, hip or ankle pain under drive. Do not train with an acute knee, hip or ankle injury.",
+    sourceRuleIds: [SOURCE_SLED_PUSH],
+  }),
+  acuteSymptomCondition({
+    conditionId: "sled_push_acute_symptom",
+    description:
+      "Stop the exercise at once on any acute symptom — dizziness, nausea, chest discomfort or sudden weakness — at any point during or between efforts.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_SLED_PUSH],
+  }),
+  completionCondition({
+    conditionId: "sled_push_completion",
+    description: "Stop once the prescribed efforts are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const sledPushInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "sled_push_setup",
+    "setup",
+    "Load the sled and confirm it is stable before the first effort. This exercise also requires a suitable surface — one that gives the feet reliable traction and lets the sled slide predictably; that requirement is documented by this chapter but has no equipment identifier of its own, so it is verified here. Keep the pushing lane clear for the full prescribed distance. Take a grip on the uprights or handles at the height that lets the trunk stay long, set the feet behind the sled and brace before applying any force.",
+    "critical",
+    true,
+    SOURCE_SLED_PUSH,
+  ),
+  makeInstruction(
+    "sled_push_execution",
+    "execution",
+    "Brace first, then lean from the ankles rather than bending at the waist, keeping the body in one line from the ankles through the trunk to the hands. Drive through the ground with short, powerful steps and maintain constant pressure on the sled — accelerate it rather than settling into a walk, and do not stop between steps. Keep the eyes forward rather than down, and finish every metre of the prescribed distance at the same intent.",
+    "high",
+    true,
+    SOURCE_SLED_PUSH,
+  ),
+  makeInstruction(
+    "sled_push_safety",
+    "safety",
+    "Poor body position, loss of foot traction and excessive trunk flexion are this chapter's documented risks. End the effort when acceleration or posture degrades rather than grinding out the remaining distance — a push that has become slow is no longer the prescribed stimulus. Stop at once if the feet lose traction. Do not train with an acute knee, hip or ankle injury.",
+    "critical",
+    true,
+    SOURCE_SLED_PUSH,
+  ),
+];
+
+const sledPushEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "sled_push",
+  moduleId: "power",
+  role: "secondary",
+  explicitMethodId: "work_rest_intervals",
+  numericalProfileId: "loaded_locomotion_power_intervals_v0_1",
+  capabilities: {
+    exerciseId: "sled_push",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["work_rest_intervals"],
+    supportedVolumeStructures: ["intervals"],
+    supportedIntensityTypes: ["movement_intent"],
+    preferredIntensityTypes: ["movement_intent"],
+    // The exact mode for locomotion against an external resistance, and it
+    // already existed. NOT `locomotion_only`, which sprint_intervals uses and
+    // which asserts there is no external resistance at all; not `bodyweight`;
+    // not `machine`, which names an apparatus the athlete works against
+    // rather than one they displace.
+    supportedLoadingModes: ["sled"],
+    // The method forbids tempo, and this chapter documents none. Explosive
+    // intent is carried by the intensity rule, where it belongs.
+    supportedTempoTypes: [],
+    // Both hands drive the same implement along one path and the volume is
+    // counted in efforts and metres, never per side. `bilateral` would be an
+    // inference from the biomechanics; the prescription allocates nothing to
+    // a side, so `not_applicable` is the honest value — the same reading
+    // sprint_intervals uses.
+    laterality: "not_applicable",
+    volumeInterpretations: ["interval_total"],
+    // The method's three required capabilities, plus `distance_measurement`
+    // because this entry genuinely prescribes a distance. `external_load` is
+    // deliberately absent: the sled is loaded, but no load is DOSED, and the
+    // tag would imply a load can be prescribed.
+    capabilityTags: [
+      "interval_structure",
+      "timed_effort",
+      "distance_measurement",
+      "technical_quality_observation",
+    ],
+    requiredEquipmentCapabilities: ["sled"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["sled_push_setup", "sled_push_execution", "sled_push_safety"],
+    requiredStopConditionIds: [
+      "sled_push_pace_loss",
+      "sled_push_technical_failure",
+      "sled_push_balance_loss",
+      "sled_push_fatigue_limit",
+      "sled_push_pain",
+      "sled_push_acute_symptom",
+      "sled_push_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_sled_push",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_SLED_PUSH, SOURCE_MODULE_PROFILES],
+  },
+  supportedIntensityTypes: ["movement_intent"],
+  preferredIntensityType: "movement_intent",
+  supportedTempoTypes: [],
+  preferredTempoType: null,
+  instructionDefinitions: sledPushInstructions,
+  stopConditionDefinitions: sledPushStopConditions,
+  // "# Loading Profile — Typical Volume: 4-12 pushes, 10-40 meters" and
+  // "# Physiological Profile — Typical Duration: 5-40 seconds". Equal to
+  // Table Group 19's envelope, because that table was written from this
+  // chapter; declared so the entry states its own documented range.
+  exerciseDoseConstraints: {
+    minimumDose: { sets: null, repetitions: null, durationSeconds: 5, distanceMeters: 10, rounds: null, workIntervals: 4 },
+    maximumDose: { sets: null, repetitions: null, durationSeconds: 40, distanceMeters: 40, rounds: null, workIntervals: 12 },
+    sourceRuleIds: [SOURCE_SLED_PUSH],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_SLED_PUSH, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 
 /**
  * Statically typed as `Record<PilotExerciseId, ...>` — TypeScript refuses
@@ -11437,6 +11692,8 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   pummeling: pummelingEntry,
   wall_wrestling: wallWrestlingEntry,
   grip_fighting: gripFightingEntry,
+
+  sled_push: sledPushEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

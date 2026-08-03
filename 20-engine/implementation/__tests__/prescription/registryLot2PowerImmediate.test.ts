@@ -379,12 +379,17 @@ describe("registry Lot 2 — duration estimation profile", () => {
     expect(result.profile?.sourceRuleIds).toEqual(["50-exercises/64_POWER/12_HANG_POWER_CLEAN.md"]);
   });
 
-  test("no duration profile exists for sled_push — it was not integrated this lot", () => {
+  test("sled_push's duration profile was added by a later lot, and is honestly unresolved", () => {
+    // This lot asserted DURATION_PROFILE_NOT_FOUND: sled_push had no entry at
+    // all. Registry Lot 21 integrated it on the Loaded Locomotion Power
+    // doctrine, so the profile now exists — and is `unresolved`, because the
+    // chapter documents prescription targets rather than session timing.
     const result = getDurationEstimationProfile("duration_profile_sled_push");
     if (result.ok) {
-      throw new Error("Expected no duration profile to exist for sled_push.");
+      throw new Error("Expected sled_push's duration profile to be unresolved.");
     }
-    expect(result.failureCode).toBe("DURATION_PROFILE_NOT_FOUND");
+    expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
+    expect(result.profile?.status).toBe("unresolved");
   });
 });
 
@@ -441,15 +446,26 @@ describe("registry Lot 2 — distinctions from named precedents", () => {
     expect(hpcKb.module).toBe(jsKb.module);
   });
 
-  test("sled_push vs. sprint_intervals: sled_push stays classified as power (loaded, discrete-effort), sprint_intervals is conditioning (interval, unloaded) — confirmed at the knowledge-base level since sled_push has no registry entry this lot", () => {
+  test("sled_push vs. sprint_intervals: both are now integrated on work_rest_intervals, and the modules stayed distinct — sled_push power (loaded), sprint_intervals conditioning (unloaded)", () => {
     const sledPush = EXERCISE_KNOWLEDGE_BASE.find((e) => e.id === "sled_push")!;
     const sprintIntervals = EXERCISE_KNOWLEDGE_BASE.find((e) => e.id === "sprint_intervals")!;
     expect(sledPush.module).toBe("power");
     expect(sprintIntervals.module).toBe("conditioning");
     expect(sledPush.requiredEquipment).toEqual([]);
-    // sled_push was NOT reclassified as conditioning/work_rest_intervals to force an
-    // integration — it remains genuinely blocked instead (see block comment in the registry).
-    expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty("sled_push");
+
+    // This lot asserted sled_push's ABSENCE, because no method available to
+    // the power module could carry a distance. Registry Lot 21 integrated it
+    // WITHOUT reclassifying it: the distinction this test protects is that
+    // the two share a method and stay in different modules, on different
+    // profiles, with different loading modes.
+    const sled = EXERCISE_PRESCRIPTION_REGISTRY.sled_push;
+    const sprint = EXERCISE_PRESCRIPTION_REGISTRY.sprint_intervals;
+    expect(sled.explicitMethodId).toBe(sprint.explicitMethodId);
+    expect(sled.moduleId).toBe("power");
+    expect(sprint.moduleId).toBe("conditioning");
+    expect(sled.numericalProfileId).not.toBe(sprint.numericalProfileId ?? null);
+    expect(sled.capabilities.supportedLoadingModes).toEqual(["sled"]);
+    expect(sprint.capabilities.supportedLoadingModes).toEqual(["locomotion_only"]);
   });
 
   test("sled_push vs. farmer_carry: sled_push is horizontal push power (no distance-based method authorized for its own \"power\" module); farmer_carry is grip-module loaded locomotion using distance_carry_sets, a method explicitly forbidden for the power module", () => {
@@ -487,8 +503,8 @@ describe("registry Lot 2 — registry validation and non-regression", () => {
   });
 
   test("the registry now contains exactly 51 active exercises (50 + hang_power_clean; sled_push honestly blocked)", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
   });
 
   test("no historical entry was removed: all 50 previously-existing ids are still present", () => {

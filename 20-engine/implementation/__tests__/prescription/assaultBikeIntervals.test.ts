@@ -91,8 +91,8 @@ const entry = () => EXERCISE_PRESCRIPTION_REGISTRY[EXERCISE_ID];
 
 describe("assault_bike_intervals — registry, knowledge base, profile and equipment counts", () => {
   test("1. the registry grew from 67 to exactly 68 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -107,7 +107,7 @@ describe("assault_bike_intervals — registry, knowledge base, profile and equip
   });
 
   test("4. the equipment vocabulary went from 28 to 29 — cardio_machine, the only identifier this lot added", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(32);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(33);
     expect(isEquipmentCapabilityId("cardio_machine")).toBe(true);
     // No air-bike-specific id was invented: the knowledge base's own atom is
     // the generic one, and "Assault Bike, or Echo Bike" names two brands of
@@ -134,7 +134,10 @@ describe("assault_bike_intervals — registry, knowledge base, profile and equip
     // lot shipped and were integrated later, in Registry Lot 20, once the
     // Partner Grappling Rounds foundation existed. Only two blocked exercises
     // remain, and both are blocked on doctrine rather than on code.
-    for (const id of ["sled_push", "turkish_get_up"]) {
+    // sled_push was on this list when this lot shipped; Registry Lot 21
+    // integrated it on the Loaded Locomotion Power doctrine. Only
+    // turkish_get_up remains, and it is blocked on doctrine rather than code.
+    for (const id of ["turkish_get_up"]) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(id);
     }
     // Every conditioning modality in the library is now integrated.
@@ -762,7 +765,7 @@ describe("assault_bike_intervals — determinism, validation and doctrine integr
 
     // The 67 entries that predate this lot: everything except this lot's own
     // entry and the ids added by later lots, each covered by its own file.
-    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting"];
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting", "sled_push"];
     const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(67);
 

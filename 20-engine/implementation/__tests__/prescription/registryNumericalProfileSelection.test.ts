@@ -160,6 +160,11 @@ const EXPLICIT_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
   pummeling: "partner_grappling_rounds_technical_v0_1",
   wall_wrestling: "partner_grappling_rounds_technical_v0_1",
   grip_fighting: "partner_grappling_rounds_technical_v0_1",
+  // Registry Lot 21 — the only consumer of Table Group 19. Its triple
+  // (power, work_rest_intervals, secondary) is UNIQUE, so implicit
+  // resolution would already select it; the id is declared for the same
+  // auditability reason towel_pull_up and the partner drills use.
+  sled_push: "loaded_locomotion_power_intervals_v0_1",
 };
 
 /**

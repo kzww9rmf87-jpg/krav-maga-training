@@ -181,7 +181,7 @@ describe("grip volume interpretations — no behaviour changed", () => {
       const declared = EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities.volumeInterpretations;
       expect(declared.length, id).toBe(1);
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
   });
 
   test("10. no volume is multiplied by adopting a new unit — both are plain totals", () => {
