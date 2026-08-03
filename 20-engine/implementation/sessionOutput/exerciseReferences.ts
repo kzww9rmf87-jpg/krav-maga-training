@@ -78,6 +78,19 @@ function collectPrescriptionExerciseIds(
     return;
   }
 
+  // Emitted on every status by every serializer, so it is collected before
+  // the per-status branches below rather than repeated inside each of them.
+  // An omitted exercise is also in the session draft today, but relying on
+  // that would make this guarantee depend on another branch's behavior.
+  //
+  // `?? []` because the field is optional on the public type for backward
+  // compatibility: a v1 payload written before 2026-08-03 can lack it, and
+  // this function must stay total over every valid `CasPrescriptionOutcomeV1`
+  // rather than only over freshly serialized ones.
+  for (const gap of prescription.unprescribedSelectedExercises ?? []) {
+    into.add(gap.exerciseId);
+  }
+
   if (prescription.status === "prescribed") {
     for (const prescribedExercise of prescription.session.exercises) {
       into.add(prescribedExercise.prescription.exerciseId);

@@ -22,9 +22,22 @@
  * CONTRACT EVOLUTION POLICY, made explicit here rather than left implicit.
  * The split above already encodes it, and this note only states it:
  *
- * - SHAPES are re-declared under `Cas*V1` names, which freezes them. Adding,
- *   removing or retyping a field of any `Cas*V1` interface is a BREAKING
- *   change and requires `cas-session-output.v2`.
+ * - SHAPES are re-declared under `Cas*V1` names, which freezes them.
+ *   Each of the following is a BREAKING change that requires `cas-session-output.v2`:
+ *     - removing a field;
+ *     - retyping a field;
+ *     - making an existing optional field required;
+ *     - adding a REQUIRED field.
+ *   Adding a NEW OPTIONAL field is the one additive shape change and stays
+ *   within v1.
+ *   Adding a required field is breaking even though a JSON reader would
+ *   never notice, because `Cas*V1` is an exported TypeScript type: any
+ *   consumer that constructs, fixtures, mocks or exhaustively types one of
+ *   these objects stops compiling. Such consumers exist — this repository's
+ *   own tests build `CasPrescriptionOutcomeV1` literals — so "consumers
+ *   only ever read the contract" is an assumption the public type does not
+ *   guarantee and must not be relied on. Compile-time compatibility is part
+ *   of the contract, not an implementation detail of it.
  * - CLOSED VOCABULARIES are imported, not re-declared, precisely so that
  *   they track the engine. Adding a member to one is an ADDITIVE change and
  *   stays within v1. Removing or renaming a member is breaking and requires
@@ -52,6 +65,30 @@
  *   equipment, an impact-limit rule and a sport-specific subtype. Additive:
  *   `CasExercisePrescriptionV1.methodId` may now carry this member, and no
  *   `Cas*V1` shape changed.
+ * - 2026-08-03 — `CasPrescriptionOutcomeV1` gains an OPTIONAL
+ *   `unprescribedSelectedExercises?` on all three statuses. Before this, an
+ *   exercise selected for a `"secondary"`/`"support"` module that found no
+ *   prescription source was dropped from the prescription while the status
+ *   stayed `"prescribed"`, with no warning and no trace entry — the only
+ *   way to notice was to diff `sessionDraft` against
+ *   `prescription.session.exercises`, which is a computation CAS must not
+ *   delegate.
+ *   Additive under the clause above: the field is optional, so every
+ *   existing v1 object and every existing consumer still type-checks
+ *   unchanged. Every output serialized after this date always populates it
+ *   (`[]` when nothing was omitted); only v1 objects predating this change
+ *   can lack it, and consumers read it as `?? []`.
+ *   `missingSourceData` retains exactly its previous meaning — the
+ *   *required* gaps that caused the `"unavailable"` status — and no status
+ *   or existing field changed semantics, type or optionality.
+ *
+ *   `CasPrescriptionGapV1` gains an OPTIONAL `reasonCode?` on the same
+ *   terms, and for the same reason: `CasPrescriptionGapV1` already existed
+ *   in v1 (it is what `missingSourceData` carries), so adding a required
+ *   field to it would break exactly the consumers the clause above
+ *   protects — this repository's own tests construct such literals. Every
+ *   gap CAS serializes after this date carries `reasonCode`; only gaps in
+ *   v1 objects predating this change can lack it.
  */
 
 import type {
@@ -70,6 +107,7 @@ import type {
 } from "../types";
 import type { TrainingMethodId } from "../prescription/contracts";
 import type { SessionPrescriptionFailureCode } from "../prescription/prescribeSession";
+import type { UnprescribedExerciseReasonCode } from "../prescription/buildPrescriptionInput";
 import type {
   DistanceScope,
   DistanceUnit,
@@ -476,7 +514,17 @@ export interface CasPrescribedSessionV1 {
 export interface CasPrescriptionGapV1 {
   exerciseId: Identifier;
   moduleId: CapabilityModule;
+  /** `true` for a `"primary"`-module exercise, `false` for `"secondary"`/`"support"`. */
   required: boolean;
+  /**
+   * Optional for backward type compatibility only — this shape predates the
+   * field (it is what `missingSourceData` has always carried), so requiring
+   * it would break any consumer that builds a `CasPrescriptionGapV1`
+   * literal. CAS always emits it; an absent value means the gap comes from
+   * a v1 payload written before 2026-08-03, not that the reason is unknown.
+   */
+  reasonCode?: UnprescribedExerciseReasonCode;
+  /** Human-readable restatement of `reasonCode` — never a second, different reason. */
   reason: string;
 }
 
@@ -496,10 +544,86 @@ export interface CasPrescriptionFailureV1 {
   sourceRuleIds: readonly Identifier[];
 }
 
+/**
+ * THE THREE LISTS, AND WHAT EACH ONE MEANS.
+ *
+ * A consumer reads all three; it never derives one from the others.
+ *
+ * - `CasSessionDraftV1.modules[].exercises` — what CAS DECIDED the athlete
+ *   should train. This is the training decision, and it is complete: an
+ *   exercise is never removed from it because a downstream stage could not
+ *   dose it.
+ * - `CasPrescribedSessionV1.exercises` — what CAS actually DOSED (sets,
+ *   repetitions, intensity, rest, tempo, instructions, stop conditions).
+ * - `unprescribedSelectedExercises` — the difference between the two, named
+ *   and explained by CAS itself.
+ *
+ * The engine is what computes that difference. A consumer must NOT diff the
+ * draft against the prescription, must NOT infer why an exercise is
+ * missing, and must NOT decide for itself whether the result counts as
+ * partial — those are training decisions, and they stay in CAS. What a
+ * consumer SHOULD do is surface the gap: show the exercise, show that it
+ * carries no prescription, and show the reason CAS gave. Silently hiding an
+ * omitted exercise and silently presenting the session as fully dosed are
+ * both misrepresentations of what the engine returned.
+ *
+ * WHY `unprescribedSelectedExercises` IS OPTIONAL, AND WHAT THAT DOES NOT
+ * MEAN.
+ *
+ * It is declared `?` purely for backward TYPE compatibility. Every other
+ * collection in this contract (`warnings`, `rejectedExercises`,
+ * `conflicts`, `omittedOptionalExerciseIds`) is a required,
+ * possibly-empty array, and this one would match that convention were it
+ * not arriving after v1 was already published. Making it required would
+ * not break a JSON reader, but it WOULD break, at compile time, any
+ * TypeScript consumer that constructs, fixtures, mocks or exhaustively
+ * types a `CasPrescriptionOutcomeV1` — and such consumers demonstrably
+ * exist, including inside this repository. That is a real break, so the
+ * field is optional and v1 stays v1.
+ *
+ * The optionality is a statement about OLD objects, never about new ones:
+ *
+ * - Any output produced by `serializeEngineRunResult` after 2026-08-03
+ *   ALWAYS carries this field — `[]` when nothing was omitted, populated
+ *   otherwise. There is no code path that emits a fresh output without it.
+ * - A v1 object that lacks it is necessarily older than this change: a
+ *   persisted payload, a stored fixture, or a hand-built literal written
+ *   before the field existed.
+ *
+ * Consumers must therefore read it as `unprescribedSelectedExercises ?? []`.
+ * An absent field means "this payload predates the field", NOT "nothing was
+ * omitted" — for such a payload the omission list was never recorded and
+ * cannot be recovered. A consumer must not reconstruct it by diffing the
+ * session draft against the prescription: that computation is a training
+ * decision and it stays in CAS (see above).
+ *
+ * On `"unavailable"`, this is a superset of `missingSourceData`: that field
+ * keeps its original meaning (the *required* gaps that caused the status),
+ * while this one is the complete omission record including non-required
+ * gaps. Reading either alone is correct for its own question.
+ *
+ * Each omission is also carried twice more, for consumers that read those
+ * surfaces instead: one `"prescription_generation"` entry in
+ * `CasDecisionTraceV1.entries` (id suffix `_omitted`), and one string in
+ * `CasDecisionTraceV1.warnings`. This list stays the source of truth — the
+ * other two restate it and never add to it.
+ */
 export type CasPrescriptionOutcomeV1 =
-  | { status: "prescribed"; session: CasPrescribedSessionV1 }
-  | { status: "unavailable"; missingSourceData: readonly CasPrescriptionGapV1[] }
-  | { status: "failed"; failure: CasPrescriptionFailureV1 };
+  | {
+      status: "prescribed";
+      session: CasPrescribedSessionV1;
+      unprescribedSelectedExercises?: readonly CasPrescriptionGapV1[];
+    }
+  | {
+      status: "unavailable";
+      missingSourceData: readonly CasPrescriptionGapV1[];
+      unprescribedSelectedExercises?: readonly CasPrescriptionGapV1[];
+    }
+  | {
+      status: "failed";
+      failure: CasPrescriptionFailureV1;
+      unprescribedSelectedExercises?: readonly CasPrescriptionGapV1[];
+    };
 
 // -----------------------------------------------------------------------------
 // Decision Trace

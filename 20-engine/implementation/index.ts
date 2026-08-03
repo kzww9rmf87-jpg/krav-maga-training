@@ -219,9 +219,14 @@ export function runEngine(
     prescriptionSources,
     prescriptionTraceContext,
   );
+  // Both lists are extended, never rebuilt: `buildDecisionTrace` runs before
+  // prescription and cannot know about an omitted exercise, so the
+  // prescription stage contributes its own entries and its own warnings.
+  // The wording of each is owned by `prescribeEngineSession`, not here.
   const decisionTraceWithPrescription = {
     ...decisionTrace,
     entries: [...decisionTrace.entries, ...sessionPrescriptionResult.traceEntries],
+    warnings: [...decisionTrace.warnings, ...sessionPrescriptionResult.warnings],
   };
 
   return {

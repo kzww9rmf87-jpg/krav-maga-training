@@ -20,6 +20,17 @@
  *
  * This file never falls back to a silent default and never mutates its
  * inputs.
+ *
+ * `"prescribed"` means every REQUIRED exercise was prescribed — not every
+ * selected one. A `"secondary"`/`"support"` module's exercise can be
+ * selected, find no source data, and be left out while the status stays
+ * `"prescribed"`; that is the existing, deliberate rule (`required` mirrors
+ * the module's `"primary"` role, see `buildPrescriptionInput.ts`) and this
+ * file does not change it. What it no longer does is leave that omission
+ * invisible: every gap, required or not, is reported on
+ * `unprescribedSelectedExercises`, given its own Decision Trace entry, and
+ * given a warning. No consumer needs to diff the session draft against the
+ * prescription to discover it.
  */
 
 import type { CapabilityModule, DecisionTraceEntry, Identifier, InitialSessionDraft } from "../types";
@@ -42,15 +53,45 @@ import {
 // Output
 // -----------------------------------------------------------------------------
 
+/**
+ * Every selected exercise that did not receive a prescription, whatever the
+ * status — the complete answer to "which exercises are in `sessionDraft`
+ * but not in `prescription.session.exercises`?", so no consumer ever has to
+ * compute that difference itself.
+ *
+ * Present on all three statuses on purpose. A `"prescribed"` session can
+ * still omit a `"secondary"`/`"support"` exercise (only a `"primary"` gap
+ * blocks the status), and both `"unavailable"` and `"failed"` can carry
+ * non-required gaps alongside whatever caused their status. Before this
+ * field existed, every one of those omissions was silent.
+ *
+ * On `"unavailable"`, this list is a superset of `missingSourceData`:
+ * `missingSourceData` stays exactly what it always was — the *required*
+ * gaps that caused the status — while this list also carries the
+ * non-required ones. The overlap is deliberate: one field explains the
+ * status, the other is the complete omission record, and neither requires
+ * reading the other to be understood.
+ */
+type WithUnprescribed<T> = T & {
+  unprescribedSelectedExercises: readonly PrescriptionSourceGap[];
+};
+
 export type EngineSessionPrescriptionOutcome =
-  | { status: "prescribed"; session: SessionPrescription }
-  | { status: "unavailable"; missingSourceData: readonly PrescriptionSourceGap[] }
-  | { status: "failed"; failure: PrescribeSessionFailure };
+  | WithUnprescribed<{ status: "prescribed"; session: SessionPrescription }>
+  | WithUnprescribed<{ status: "unavailable"; missingSourceData: readonly PrescriptionSourceGap[] }>
+  | WithUnprescribed<{ status: "failed"; failure: PrescribeSessionFailure }>;
 
 export interface EngineSessionPrescriptionResult {
   outcome: EngineSessionPrescriptionOutcome;
   /** Ready to be appended to the engine's `DecisionTrace.entries`. */
   traceEntries: readonly DecisionTraceEntry[];
+  /**
+   * Ready to be appended to the engine's `DecisionTrace.warnings` — one per
+   * omitted exercise, in `unprescribedSelectedExercises` order. Built here
+   * rather than in `runEngine` so the wording stays owned by the layer that
+   * took the decision.
+   */
+  warnings: readonly string[];
 }
 
 // -----------------------------------------------------------------------------
@@ -65,10 +106,24 @@ export function prescribeEngineSession(
   const { exercises, gaps } = buildDraftPrescriptionInputs(draft, prescriptionSources);
   const missingRequiredGaps = gaps.filter((gap) => gap.required);
 
+  // Every gap — required or not — is recorded once, here, for every status
+  // below. `gaps` already follows `draft.modules` order, so the list, the
+  // trace entries and the warnings are all deterministically ordered.
+  const omissionTraceEntries = buildOmissionTraceEntries(gaps, traceContext);
+  const warnings = buildOmissionWarnings(gaps);
+
   if (missingRequiredGaps.length > 0) {
     return {
-      outcome: { status: "unavailable", missingSourceData: missingRequiredGaps },
-      traceEntries: buildUnavailableTraceEntries(draft.sessionId, missingRequiredGaps, traceContext),
+      outcome: {
+        status: "unavailable",
+        missingSourceData: missingRequiredGaps,
+        unprescribedSelectedExercises: gaps,
+      },
+      traceEntries: [
+        ...omissionTraceEntries,
+        ...buildUnavailableTraceEntries(draft.sessionId, missingRequiredGaps, traceContext),
+      ],
+      warnings,
     };
   }
 
@@ -91,13 +146,73 @@ export function prescribeEngineSession(
     exercises,
   });
 
-  const traceEntries = adaptSessionPrescriptionResult(result, traceContext);
+  const traceEntries = [...omissionTraceEntries, ...adaptSessionPrescriptionResult(result, traceContext)];
 
   if (!result.ok) {
-    return { outcome: { status: "failed", failure: result }, traceEntries };
+    return {
+      outcome: { status: "failed", failure: result, unprescribedSelectedExercises: gaps },
+      traceEntries,
+      warnings,
+    };
   }
 
-  return { outcome: { status: "prescribed", session: result.session }, traceEntries };
+  return {
+    outcome: { status: "prescribed", session: result.session, unprescribedSelectedExercises: gaps },
+    traceEntries,
+    warnings,
+  };
+}
+
+// -----------------------------------------------------------------------------
+// Per-exercise omission record (every status)
+// -----------------------------------------------------------------------------
+
+/**
+ * One `"prescription_generation"` entry per selected-but-unprescribed
+ * exercise, emitted for every status. Follows the same one-entry-per-subject
+ * convention `adaptExercisePrescriptionResult` already uses for prescribed
+ * exercises, so a reader walking the stage sees every selected exercise
+ * accounted for — prescribed or omitted — never only the prescribed ones.
+ *
+ * `DecisionTraceEntry` has no structured slot for `required` or
+ * `reasonCode`, so both are stated explicitly in `reasons` rather than
+ * encoded into the entry id or left out. No branch is taken on any exercise
+ * id: the same sentence is built for every gap.
+ */
+function buildOmissionTraceEntries(
+  gaps: readonly PrescriptionSourceGap[],
+  context: PrescriptionTraceContext,
+): DecisionTraceEntry[] {
+  return gaps.map((gap) => ({
+    id: `${context.idPrefix}_prescription_generation_${gap.exerciseId}_omitted`,
+    timestamp: context.timestamp,
+    stage: "prescription_generation" as const,
+    decision: `Exercise "${gap.exerciseId}" was selected but omitted from the prescription.`,
+    reasons: [
+      `reasonCode: ${gap.reasonCode}.`,
+      `required: ${gap.required}.`,
+      gap.reason,
+      gap.required
+        ? "The session prescription cannot be considered complete without this exercise."
+        : "This exercise belongs to a non-primary module, so the session prescription is still reported as prescribed.",
+    ],
+    affectedExerciseIds: [gap.exerciseId],
+    affectedModules: [gap.moduleId],
+  }));
+}
+
+/**
+ * One warning per omitted exercise, so a product surface reading only
+ * `DecisionTrace.warnings` still learns that the displayed session and the
+ * prescribed session differ. The structured
+ * `unprescribedSelectedExercises` list stays the source of truth — these
+ * strings restate it, never add to it.
+ */
+function buildOmissionWarnings(gaps: readonly PrescriptionSourceGap[]): string[] {
+  return gaps.map(
+    (gap) =>
+      `Exercise "${gap.exerciseId}" (module "${gap.moduleId}") was selected for this session but could not be prescribed (${gap.reasonCode}).`,
+  );
 }
 
 // -----------------------------------------------------------------------------

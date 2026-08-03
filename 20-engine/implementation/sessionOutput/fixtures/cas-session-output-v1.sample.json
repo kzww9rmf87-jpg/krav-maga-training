@@ -321,7 +321,8 @@
         "27_REST_TEMPO_RULES_V0_1"
       ],
       "status": "complete"
-    }
+    },
+    "unprescribedSelectedExercises": []
   },
   "decisionTrace": {
     "traceId": "trace_request-1",

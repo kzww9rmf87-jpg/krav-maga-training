@@ -28,11 +28,34 @@ import type { SessionExercisePrescriptionInput } from "./prescribeSession";
  */
 export type ExercisePrescriptionSource = Omit<PrescribeExerciseInput, "exerciseId" | "moduleId">;
 
+/**
+ * Why a selected exercise received no prescription.
+ *
+ * Deliberately NOT reusing `ExercisePrescriptionSourceFailureCode`
+ * (`EXERCISE_NOT_IN_REGISTRY`, `REQUIRED_ATHLETE_REFERENCE_MISSING`,
+ * `REQUIRED_EQUIPMENT_MISSING`): those describe why a *registry lookup*
+ * failed, and that lookup happens in `getExercisePrescriptionSource`, one
+ * layer above `runEngine`. All this function ever observes is that
+ * `prescriptionSources` carries no entry for an exercise id — it cannot
+ * distinguish "absent from the registry" from "present in the registry but
+ * unresolvable in this context" from "the caller simply did not ask for
+ * it". Reporting one of those three codes here would be a guess, and the
+ * middle case is real: `pallof_press` is in the registry and still resolves
+ * to no source when no cable/band capability is declared.
+ *
+ * This union has one member today. It exists as a union so that, once the
+ * engine resolves prescription sources itself, the more precise codes can
+ * be added additively without changing this field's type name or meaning.
+ */
+export type UnprescribedExerciseReasonCode = "PRESCRIPTION_SOURCE_NOT_PROVIDED";
+
 export interface PrescriptionSourceGap {
   exerciseId: Identifier;
   moduleId: CapabilityModule;
   /** Mirrors the module's own `"primary"` role — never a new inference (see below). */
   required: boolean;
+  reasonCode: UnprescribedExerciseReasonCode;
+  /** Human-readable restatement of `reasonCode` — never a second, different reason. */
   reason: string;
 }
 
@@ -83,6 +106,7 @@ export function buildDraftPrescriptionInputs(
         exerciseId,
         moduleId,
         required,
+        reasonCode: "PRESCRIPTION_SOURCE_NOT_PROVIDED",
         reason: `No prescription source data (role, capabilities, instructions, stop conditions, athlete references, load profile) is available for exercise "${exerciseId}".`,
       });
       continue;

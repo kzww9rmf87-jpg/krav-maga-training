@@ -530,7 +530,13 @@ function mapPrescribedSession(session: SessionPrescription): CasPrescribedSessio
 }
 
 function mapPrescriptionGap(gap: PrescriptionSourceGap): CasPrescriptionGapV1 {
-  return { exerciseId: gap.exerciseId, moduleId: gap.moduleId, required: gap.required, reason: gap.reason };
+  return {
+    exerciseId: gap.exerciseId,
+    moduleId: gap.moduleId,
+    required: gap.required,
+    reasonCode: gap.reasonCode,
+    reason: gap.reason,
+  };
 }
 
 /** Ids whose per-exercise resolver attempt did not succeed — filtered from the internal per-exercise trace, never exposed itself. */
@@ -555,14 +561,41 @@ function mapPrescriptionFailure(failure: PrescribeSessionFailure): CasPrescripti
   };
 }
 
+/**
+ * `unprescribedSelectedExercises` is projected on every status, in the
+ * engine's own order (`draft.modules` order, never re-sorted here), so a
+ * consumer never has to diff `sessionDraft` against
+ * `prescription.session.exercises` to find an omitted exercise.
+ *
+ * The field is declared optional on `CasPrescriptionOutcomeV1` for backward
+ * TYPE compatibility with v1 objects that predate it — the type therefore
+ * no longer forces this function to set it. Emitting it unconditionally
+ * (`[]` included) is a guarantee this serializer makes on purpose, not one
+ * the compiler checks, so it is covered by tests rather than by the type.
+ * The same holds for `reasonCode` in `mapPrescriptionGap` above.
+ */
 function mapPrescriptionOutcome(outcome: EngineSessionPrescriptionOutcome): CasPrescriptionOutcomeV1 {
+  const unprescribedSelectedExercises = outcome.unprescribedSelectedExercises.map(mapPrescriptionGap);
+
   switch (outcome.status) {
     case "prescribed":
-      return { status: "prescribed", session: mapPrescribedSession(outcome.session) };
+      return {
+        status: "prescribed",
+        session: mapPrescribedSession(outcome.session),
+        unprescribedSelectedExercises,
+      };
     case "unavailable":
-      return { status: "unavailable", missingSourceData: outcome.missingSourceData.map(mapPrescriptionGap) };
+      return {
+        status: "unavailable",
+        missingSourceData: outcome.missingSourceData.map(mapPrescriptionGap),
+        unprescribedSelectedExercises,
+      };
     case "failed":
-      return { status: "failed", failure: mapPrescriptionFailure(outcome.failure) };
+      return {
+        status: "failed",
+        failure: mapPrescriptionFailure(outcome.failure),
+        unprescribedSelectedExercises,
+      };
   }
 }
 
