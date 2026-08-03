@@ -153,6 +153,13 @@ const EXPLICIT_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
   // but each on its own unit's profile.
   rope_climb: "grip_climb_strength_v0_1",
   rope_pull: "grip_hand_pull_work_v0_1",
+  // Registry Lot 20 — the three partner grappling drills, all on Table Group
+  // 18's single profile. Their triple (movement, partner_grappling_rounds,
+  // technical) is UNIQUE, so implicit resolution would already select it;
+  // the id is declared for the same auditability reason towel_pull_up uses.
+  pummeling: "partner_grappling_rounds_technical_v0_1",
+  wall_wrestling: "partner_grappling_rounds_technical_v0_1",
+  grip_fighting: "partner_grappling_rounds_technical_v0_1",
 };
 
 /**

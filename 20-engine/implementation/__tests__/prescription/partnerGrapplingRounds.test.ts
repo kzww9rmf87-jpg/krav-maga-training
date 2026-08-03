@@ -796,17 +796,31 @@ describe("Partner Grappling Rounds — genericity and non-regression", () => {
     }
   });
 
-  test("30. no registry entry was added — the registry stays at 71 and the three drills are still absent", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(71);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(71);
+  test("30. the method and profile are consumed by exactly the three drills they were built for — and by nothing else", () => {
+    // This assertion was "no registry entry was added — the registry stays at
+    // 71" while the foundation shipped alone. Registry Lot 20 consumed the
+    // foundation, which is what it was for; what still has to hold is that
+    // NOTHING ELSE moved onto the new method or the new profile.
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
 
     for (const drill of FUTURE_DRILLS) {
-      expect(PILOT_EXERCISE_IDS as readonly string[]).not.toContain(drill);
-      expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(drill);
+      expect(PILOT_EXERCISE_IDS as readonly string[]).toContain(drill);
+      expect(EXERCISE_PRESCRIPTION_REGISTRY).toHaveProperty(drill);
     }
 
-    // No existing entry was moved onto the new method either.
+    const onMethod = Object.values(EXERCISE_PRESCRIPTION_REGISTRY).filter(
+      (entry) => entry.explicitMethodId === METHOD_ID,
+    );
+    const onProfile = Object.values(EXERCISE_PRESCRIPTION_REGISTRY).filter(
+      (entry) => entry.numericalProfileId === PROFILE_ID,
+    );
+    expect(onMethod.map((entry) => entry.exerciseId)).toEqual([...FUTURE_DRILLS]);
+    expect(onProfile.map((entry) => entry.exerciseId)).toEqual([...FUTURE_DRILLS]);
+
+    // No pre-existing entry declared support for the new method.
     for (const entry of Object.values(EXERCISE_PRESCRIPTION_REGISTRY)) {
+      if ((FUTURE_DRILLS as readonly string[]).includes(entry.exerciseId)) continue;
       expect(entry.capabilities.supportedMethodIds as readonly string[]).not.toContain(METHOD_ID);
       expect(entry.numericalProfileId).not.toBe(PROFILE_ID);
     }
@@ -825,8 +839,17 @@ describe("Partner Grappling Rounds — genericity and non-regression", () => {
     }
   });
 
-  test("32. the equipment vocabulary stays at 31 — this lot added none", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(31);
+  test("32. the foundation added no equipment identifier — the one later addition is wall_wrestling's, not the method's", () => {
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(32);
+    // The method requires a PERSON, and a person is not an implement: no
+    // generic "partner" identifier exists in the equipment vocabulary, and
+    // the foundation added none. Registry Lot 20 added exactly one id,
+    // `usable_wall`, and it belongs to one exercise's environment rather
+    // than to this method — pummeling and grip_fighting require no equipment
+    // at all.
+    for (const id of EQUIPMENT_CAPABILITY_IDS) {
+      expect(id).not.toContain("partner");
+    }
   });
 
   test("33. no resolver branches on this method, this profile or a partner drill", () => {

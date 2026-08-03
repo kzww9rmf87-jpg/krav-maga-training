@@ -582,7 +582,7 @@ describe("registry Lot 4 — distinctions from named precedents", () => {
     expect(shotEntriesExecution?.text.toLowerCase()).not.toContain("protect the head");
   });
 
-  test("shot_entries vs. pummeling: pummeling requires a mandatory partner (human_assistance) and is entirely unintegrated in the registry; shot_entries requires only a mat and no partner, confirmed at the knowledge-base level and by direct search of the registry", () => {
+  test("shot_entries vs. pummeling: pummeling requires a mandatory partner (human_assistance) and shot_entries requires only a mat and no partner, confirmed at the knowledge-base level and in the registry", () => {
     const shotEntriesKb = EXERCISE_KNOWLEDGE_BASE.find((e) => e.id === "shot_entries")!;
     const pummelingKb = EXERCISE_KNOWLEDGE_BASE.find((e) => e.id === "pummeling")!;
     expect(shotEntriesKb.module).toBe(pummelingKb.module);
@@ -593,7 +593,16 @@ describe("registry Lot 4 — distinctions from named precedents", () => {
     const shotEntriesRequirements = (shotEntriesKb.requirements?.required ?? []).flatMap((c) => c.items);
     expect(shotEntriesRequirements.some((a) => a.kind === "human_assistance")).toBe(false);
     expect(EXERCISE_PRESCRIPTION_REGISTRY.shot_entries.capabilities.requiredEquipmentCapabilities).toEqual(["mat"]);
-    expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty("pummeling");
+
+    // pummeling was unintegrated when this lot shipped; Registry Lot 20 added
+    // it. The distinction this test exists to protect survives integration and
+    // is now assertable on both entries rather than on one: the partner
+    // requirement is carried as a capability tag, not as an equipment id, and
+    // shot_entries — same module, no partner — never acquired it.
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.pummeling.capabilities.capabilityTags).toContain("partner_resistance");
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.pummeling.capabilities.requiredEquipmentCapabilities).toEqual([]);
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.shot_entries.capabilities.capabilityTags).not.toContain("partner_resistance");
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.shot_entries.explicitMethodId).not.toBe("partner_grappling_rounds");
   });
 
   test("shot_entries vs. weighted strength exercises (e.g. back_squat): entirely different module, method, loading mode and intensity vocabulary — no load-based prescription is introduced for shot_entries", () => {
@@ -622,8 +631,8 @@ describe("registry Lot 4 — registry validation and non-regression", () => {
   });
 
   test("the registry now contains exactly 59 active exercises (57 + sprawl + shot_entries)", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(71);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(71);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
   });
 
   test("no historical entry was removed: all 57 previously-existing ids are still present", () => {

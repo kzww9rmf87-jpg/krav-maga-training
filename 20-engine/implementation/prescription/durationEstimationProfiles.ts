@@ -321,6 +321,27 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // convert one unrepresented unit into another.
   unresolvedProfile("rope_climb", "sets_reps", ["50-exercises/65_GRIP/13_ROPE_CLIMB.md"]),
   unresolvedProfile("rope_pull", "sets_reps", ["50-exercises/65_GRIP/14_ROPE_PULL.md"]),
+
+  // Registry Lot 20 — the three partner grappling drills.
+  //
+  // All three `"unresolved"`, and for a reason specific to this family
+  // rather than the usual one. Each chapter quantifies rounds and round
+  // duration, and both are prescription targets resolved by `resolveVolume`;
+  // inter-round rest is resolved by `resolveRest` from Table Group 18, which
+  // states in writing that the band is an engineering decision no chapter
+  // supports. None of that is an estimate of how long the exercise takes.
+  //
+  // What is missing here is also structural, not merely undocumented: a
+  // partner drill's real elapsed time includes finding and pairing with a
+  // partner, agreeing the constraint and the resistance level, and resetting
+  // position between exchanges — and no chapter gives a figure for any of
+  // them (checked directly). `perRoundSeconds` in particular must not be
+  // back-filled from the prescribed round duration: that would restate a
+  // prescription as an estimate, the error already refused for towel_pull_up
+  // and the two rope entries.
+  unresolvedProfile("pummeling", "rounds_duration", ["50-exercises/31_PUMMELING"]),
+  unresolvedProfile("wall_wrestling", "rounds_duration", ["50-exercises/32_WALL_WRESTLING"]),
+  unresolvedProfile("grip_fighting", "rounds_duration", ["50-exercises/33_GRIP_FIGHTING"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

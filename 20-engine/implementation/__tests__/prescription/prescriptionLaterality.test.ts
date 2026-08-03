@@ -69,10 +69,32 @@ function prescribe(id: PilotExerciseId) {
   return result;
 }
 
-/** Every registry id declaring the given laterality. */
+/**
+ * True when the entry's own method forbids the laterality field outright, in
+ * which case the source builder yields `null` no matter what the entry
+ * declares — a method rule that outranks the exercise declaration.
+ *
+ * Registry Lot 20 produced the first entries in this state: all three partner
+ * grappling drills sit on `partner_grappling_rounds`, whose contract lists
+ * `laterality` among its `forbiddenVolumeFields` because a clinch exchange is
+ * not allocated per side. Until then the rule was asserted at contract level
+ * only, against no real entry.
+ */
+const methodForbidsLaterality = (id: PilotExerciseId): boolean =>
+  getTrainingMethodContract(
+    EXERCISE_PRESCRIPTION_REGISTRY[id].explicitMethodId,
+  ).forbiddenVolumeFields.includes("laterality");
+
+/**
+ * Every registry id declaring the given laterality AND sitting on a method
+ * that permits the field — the population whose declaration actually reaches
+ * the resolved volume.
+ */
 const idsWithLaterality = (laterality: ExerciseLaterality): PilotExerciseId[] =>
   PILOT_EXERCISE_IDS.filter(
-    (id) => EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities.laterality === laterality,
+    (id) =>
+      EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities.laterality === laterality &&
+      !methodForbidsLaterality(id),
   );
 
 // -----------------------------------------------------------------------------
@@ -90,12 +112,20 @@ describe("prescription laterality — getExercisePrescriptionSource forwards wha
       const entry = EXERCISE_PRESCRIPTION_REGISTRY[id];
       const [expectedInterpretation] = entry.capabilities.volumeInterpretations;
 
-      expect(sourceResult.source.laterality).toEqual({
-        laterality: entry.capabilities.laterality,
-        interpretation: expectedInterpretation,
-        startingSide: null,
-        sideSwitchRuleId: null,
-      });
+      // A method that forbids the field outranks the entry's declaration:
+      // the builder returns null rather than carrying a value the
+      // prescription is not allowed to hold. The entry still DECLARES its
+      // laterality — that declaration simply does not reach the volume.
+      expect(sourceResult.source.laterality).toEqual(
+        methodForbidsLaterality(id)
+          ? null
+          : {
+              laterality: entry.capabilities.laterality,
+              interpretation: expectedInterpretation,
+              startingSide: null,
+              sideSwitchRuleId: null,
+            },
+      );
       // The flag is the same predicate compatibility validation uses — one
       // definition, not two that can drift.
       expect(sourceResult.source.lateralityRequired).toBe(requiresLateralityResolution(entry.capabilities));
@@ -202,13 +232,32 @@ describe("prescription laterality — every declared value reaches the resolved 
   });
 
   test("a method whose contract forbids the laterality field yields null — a method rule, not an exercise rule", () => {
-    // No registry entry uses such a method today; the rule is asserted at
-    // the contract level so it holds for the first entry that does.
-    for (const methodId of ["continuous_aerobic_duration", "recovery_duration_work"] as const) {
+    for (const methodId of [
+      "continuous_aerobic_duration",
+      "recovery_duration_work",
+      "partner_grappling_rounds",
+    ] as const) {
       expect(getTrainingMethodContract(methodId).forbiddenVolumeFields).toContain("laterality");
     }
-    for (const entry of Object.values(EXERCISE_PRESCRIPTION_REGISTRY)) {
-      expect(getTrainingMethodContract(entry.explicitMethodId).forbiddenVolumeFields).not.toContain("laterality");
+
+    // Registry Lot 20 supplied the first real entries exercising this rule.
+    // Each DECLARES `not_applicable` and still resolves to null, which is the
+    // point: the method decides whether the field exists at all, and the
+    // exercise cannot override it in either direction.
+    const forbidden = PILOT_EXERCISE_IDS.filter(methodForbidsLaterality);
+    expect(forbidden).toEqual(["pummeling", "wall_wrestling", "grip_fighting"]);
+
+    for (const id of forbidden) {
+      expect(EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities.laterality).toBe("not_applicable");
+      expect(prescribe(id).prescription.volume.laterality).toBeNull();
+      expect(requiresLateralityResolution(EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities)).toBe(false);
+    }
+
+    // Every other entry sits on a method that permits the field.
+    for (const id of PILOT_EXERCISE_IDS.filter((candidate) => !methodForbidsLaterality(candidate))) {
+      expect(
+        getTrainingMethodContract(EXERCISE_PRESCRIPTION_REGISTRY[id].explicitMethodId).forbiddenVolumeFields,
+      ).not.toContain("laterality");
     }
   });
 });

@@ -195,6 +195,33 @@ export const EQUIPMENT_CAPABILITY_IDS = [
   // `battle_rope`, which was given its own id precisely so the two could
   // never satisfy each other. Matching stays exact in both directions.
   "rope",
+  // Added for `wall_wrestling` (Registry Lot 20).
+  //
+  // Aligned 1:1 with the knowledge base's own `usable_wall`
+  // `EnvironmentCapability`, which WALL_WRESTLING already gates on; no
+  // ExerciseDefinition was modified and the gap was vocabulary asymmetry
+  // alone. Same-name mirroring across the two layers is the established
+  // convention for an environmental capability — `safe_landing_surface` is
+  // spelled identically in both, and the knowledge base states the rule
+  // outright: "consistent naming across both layers for the same physical
+  // constraint".
+  //
+  // DELIBERATELY NOT `wall`, and the distinction is not cosmetic. That id is
+  // documented as "a resistant vertical surface authorized to receive a
+  // thrown implement" and is held by two medicine-ball entries; a surface
+  // rated to be thrown at is not thereby rated for two athletes to drive
+  // into each other against it, and an MMA cage — which this chapter names
+  // as an equal alternative — is a poor rebound target. Requiring `wall`
+  // here would claim a throw-target authorization this chapter never gives.
+  // `wall` is left untouched for its two existing users, exactly as
+  // `rigid_anchor_support` was left intact when `rope_anchor_point` was
+  // added for a different anchoring function.
+  //
+  // MODEL LIMITATION, inherited from the knowledge base rather than invented
+  // here: this vocabulary does not distinguish a padded wall from an MMA
+  // cage, and `usable_wall` represents only the function both share — a
+  // vertical, resistant surface an opponent can be controlled against.
+  "usable_wall",
 ] as const;
 
 export type EquipmentCapabilityId = (typeof EQUIPMENT_CAPABILITY_IDS)[number];

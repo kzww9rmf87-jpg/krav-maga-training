@@ -36,8 +36,13 @@ import {
   fatigueLimitCondition,
   impactLimitCondition,
   intervalPaceLossCondition,
+  manualTerminationCondition,
   painCondition,
+  partnerResistanceLimitCondition,
   rangeOfMotionLossCondition,
+  roundBalanceLossCondition,
+  roundCoordinationLossCondition,
+  roundTechnicalFailureCondition,
   technicalFailureCondition,
   velocityLossCondition,
 } from "./stopConditionRegistry";
@@ -312,6 +317,15 @@ export const PILOT_EXERCISE_IDS = [
   // are never counted as the same thing.
   "rope_climb",
   "rope_pull",
+  // Registry Lot 20 — the three partner grappling drills, and the first
+  // consumers of the `partner_grappling_rounds` method, of Table Group 18's
+  // profile and of the `rounds_duration` structure anywhere in the registry.
+  // The first entries whose required resistance is a person rather than an
+  // implement. Add no method, no profile and no doctrine: the foundation
+  // already covers them, and these entries only narrow.
+  "pummeling",
+  "wall_wrestling",
+  "grip_fighting",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -10762,6 +10776,568 @@ const ropePullEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Registry Lot 20 — the three partner grappling drills
+// Sources: 50-exercises/31_PUMMELING, 32_WALL_WRESTLING, 33_GRIP_FIGHTING
+//
+// The three entries the Partner Grappling Rounds foundation was built for.
+// Everything they need already exists: the `partner_grappling_rounds` method,
+// Table Group 18's `partner_grappling_rounds_technical_v0_1` profile, the
+// `partner_resistance` capability and the round-scoped stop-condition family.
+// No method, module contract, profile or doctrine is touched here — this lot
+// is registry work, and the foundation comes out of it unchanged.
+//
+// WHAT IS IDENTICAL ACROSS ALL THREE, and why it is not duplication: every
+// one of these fields is dictated by the method contract or by Table Group
+// 18, not chosen per exercise. `rounds_duration` is the method's only
+// structure; `technical_effort` is the profile's only intensity rule; tempo
+// is forbidden by the method; laterality is forbidden by the method, so
+// `not_applicable` is the only honest value; `partner_resistance` is the
+// method's own required capability. Three chapters that share a Primary
+// Classification, a Secondary Classification and a Loading Profile shape
+// SHOULD produce three structurally identical entries — divergence would be
+// the thing needing justification.
+//
+// WHAT DIFFERS is exactly what the chapters differ on: the documented volume
+// bounds, the wall, and the drill-specific text of instructions and stop
+// conditions.
+//
+// ROLE. `technical` for all three, and it is read from the documents rather
+// than picked for convenience: each chapter's Primary Classification is
+// "Combat-Specific Technique", each names "Technical quality remains high"
+// as a Success Criterion, and the movement module authorizes
+// `partner_grappling_rounds` at `technical` (priority 6, its last preference
+// — resisted partner work is never selected ahead of mobility or repetition
+// work). `secondary` and `accessory` are contract-legal but neither is
+// supported by a chapter that calls itself a technique.
+//
+// INTENSITY. `technical_effort` alone, and `exerciseIntensityConstraints`
+// is null for all three: the profile carries exactly one intensity rule, so
+// there is nothing to narrow and a constraint object would only restate it.
+// No RPE and no RIR appear anywhere in the three chapters (counted
+// directly). `movement_intent` is not declared even though the method allows
+// it — wall_wrestling and grip_fighting say "Explosive" and pummeling says
+// movement quality is prioritized over speed, and Table Group 18 already
+// settled that a shared profile cannot claim a velocity one member
+// contradicts.
+//
+// PARTNER RESISTANCE IS NOT DOSED, in any of the three. All three list it
+// under "Progression" — a progression axis, not a prescribed value, the same
+// reading that kept Power Output and Calories out of assault_bike_intervals.
+// It is carried by the `intensity_limit` stop condition instead.
+//
+// REST. `exerciseRestConstraints` is null for all three, and that is a
+// finding rather than an oversight: none of the three chapters documents
+// inter-round rest at all (checked directly — their only time values are
+// round duration and 24–48 h inter-session recovery). The profile's
+// 60/120/180 s band applies unnarrowed, and it is sourced to
+// `MOVEMENT_PARTNER_GRAPPLING_REST_V0_1`, so the one value no chapter
+// supports can never be mistaken for a value read off one of these three.
+//
+// THE PARTNER IS NOT AN EQUIPMENT ID. It is gated on three layers already —
+// the method's `partner_resistance` required capability, each entry's own
+// `capabilityTags`, and the knowledge base's `human_assistance: partner`
+// requirement, which governs eligibility. No generic "partner" identifier
+// was added to the equipment vocabulary: a human being does not belong in
+// the implement list. `registryValidators` was taught this class of
+// requirement generically (see `NON_EQUIPMENT_REQUIREMENT_TAGS`), not
+// exercise by exercise.
+//
+// DURATION. All three profiles are `unresolved` — see
+// `durationEstimationProfiles.ts` for why a partner drill's elapsed time is
+// structurally unavailable, and why `perRoundSeconds` must not be back-filled
+// from the prescribed round duration.
+// -----------------------------------------------------------------------------
+
+const SOURCE_PUMMELING = "50-exercises/31_PUMMELING";
+const SOURCE_WALL_WRESTLING = "50-exercises/32_WALL_WRESTLING";
+const SOURCE_GRIP_FIGHTING = "50-exercises/33_GRIP_FIGHTING";
+
+/**
+ * The capability tags every partner grappling entry carries. Exactly the
+ * `partner_grappling_rounds` contract's own `requiredExerciseCapabilities`,
+ * in the same order — `validateCompatibility` checks the entry against the
+ * method, so any divergence here is a bug, not a variation.
+ */
+const PARTNER_GRAPPLING_CAPABILITY_TAGS = [
+  "round_structure",
+  "technical_quality_observation",
+  "partner_resistance",
+] as const;
+
+// -----------------------------------------------------------------------------
+// Pummeling
+//
+// NARROWING. "# Loading Profile — Typical Volume: 3–8 rounds, 2–5 minutes",
+// corroborated by "# Physiological Profile — Typical Duration: 2–5 minute
+// rounds". The two sections agree, so there is no source arbitration of the
+// heavy_bag kind. Declared as the chapter's own bounds; the generic resolvers
+// intersect them with the profile's 3–10 × 30–300 s envelope and reach 3–8 ×
+// 120–300 s. The 9th and 10th round and the 30–119 s round become
+// unreachable, which is the safe direction: a constraint narrows, never
+// widens.
+//
+// EQUIPMENT. None, and this is the chapter's own position: "# Equipment
+// Requirements — Required: Training Partner", with "Wrestling Mat, Timer,
+// Reaction Commands" all Optional. NO WALL — "Wall Pummeling" appears only
+// as a named Variation of this chapter, and a variation's equipment is not
+// the base drill's requirement. The knowledge base agrees exactly: its
+// `requirements` hold `human_assistance: partner` and nothing else.
+// -----------------------------------------------------------------------------
+
+const pummelingStopConditions: StopConditionDefinition[] = [
+  roundTechnicalFailureCondition({
+    conditionId: "pummeling_technical_failure",
+    description:
+      "End the round on technical breakdown: posture lost and the athlete standing too upright, the arms working alone without the feet, or the exchange degenerating into a strength contest rather than a fight for inside position.",
+    sourceRuleIds: [SOURCE_PUMMELING],
+  }),
+  roundCoordinationLossCondition({
+    conditionId: "pummeling_coordination_loss",
+    description:
+      "End the round when the continuous exchange can no longer be coordinated — reacting to the hands instead of feeling pressure, tension replacing relaxed contact, or the athlete no longer able to improve position while maintaining posture and balance.",
+    sourceRuleIds: [SOURCE_PUMMELING, SOURCE_MODULE_PROFILES],
+  }),
+  roundBalanceLossCondition({
+    conditionId: "pummeling_balance_loss",
+    description:
+      "End the round on loss of balance or base: feet no longer moving continuously, stance crossed or squared under pressure, or posture no longer recoverable inside the clinch.",
+    sourceRuleIds: [SOURCE_PUMMELING],
+  }),
+  partnerResistanceLimitCondition({
+    conditionId: "pummeling_partner_resistance_limit",
+    description:
+      "End the round if the partner's resistance rises above the agreed level, or if excessive force replaces technical exchange. Resistance is a progression axis in this chapter, not a prescribed dose — it is corrected by the partner dialling back, after which the work continues.",
+    sourceRuleIds: [SOURCE_PUMMELING, SOURCE_METHOD_CATALOGUE],
+  }),
+  manualTerminationCondition({
+    conditionId: "pummeling_manual_termination",
+    description:
+      "End the round immediately whenever either athlete asks to stop. No reason has to be stated, and none is inferred.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+  painCondition({
+    conditionId: "pummeling_pain",
+    description:
+      "Stop immediately on pain, in particular shoulder pain under load or any pain referred to the neck. Do not train with an acute shoulder, cervical or elbow injury.",
+    sourceRuleIds: [SOURCE_PUMMELING],
+  }),
+  acuteSymptomCondition({
+    conditionId: "pummeling_acute_symptom",
+    description:
+      "Stop the exercise at once on any acute symptom — dizziness, nausea, numbness or sudden weakness — reported by either athlete at any point.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_PUMMELING],
+  }),
+  completionCondition({
+    conditionId: "pummeling_completion",
+    description: "Stop once the prescribed rounds are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const pummelingInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "pummeling_setup",
+    "setup",
+    "This drill requires a training partner and has no solo form. Agree the level of resistance and the constraint before the first round, and hold it there — resistance is a progression axis in this chapter, not a prescribed dose. Establish the clinch with posture maintained and a stable base, feet already moving. A wrestling mat and a timer are optional; no wall is required.",
+    "critical",
+    true,
+    SOURCE_PUMMELING,
+  ),
+  makeInstruction(
+    "pummeling_execution",
+    "execution",
+    "Fight continuously for inside position, alternating underhooks with the partner and exchanging fluidly rather than in discrete attempts. Feel before reacting instead of watching the hands, keep the arms connected to a moving base rather than working them alone, move the feet continuously and stay relaxed. Movement quality is prioritized over speed.",
+    "high",
+    true,
+    SOURCE_PUMMELING,
+  ),
+  makeInstruction(
+    "pummeling_safety",
+    "safety",
+    "Maintain neck position throughout — poor neck position, excessive force, shoulder overload and technical breakdown are this chapter's documented risks. Do not force a position with strength when the technique is not there. Do not train with an acute shoulder, cervical or elbow injury.",
+    "critical",
+    true,
+    SOURCE_PUMMELING,
+  ),
+];
+
+const pummelingEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "pummeling",
+  moduleId: "movement",
+  role: "technical",
+  explicitMethodId: "partner_grappling_rounds",
+  numericalProfileId: "partner_grappling_rounds_technical_v0_1",
+  capabilities: {
+    exerciseId: "pummeling",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["partner_grappling_rounds"],
+    supportedVolumeStructures: ["rounds_duration"],
+    supportedIntensityTypes: ["technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    // The resistance comes from the partner. No implement, no machine, and
+    // not `bodyweight` either — the athlete is not moving their own mass
+    // against gravity, they are working against a resisting human.
+    supportedLoadingModes: ["partner_resistance"],
+    supportedTempoTypes: [],
+    laterality: "not_applicable",
+    volumeInterpretations: ["round_total"],
+    capabilityTags: [...PARTNER_GRAPPLING_CAPABILITY_TAGS],
+    // Deliberately empty. "Wrestling Mat" is Optional in this chapter, and
+    // "Wall Pummeling" is one of its Variations, not its requirement.
+    requiredEquipmentCapabilities: [],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["pummeling_setup", "pummeling_execution", "pummeling_safety"],
+    requiredStopConditionIds: [
+      "pummeling_technical_failure",
+      "pummeling_coordination_loss",
+      "pummeling_balance_loss",
+      "pummeling_partner_resistance_limit",
+      "pummeling_manual_termination",
+      "pummeling_pain",
+      "pummeling_acute_symptom",
+      "pummeling_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_pummeling",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_PUMMELING, SOURCE_MODULE_PROFILES],
+  },
+  supportedIntensityTypes: ["technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: [],
+  preferredTempoType: null,
+  instructionDefinitions: pummelingInstructions,
+  stopConditionDefinitions: pummelingStopConditions,
+  // "# Loading Profile — Typical Volume: 3–8 rounds, 2–5 minutes."
+  exerciseDoseConstraints: {
+    minimumDose: { sets: null, repetitions: null, durationSeconds: 120, distanceMeters: null, rounds: 3, workIntervals: null },
+    maximumDose: { sets: null, repetitions: null, durationSeconds: 300, distanceMeters: null, rounds: 8, workIntervals: null },
+    sourceRuleIds: [SOURCE_PUMMELING],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_PUMMELING, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
+// Wall Wrestling
+//
+// NARROWING. "# Loading Profile — Typical Volume: 3–8 rounds, 2–5 minutes",
+// again corroborated by "# Physiological Profile — Typical Duration: 2–5
+// minute rounds". Same bounds as pummeling, reached independently from this
+// chapter's own sections rather than copied across.
+//
+// EQUIPMENT — THE ONE PLACE THE THREE DIVERGE. "# Equipment Requirements —
+// Required: Training Partner, Wall or MMA Cage." Two unconditional items,
+// and the knowledge base encodes exactly that: an `all_of` clause holding
+// `human_assistance: partner` AND `environment: usable_wall`. This entry
+// mirrors the wall with the `usable_wall` capability id, matching the
+// knowledge base's own identifier name for the same physical constraint.
+//
+// NOT the `wall` id, which is documented as a surface authorized to receive
+// a THROWN IMPLEMENT and is held by two medicine-ball entries — see
+// `equipmentCapabilities.ts` for the full reasoning. Crash Mats, Timer and
+// Coach are Optional and add no atom. No impact equipment of any kind is
+// required: nothing is struck in this drill.
+// -----------------------------------------------------------------------------
+
+const wallWrestlingStopConditions: StopConditionDefinition[] = [
+  roundTechnicalFailureCondition({
+    conditionId: "wall_wrestling_technical_failure",
+    description:
+      "End the round on technical breakdown: standing upright against the surface, hip pressure lost, the arms working without the legs, or posture no longer held under pressure.",
+    sourceRuleIds: [SOURCE_WALL_WRESTLING],
+  }),
+  roundCoordinationLossCondition({
+    conditionId: "wall_wrestling_coordination_loss",
+    description:
+      "End the round when position against the wall can no longer be controlled — the athlete unable to maintain connection and pressure at once, or the exchange no longer directed at a position but merely absorbed.",
+    sourceRuleIds: [SOURCE_WALL_WRESTLING, SOURCE_MODULE_PROFILES],
+  }),
+  roundBalanceLossCondition({
+    conditionId: "wall_wrestling_balance_loss",
+    description:
+      "End the round on loss of balance or base against the surface: feet crossed, feet no longer moving, or stance collapsing under the partner's pressure.",
+    sourceRuleIds: [SOURCE_WALL_WRESTLING],
+  }),
+  partnerResistanceLimitCondition({
+    conditionId: "wall_wrestling_partner_resistance_limit",
+    description:
+      "End the round if the partner's resistance exceeds the agreed level — excessive resistance is named among this chapter's primary risks. Resistance and partner skill are progression axes here, not prescribed doses; the correction is the partner dialling back, after which the work continues.",
+    sourceRuleIds: [SOURCE_WALL_WRESTLING, SOURCE_METHOD_CATALOGUE],
+  }),
+  manualTerminationCondition({
+    conditionId: "wall_wrestling_manual_termination",
+    description:
+      "End the round immediately whenever either athlete asks to stop. No reason has to be stated, and none is inferred.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+  painCondition({
+    conditionId: "wall_wrestling_pain",
+    description:
+      "Stop immediately on pain, in particular neck pain under load and finger pain from grip exchanges. Do not train with an acute cervical, shoulder or knee injury, or after a concussion.",
+    sourceRuleIds: [SOURCE_WALL_WRESTLING],
+  }),
+  acuteSymptomCondition({
+    conditionId: "wall_wrestling_acute_symptom",
+    description:
+      "Stop the exercise at once on any acute symptom — dizziness, nausea, headache, numbness or sudden weakness — reported by either athlete at any point. This drill's contraindications include acute concussion, so head symptoms end the session rather than the round.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_WALL_WRESTLING],
+  }),
+  completionCondition({
+    conditionId: "wall_wrestling_completion",
+    description: "Stop once the prescribed rounds are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const wallWrestlingInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "wall_wrestling_setup",
+    "setup",
+    "This drill requires a training partner and a wall or MMA cage — a vertical, resistant surface an opponent can be controlled against. Check the surface and the area around it before starting: no protruding edges, no obstacles, and enough clear floor at its base. Agree the level of resistance and the objective before the first round. Establish the clinch against the surface with head position set and a stable base. Crash mats, a timer and a coach are optional.",
+    "critical",
+    true,
+    SOURCE_WALL_WRESTLING,
+  ),
+  makeInstruction(
+    "wall_wrestling_execution",
+    "execution",
+    "Control the inside space and drive through the legs, keeping hip pressure on the partner and staying connected to them and to the surface. Work pummeling, underhook battles and positional control against the wall, changing levels to improve position. Never stop moving the feet and do not cross them. Do not stand upright and do not pull with the arms alone.",
+    "high",
+    true,
+    SOURCE_WALL_WRESTLING,
+  ),
+  makeInstruction(
+    "wall_wrestling_safety",
+    "safety",
+    "Maintain head position throughout — poor head position, neck overload, finger injuries and excessive resistance are this chapter's documented risks. Takedown entries belong to this drill, but completing a takedown is a documented progression ('Wall Wrestling to Takedown') and not part of its base form: never force a throw or takedown against the surface, and end the round when control is lost rather than finishing the entry. Do not train with an acute cervical, shoulder or knee injury, or after a concussion.",
+    "critical",
+    true,
+    SOURCE_WALL_WRESTLING,
+  ),
+];
+
+const wallWrestlingEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "wall_wrestling",
+  moduleId: "movement",
+  role: "technical",
+  explicitMethodId: "partner_grappling_rounds",
+  numericalProfileId: "partner_grappling_rounds_technical_v0_1",
+  capabilities: {
+    exerciseId: "wall_wrestling",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["partner_grappling_rounds"],
+    supportedVolumeStructures: ["rounds_duration"],
+    supportedIntensityTypes: ["technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    supportedLoadingModes: ["partner_resistance"],
+    supportedTempoTypes: [],
+    laterality: "not_applicable",
+    volumeInterpretations: ["round_total"],
+    capabilityTags: [...PARTNER_GRAPPLING_CAPABILITY_TAGS],
+    // The only equipment atom in this family, mirroring the knowledge base's
+    // own `environment: usable_wall` requirement 1:1.
+    requiredEquipmentCapabilities: ["usable_wall"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: [
+      "wall_wrestling_setup",
+      "wall_wrestling_execution",
+      "wall_wrestling_safety",
+    ],
+    requiredStopConditionIds: [
+      "wall_wrestling_technical_failure",
+      "wall_wrestling_coordination_loss",
+      "wall_wrestling_balance_loss",
+      "wall_wrestling_partner_resistance_limit",
+      "wall_wrestling_manual_termination",
+      "wall_wrestling_pain",
+      "wall_wrestling_acute_symptom",
+      "wall_wrestling_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_wall_wrestling",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_WALL_WRESTLING, SOURCE_MODULE_PROFILES],
+  },
+  supportedIntensityTypes: ["technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: [],
+  preferredTempoType: null,
+  instructionDefinitions: wallWrestlingInstructions,
+  stopConditionDefinitions: wallWrestlingStopConditions,
+  // "# Loading Profile — Typical Volume: 3–8 rounds, 2–5 minutes."
+  exerciseDoseConstraints: {
+    minimumDose: { sets: null, repetitions: null, durationSeconds: 120, distanceMeters: null, rounds: 3, workIntervals: null },
+    maximumDose: { sets: null, repetitions: null, durationSeconds: 300, distanceMeters: null, rounds: 8, workIntervals: null },
+    sourceRuleIds: [SOURCE_WALL_WRESTLING],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_WALL_WRESTLING, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
+// Grip Fighting
+//
+// NARROWING. "# Loading Profile — Typical Volume: 3–10 rounds, 30 seconds–3
+// minutes", corroborated by "# Physiological Profile — Typical Duration: 30
+// seconds–3 minutes". This is the chapter that set both outer edges of Table
+// Group 18's envelope: its round count IS the profile's 3–10, so only the
+// duration ceiling narrows (300 s → 180 s).
+//
+// NO GARMENT IS REQUIRED, and this is the chapter's own position rather than
+// a simplification. "# Equipment Requirements — Required: Training Partner",
+// with "Gi, No-Gi Clothing, Grip Trainer, Resistance Bands" ALL Optional, and
+// "# Variations" names both "Gi Grip Fighting" and "No-Gi Hand Fighting" as
+// equal alternatives. A gi is therefore a variation's implement, never the
+// base drill's requirement, and requiring one at the engine level would make
+// the no-gi form unprescribable. The knowledge base agrees exactly: its
+// `requirements` hold `human_assistance: partner` and nothing else.
+//
+// NO WALL. "Wall Grip Fighting" is a named Variation of this chapter, not a
+// requirement — the same discipline applied to pummeling's "Wall Pummeling".
+// -----------------------------------------------------------------------------
+
+const gripFightingStopConditions: StopConditionDefinition[] = [
+  roundTechnicalFailureCondition({
+    conditionId: "grip_fighting_technical_failure",
+    description:
+      "End the round on technical breakdown: pulling with arm strength alone, standing upright, chasing the hands, holding grips too long, or the feet no longer positioning the body behind the grip.",
+    sourceRuleIds: [SOURCE_GRIP_FIGHTING],
+  }),
+  roundCoordinationLossCondition({
+    conditionId: "grip_fighting_coordination_loss",
+    description:
+      "End the round when hand fighting can no longer be coordinated with posture and distance — grips taken without the body behind them, or the athlete reacting to the hands instead of controlling the exchange.",
+    sourceRuleIds: [SOURCE_GRIP_FIGHTING, SOURCE_MODULE_PROFILES],
+  }),
+  roundBalanceLossCondition({
+    conditionId: "grip_fighting_balance_loss",
+    description:
+      "End the round on loss of balance or base: poor foot positioning, the athlete pulled off posture by a grip, or distance no longer managed.",
+    sourceRuleIds: [SOURCE_GRIP_FIGHTING],
+  }),
+  partnerResistanceLimitCondition({
+    conditionId: "grip_fighting_partner_resistance_limit",
+    description:
+      "End the round if the partner's resistance rises above the agreed level, or if excessive grip force replaces technical hand fighting. Partner skill and grip constraints are progression axes in this chapter, not prescribed doses; the correction is the partner dialling back, after which the work continues.",
+    sourceRuleIds: [SOURCE_GRIP_FIGHTING, SOURCE_METHOD_CATALOGUE],
+  }),
+  manualTerminationCondition({
+    conditionId: "grip_fighting_manual_termination",
+    description:
+      "End the round immediately whenever either athlete asks to stop. No reason has to be stated, and none is inferred.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+  painCondition({
+    conditionId: "grip_fighting_pain",
+    description:
+      "Stop immediately on pain, in particular finger, wrist or elbow pain during a grip or a grip break. Do not train with an acute finger, wrist or elbow injury.",
+    sourceRuleIds: [SOURCE_GRIP_FIGHTING],
+  }),
+  acuteSymptomCondition({
+    conditionId: "grip_fighting_acute_symptom",
+    description:
+      "Stop the exercise at once on any acute symptom — numbness or tingling in the hands, sudden weakness, dizziness or nausea — reported by either athlete at any point.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_GRIP_FIGHTING],
+  }),
+  completionCondition({
+    conditionId: "grip_fighting_completion",
+    description: "Stop once the prescribed rounds are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const gripFightingInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "grip_fighting_setup",
+    "setup",
+    "This drill requires a training partner and has no solo form. A gi, no-gi clothing, a grip trainer and resistance bands are all optional — the drill runs in either the gi or the no-gi form, and neither garment is required. Agree the variation and the level of resistance before the first round. Establish posture at working distance before engaging the hands.",
+    "critical",
+    true,
+    SOURCE_GRIP_FIGHTING,
+  ),
+  makeInstruction(
+    "grip_fighting_execution",
+    "execution",
+    "Fight for inside control, establishing dominant grips — sleeve and collar in the gi form, wrist and elbow control in the no-gi form — while denying the partner the same. Break grips immediately rather than holding them, never chase the hands or watch them, use the whole body rather than arm strength alone, and keep the feet moving to manage distance. Maintain technical quality as the round goes on.",
+    "high",
+    true,
+    SOURCE_GRIP_FIGHTING,
+  ),
+  makeInstruction(
+    "grip_fighting_safety",
+    "safety",
+    "Protect the fingers and keep the wrists in a strong position — finger injuries, excessive grip force, poor wrist position and shoulder tension are this chapter's documented risks. Never jerk a gripped limb abruptly and never twist a gripped wrist or finger to break a grip. Do not train with an acute finger, wrist or elbow injury.",
+    "critical",
+    true,
+    SOURCE_GRIP_FIGHTING,
+  ),
+];
+
+const gripFightingEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "grip_fighting",
+  moduleId: "movement",
+  role: "technical",
+  explicitMethodId: "partner_grappling_rounds",
+  numericalProfileId: "partner_grappling_rounds_technical_v0_1",
+  capabilities: {
+    exerciseId: "grip_fighting",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["partner_grappling_rounds"],
+    supportedVolumeStructures: ["rounds_duration"],
+    supportedIntensityTypes: ["technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    supportedLoadingModes: ["partner_resistance"],
+    supportedTempoTypes: [],
+    laterality: "not_applicable",
+    volumeInterpretations: ["round_total"],
+    capabilityTags: [...PARTNER_GRAPPLING_CAPABILITY_TAGS],
+    // Deliberately empty. Gi, no-gi clothing, grip trainer and resistance
+    // bands are all Optional in this chapter, and both the gi and the no-gi
+    // forms are named Variations — requiring a garment would make one of the
+    // two documented forms unprescribable.
+    requiredEquipmentCapabilities: [],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: [
+      "grip_fighting_setup",
+      "grip_fighting_execution",
+      "grip_fighting_safety",
+    ],
+    requiredStopConditionIds: [
+      "grip_fighting_technical_failure",
+      "grip_fighting_coordination_loss",
+      "grip_fighting_balance_loss",
+      "grip_fighting_partner_resistance_limit",
+      "grip_fighting_manual_termination",
+      "grip_fighting_pain",
+      "grip_fighting_acute_symptom",
+      "grip_fighting_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_grip_fighting",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_GRIP_FIGHTING, SOURCE_MODULE_PROFILES],
+  },
+  supportedIntensityTypes: ["technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: [],
+  preferredTempoType: null,
+  instructionDefinitions: gripFightingInstructions,
+  stopConditionDefinitions: gripFightingStopConditions,
+  // "# Loading Profile — Typical Volume: 3–10 rounds, 30 seconds–3 minutes."
+  exerciseDoseConstraints: {
+    minimumDose: { sets: null, repetitions: null, durationSeconds: 30, distanceMeters: null, rounds: 3, workIntervals: null },
+    maximumDose: { sets: null, repetitions: null, durationSeconds: 180, distanceMeters: null, rounds: 10, workIntervals: null },
+    sourceRuleIds: [SOURCE_GRIP_FIGHTING],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [SOURCE_GRIP_FIGHTING, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 
 /**
  * Statically typed as `Record<PilotExerciseId, ...>` — TypeScript refuses
@@ -10857,6 +11433,10 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   towel_pull_up: towelPullUpEntry,
   rope_climb: ropeClimbEntry,
   rope_pull: ropePullEntry,
+
+  pummeling: pummelingEntry,
+  wall_wrestling: wallWrestlingEntry,
+  grip_fighting: gripFightingEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

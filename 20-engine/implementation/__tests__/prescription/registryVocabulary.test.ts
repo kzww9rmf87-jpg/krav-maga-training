@@ -150,8 +150,12 @@ describe("registryVocabulary — equipment capabilities", () => {
     // +1 for towel (Registry Lot 14 — Towel pull-up: likewise already a
     // knowledge-base atom, likewise only a vocabulary asymmetry),
     // +1 for rope (Registry Lot 15 — the two rope entries: the CLIMBING
-    // rope, deliberately disjoint from battle_rope).
-    expect(EQUIPMENT_CAPABILITY_IDS.length).toBe(PREVIOUSLY_EXISTING_IDS.length + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 1 + 1);
+    // rope, deliberately disjoint from battle_rope),
+    // +1 for usable_wall (Registry Lot 20 — Wall wrestling: the knowledge
+    // base's own EnvironmentCapability name, mirrored here as
+    // safe_landing_surface already is; deliberately NOT the `wall` id, which
+    // is documented as a target for a thrown implement).
+    expect(EQUIPMENT_CAPABILITY_IDS.length).toBe(PREVIOUSLY_EXISTING_IDS.length + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 1 + 1 + 1);
   });
 
   test("an unknown equipment identifier is still rejected after the addition", () => {
@@ -503,6 +507,12 @@ describe("registryVocabulary — carry loading modes corrected to match document
       // and is shared with battle_ropes without the equipment overlapping.
       rope_climb: ["bodyweight"],
       rope_pull: ["rope"],
+      // Registry Lot 20 — the first entries loaded by a PERSON. Not
+      // `bodyweight`: the athlete is not moving their own mass against
+      // gravity, they are working against a resisting partner.
+      pummeling: ["partner_resistance"],
+      wall_wrestling: ["partner_resistance"],
+      grip_fighting: ["partner_resistance"],
     };
     const CORRECTED_IDS = ["pinch_carry", "sandbag_carry", "zercher_carry"];
 
@@ -519,8 +529,8 @@ describe("registryVocabulary — carry loading modes corrected to match document
   });
 
   test("7. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(71);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(71);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
   });
 
   test("8. every retained value (plate, sandbag, barbell) is a known, documented LoadingMode", () => {
@@ -633,12 +643,12 @@ describe("registryVocabulary — pinch_carry represents only the Bilateral Varia
     for (const [id, text] of Object.entries(OTHER_ENTRY_FIRST_INSTRUCTION)) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id as PilotExerciseId].instructionDefinitions[0].text).toBe(text);
     }
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(71);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
   });
 
   test("9. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(71);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(71);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
   });
 
   test("10. explicitMethodId, supportedMethodIds, supportedVolumeStructures and stop conditions are unchanged", () => {
@@ -775,6 +785,13 @@ const DOSE_NARROWING_EXCEPTIONS = [
   // its own unit count, both of which match their module envelopes exactly.
   "rope_climb",
   "rope_pull",
+  // Registry Lot 20 — each of the three partner grappling drills narrows
+  // Table Group 18's union envelope (3-10 rounds, 30-300 s) back to its own
+  // chapter's Loading Profile: 3-8 x 120-300 s for the two clinch drills,
+  // 3-10 x 30-180 s for grip fighting.
+  "pummeling",
+  "wall_wrestling",
+  "grip_fighting",
 ] as const;
 
 describe("registryVocabulary — exerciseDoseConstraints", () => {
@@ -785,7 +802,7 @@ describe("registryVocabulary — exerciseDoseConstraints", () => {
       }
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseDoseConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(71);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
   });
 
   test("tibialis_raise, rotator_cuff_training, soleus_raise, copenhagen_plank, hip_thrust and barbell_row narrow exerciseDoseConstraints; wrist_strengthening and chin_up do not", () => {
@@ -869,7 +886,7 @@ describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestCons
         expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).toBeNull();
       }
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(71);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
   });
 
   test("every rest-narrowing entry declares its own documented window; the three set-based ones narrow rest alone, and the interval-based one is scoped between intervals", () => {

@@ -14,7 +14,7 @@
  */
 
 import type { Identifier } from "../types";
-import { getTrainingMethodContract } from "./contracts";
+import { getTrainingMethodContract, type PrescriptionCapabilityRequirement } from "./contracts";
 import {
   NUMERICAL_PRESCRIPTION_PROFILES,
   getNumericalPrescriptionProfileById,
@@ -69,6 +69,35 @@ export interface RegistryIssue {
  * mode requires nothing external — not merely that it is unloaded.
  */
 const SELF_SUPPLIED_LOADING_MODES: readonly LoadingMode[] = ["bodyweight", "locomotion_only"];
+
+/**
+ * Capability tags naming a requirement that is real, mandatory and declared —
+ * but that is a PERSON rather than a piece of equipment, and therefore has no
+ * equipment capability id and must never be given one.
+ *
+ * This is the second exemption the no-equipment check needs, and it is
+ * deliberately not a third entry in `SELF_SUPPLIED_LOADING_MODES` above:
+ * membership in that list asserts the mode "requires nothing external", and
+ * that list already excludes `assisted_bodyweight` precisely BECAUSE a
+ * partner is external. A partner drill is the opposite case — the
+ * requirement is external, it is simply not equipment.
+ *
+ * The rule's real intent is that an entry must not silently omit what it
+ * needs. `partner_resistance` omits nothing: it is required by the
+ * `partner_grappling_rounds` METHOD contract, checked by
+ * `validateCompatibility` against the entry's own `capabilityTags`, and
+ * gated independently by the knowledge base's `human_assistance: partner`
+ * requirement. Three layers state it; none of them is an equipment id, and
+ * inventing a generic "partner" equipment capability to satisfy an equipment
+ * check would put a human being in the implement vocabulary.
+ *
+ * Membership here is a claim that the tag names a mandatory NON-EQUIPMENT
+ * requirement already enforced elsewhere — not that the exercise needs
+ * nothing.
+ */
+const NON_EQUIPMENT_REQUIREMENT_TAGS: readonly PrescriptionCapabilityRequirement[] = [
+  "partner_resistance",
+];
 
 /** Every check confined to a single entry — no cross-entry duplicate check here (see `validatePilotRegistry`). */
 export function validateRegistryEntry(entry: ExercisePrescriptionRegistryEntry): RegistryIssue[] {
@@ -219,12 +248,16 @@ export function validateRegistryEntry(entry: ExercisePrescriptionRegistryEntry):
   }
   if (
     entry.capabilities.requiredEquipmentCapabilities.length === 0 &&
-    !entry.capabilities.supportedLoadingModes.some((mode) => SELF_SUPPLIED_LOADING_MODES.includes(mode))
+    !entry.capabilities.supportedLoadingModes.some((mode) => SELF_SUPPLIED_LOADING_MODES.includes(mode)) &&
+    !entry.capabilities.capabilityTags.some((tag) => NON_EQUIPMENT_REQUIREMENT_TAGS.includes(tag))
   ) {
     issues.push({
       code: "IMPOSSIBLE_METHOD_STRUCTURE_EQUIPMENT_COMBINATION",
       exerciseId,
-      message: `No required equipment capability is declared, and no loading mode is self-supplied (one of: ${SELF_SUPPLIED_LOADING_MODES.join(", ")}).`,
+      message:
+        `No required equipment capability is declared, no loading mode is self-supplied ` +
+        `(one of: ${SELF_SUPPLIED_LOADING_MODES.join(", ")}), and no non-equipment requirement ` +
+        `is declared (one of: ${NON_EQUIPMENT_REQUIREMENT_TAGS.join(", ")}).`,
     });
   }
 

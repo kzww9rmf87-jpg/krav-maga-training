@@ -92,8 +92,8 @@ const entry = () => EXERCISE_PRESCRIPTION_REGISTRY[EXERCISE_ID];
 
 describe("battle_ropes — registry, knowledge base, profile and equipment counts", () => {
   test("1. the registry grew from 66 to exactly 67 entries; a later lot added assault_bike_intervals, bringing the total to 68", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(71);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(71);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(74);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(74);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -108,7 +108,7 @@ describe("battle_ropes — registry, knowledge base, profile and equipment count
   });
 
   test("4. the equipment vocabulary went from 26 to 28 — battle_rope and rope_anchor_point, the two Required items; a later lot added cardio_machine, bringing it to 29", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(31);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(32);
     expect(isEquipmentCapabilityId("battle_rope")).toBe(true);
     expect(isEquipmentCapabilityId("rope_anchor_point")).toBe(true);
 
@@ -750,7 +750,7 @@ describe("battle_ropes — determinism, validation and non-regression", () => {
 
     // The 66 entries that predate this lot: everything except this lot's own
     // entry and the ids added by later lots, each covered by its own file.
-    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull"];
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting"];
     const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(66);
 
