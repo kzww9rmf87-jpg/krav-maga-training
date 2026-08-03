@@ -409,13 +409,23 @@ describe("Grip rope profiles — non-regression", () => {
     expect(power.volume.workIntervals).toEqual({ min: 3, normal: 7, max: 12 });
   });
 
-  test("19. no registry entry consumes either profile yet", () => {
+  test("19. exactly one entry consumes each profile, and each declares its own unit", () => {
+    const byProfile: Record<string, string> = {
+      [CLIMB_ID]: "rope_climb",
+      [PULL_ID]: "rope_pull",
+    };
     for (const id of [CLIMB_ID, PULL_ID]) {
       const consumers = Object.values(EXERCISE_PRESCRIPTION_REGISTRY).filter(
         (entry) => entry.numericalProfileId === id,
       );
-      expect(consumers, id).toHaveLength(0);
+      expect(consumers.map((entry) => entry.exerciseId), id).toEqual([byProfile[id]]);
     }
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.rope_climb.capabilities.volumeInterpretations).toEqual([
+      "climbs",
+    ]);
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.rope_pull.capabilities.volumeInterpretations).toEqual([
+      "hand_pulls",
+    ]);
     // towel_pull_up keeps its own profile and still resolves explicitly.
     expect(EXERCISE_PRESCRIPTION_REGISTRY.towel_pull_up.numericalProfileId).toBe(
       "grip_repetition_strength_v0_1",

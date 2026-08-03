@@ -87,8 +87,8 @@ function prescribe(rangeContext: PrescriptionExecutionContext["rangeContext"] = 
 
 describe("plate_pinch — registry, knowledge base, profile and equipment counts", () => {
   test("1. the registry grew from 64 to exactly 65 entries; a later lot added heavy_bag_power_intervals, bringing the total to 66", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(69);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(69);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(71);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(71);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -103,7 +103,7 @@ describe("plate_pinch — registry, knowledge base, profile and equipment counts
   });
 
   test("4. the equipment vocabulary stayed at 25 for this lot — the later heavy_bag_power_intervals lot added `heavy_bag`, bringing it to 26", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(30);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(31);
     expect(isEquipmentCapabilityId("plates")).toBe(true);
   });
 
@@ -141,7 +141,7 @@ describe("plate_pinch — registry, knowledge base, profile and equipment counts
 
     // Ids added by lots AFTER this one, listed explicitly so this test keeps
     // proving that plate_pinch was the only exercise this lot added.
-    const ADDED_BY_LATER_LOTS = ["heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up"] as const;
+    const ADDED_BY_LATER_LOTS = ["heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull"] as const;
 
     expect(PREVIOUS_IDS).toHaveLength(64);
     expect([...PREVIOUS_IDS, EXERCISE_ID, ...ADDED_BY_LATER_LOTS].sort()).toEqual(
@@ -737,7 +737,7 @@ describe("plate_pinch — determinism, non-mutation and non-regression", () => {
 
     // The 64 entries that predate this lot: everything except this lot's own
     // entry and the ids added by later lots, each covered by its own file.
-    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up"];
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull"];
     const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(64);
 
@@ -819,7 +819,7 @@ describe("plate_pinch — determinism, non-mutation and non-regression", () => {
     // canonical ISO-GRIP, which now has a consumer. The totals below are
     // running totals and have since moved: later lots added heavy_bag, then
     // battle_rope/rope_anchor_point, and the Table Group 14 profile.
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(30);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(31);
     expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(21);
     expect(getNumericalPrescriptionProfileById(PROFILE_ID)!.sourceRuleIds).toEqual([
       "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",

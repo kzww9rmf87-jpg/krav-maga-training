@@ -164,14 +164,24 @@ describe("grip volume interpretations — no behaviour changed", () => {
     expect(perSideGate).not.toContain("hand_pulls");
   });
 
-  test("9. no existing registry entry adopted either new interpretation", () => {
+  test("9. exactly two entries adopted the new interpretations — one each, never both", () => {
+    const byInterpretation: Record<string, string[]> = { climbs: [], hand_pulls: [] };
     for (const id of PILOT_EXERCISE_IDS) {
       const declared = EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities.volumeInterpretations;
-      expect(declared, id).not.toContain("climbs");
-      expect(declared, id).not.toContain("hand_pulls");
+      for (const unit of ["climbs", "hand_pulls"] as const) {
+        if (declared.includes(unit)) byInterpretation[unit]!.push(id);
+      }
     }
-    // This phase adds vocabulary only: the registry is untouched.
-    expect(PILOT_EXERCISE_IDS).toHaveLength(69);
+    expect(byInterpretation["climbs"]).toEqual(["rope_climb"]);
+    expect(byInterpretation["hand_pulls"]).toEqual(["rope_pull"]);
+
+    // No entry claims both, and no entry claims one alongside a repetition
+    // interpretation — a unit is exclusive.
+    for (const id of PILOT_EXERCISE_IDS) {
+      const declared = EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities.volumeInterpretations;
+      expect(declared.length, id).toBe(1);
+    }
+    expect(PILOT_EXERCISE_IDS).toHaveLength(71);
   });
 
   test("10. no volume is multiplied by adopting a new unit — both are plain totals", () => {

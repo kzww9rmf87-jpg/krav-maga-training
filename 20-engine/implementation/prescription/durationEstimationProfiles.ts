@@ -307,6 +307,20 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // prescription as an estimate, and would ignore the setup this exercise
   // demands most: confirming the bar and the towel before every set.
   unresolvedProfile("towel_pull_up", "sets_reps", ["50-exercises/65_GRIP/10_TOWEL_PULL_UP.md"]),
+
+  // Registry Lot 15 — the two rope entries.
+  //
+  // Both `"unresolved"`. Each chapter quantifies sets, its own unit and
+  // rest, and every one of those is a prescription target resolved by
+  // `resolveVolume` or `resolveRest` — none estimates how long the exercise
+  // takes. Neither gives the fields below: no time to inspect and verify
+  // the rope and its anchor, no transition time, no per-set time, no
+  // technical margin. Rope Climb's documented height and Rope Pull's
+  // documented distance and duration are prescription VARIABLES of those
+  // exercises, not session timing, and deriving a duration from them would
+  // convert one unrepresented unit into another.
+  unresolvedProfile("rope_climb", "sets_reps", ["50-exercises/65_GRIP/13_ROPE_CLIMB.md"]),
+  unresolvedProfile("rope_pull", "sets_reps", ["50-exercises/65_GRIP/14_ROPE_PULL.md"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

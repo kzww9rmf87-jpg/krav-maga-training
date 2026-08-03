@@ -149,6 +149,10 @@ const EXPLICIT_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
   // UNIQUE, so implicit resolution would already select it; the id is
   // declared for the same auditability reason ab_wheel and plate_pinch use.
   towel_pull_up: "grip_repetition_strength_v0_1",
+  // Registry Lot 15 — the two rope entries, on the same shared Grip triple
+  // but each on its own unit's profile.
+  rope_climb: "grip_climb_strength_v0_1",
+  rope_pull: "grip_hand_pull_work_v0_1",
 };
 
 /**
@@ -165,6 +169,8 @@ const AMBIGUOUS_TRIPLE_EXERCISES: readonly string[] = [
   // The Grip repetition triple became shared when Table Groups 16 and 17
   // added two more profiles counting two other units on it.
   "towel_pull_up",
+  "rope_climb",
+  "rope_pull",
 ];
 
 const historicalEntries = () =>

@@ -540,11 +540,21 @@ describe("GRIP-REPETITION-STRENGTH — genericity and non-regression", () => {
       profile().volume.repetitions!.range.max,
     );
 
-    // rope_climb and rope_pull remain out: their units are excluded by the
-    // doctrine itself, not merely unimplemented.
-    for (const id of ["rope_climb", "rope_pull"]) {
-      expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(id);
-    }
+    // rope_climb and rope_pull were integrated on their OWN profiles, which
+    // is the doctrine working as written: a different unit means a different
+    // family, never an exception inside this one.
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.rope_climb.numericalProfileId).toBe(
+      "grip_climb_strength_v0_1",
+    );
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.rope_pull.numericalProfileId).toBe(
+      "grip_hand_pull_work_v0_1",
+    );
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.rope_climb.capabilities.volumeInterpretations).toEqual([
+      "climbs",
+    ]);
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.rope_pull.capabilities.volumeInterpretations).toEqual([
+      "hand_pulls",
+    ]);
   });
 
   test("26. resolution is deterministic and never mutates the profile", () => {

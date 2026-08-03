@@ -186,6 +186,15 @@ export const EQUIPMENT_CAPABILITY_IDS = [
   // satisfy `rope` — which is what keeps towel_pull_up and the rope
   // exercises apart at the prescription layer.
   "towel",
+  // Added for the two rope entries (rope_climb, rope_pull).
+  //
+  // Aligned 1:1 with the knowledge base's own pre-existing `rope`
+  // `EquipmentType` member, which both exercises already gate on; no
+  // ExerciseDefinition was modified and the gap was vocabulary asymmetry
+  // alone. This is a CLIMBING rope — deliberately disjoint from
+  // `battle_rope`, which was given its own id precisely so the two could
+  // never satisfy each other. Matching stays exact in both directions.
+  "rope",
 ] as const;
 
 export type EquipmentCapabilityId = (typeof EQUIPMENT_CAPABILITY_IDS)[number];

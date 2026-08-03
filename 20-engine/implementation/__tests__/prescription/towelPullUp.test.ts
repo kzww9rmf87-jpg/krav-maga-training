@@ -102,8 +102,8 @@ const entry = () => EXERCISE_PRESCRIPTION_REGISTRY[EXERCISE_ID];
 
 describe("towel_pull_up — registry, knowledge base, profile and equipment counts", () => {
   test("1. the registry grew from 68 to exactly 69 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(69);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(69);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(71);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(71);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -118,7 +118,7 @@ describe("towel_pull_up — registry, knowledge base, profile and equipment coun
   });
 
   test("4. the equipment vocabulary went from 29 to 30 — `towel`, the only identifier this lot added", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(30);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(31);
     expect(isEquipmentCapabilityId("towel")).toBe(true);
     expect(isEquipmentCapabilityId("pull_up_bar")).toBe(true);
     // No substitute was invented alongside it.
@@ -138,8 +138,8 @@ describe("towel_pull_up — registry, knowledge base, profile and equipment coun
     expect(PILOT_EXERCISE_IDS.filter((id) => id === EXERCISE_ID)).toHaveLength(1);
   });
 
-  test("6. no other exercise was added, and the Grip module now covers three different units", () => {
-    for (const id of ["rope_climb", "rope_pull", "sled_push", "turkish_get_up", "pummeling", "wall_wrestling", "grip_fighting"]) {
+  test("6. no other exercise was added by THIS lot, and the Grip module now covers five different units", () => {
+    for (const id of ["sled_push", "turkish_get_up", "pummeling", "wall_wrestling", "grip_fighting"]) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(id);
     }
 
@@ -223,11 +223,18 @@ describe("towel_pull_up — equipment and eligibility", () => {
       expect(source.ok, available.join("+") || "(rien)").toBe(false);
     }
 
-    // `rope` is not even part of the prescription vocabulary — rope_climb and
-    // rope_pull remain unintegrated, so no id was minted for them. A towel
-    // therefore cannot be confused with a rope in either direction.
-    expect(isEquipmentCapabilityId("rope")).toBe(false);
+    // `rope` joined the vocabulary when the two rope entries were
+    // integrated, which makes this guarantee stronger rather than weaker:
+    // both ids now exist and neither satisfies the other, because matching
+    // is exact string equality.
+    expect(isEquipmentCapabilityId("rope")).toBe(true);
     expect(entry().capabilities.requiredEquipmentCapabilities).not.toContain("rope");
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.rope_climb.capabilities.requiredEquipmentCapabilities).toEqual([
+      "rope",
+    ]);
+    expect(
+      EXERCISE_PRESCRIPTION_REGISTRY.rope_climb.capabilities.requiredEquipmentCapabilities,
+    ).not.toContain("towel");
   });
 });
 
@@ -683,7 +690,10 @@ describe("towel_pull_up — prescription, engine and non-regression", () => {
       confidence: "validated" as const,
     };
 
-    const previousIds = PILOT_EXERCISE_IDS.filter((id) => id !== EXERCISE_ID);
+    // The 68 entries that predate this lot: everything except this lot's own
+    // entry and the ids added by later lots, each covered by its own file.
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "rope_climb", "rope_pull"];
+    const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(68);
 
     for (const id of previousIds) {
@@ -758,22 +768,28 @@ describe("towel_pull_up — prescription, engine and non-regression", () => {
     expect(contract).toContain('contractVersion: "cas-session-output.v1"');
   });
 
-  test("38. + 39. rope_climb and rope_pull remain unintegrated — the doctrine excludes their units", () => {
+  test("38. + 39. rope_climb and rope_pull were integrated on their OWN units, never absorbed into this one", () => {
     for (const id of ["rope_climb", "rope_pull"]) {
-      expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(id);
+      expect(EXERCISE_PRESCRIPTION_REGISTRY).toHaveProperty(id);
       expect(EXERCISE_KNOWLEDGE_BASE.some((e) => e.id === id)).toBe(true);
     }
 
+    // The exclusion this entry's doctrine wrote is still in force, and it is
+    // what sent them to their own families rather than into this one.
     const overview = readFileSync(
       new URL("../../../../50-exercises/65_GRIP/00_OVERVIEW.md", import.meta.url),
       "utf-8",
     );
     const section = overview.slice(
       overview.indexOf("## Grip Repetition Strength"),
-      overview.indexOf("# Volume Metrics"),
+      overview.indexOf("## Grip Climb Strength"),
     );
     expect(section).toContain("rope ascents");
     expect(section).toContain("hand-over-hand pulls");
+
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.rope_climb.numericalProfileId).not.toBe(PROFILE_ID);
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.rope_pull.numericalProfileId).not.toBe(PROFILE_ID);
+    expect(entry().capabilities.volumeInterpretations).toEqual(["total_repetitions"]);
   });
 
   test("40. every source rule the entry cites is real, and nothing unsourced was added", () => {

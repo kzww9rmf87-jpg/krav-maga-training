@@ -92,8 +92,8 @@ const entry = () => EXERCISE_PRESCRIPTION_REGISTRY[EXERCISE_ID];
 
 describe("battle_ropes — registry, knowledge base, profile and equipment counts", () => {
   test("1. the registry grew from 66 to exactly 67 entries; a later lot added assault_bike_intervals, bringing the total to 68", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(69);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(69);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(71);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(71);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
@@ -108,7 +108,7 @@ describe("battle_ropes — registry, knowledge base, profile and equipment count
   });
 
   test("4. the equipment vocabulary went from 26 to 28 — battle_rope and rope_anchor_point, the two Required items; a later lot added cardio_machine, bringing it to 29", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(30);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(31);
     expect(isEquipmentCapabilityId("battle_rope")).toBe(true);
     expect(isEquipmentCapabilityId("rope_anchor_point")).toBe(true);
 
@@ -133,7 +133,7 @@ describe("battle_ropes — registry, knowledge base, profile and equipment count
   });
 
   test("6. no other exercise was added by THIS lot: the still-blocked exercises stay out, and assault_bike_intervals joined later on the same profile", () => {
-    for (const id of ["sled_push", "turkish_get_up", "rope_climb", "rope_pull"]) {
+    for (const id of ["sled_push", "turkish_get_up"]) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY as Record<string, unknown>).not.toHaveProperty(id);
     }
 
@@ -442,13 +442,20 @@ describe("battle_ropes — intensity, rest and tempo", () => {
 // -----------------------------------------------------------------------------
 
 describe("battle_ropes — loading mode and laterality", () => {
-  test("22. the loading mode is `rope` — the pre-existing LoadingMode value, and this entry is its first consumer", () => {
+  test("22. the loading mode is `rope` — the pre-existing LoadingMode value, and this entry was its first consumer", () => {
     expect(entry().capabilities.supportedLoadingModes).toEqual(["rope"]);
 
+    // rope_pull joined the same loading mode later, and the two are still
+    // told apart by their equipment: a battle rope and a climbing rope are
+    // disjoint identifiers, by design.
     const others = PILOT_EXERCISE_IDS.filter((id) => id !== EXERCISE_ID).filter((id) =>
       EXERCISE_PRESCRIPTION_REGISTRY[id].capabilities.supportedLoadingModes.includes("rope"),
     );
-    expect(others).toEqual([]);
+    expect(others).toEqual(["rope_pull"]);
+    expect(EXERCISE_PRESCRIPTION_REGISTRY.rope_pull.capabilities.requiredEquipmentCapabilities).toEqual([
+      "rope",
+    ]);
+    expect(entry().capabilities.requiredEquipmentCapabilities).not.toContain("rope");
 
     // Nothing adjacent was diverted into the slot.
     for (const wrong of ["bodyweight", "plate", "locomotion_only", "impact_equipment", "sled"] as const) {
@@ -743,7 +750,7 @@ describe("battle_ropes — determinism, validation and non-regression", () => {
 
     // The 66 entries that predate this lot: everything except this lot's own
     // entry and the ids added by later lots, each covered by its own file.
-    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "assault_bike_intervals", "towel_pull_up"];
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull"];
     const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(66);
 

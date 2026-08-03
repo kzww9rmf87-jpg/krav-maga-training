@@ -307,6 +307,11 @@ export const PILOT_EXERCISE_IDS = [
   // GRIP-REPETITION-STRENGTH profile, and the first Grip entry counted in
   // complete repetitions rather than carried metres or held seconds.
   "towel_pull_up",
+  // Registry Lot 15 — first consumers of Table Groups 16 and 17. Two
+  // exercises, two units, two profiles: an ascent and a hand-over-hand pull
+  // are never counted as the same thing.
+  "rope_climb",
+  "rope_pull",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -10331,6 +10336,432 @@ const towelPullUpEntry: ExercisePrescriptionRegistryEntry = {
 };
 
 // -----------------------------------------------------------------------------
+// Rope Climb
+// Source: 50-exercises/65_GRIP/13_ROPE_CLIMB.md
+//   - Primary Classification: "Grip-Integrated Pulling Strength"; module grip.
+//   - Exercise Identity: "Equipment: Climbing Rope. Complexity: High.
+//     Unilateral or Bilateral: Alternating Bilateral. Closed or Open Chain:
+//     Closed Chain."
+//   - Prescription Variables: "Height — partial climbs, 2 to 4 metres,
+//     full-rope climbs, repeated short ascents"; "Repetitions — 1 to 5
+//     climbs, or 2 to 8 controlled hand pulls per set"; "Sets — 3 to 5";
+//     "Rest — 2 to 5 minutes".
+//   - Strength Prescription: "3 to 5 sets, 1 to 3 short climbs, long rest,
+//     full technical control, termination before grip breakdown."
+//   - Execution: "Verify the rope and anchor point. ... Reposition one hand
+//     higher on the rope. Re-establish full grip before moving the other
+//     hand. ... Descend under control. ... Finish with both feet safely on
+//     the floor."
+//   - Safety Rules: "Use a professionally anchored rope.", "Inspect the rope
+//     before every session.", "Keep the landing area clear.", "Teach descent
+//     before full-height climbing.", "Do not climb beyond the athlete's safe
+//     descent capacity.", "Stop before grip failure.", "Do not slide down
+//     the rope.", "Terminate immediately if sharp pain, numbness or sudden
+//     weakness occurs."
+//   - Common Errors: Insecure Regripping (and the rest of that section).
+// Method: straight_sets_repetitions / grip / secondary
+//   (grip_climb_strength_v0_1 — sets 3/4/5, climbs 1/3/5, technical_effort
+//   high_quality, rest 120/210/300 s, tempo global_intent controlled)
+//
+// UNIT — `climbs`, and this is the whole point of the entry. The chapter
+// offers two units in the same breath ("1 to 5 climbs, OR 2 to 8 controlled
+// hand pulls per set"), and only ONE may be represented. Complete ascents
+// are chosen because they are the better-quantified of the two: the named
+// Strength Prescription quantifies climbs ("1 to 3 short climbs") and never
+// quantifies hand pulls, while the Strength-Endurance Prescription leaves
+// "repeated hand transitions" unquantified entirely. The hand-pull reading
+// of THIS exercise is therefore not represented — it is not merged into
+// Table Group 17 either, whose consumer is rope_pull and whose envelope is
+// a different exercise's.
+//
+// CLIMBED HEIGHT IS NOT A VOLUME DIMENSION. "Height — partial climbs, 2 to
+// 4 metres, full-rope climbs" is a documented variable of the exercise, and
+// it stays in the instructions. No metre is converted into a count, and no
+// count into a metre. `straight_sets_repetitions` forbids the distance
+// field outright, which makes the refusal structural rather than a
+// preference.
+//
+// PROFILE. Table Group 16's own profile. Its triple
+// (grip, straight_sets_repetitions, secondary) is shared with Table Groups
+// 15 and 17, so the explicit `numericalProfileId` is mandatory — implicit
+// resolution refuses the triple.
+//
+// NARROWING. The chapter's Prescription Variables give sets 3-5, climbs 1-5
+// and rest 2-5 minutes, and those ARE the module envelope, because the
+// module rule was written from this family. Declared anyway, as ab_wheel
+// and towel_pull_up already do, so the entry states its own documented
+// range rather than relying on the envelope happening to match. The named
+// Strength Prescription's narrower "1 to 3 short climbs" is NOT used as the
+// bound: the chapter documents 1-5 as the range and 1-3 as one prescription
+// within it, and this entry represents the exercise, not one prescription
+// of it — unlike towel_pull_up, whose chapter gives no wider variable range
+// than its named prescriptions.
+//
+// INTENSITY. `technical_effort` only, resolved from the profile as
+// `high_quality`. The chapter documents "full technical control" and
+// "technically consistent ascent and descent" and gives no RPE, no RIR and
+// no load figure anywhere. Rope diameter, texture, stiffness, length and
+// surface friction are documented DIFFICULTY influences, and assistance
+// (foot lock, leg drive, partial height, seated start, body angle,
+// partner support) is a documented regression axis — none is converted
+// into a number.
+//
+// LATERALITY. `bilateral` with `climbs`. The chapter says "Alternating
+// Bilateral", but that alternation is intra-movement: the hands alternate
+// WITHIN an ascent, and the prescription allocates nothing per hand. A
+// per-side interpretation would also force the laterality-resolution gate,
+// which is exactly the wrong claim here. The knowledge base's own
+// `unilateral: false` agrees.
+//
+// EQUIPMENT. `rope`, plus the environment gates the knowledge base already
+// owns: `safe_landing_surface` and `sufficient_space` at "large". `rope` is
+// added to the prescription vocabulary by this lot and is disjoint from
+// `battle_rope` in both directions. No anchor id is invented: "a
+// professionally anchored rope" is a property OF the rope in this chapter,
+// not a second implement, and `rope_anchor_point` belongs to battle ropes,
+// where the anchor is a separate documented Required item.
+//
+// STOP CONDITIONS — six, all documented here. The method requires three
+// (technical_failure, pain, completion) and the grip module five (adding
+// fatigue_limit and equipment_failure). `equipment_failure` covers the
+// inspected rope and its anchor; `range_of_motion_loss` covers the
+// prescribed height and the controlled descent to both feet on the floor.
+// `balance_loss`, the module's sixth, is deliberately absent: this chapter
+// documents no balance concern (checked directly).
+// -----------------------------------------------------------------------------
+
+const SOURCE_ROPE_CLIMB = "50-exercises/65_GRIP/13_ROPE_CLIMB.md";
+
+const ropeClimbStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "rope_climb_technical_failure",
+    description:
+      "Stop the set on technical breakdown: moving the next hand before the supporting hand is fully secure, loss of an active shoulder position, or a trunk that can no longer be kept controlled between transitions.",
+    sourceRuleIds: [SOURCE_ROPE_CLIMB],
+  }),
+  equipmentFailureCondition({
+    conditionId: "rope_climb_equipment_failure",
+    description:
+      "Stop immediately if the rope shows damage on inspection, if the anchor is not secure, or if the hands begin to slide. Never slide down the rope.",
+    sourceRuleIds: [SOURCE_ROPE_CLIMB],
+  }),
+  rangeOfMotionLossCondition({
+    conditionId: "rope_climb_range_of_motion_loss",
+    description:
+      "Stop the set when the prescribed height can no longer be reached and descended under control, and never climb beyond the athlete's safe descent capacity.",
+    sourceRuleIds: [SOURCE_ROPE_CLIMB],
+  }),
+  fatigueLimitCondition({
+    conditionId: "rope_climb_fatigue_limit",
+    description:
+      "Stop the exercise before grip failure. An ascent begun on a fatigued grip becomes a descent that cannot be controlled, which is why the set ends first.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_ROPE_CLIMB],
+  }),
+  painCondition({
+    conditionId: "rope_climb_pain",
+    description:
+      "Stop immediately if pain occurs, and terminate at once on sharp pain, numbness or sudden weakness. Avoid maximal efforts with irritated fingers, elbows or shoulders.",
+    sourceRuleIds: [SOURCE_ROPE_CLIMB],
+  }),
+  completionCondition({
+    conditionId: "rope_climb_completion",
+    description: "Stop once the prescribed sets and ascents are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const ropeClimbInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "rope_climb_setup",
+    "setup",
+    "Use a professionally anchored rope and inspect it before every session. Ensure adequate clearance around the climbing area, a safe landing surface and appropriate floor protection, and keep the landing area clear. Grip the rope with both hands, wrists controlled, shoulders actively stabilized, ribs stacked and trunk braced, with the feet positioned according to the selected climbing technique. Establish grip security before leaving the floor. Descent is taught before full-height climbing, and novice athletes are supervised.",
+    "critical",
+    true,
+    SOURCE_ROPE_CLIMB,
+  ),
+  makeInstruction(
+    "rope_climb_execution",
+    "execution",
+    "Pull the body upward while driving the elbows down, reposition one hand higher on the rope and re-establish full grip before moving the other. Repeat while keeping the trunk controlled, to the prescribed height — partial climbs, roughly 2 to 4 metres, or full-rope climbs, according to the athlete's safe descent capacity. Descend under control, maintaining grip and foot security throughout, and finish with both feet safely on the floor. Never slide down the rope, and protect exposed skin from rope burns.",
+    "high",
+    true,
+    SOURCE_ROPE_CLIMB,
+  ),
+];
+
+const ropeClimbEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "rope_climb",
+  moduleId: "grip",
+  role: "secondary",
+  explicitMethodId: "straight_sets_repetitions",
+  numericalProfileId: "grip_climb_strength_v0_1",
+  capabilities: {
+    exerciseId: "rope_climb",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    // The athlete's own bodyweight; the documented assistance variations
+    // (foot lock, leg drive, seated start, partner support) are regressions
+    // this entry does not represent.
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    // The count is ascents, not repetitions — see the block comment above.
+    volumeInterpretations: ["climbs"],
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["rope"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["rope_climb_setup", "rope_climb_execution"],
+    requiredStopConditionIds: [
+      "rope_climb_technical_failure",
+      "rope_climb_equipment_failure",
+      "rope_climb_range_of_motion_loss",
+      "rope_climb_fatigue_limit",
+      "rope_climb_pain",
+      "rope_climb_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_rope_climb",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_ROPE_CLIMB, SOURCE_MODULE_PROFILES],
+  },
+  supportedIntensityTypes: ["technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: "global_intent",
+  instructionDefinitions: ropeClimbInstructions,
+  stopConditionDefinitions: ropeClimbStopConditions,
+  // "# Prescription Variables — Sets: 3 to 5. Repetitions: 1 to 5 climbs."
+  // Both match the module envelope, and are declared so the entry states its
+  // own documented range. The climbed height is deliberately absent: it is
+  // not a volume dimension here.
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: 1, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 5, repetitions: 5, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_ROPE_CLIMB],
+  },
+  // Null: the profile documents one rule and this chapter documents no
+  // competing intensity of any kind.
+  exerciseIntensityConstraints: null,
+  // "# Prescription Variables — Rest: 2 to 5 minutes", which IS the module
+  // window. Declared so the entry states its own documented range.
+  exerciseRestConstraints: {
+    scope: "between_sets",
+    minimumSeconds: 120,
+    maximumSeconds: 300,
+    sourceRuleIds: [SOURCE_ROPE_CLIMB],
+  },
+  sourceRuleIds: [SOURCE_ROPE_CLIMB, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
+// Rope Pull
+// Source: 50-exercises/65_GRIP/14_ROPE_PULL.md
+//   - Primary Classification: "Grip-Integrated Pulling Endurance"; module grip.
+//   - Exercise Identity: "Equipment: Climbing Rope, Sled or Anchored Load.
+//     Complexity: Moderate. Unilateral or Bilateral: Alternating Bilateral.
+//     Closed or Open Chain: Open Chain."
+//   - Prescription Variables: "Distance — 5 to 15 metres for strength, 10 to
+//     30 metres for strength endurance"; "Duration — 10 to 20 seconds for
+//     strength, 20 to 40 seconds for strength endurance, 30 to 60 seconds
+//     for work-capacity emphasis"; "Hand Pulls — 6 to 20 hand-over-hand
+//     pulls per set"; "Sets — 3 to 5"; "Rest — 90 seconds to 4 minutes";
+//     "Load is determined by sled weight, rope angle, friction, rope
+//     diameter, pulling position, distance, and intended adaptation."
+//   - Strength Prescription: "3 to 5 sets, heavy external resistance, 6 to
+//     10 strong hand pulls, 2 to 4 minutes rest, complete grip and trunk
+//     control."
+//   - Strength-Endurance Prescription: "3 to 4 sets, moderate external
+//     resistance, 10 to 20 hand pulls, 90 to 180 seconds rest, consistent
+//     pace and posture."
+//   - Work-Capacity Prescription: "2 to 4 sets, 20 to 40 second intervals" —
+//     NOT this entry.
+//   - Safety Rules: "Use a securely anchored rope.", "Inspect the rope
+//     before use.", "Verify sled or load attachment.", "Keep the pulling
+//     lane clear.", "Maintain a stable stance.", "Do not wrap the rope
+//     around the hand or wrist.", "Stop before grip failure.", "Avoid
+//     uncontrolled rope recoil.", "Terminate immediately if sharp pain,
+//     numbness or sudden weakness occurs."
+//   - Common Errors: Insecure Regripping (and the rest of that section).
+// Method: straight_sets_repetitions / grip / secondary
+//   (grip_hand_pull_work_v0_1 — sets 3/4/5, hand pulls 6/13/20,
+//   technical_effort high_quality, rest 90/165/240 s, tempo controlled)
+//
+// UNIT — `hand_pulls`, chosen among THREE the chapter documents for the same
+// movement, and the only one both of its strength prescriptions quantify:
+//   - hand pulls: 6-10 (Strength) and 10-20 (Strength-Endurance) — used;
+//   - distance: 5-15 m and 10-30 m — a Prescription Variable that no named
+//     prescription restates, and a dimension `straight_sets_repetitions`
+//     forbids outright. Representing it would need a distance-scoped grip
+//     profile, which Table Group 17 explicitly excludes;
+//   - duration and the Work-Capacity Prescription's "20 to 40 second
+//     intervals" — a different structure entirely, excluded by Table Group
+//     17 in writing.
+// No metre becomes a pull, no second becomes a pull, and the two
+// unrepresented prescriptions stay unrepresented rather than being folded
+// in. This is a documented precision loss, recorded rather than resolved.
+//
+// PROFILE. Table Group 17's own profile, on the shared Grip triple, so the
+// explicit id is mandatory.
+//
+// NARROWING. The union of the two pull-counted prescriptions is 6-20 hand
+// pulls over 3-5 sets, with rest spanning 90-240 s — which is what the
+// chapter's own Prescription Variables state, and what the module envelope
+// holds. Declared so the entry states its own documented range.
+//
+// INTENSITY. `technical_effort` only. The chapter qualifies resistance in
+// words — "heavy external resistance", "moderate external resistance" —
+// and never in figures; `resistance_category` cannot carry a categorical
+// profile rule in this model, and inventing a number for "heavy" is exactly
+// what the module chapter forbids when it states that grip intensity is not
+// represented accurately by external load alone. What the chapter DOES
+// prescribe is the standard the pulls must hold: "complete grip and trunk
+// control", "consistent pace and posture", "no uncontrolled slipping".
+//
+// LATERALITY. `bilateral` with `hand_pulls`. "Alternating Bilateral"
+// describes hands alternating WITHIN the movement; the count is a total and
+// nothing is allocated per hand.
+//
+// EQUIPMENT. `rope` only, mirroring the knowledge base exactly.
+// DOCUMENTED GAP, flagged rather than papered over: this chapter's own
+// "Equipment: Climbing Rope, Sled or Anchored Load" names a resistance
+// source alongside the rope, and its Safety Rules say to "verify sled or
+// load attachment". The knowledge base encodes only `rope`, and this entry
+// mirrors that decision rather than inventing an equivalence group for
+// "Sled or Anchored Load" — which would also collide with the `sled` id
+// that belongs to loaded locomotion. The requirement is carried at critical
+// priority in the setup instruction instead. Closing it properly is a
+// knowledge-base change, not a registry one.
+//
+// STOP CONDITIONS — six, on the same reasoning as rope_climb.
+// `range_of_motion_loss` covers the documented regripping standard: a pull
+// that no longer travels its full path with the rope kept close to the body
+// is a pull that has lost its range.
+// -----------------------------------------------------------------------------
+
+const SOURCE_ROPE_PULL = "50-exercises/65_GRIP/14_ROPE_PULL.md";
+
+const ropePullStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "rope_pull_technical_failure",
+    description:
+      "Stop the set on technical breakdown: releasing one hand before the other is secure, loss of a stable stance, or trunk compensation replacing grip.",
+    sourceRuleIds: [SOURCE_ROPE_PULL],
+  }),
+  equipmentFailureCondition({
+    conditionId: "rope_pull_equipment_failure",
+    description:
+      "Stop immediately if the rope shows damage on inspection, if the anchor or the load attachment is not secure, or if the rope begins to slip through the hands. Never wrap the rope around the hand or wrist, and avoid uncontrolled rope recoil.",
+    sourceRuleIds: [SOURCE_ROPE_PULL],
+  }),
+  rangeOfMotionLossCondition({
+    conditionId: "rope_pull_range_of_motion_loss",
+    description:
+      "Stop the set when a pull no longer travels its full path with the rope kept close to the body, or when the regrip can no longer reach farther along the rope.",
+    sourceRuleIds: [SOURCE_ROPE_PULL],
+  }),
+  fatigueLimitCondition({
+    conditionId: "rope_pull_fatigue_limit",
+    description:
+      "Stop the exercise before grip failure, and before pace and posture can no longer both be held consistent.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE, SOURCE_ROPE_PULL],
+  }),
+  painCondition({
+    conditionId: "rope_pull_pain",
+    description:
+      "Stop immediately if pain occurs, and terminate at once on sharp pain, numbness or sudden weakness. Avoid maximal loading with irritated elbows or fingers.",
+    sourceRuleIds: [SOURCE_ROPE_PULL],
+  }),
+  completionCondition({
+    conditionId: "rope_pull_completion",
+    description: "Stop once the prescribed sets and hand pulls are completed.",
+    sourceRuleIds: [SOURCE_METHOD_CATALOGUE],
+  }),
+];
+
+const ropePullInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "rope_pull_setup",
+    "setup",
+    "Use a securely anchored rope and inspect it before use. This exercise also requires an external resistance — a sled or an anchored load — and its attachment must be verified before every set; that resistance is documented by this chapter but is not representable as its own equipment identifier, so it is checked here. Keep the pulling lane clear and establish a stable stance with both hands on the rope, the trunk braced and the shoulders controlled. Never wrap the rope around the hand or wrist.",
+    "critical",
+    true,
+    SOURCE_ROPE_PULL,
+  ),
+  makeInstruction(
+    "rope_pull_execution",
+    "execution",
+    "Pull one hand toward the torso, then regrip farther along the rope with the opposite hand, securing the next grip before releasing the previous one. Continue alternating hands, keeping the rope close to the body and holding consistent posture and rhythm. Stop before slipping or major technical breakdown, then reset or return the rope safely. Protect the skin from excessive friction.",
+    "high",
+    true,
+    SOURCE_ROPE_PULL,
+  ),
+];
+
+const ropePullEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "rope_pull",
+  moduleId: "grip",
+  role: "secondary",
+  explicitMethodId: "straight_sets_repetitions",
+  numericalProfileId: "grip_hand_pull_work_v0_1",
+  capabilities: {
+    exerciseId: "rope_pull",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    supportedIntensityTypes: ["technical_effort"],
+    preferredIntensityTypes: ["technical_effort"],
+    // The rope and its external resistance supply the load; the athlete is
+    // not moving their own bodyweight against gravity here.
+    supportedLoadingModes: ["rope"],
+    supportedTempoTypes: ["global_intent"],
+    laterality: "bilateral",
+    volumeInterpretations: ["hand_pulls"],
+    capabilityTags: ["countable_repetitions", "technical_quality_observation"],
+    requiredEquipmentCapabilities: ["rope"],
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["rope_pull_setup", "rope_pull_execution"],
+    requiredStopConditionIds: [
+      "rope_pull_technical_failure",
+      "rope_pull_equipment_failure",
+      "rope_pull_range_of_motion_loss",
+      "rope_pull_fatigue_limit",
+      "rope_pull_pain",
+      "rope_pull_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_rope_pull",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_ROPE_PULL, SOURCE_MODULE_PROFILES],
+  },
+  supportedIntensityTypes: ["technical_effort"],
+  preferredIntensityType: "technical_effort",
+  supportedTempoTypes: ["global_intent"],
+  preferredTempoType: "global_intent",
+  instructionDefinitions: ropePullInstructions,
+  stopConditionDefinitions: ropePullStopConditions,
+  // "# Prescription Variables — Hand Pulls: 6 to 20 per set. Sets: 3 to 5",
+  // the union of the two pull-counted prescriptions. Distance and duration
+  // are deliberately absent — see the block comment above.
+  exerciseDoseConstraints: {
+    minimumDose: { sets: 3, repetitions: 6, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: { sets: 5, repetitions: 20, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    sourceRuleIds: [SOURCE_ROPE_PULL],
+  },
+  exerciseIntensityConstraints: null,
+  // "# Prescription Variables — Rest: 90 seconds to 4 minutes."
+  exerciseRestConstraints: {
+    scope: "between_sets",
+    minimumSeconds: 90,
+    maximumSeconds: 240,
+    sourceRuleIds: [SOURCE_ROPE_PULL],
+  },
+  sourceRuleIds: [SOURCE_ROPE_PULL, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
+};
+
+// -----------------------------------------------------------------------------
 
 /**
  * Statically typed as `Record<PilotExerciseId, ...>` — TypeScript refuses
@@ -10424,6 +10855,8 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   battle_ropes: battleRopesEntry,
   assault_bike_intervals: assaultBikeIntervalsEntry,
   towel_pull_up: towelPullUpEntry,
+  rope_climb: ropeClimbEntry,
+  rope_pull: ropePullEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>
