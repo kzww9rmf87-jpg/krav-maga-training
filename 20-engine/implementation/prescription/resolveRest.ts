@@ -115,6 +115,17 @@ export interface ResolveRestInput {
   methodId: TrainingMethodId;
   role: ExerciseRole;
   rangeContext: RangeContext;
+  /**
+   * The range context to use for REST specifically. Rest moves opposite to
+   * volume and intensity in `35_PRESCRIPTION_ADJUSTMENT_RULES.md`'s Readiness
+   * Adjustment Table — reduced readiness gets "normal or upper" rest and low
+   * readiness the "upper valid boundary", never the lower one — so a single
+   * context cannot express both. `deriveRangeContext` supplies this value.
+   *
+   * Optional, and defaults to `rangeContext`, which is exactly the behavior
+   * every caller had before this field existed.
+   */
+  restRangeContext?: RangeContext;
 
   /**
    * Documented, exercise-specific narrowing of the shared profile's rest
@@ -455,7 +466,7 @@ export const resolveRest = (
 
   const seconds = selectRangeValue(
     effectiveSeconds,
-    input.rangeContext,
+    input.restRangeContext ?? input.rangeContext,
   );
 
   // `seconds === 0` is a valid, documented value (an immediate,

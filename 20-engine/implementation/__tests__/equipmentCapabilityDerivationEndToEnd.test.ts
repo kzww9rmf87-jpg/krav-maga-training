@@ -99,9 +99,9 @@ function runScenario(input: EngineInput) {
   );
 
   const built = buildEngineSessionPrescriptionSources(selectedExerciseIds, {
-    rangeContext: "normal",
     athleteReferences: [],
     environment: input.environment,
+    readiness: input.readiness,
   });
 
   const result = runEngine(input, undefined, built.sources);
@@ -219,14 +219,14 @@ describe("equipment capability derivation — a restricted environment restricts
     };
 
     const before = buildEngineSessionPrescriptionSources([], {
-      rangeContext: "normal",
       athleteReferences: [],
       environment: withoutBand.environment,
+      readiness: withoutBand.readiness,
     });
     const after = buildEngineSessionPrescriptionSources([], {
-      rangeContext: "normal",
       athleteReferences: [],
       environment: withBand.environment,
+      readiness: withBand.readiness,
     });
 
     expect(before.derivedEquipmentCapabilities).not.toContain("cable_or_band_resistance");

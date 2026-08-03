@@ -36,6 +36,7 @@ export * from "./prescribeEngineSession";
 // profiles, source-rule identifier convention) and cross-entry validators
 export * from "./equipmentCapabilities";
 export * from "./deriveEquipmentCapabilities";
+export * from "./deriveRangeContext";
 export * from "./athleteReferenceCatalog";
 export * from "./durationEstimationProfiles";
 export * from "./sourceRuleIdentifiers";

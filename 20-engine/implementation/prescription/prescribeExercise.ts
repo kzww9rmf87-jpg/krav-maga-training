@@ -89,6 +89,8 @@ export interface PrescribeExerciseInput {
   moduleId: CapabilityModule;
   role: ExerciseRole;
   rangeContext: RangeContext;
+  /** Rest-specific range context — see `ResolveRestInput.restRangeContext`. Defaults to `rangeContext`. */
+  restRangeContext?: RangeContext;
 
   capabilities: ExercisePrescriptionCapabilities;
 
@@ -357,6 +359,7 @@ export const prescribeExercise = (
     methodId: method.methodId,
     role: input.role,
     rangeContext: input.rangeContext,
+    restRangeContext: input.restRangeContext,
     exerciseRestConstraints: input.exerciseRestConstraints,
     numericalProfileId: input.numericalProfileId,
     sourceRuleIds: [

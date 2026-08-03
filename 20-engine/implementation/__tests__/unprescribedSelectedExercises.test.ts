@@ -122,9 +122,9 @@ function runRealKnowledgeBaseScenario() {
   );
 
   const { sources } = buildEngineSessionPrescriptionSources(selectedExerciseIds, {
-    rangeContext: "normal",
     athleteReferences: [],
     environment: input.environment,
+    readiness: input.readiness,
   });
 
   const result = runEngine(input, undefined, sources);

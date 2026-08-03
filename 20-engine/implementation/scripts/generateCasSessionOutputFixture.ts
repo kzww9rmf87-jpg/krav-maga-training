@@ -66,9 +66,9 @@ export function buildScenario() {
   const exercise = makeExercise({ id: "bench_press", name: "Bench Press" });
 
   const { sources, failures } = buildEngineSessionPrescriptionSources(["bench_press"], {
-    rangeContext: "normal",
     athleteReferences: [makeOneRepMaxReference({ value: 100 })],
     environment: input.environment,
+    readiness: input.readiness,
   });
   if (failures.length > 0) {
     throw new Error(`Fixture scenario setup failed: ${failures.map((failure) => failure.message).join(" ")}`);

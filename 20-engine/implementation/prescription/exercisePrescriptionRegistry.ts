@@ -11710,6 +11710,13 @@ export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>
  */
 export interface PrescriptionExecutionContext {
   rangeContext: RangeContext;
+  /**
+   * Rest-specific range context. Optional and defaults to `rangeContext`,
+   * so every historical caller behaves identically. `deriveRangeContext`
+   * supplies it, because rest moves opposite to volume and intensity in the
+   * Readiness Adjustment Table — see `ResolveRestInput.restRangeContext`.
+   */
+  restRangeContext?: RangeContext;
   /** Validated athlete references actually available for this athlete. */
   athleteReferences: readonly IntensityReference[];
   /** Equipment capability identifiers actually available in this environment. */
@@ -11850,6 +11857,7 @@ export function getExercisePrescriptionSource(
     source: {
       role: entry.role,
       rangeContext: context.rangeContext,
+      restRangeContext: context.restRangeContext,
       capabilities: entry.capabilities,
       explicitMethodId: entry.explicitMethodId,
       // Declared by the entry, forwarded verbatim. `lateralityRequired`

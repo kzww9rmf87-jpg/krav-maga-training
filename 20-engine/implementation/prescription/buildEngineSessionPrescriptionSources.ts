@@ -11,23 +11,26 @@
  * extracts exercise ids from it — so it stays decoupled from the session
  * traversal logic already owned by `buildPrescriptionInput.ts`.
  *
- * EQUIPMENT IS DERIVED, NEVER SUPPLIED. This helper takes the athlete's
- * `TrainingEnvironment` — the same public object `runEngine` already
- * receives — and derives `availableEquipmentCapabilities` itself via
- * `deriveEquipmentCapabilities`. It deliberately does NOT accept a
- * pre-computed capability list: translating declared equipment into
- * prescription capabilities is a training-domain decision (which implements
- * are interchangeable, which surfaces are rated for what), and it belongs
- * to CAS rather than to whatever platform calls it.
+ * EQUIPMENT AND DOSE ARE DERIVED, NEVER SUPPLIED. This helper takes the
+ * athlete's `TrainingEnvironment` and `ReadinessState` — the same public
+ * objects `runEngine` already receives — and derives both
+ * `availableEquipmentCapabilities` (via `deriveEquipmentCapabilities`) and
+ * `rangeContext` (via `deriveRangeContext`) itself. It deliberately accepts
+ * neither a pre-computed capability list nor a pre-chosen range context:
+ * translating declared equipment into prescription capabilities, and
+ * deciding whether an athlete trains at the bottom or the middle of every
+ * documented range, are both training-domain decisions and both belong to
+ * CAS rather than to whatever platform calls it.
  *
- * `rangeContext`, `athleteReferences` and `loadRounding` are still caller-
- * supplied. Internalizing those is a separate, later concern and nothing
- * here anticipates it.
+ * `athleteReferences` and `loadRounding` are still caller-supplied.
+ * Internalizing those is a separate, later concern and nothing here
+ * anticipates it.
  */
 
-import type { Identifier, TrainingEnvironment } from "../types";
+import type { Identifier, ReadinessState, TrainingEnvironment } from "../types";
 import type { ExercisePrescriptionSource } from "./buildPrescriptionInput";
 import { deriveEquipmentCapabilities } from "./deriveEquipmentCapabilities";
+import { deriveRangeContext, type RangeContextDecision } from "./deriveRangeContext";
 import {
   getExercisePrescriptionSource,
   type ExercisePrescriptionSourceFailure,
@@ -42,10 +45,12 @@ import {
  */
 export type EngineSessionPrescriptionContext = Omit<
   PrescriptionExecutionContext,
-  "availableEquipmentCapabilities"
+  "availableEquipmentCapabilities" | "rangeContext"
 > & {
   /** The athlete's declared environment — CAS derives the capabilities from it. */
   environment: TrainingEnvironment;
+  /** The athlete's validated readiness — CAS derives the range context from it. */
+  readiness: ReadinessState;
 };
 
 export interface BuildEngineSessionPrescriptionSourcesResult {
@@ -59,21 +64,32 @@ export interface BuildEngineSessionPrescriptionSourcesResult {
    * never as something the caller is expected to compute or supply back.
    */
   derivedEquipmentCapabilities: readonly Identifier[];
+  /**
+   * The full readiness → range-context decision CAS took, with its
+   * aggregate, per-field contributions, reasons and source rules. Returned
+   * for explainability: a caller can show WHY the session was dosed the way
+   * it was without re-deriving anything, and must never compute it itself.
+   */
+  rangeContextDecision: RangeContextDecision;
 }
 
 export function buildEngineSessionPrescriptionSources(
   exerciseIds: readonly Identifier[],
   context: EngineSessionPrescriptionContext,
 ): BuildEngineSessionPrescriptionSourcesResult {
-  const { environment, ...rest } = context;
+  const { environment, readiness, ...rest } = context;
   const derivedEquipmentCapabilities = deriveEquipmentCapabilities(environment);
+  const rangeContextDecision = deriveRangeContext(readiness);
 
-  // Derived once for the whole session, not per exercise: the environment
-  // does not change between two exercises of the same session, and deriving
-  // per exercise would invite a future per-exercise divergence.
+  // Both derived once for the whole session, not per exercise: neither the
+  // environment nor the athlete's readiness changes between two exercises of
+  // the same session, and deriving per exercise would invite a future
+  // per-exercise divergence.
   const resolutionContext: PrescriptionExecutionContext = {
     ...rest,
     availableEquipmentCapabilities: derivedEquipmentCapabilities,
+    rangeContext: rangeContextDecision.rangeContext,
+    restRangeContext: rangeContextDecision.restRangeContext,
   };
 
   const sources = new Map<Identifier, ExercisePrescriptionSource>();
@@ -89,5 +105,5 @@ export function buildEngineSessionPrescriptionSources(
     }
   }
 
-  return { sources, failures, derivedEquipmentCapabilities };
+  return { sources, failures, derivedEquipmentCapabilities, rangeContextDecision };
 }
