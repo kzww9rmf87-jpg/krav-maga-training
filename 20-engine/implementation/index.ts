@@ -73,6 +73,7 @@ import { filterEligibleExercises } from "./exerciseSelector";
 import { selectCapabilityModules } from "./moduleSelector";
 import { scoreEligibleExercises } from "./scoringEngine";
 import { selectExercisesForModules } from "./exerciseFinalSelector";
+import { buildRemovalOrder, composeSession, withoutExercises, type SessionComposition } from "./sessionComposer";
 import { generateInitialSession } from "./sessionGenerator";
 import { detectSessionConflicts } from "./conflictResolver";
 import { applySubstitution, findSubstituteCandidate } from "./substitutionEngine";
@@ -81,7 +82,7 @@ import { buildDecisionTrace, buildInvalidInputDecisionTrace } from "./decisionTr
 import type { ExercisePrescriptionSource } from "./prescription/buildPrescriptionInput";
 import { buildEngineSessionPrescriptionSources } from "./prescription/buildEngineSessionPrescriptionSources";
 import { deriveAthleteReferences } from "./prescription/deriveAthleteReferences";
-import { prescribeEngineSession } from "./prescription/prescribeEngineSession";
+import { prescribeEngineSession, type EngineSessionPrescriptionResult } from "./prescription/prescribeEngineSession";
 import { estimateSessionDuration, type SessionDurationEstimate } from "./prescription/estimatePrescriptionDuration";
 import type { PrescriptionTraceContext } from "./prescription/prescriptionDecisionTrace";
 import { EXERCISE_KNOWLEDGE_BASE } from "./exerciseKnowledgeBase";
@@ -185,7 +186,14 @@ export function runEngine(
     selectedModules,
   );
 
-  const exerciseSelections = selectExercisesForModules(scoredExercisesByModule, selectedModules, input);
+  const rankedSelections = selectExercisesForModules(scoredExercisesByModule, selectedModules, input);
+
+  // Composition turns each module's ranked bench into the exercises the
+  // session actually holds. It never pads to fill the requested time —
+  // see `sessionComposer.ts` for the Minimum Effective Session Principle
+  // this implements.
+  const composition = composeSession(rankedSelections, selectedModules);
+  const exerciseSelections = [...composition.selections];
 
   const sessionResult = generateInitialSession(input, selectedModules, exerciseSelections);
 
@@ -268,26 +276,90 @@ export function runEngine(
   // before prescription exists and therefore cannot produce it; the draft it
   // returns is completed with the estimate below rather than guessing
   // earlier from knowledge-base metadata that no exercise carries.
-  const durationEstimate =
-    sessionPrescriptionResult.outcome.status === "prescribed"
-      ? estimateSessionDuration(
-          sessionPrescriptionResult.outcome.session.exercises.map(
-            (prescribedExercise) => prescribedExercise.prescription,
-          ),
-        )
-      : null;
+  let workingComposition: SessionComposition = { selections: exerciseSelections, decisions: composition.decisions };
+  let workingSessionResult = finalSessionResult;
+  let workingPrescription = sessionPrescriptionResult;
+  const removedForTimeBudget: { exerciseId: Identifier; module: CapabilityModule }[] = [];
+
+  // Reduce to the requested time budget.
+  //
+  // `18_SESSION_GENERATION_PIPELINE.md` prefers "a shorter valid session"
+  // over "a longer incoherent" one, so an over-budget session gives up whole
+  // exercises rather than having its doses quietly trimmed — volume,
+  // intensity and rest were decided by the prescription layer and are not
+  // this stage's to shorten. `buildRemovalOrder` surrenders support work
+  // before secondary and secondary before primary (Principle 1), and never
+  // offers the primary module's last exercise, so the loop cannot empty the
+  // session. It also never ADDS when time remains: the Minimum Effective
+  // Session Principle forbids it.
+  //
+  // Bounded by the number of removable exercises, so it always terminates.
+  const removalOrder = buildRemovalOrder(workingComposition);
+  for (const removal of removalOrder) {
+    const estimate = estimateFor(workingPrescription);
+    if (estimate === null || estimate.totalMinutes === null) {
+      break;
+    }
+    if (estimate.totalMinutes <= input.request.durationMinutes) {
+      break;
+    }
+    if (isLastPrimaryExercise(workingComposition, removal.exerciseId)) {
+      break;
+    }
+
+    const reduced = withoutExercises(workingComposition, new Set([removal.exerciseId]));
+    const reducedSession = generateInitialSession(input, selectedModules, [...reduced.selections]);
+    if (reducedSession.outcome === "blocked") {
+      break;
+    }
+
+    workingComposition = reduced;
+    workingSessionResult = reducedSession;
+    workingPrescription = prescribeEngineSession(
+      reducedSession.draft,
+      resolvedPrescriptionSources,
+      prescriptionTraceContext,
+    );
+    removedForTimeBudget.push({ exerciseId: removal.exerciseId, module: removal.module });
+  }
+
+  const durationEstimate = estimateFor(workingPrescription);
 
   const sessionDraft: InitialSessionDraft =
     durationEstimate === null || durationEstimate.totalMinutes === null
-      ? finalSessionResult.draft
-      : { ...finalSessionResult.draft, estimatedDurationMinutes: durationEstimate.totalMinutes };
+      ? workingSessionResult.draft
+      : { ...workingSessionResult.draft, estimatedDurationMinutes: durationEstimate.totalMinutes };
 
   // Conflicts are re-detected against the draft that now carries a duration.
   // This is what finally makes `duration_session` reachable: before the
   // estimate existed, `estimatedDurationMinutes` was always undefined and
   // `detectDurationConflict` returned early every time.
-  const finalConflicts =
+  const detectedConflicts =
     sessionDraft === finalSessionResult.draft ? conflicts : detectSessionConflicts(sessionDraft, input);
+
+  // `detectSessionConflicts` sees only the final draft, so a module emptied
+  // by the time-budget policy looks to it exactly like a module that never
+  // had a candidate. Both are genuinely unsatisfied — the module was
+  // explicitly requested and the session does not represent it, which is
+  // what the conflict is for — but the CAUSE differs, and reporting "no
+  // exercise is selected" for work that was chosen, prescribed and then
+  // deliberately given up would hide the removal. The description is
+  // restated here, where the removal is known; no code, severity or
+  // resolution flag changes.
+  const finalConflicts = describeTimeBudgetRemovals(detectedConflicts, removedForTimeBudget, input);
+
+  const timeBudgetTraceEntries = buildTimeBudgetTraceEntries(input, removedForTimeBudget);
+
+  // Conflicts detected after the reduction must reach `warnings` too:
+  // `buildDecisionTrace` computed its warnings from the pre-reduction
+  // conflicts, so without this the public `conflicts` and `warnings` arrays
+  // would disagree about the same session.
+  const postReductionWarnings = finalConflicts
+    .filter(
+      (conflict) =>
+        conflict.severity === "minor" && !conflicts.some((earlier) => earlier.id === conflict.id),
+    )
+    .map((conflict) => conflict.description);
 
   const durationTraceEntries = buildDurationTraceEntries(input, durationEstimate);
 
@@ -299,11 +371,12 @@ export function runEngine(
     ...decisionTrace,
     entries: [
       ...decisionTrace.entries,
-      ...sessionPrescriptionResult.traceEntries,
+      ...workingPrescription.traceEntries,
+      ...timeBudgetTraceEntries,
       ...durationTraceEntries,
       ...buildDurationConflictTraceEntries(input, conflicts, finalConflicts),
     ],
-    warnings: [...decisionTrace.warnings, ...sessionPrescriptionResult.warnings],
+    warnings: [...decisionTrace.warnings, ...workingPrescription.warnings, ...postReductionWarnings],
   };
 
   return {
@@ -316,8 +389,100 @@ export function runEngine(
     conflicts: finalConflicts,
     conflictResolutions: substitutionPass.conflictResolutions,
     decisionTrace: decisionTraceWithPrescription,
-    prescription: sessionPrescriptionResult.outcome,
+    prescription: workingPrescription.outcome,
   };
+}
+
+// -----------------------------------------------------------------------------
+// Time-budget reduction helpers
+// -----------------------------------------------------------------------------
+
+/** The session duration implied by a prescription outcome, or `null` when it was not prescribed. */
+function estimateFor(result: EngineSessionPrescriptionResult): SessionDurationEstimate | null {
+  return result.outcome.status === "prescribed"
+    ? estimateSessionDuration(
+        result.outcome.session.exercises.map((prescribedExercise) => prescribedExercise.prescription),
+      )
+    : null;
+}
+
+/**
+ * Whether removing `exerciseId` would leave a `"primary"` module empty.
+ *
+ * The primary module carries the session's objective, and
+ * `generateInitialSession` blocks a draft whose primary module holds
+ * nothing. Refusing the removal here means an over-budget session is
+ * reported as an unresolved `duration_session` conflict rather than
+ * destroyed to fit the clock.
+ */
+function isLastPrimaryExercise(composition: SessionComposition, exerciseId: Identifier): boolean {
+  return composition.decisions.some(
+    (decision) =>
+      decision.role === "primary" &&
+      decision.keptExerciseIds.length === 1 &&
+      decision.keptExerciseIds[0] === exerciseId,
+  );
+}
+
+/**
+ * Restates the description of every `missing_exercise_*` conflict whose
+ * module was emptied by the time-budget reduction.
+ *
+ * Only `description` changes. The conflict's id, type, severity and
+ * `resolutionRequired` are untouched: an explicitly requested module the
+ * session cannot represent is still an unsatisfied module, whatever emptied
+ * it.
+ */
+function describeTimeBudgetRemovals(
+  detectedConflicts: readonly DetectedConflict[],
+  removed: readonly { exerciseId: Identifier; module: CapabilityModule }[],
+  input: EngineInput,
+): DetectedConflict[] {
+  if (removed.length === 0) {
+    return [...detectedConflicts];
+  }
+
+  const removedByModule = new Map<CapabilityModule, Identifier[]>();
+  for (const entry of removed) {
+    removedByModule.set(entry.module, [...(removedByModule.get(entry.module) ?? []), entry.exerciseId]);
+  }
+
+  return detectedConflicts.map((conflict) => {
+    const module = conflict.affectedModules?.[0];
+    if (conflict.type !== "missing_data" || module === undefined) {
+      return conflict;
+    }
+    const removedHere = removedByModule.get(module);
+    if (removedHere === undefined || removedHere.length === 0) {
+      return conflict;
+    }
+
+    return {
+      ...conflict,
+      description: `The "${module}" module is not represented in this session: ${removedHere
+        .map((exerciseId) => `"${exerciseId}"`)
+        .join(", ")} was selected and prescribed, then given up so the session fits the requested ${input.request.durationMinutes} minute(s).`,
+    };
+  });
+}
+
+/** One `"duration_validation"` entry per exercise given up to fit the budget. */
+function buildTimeBudgetTraceEntries(
+  input: EngineInput,
+  removed: readonly { exerciseId: Identifier; module: CapabilityModule }[],
+): DecisionTraceEntry[] {
+  return removed.map(({ exerciseId }) => ({
+    id: `trace_${input.request.requestId}_time_budget_removed_${exerciseId}`,
+    timestamp: input.request.requestedAt,
+    stage: "duration_validation" as const,
+    decision: `Exercise "${exerciseId}" was removed so the session fits the requested ${input.request.durationMinutes} minute(s).`,
+    reasons: [
+      "The estimated duration exceeded the requested time budget.",
+      "Support work is given up before secondary work, and secondary before primary; a primary module is never emptied.",
+      "Doses are never shortened to fit the clock — a shorter valid session is preferred to a longer degraded one.",
+    ],
+    affectedExerciseIds: [exerciseId],
+  }));
 }
 
 // -----------------------------------------------------------------------------

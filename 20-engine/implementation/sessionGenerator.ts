@@ -108,7 +108,7 @@ export function generateInitialSession(
     order: index + 1,
     selectedModule: resolution.selectedModule,
     exerciseSelection: resolution.exerciseSelection,
-    estimatedDurationMinutes: computeModuleEstimatedDuration(resolution.selectedCandidate),
+    estimatedDurationMinutes: computeModuleEstimatedDuration(resolution.selectedCandidates),
   }));
 
   const draft: InitialSessionDraft = {
@@ -133,7 +133,7 @@ export function generateInitialSession(
 interface ModuleResolution {
   selectedModule: SelectedModule;
   exerciseSelection: ExerciseSelectionResult;
-  selectedCandidate: SelectedExerciseCandidate | undefined;
+  selectedCandidates: SelectedExerciseCandidate[];
 }
 
 function resolveModules(
@@ -147,7 +147,7 @@ function resolveModules(
     return {
       selectedModule,
       exerciseSelection,
-      selectedCandidate: findSelectedCandidate(exerciseSelection),
+      selectedCandidates: findSelectedCandidates(exerciseSelection),
     };
   });
 }
@@ -193,15 +193,16 @@ function resolveModuleExerciseSelection(
   return exerciseSelection;
 }
 
-/** Throws when more than one candidate is marked `selected: true` for the same module — a pipeline-call error. */
-function findSelectedCandidate(exerciseSelection: ExerciseSelectionResult): SelectedExerciseCandidate | undefined {
-  const selectedCandidates = exerciseSelection.candidates.filter((candidate) => candidate.selected);
-
-  if (selectedCandidates.length > 1) {
-    throw new Error(`Multiple exercises are marked as selected for module "${exerciseSelection.module}".`);
-  }
-
-  return selectedCandidates[0];
+/**
+ * Every candidate the composer kept for this module, in bench order.
+ *
+ * A module may now contribute several exercises (`sessionComposer.ts`), so
+ * more than one `selected: true` is a normal composition rather than the
+ * pipeline-call error it used to be. Zero remains normal too, for a
+ * secondary or support module whose bench was empty.
+ */
+function findSelectedCandidates(exerciseSelection: ExerciseSelectionResult): SelectedExerciseCandidate[] {
+  return exerciseSelection.candidates.filter((candidate) => candidate.selected);
 }
 
 // -----------------------------------------------------------------------------
@@ -214,7 +215,7 @@ function collectBlockedPrimaryModules(primaryResolutions: readonly ModuleResolut
   const seenModules = new Set<CapabilityModule>();
 
   for (const resolution of primaryResolutions) {
-    if (resolution.selectedCandidate !== undefined) {
+    if (resolution.selectedCandidates.length > 0) {
       continue;
     }
     if (seenModules.has(resolution.selectedModule.module)) {
@@ -246,7 +247,7 @@ function collectBlockedPrimaryModules(primaryResolutions: readonly ModuleResolut
  * `estimateSessionDuration` has run. The parameter is kept so the module
  * shape and its call site do not change.
  */
-function computeModuleEstimatedDuration(_candidate: SelectedExerciseCandidate | undefined): number | undefined {
+function computeModuleEstimatedDuration(_candidates: readonly SelectedExerciseCandidate[]): number | undefined {
   return undefined;
 }
 
@@ -292,14 +293,13 @@ function aggregateConfidence(resolutions: readonly ModuleResolution[]): Confiden
   let weakestRank = Number.POSITIVE_INFINITY;
 
   for (const resolution of resolutions) {
-    if (resolution.selectedCandidate === undefined) {
-      continue;
-    }
-    const confidence = resolution.selectedCandidate.scoredExercise.confidence;
-    const rank = CONFIDENCE_ORDER.indexOf(confidence);
-    if (rank < weakestRank) {
-      weakestRank = rank;
-      weakestConfidence = confidence;
+    for (const candidate of resolution.selectedCandidates) {
+      const confidence = candidate.scoredExercise.confidence;
+      const rank = CONFIDENCE_ORDER.indexOf(confidence);
+      if (rank < weakestRank) {
+        weakestRank = rank;
+        weakestConfidence = confidence;
+      }
     }
   }
 

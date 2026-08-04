@@ -230,12 +230,9 @@ function assertReplaceableSelection(
     throw new Error(`Cannot substitute exercise "${exerciseIdToReplace}": exercise is not currently selected.`);
   }
 
-  const selectedCount = exerciseSelection.candidates.filter((candidate) => candidate.selected).length;
-  if (selectedCount > 1) {
-    throw new Error(
-      `Cannot substitute exercise for module "${exerciseSelection.module}": multiple candidates are currently selected.`,
-    );
-  }
+  // A module may hold several selected exercises since `sessionComposer.ts`.
+  // Substitution still targets exactly one of them — the id it was given —
+  // so the others are simply left alone.
 
   return originalCandidate;
 }
@@ -268,6 +265,7 @@ function isCombatRecoveryCompatibleBackup(
   primaryAdaptation: SelectedExerciseCandidate["scoredExercise"]["exercise"]["primaryAdaptation"],
   availableHours: number,
 ): boolean {
+  // Never propose an exercise the session already holds.
   if (candidate.selected) {
     return false;
   }

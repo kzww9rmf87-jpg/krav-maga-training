@@ -88,38 +88,39 @@ export function buildDraftPrescriptionInputs(
   const gaps: PrescriptionSourceGap[] = [];
 
   for (const generatedModule of draft.modules) {
-    const selectedCandidate = generatedModule.exerciseSelection.candidates.find(
+    const selectedCandidates = generatedModule.exerciseSelection.candidates.filter(
       (candidate) => candidate.selected,
     );
 
-    if (selectedCandidate === undefined) {
-      continue;
-    }
+    // A module may contribute several exercises. `order` is unique across the
+    // session, so each one takes the next position rather than sharing its
+    // module's index — `prescribeSession` rejects duplicate orders.
+    for (const selectedCandidate of selectedCandidates) {
+      const exerciseId = selectedCandidate.scoredExercise.exercise.id;
+      const moduleId = generatedModule.selectedModule.module;
+      const required = generatedModule.selectedModule.role === "primary";
+      const source = prescriptionSources.get(exerciseId);
 
-    const exerciseId = selectedCandidate.scoredExercise.exercise.id;
-    const moduleId = generatedModule.selectedModule.module;
-    const required = generatedModule.selectedModule.role === "primary";
-    const source = prescriptionSources.get(exerciseId);
+      if (source === undefined) {
+        gaps.push({
+          exerciseId,
+          moduleId,
+          required,
+          reasonCode: "PRESCRIPTION_SOURCE_NOT_PROVIDED",
+          reason: `No prescription source data (role, capabilities, instructions, stop conditions, athlete references, load profile) is available for exercise "${exerciseId}".`,
+        });
+        continue;
+      }
 
-    if (source === undefined) {
-      gaps.push({
+      exercises.push({
+        ...source,
         exerciseId,
         moduleId,
+        order: exercises.length + 1,
         required,
-        reasonCode: "PRESCRIPTION_SOURCE_NOT_PROVIDED",
-        reason: `No prescription source data (role, capabilities, instructions, stop conditions, athlete references, load profile) is available for exercise "${exerciseId}".`,
+        blockId: moduleId,
       });
-      continue;
     }
-
-    exercises.push({
-      ...source,
-      exerciseId,
-      moduleId,
-      order: generatedModule.order,
-      required,
-      blockId: moduleId,
-    });
   }
 
   return { exercises, gaps };

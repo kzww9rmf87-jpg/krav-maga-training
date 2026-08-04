@@ -383,8 +383,7 @@
         "stage": "exercise_scoring",
         "decision": "Exercise \"bench_press\" selected for module \"strength\" with final score 82.33.",
         "reasons": [
-          "Exercise module and primary adaptation both match the selected module \"strength\".",
-          "Technical risk penalty applied: -1 (complexity, technical fatigue and/or borderline technical level).",
+          "bench_press (final score 82.33).",
           "Automatically selected with a final score of 82.33 (threshold: 80).",
           "Highest-ranked admissible candidate for the strength module.",
           "0 backup candidate(s) were retained for this module."

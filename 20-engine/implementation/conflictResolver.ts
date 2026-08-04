@@ -131,10 +131,8 @@ function assertDraftInvariants(draft: InitialSessionDraft): void {
       (candidate) => candidate.selected,
     ).length;
 
-    if (selectedCandidateCount > 1) {
-      throw new Error(`Initial session draft contains multiple selected exercises for module "${module}".`);
-    }
-
+    // Several selected candidates is a normal composition since
+    // `sessionComposer.ts` — only an EMPTY primary module is still an error.
     if (generatedModule.selectedModule.role === "primary" && selectedCandidateCount === 0) {
       throw new Error(`Initial session draft contains an unsatisfied primary module "${module}".`);
     }
@@ -249,14 +247,12 @@ function collectSelectedExercises(draft: InitialSessionDraft): SelectedExerciseE
   const entries: SelectedExerciseEntry[] = [];
 
   for (const generatedModule of draft.modules) {
-    const candidate = getSelectedCandidate(generatedModule);
-    if (candidate === undefined) {
-      continue;
+    for (const candidate of getSelectedCandidates(generatedModule)) {
+      entries.push({
+        module: generatedModule.selectedModule.module,
+        exercise: candidate.scoredExercise.exercise,
+      });
     }
-    entries.push({
-      module: generatedModule.selectedModule.module,
-      exercise: candidate.scoredExercise.exercise,
-    });
   }
 
   return entries;
@@ -305,11 +301,7 @@ function detectCombatRecoveryConflicts(draft: InitialSessionDraft, input: Engine
   const conflicts: DetectedConflict[] = [];
 
   for (const generatedModule of draft.modules) {
-    const candidate = getSelectedCandidate(generatedModule);
-    if (candidate === undefined) {
-      continue;
-    }
-
+    for (const candidate of getSelectedCandidates(generatedModule)) {
     const { exercise } = candidate.scoredExercise;
     const { recoveryHours } = exercise.fatigueProfile;
     if (recoveryHours === undefined) {
@@ -329,6 +321,7 @@ function detectCombatRecoveryConflicts(draft: InitialSessionDraft, input: Engine
       affectedModules: [generatedModule.selectedModule.module],
       resolutionRequired: COMBAT_RECOVERY_CONFLICT_POLICY.resolutionRequired,
     });
+    }
   }
 
   return conflicts;
@@ -340,6 +333,11 @@ function detectCombatRecoveryConflicts(draft: InitialSessionDraft, input: Engine
 
 function getSelectedCandidate(generatedModule: InitialGeneratedModule): SelectedExerciseCandidate | undefined {
   return generatedModule.exerciseSelection.candidates.find((candidate) => candidate.selected);
+}
+
+/** Every exercise the module contributes, in bench order. */
+function getSelectedCandidates(generatedModule: InitialGeneratedModule): SelectedExerciseCandidate[] {
+  return generatedModule.exerciseSelection.candidates.filter((candidate) => candidate.selected);
 }
 
 /** Preserves first-occurrence order while removing duplicates. */

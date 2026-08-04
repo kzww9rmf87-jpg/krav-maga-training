@@ -116,8 +116,12 @@ describe("equipment capability derivation — the audit scenario is fixed", () =
   test("every selected exercise is now prescribed, with no capability list supplied by the caller", () => {
     const { selectedExerciseIds, result, failures } = runScenario(makeAuditScenarioInput());
 
+    // The strength module contributes three exercises since Lot 7 composed
+    // sessions from the ranked bench instead of taking only the top pick.
     expect(selectedExerciseIds).toEqual([
       "chest_supported_row",
+      "neck_training",
+      "chin_up",
       "plate_pinch",
       "pallof_press",
       "assault_bike_intervals",

@@ -290,12 +290,10 @@ function buildScoringEntries(
   const scoredExerciseIds = new Set(scoredExercises.map((scored) => scored.exercise.id));
 
   return exerciseSelections.map((exerciseSelection) => {
+    // A module may contribute several exercises since `sessionComposer.ts`;
+    // the entry summarizes all of them rather than refusing to describe the
+    // module.
     const selectedCandidates = exerciseSelection.candidates.filter((candidate) => candidate.selected);
-    if (selectedCandidates.length > 1) {
-      throw new Error(
-        `Decision trace cannot summarize module "${exerciseSelection.module}": multiple exercises are selected.`,
-      );
-    }
 
     const baseEntry = {
       id: `trace_${input.request.requestId}_scoring_${exerciseSelection.module}`,
@@ -305,7 +303,7 @@ function buildScoringEntries(
       affectedModules: [exerciseSelection.module],
     };
 
-    const selectedCandidate = selectedCandidates[0];
+    const [selectedCandidate] = selectedCandidates;
     if (selectedCandidate === undefined) {
       const reasons =
         exerciseSelection.candidates.length === 0
@@ -319,23 +317,30 @@ function buildScoringEntries(
       };
     }
 
-    const exerciseId = selectedCandidate.scoredExercise.exercise.id;
-    if (!scoredExerciseIds.has(exerciseId)) {
-      throw new Error(`Selected exercise "${exerciseId}" is missing from the scored exercise results.`);
+    const selectedIds = selectedCandidates.map((candidate) => candidate.scoredExercise.exercise.id);
+    for (const exerciseId of selectedIds) {
+      if (!scoredExerciseIds.has(exerciseId)) {
+        throw new Error(`Selected exercise "${exerciseId}" is missing from the scored exercise results.`);
+      }
     }
 
-    const backupCount = exerciseSelection.candidates.length - 1;
+    const backupCount = exerciseSelection.candidates.length - selectedCandidates.length;
 
     return {
       ...baseEntry,
-      decision: `Exercise "${exerciseId}" selected for module "${exerciseSelection.module}" with final score ${formatNumber(selectedCandidate.scoredExercise.finalScore)}.`,
+      decision:
+        selectedCandidates.length === 1
+          ? `Exercise "${selectedIds[0]}" selected for module "${exerciseSelection.module}" with final score ${formatNumber(selectedCandidate.scoredExercise.finalScore)}.`
+          : `${selectedCandidates.length} exercises selected for module "${exerciseSelection.module}": ${selectedIds.join(", ")}.`,
       reasons: [
-        ...selectedCandidate.scoredExercise.reasons,
-        ...selectedCandidate.selectionReasons,
+        ...selectedCandidates.flatMap((candidate) => [
+          `${candidate.scoredExercise.exercise.id} (final score ${formatNumber(candidate.scoredExercise.finalScore)}).`,
+          ...candidate.selectionReasons,
+        ]),
         `${backupCount} backup candidate(s) were retained for this module.`,
       ],
       confidence: selectedCandidate.scoredExercise.confidence,
-      affectedExerciseIds: [exerciseId],
+      affectedExerciseIds: selectedIds,
     };
   });
 }

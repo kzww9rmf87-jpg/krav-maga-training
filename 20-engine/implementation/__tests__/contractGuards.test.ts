@@ -49,7 +49,7 @@ describe("contract guards", () => {
     ).toThrowError('Decision trace cannot contain duplicate module selection "strength".');
   });
 
-  test("buildDecisionTrace throws when a module reports more than one selected candidate", () => {
+  test("buildDecisionTrace summarizes a module that contributes several exercises", () => {
     const input = makeValidInput();
     const exercise = makeExercise();
     const eligibility = checkExerciseEligibility(exercise, input);
@@ -70,17 +70,21 @@ describe("contract guards", () => {
       ],
     };
 
-    expect(() =>
-      buildDecisionTrace(
-        input,
-        EMPTY_VALIDATION,
-        [selectedModule],
-        [eligibility],
-        [scored],
-        [exerciseSelection],
-        { outcome: "blocked", reasonCode: "NO_PRIMARY_MODULE_SELECTED", reason: "n/a", blockedModules: [] },
-        [],
-      ),
-    ).toThrowError('Decision trace cannot summarize module "strength": multiple exercises are selected.');
+    // Several selected candidates is a normal composition since
+    // `sessionComposer.ts`, so the trace describes them instead of refusing.
+    const trace = buildDecisionTrace(
+      input,
+      EMPTY_VALIDATION,
+      [selectedModule],
+      [eligibility],
+      [scored],
+      [exerciseSelection],
+      { outcome: "blocked", reasonCode: "NO_PRIMARY_MODULE_SELECTED", reason: "n/a", blockedModules: [] },
+      [],
+    );
+
+    const scoringEntry = trace.entries.find((entry) => entry.stage === "exercise_scoring");
+    expect(scoringEntry?.decision).toContain("2 exercises selected for module \"strength\"");
+    expect(scoringEntry?.affectedExerciseIds).toEqual([exercise.id, exercise.id]);
   });
 });
