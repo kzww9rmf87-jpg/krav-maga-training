@@ -83,6 +83,10 @@ import { deriveAthleteReferences } from "./prescription/deriveAthleteReferences"
 import { prescribeEngineSession } from "./prescription/prescribeEngineSession";
 import type { PrescriptionTraceContext } from "./prescription/prescriptionDecisionTrace";
 import { EXERCISE_KNOWLEDGE_BASE } from "./exerciseKnowledgeBase";
+import { adaptCasSessionInput } from "./sessionInput/adaptCasSessionInput";
+import type { CasSessionInputV1 } from "./sessionInput/types";
+import { serializeEngineRunResult } from "./sessionOutput/serializeEngineRunResult";
+import type { CasSessionOutputV1 } from "./sessionOutput/types";
 
 // -----------------------------------------------------------------------------
 // Public API
@@ -97,6 +101,39 @@ import { EXERCISE_KNOWLEDGE_BASE } from "./exerciseKnowledgeBase";
  * inspect/derive a filtered array before passing it explicitly).
  */
 export { EXERCISE_KNOWLEDGE_BASE } from "./exerciseKnowledgeBase";
+
+/**
+ * The public boundary, in one function.
+ *
+ *   CasSessionInputV1 → adapt → EngineInput → runEngine → CasSessionOutputV1
+ *
+ * This is the call a platform makes. It never sees `EngineInput`, a
+ * prescription source map, an equipment capability, a range context or a
+ * registry identifier — it sends public athlete facts, environment facts,
+ * intent, constraints and preferences, and receives a selected, prescribed,
+ * explained session under a versioned contract.
+ *
+ * `generatedAt` is a parameter rather than a clock read, exactly as
+ * `serializeEngineRunResult` requires: the engine is deterministic, and the
+ * only honest source for "when was this produced" is the caller that owns
+ * the clock. Given the same input and the same `generatedAt`, this function
+ * always returns byte-identical JSON.
+ *
+ * Every outcome is a value, never a rejected promise or a thrown error:
+ * invalid input comes back as `outcome: "invalid_input"` with typed issues,
+ * an unsatisfiable request as `outcome: "blocked"` with a reason. The
+ * deterministic `Error`s documented on `runEngine` remain genuine
+ * programming errors and are deliberately not caught here — converting a
+ * contract violation into a soft result would hide a bug rather than
+ * report it.
+ */
+export function generateCasSession(input: CasSessionInputV1, generatedAt: string): CasSessionOutputV1 {
+  const engineInput = adaptCasSessionInput(input);
+  const exercises = [...EXERCISE_KNOWLEDGE_BASE];
+  const result = runEngine(engineInput, exercises);
+
+  return serializeEngineRunResult(result, exercises, generatedAt);
+}
 
 /**
  * Runs the full V0.1 pipeline against `input` and the candidate exercise
