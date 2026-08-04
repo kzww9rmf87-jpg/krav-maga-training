@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "exports": {
+    "./cas": "./20-engine/implementation/publicApi.ts"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
