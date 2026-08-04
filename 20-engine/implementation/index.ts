@@ -67,6 +67,7 @@ import type {
   InitialSessionDraft,
   ScoredExercise,
   SelectedModule,
+  ValidationIssue,
 } from "./types";
 
 import { filterEligibleExercises } from "./exerciseSelector";
@@ -88,6 +89,11 @@ import type { PrescriptionTraceContext } from "./prescription/prescriptionDecisi
 import { EXERCISE_KNOWLEDGE_BASE } from "./exerciseKnowledgeBase";
 import { adaptCasSessionInput } from "./sessionInput/adaptCasSessionInput";
 import type { CasSessionInputV1 } from "./sessionInput/types";
+import {
+  findCasSessionInputStructuralIssues,
+  readRequestIdForDiagnostics,
+  readRequestedAtForDiagnostics,
+} from "./sessionInput/validateCasSessionInputStructure";
 import { serializeEngineRunResult } from "./sessionOutput/serializeEngineRunResult";
 import type { CasSessionOutputV1 } from "./sessionOutput/types";
 
@@ -131,11 +137,71 @@ export { EXERCISE_KNOWLEDGE_BASE } from "./exerciseKnowledgeBase";
  * report it.
  */
 export function generateCasSession(input: CasSessionInputV1, generatedAt: string): CasSessionOutputV1 {
+  // A payload that is not shaped like the contract cannot be projected at
+  // all, and the projection would fail with a raw `TypeError` rather than a
+  // result the caller can read. Structurally malformed input therefore comes
+  // back as `outcome: "invalid_input"`, exactly like a semantically invalid
+  // one — this function never throws on data a client sent.
+  const structuralIssues = findCasSessionInputStructuralIssues(input);
+  if (structuralIssues.length > 0) {
+    return buildStructurallyInvalidOutput(input, structuralIssues, generatedAt);
+  }
+
   const engineInput = adaptCasSessionInput(input);
   const exercises = [...EXERCISE_KNOWLEDGE_BASE];
   const result = runEngine(engineInput, exercises);
 
   return serializeEngineRunResult(result, exercises, generatedAt);
+}
+
+/**
+ * The `invalid_input` result for a payload that could not even be projected.
+ *
+ * Shaped exactly like the one `serializeEngineRunResult` produces for a
+ * semantically invalid input — same outcome, same validation shape, same
+ * trace stage, empty `exerciseReferences` — so a consumer handles both
+ * through one code path.
+ */
+function buildStructurallyInvalidOutput(
+  input: unknown,
+  issues: readonly ValidationIssue[],
+  generatedAt: string,
+): CasSessionOutputV1 {
+  const requestId = readRequestIdForDiagnostics(input);
+  const timestamp = readRequestedAtForDiagnostics(input, generatedAt);
+
+  return {
+    contractVersion: "cas-session-output.v1",
+    engineVersion: "0.1",
+    generatedAt,
+    outcome: "invalid_input",
+    validation: {
+      valid: false,
+      issues: issues.map((issue) => ({
+        code: issue.code,
+        path: issue.path,
+        message: issue.message,
+        severity: issue.severity,
+      })),
+    },
+    decisionTrace: {
+      traceId: `trace_${requestId}`,
+      entries: [
+        {
+          id: `trace_${requestId}_input_validation`,
+          timestamp,
+          stage: "input_validation",
+          decision: "Input validation completed: the payload does not match the cas-session-input.v1 structure.",
+          reasons: issues.map((issue) => issue.message),
+        },
+      ],
+      rejectedExercises: [],
+      detectedConflicts: [],
+      conflictResolutions: [],
+      warnings: [],
+    },
+    exerciseReferences: {},
+  };
 }
 
 /**

@@ -11839,3 +11839,29 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   GRIP_FIGHTING,
   SHOT_ENTRIES,
 ];
+
+/**
+ * Deep-frozen at module load.
+ *
+ * This array is re-exported from the engine's public entry point, so an
+ * external consumer — a VITA bridge, a test harness, anything holding the
+ * module — could otherwise `push` an entry or edit a definition in place and
+ * corrupt every session the process generates afterwards. `runEngine` copies
+ * the array before use, but a copy of a mutated catalog is still mutated.
+ *
+ * Freezing makes the catalog read-only at runtime as well as in the type
+ * system. Nothing inside the engine mutates it: every consumer either
+ * spreads it, filters it or reads it.
+ */
+function deepFreezeCatalog<T>(value: T): T {
+  if (value === null || typeof value !== "object" || Object.isFrozen(value)) {
+    return value;
+  }
+  Object.freeze(value);
+  for (const nested of Object.values(value as Record<string, unknown>)) {
+    deepFreezeCatalog(nested);
+  }
+  return value;
+}
+
+deepFreezeCatalog(EXERCISE_KNOWLEDGE_BASE);
