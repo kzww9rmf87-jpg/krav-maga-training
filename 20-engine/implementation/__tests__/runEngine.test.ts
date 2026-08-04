@@ -117,14 +117,20 @@ describe("runEngine", () => {
     );
     expect(result.sessionDraft.confidence).toBe(selectedCandidates[0].scoredExercise.confidence);
 
+    // Prescription now runs on every draft (see `runEngine`'s own
+    // `resolveEnginePrescriptionSources`), so the selection stages are a
+    // prefix of the trace rather than the whole of it. This synthetic
+    // exercise is not in the prescription registry, so the run ends with a
+    // structured omission rather than a dose.
     const stages = result.decisionTrace.entries.map((entry) => entry.stage);
-    expect(stages).toEqual([
+    expect(stages.slice(0, 5)).toEqual([
       "input_validation",
       "module_selection",
       "eligibility_filtering",
       "exercise_scoring",
       "session_assembly",
     ]);
+    expect(stages.slice(5).every((stage) => stage === "prescription_generation")).toBe(true);
   });
 
   test("5. an exercise whose total duration exceeds the requested duration produces a duration_session conflict", () => {

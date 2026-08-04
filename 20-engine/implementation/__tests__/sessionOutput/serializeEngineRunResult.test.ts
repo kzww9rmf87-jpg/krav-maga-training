@@ -125,7 +125,7 @@ describe("serializeEngineRunResult — outcome: blocked", () => {
 });
 
 describe("serializeEngineRunResult — outcome: draft", () => {
-  test("without prescription: sessionDraft/conflicts present, prescription key absent", () => {
+  test("draft with an unregistered exercise: sessionDraft present, prescription reports the gap", () => {
     const input = makeValidInput();
     const exercise = makeExercise();
 
@@ -143,7 +143,11 @@ describe("serializeEngineRunResult — outcome: draft", () => {
     expect(output.sessionDraft.title).toBe(result.sessionDraft.title);
     expect(output.sessionDraft.primaryObjective.adaptationDomain).toBe(result.sessionDraft.primaryObjective.adaptationDomain);
     expect(output.sessionDraft.confidence).toBe(result.sessionDraft.confidence);
-    expect("prescription" in output).toBe(false);
+    // Prescription now always runs; a synthetic exercise has no registry
+    // entry, so the public output carries a structured gap instead of
+    // omitting the key.
+    expect(output.prescription?.status).toBe("unavailable");
+    expect(output.prescription?.unprescribedSelectedExercises?.map((gap) => gap.exerciseId)).toEqual([exercise.id]);
     // No unselected candidate, no full ExerciseDefinition, ever embedded in the public draft.
     for (const module of output.sessionDraft.modules) {
       for (const selectedExercise of module.exercises) {
@@ -297,8 +301,8 @@ describe("serializeEngineRunResult — determinism and isolation", () => {
 
 describe("serializeEngineRunResult — versioned fixture consistency", () => {
   test("cas-session-output-v1.sample.json matches a fresh in-memory regeneration exactly (never writes to disk)", () => {
-    const { input, exercises, prescriptionSources } = buildScenario();
-    const result = runEngine(input, exercises, prescriptionSources);
+    const { input, exercises } = buildScenario();
+    const result = runEngine(input, exercises);
     if (result.outcome !== "draft" || result.prescription?.status !== "prescribed") {
       throw new Error("Expected the fixture scenario to produce a prescribed draft.");
     }

@@ -24,7 +24,7 @@ function toSource(input: PrescribeExerciseInput): ExercisePrescriptionSource {
 }
 
 describe("runEngine prescription integration", () => {
-  test("1. a historical two-argument call keeps its behavior byte-for-byte identical", () => {
+  test("1. a two-argument call now prescribes from engine-derived context", () => {
     const input = makeValidInput();
     const exercise = makeExercise();
 
@@ -34,14 +34,15 @@ describe("runEngine prescription integration", () => {
       throw new Error(`Expected outcome "draft" but received "${result.outcome}".`);
     }
 
-    expect(result.prescription).toBeUndefined();
-    expect(result.decisionTrace.entries.map((entry) => entry.stage)).toEqual([
-      "input_validation",
-      "module_selection",
-      "eligibility_filtering",
-      "exercise_scoring",
-      "session_assembly",
-    ]);
+    // Omitting `prescriptionSources` used to mean "do not prescribe". It now
+    // means "derive the sources yourself", so prescription always runs. This
+    // synthetic exercise has no prescription registry entry, so the honest
+    // result is a structured gap rather than an absent field.
+    expect(result.prescription).toBeDefined();
+    expect(result.prescription?.status).toBe("unavailable");
+    expect(result.prescription?.unprescribedSelectedExercises.map((gap) => gap.exerciseId)).toEqual([exercise.id]);
+
+    expect(result.decisionTrace.entries.map((entry) => entry.stage)).toContain("prescription_generation");
   });
 
   test("2. a complete session with valid prescription source data produces a prescription", () => {

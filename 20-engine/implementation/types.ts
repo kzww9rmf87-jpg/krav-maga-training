@@ -12,6 +12,10 @@
 // imports back from this file (also type-only), so this reference is a
 // type-level cycle only — erased at compile time, no runtime dependency.
 import type { EngineSessionPrescriptionOutcome } from "./prescription/prescribeEngineSession";
+// Type-only, like the import above: `AthleteProfile.performanceReferences`
+// reuses the prescription layer's own reference shape rather than declaring
+// a second, drifting copy of it.
+import type { IntensityReference } from "./prescription/types";
 
 // -----------------------------------------------------------------------------
 // Generic primitives
@@ -342,6 +346,24 @@ export interface AthleteProfile {
   experience: AthleteExperience;
   goals: AthleteGoal[];
   preferences?: AthletePreference;
+  /**
+   * Measured performance references (a tested one-rep max, a training max,
+   * a baseline velocity …), as recorded for this athlete.
+   *
+   * These are FACTS the platform supplies, not decisions it takes: the
+   * engine consumes them, decides which are still usable
+   * (`deriveAthleteReferences`), and decides what to do with them
+   * (`resolveIntensity`'s `percentage_1rm` rules and friends). Absent or
+   * empty is a normal state — an exercise whose reference is missing
+   * reports `REQUIRED_ATHLETE_REFERENCE_MISSING` and appears in
+   * `unprescribedSelectedExercises` rather than being dosed from a guess.
+   *
+   * Typed as the prescription layer's own `IntensityReference` so a
+   * recorded max cannot be a free-form string: the reference type comes
+   * from the closed `IntensityReferenceType` vocabulary catalogued in
+   * `athleteReferenceCatalog.ts`.
+   */
+  performanceReferences?: readonly IntensityReference[];
 }
 
 // -----------------------------------------------------------------------------

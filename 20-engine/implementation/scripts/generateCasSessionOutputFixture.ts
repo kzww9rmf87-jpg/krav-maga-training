@@ -24,9 +24,8 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { runEngine } from "../index";
-import { buildEngineSessionPrescriptionSources } from "../prescription/buildEngineSessionPrescriptionSources";
 import { serializeEngineRunResult } from "../sessionOutput/serializeEngineRunResult";
-import { makeExercise, makeValidInput } from "../__tests__/fixtures";
+import { makeAthleteProfile, makeExercise, makeValidInput } from "../__tests__/fixtures";
 import { makeOneRepMaxReference } from "../__tests__/prescription/fixtures";
 
 /**
@@ -49,11 +48,15 @@ const FIXTURE_PATH = path.join(SCRIPT_DIRECTORY, "..", "sessionOutput", "fixture
  * prone to drifting from what actually generated the committed file.
  */
 export function buildScenario() {
-  // The environment declares equipment, never capabilities: CAS derives
-  // `barbell`/`bench`/`rack`/`plates` itself via `deriveEquipmentCapabilities`.
-  // Before that derivation existed this scenario hand-wrote the capability
-  // list, which is exactly the caller-side translation the engine now owns.
+  // Everything the prescription needs is now an athlete FACT carried by the
+  // input: declared equipment (not capabilities), reported readiness (not a
+  // range context), and a measured one-rep max (not a hand-built reference
+  // list). CAS derives the whole execution context from them, so this
+  // scenario passes no prescription sources at all.
   const input = makeValidInput({
+    athleteProfile: makeAthleteProfile({
+      performanceReferences: [makeOneRepMaxReference({ value: 100 })],
+    }),
     environment: {
       locationType: "gym",
       availableEquipment: [{ type: "barbell" }, { type: "bench" }, { type: "rack" }, { type: "plates" }],
@@ -65,22 +68,13 @@ export function buildScenario() {
   // exercised end to end in `runEnginePrescription.test.ts`.
   const exercise = makeExercise({ id: "bench_press", name: "Bench Press" });
 
-  const { sources, failures } = buildEngineSessionPrescriptionSources(["bench_press"], {
-    athleteReferences: [makeOneRepMaxReference({ value: 100 })],
-    environment: input.environment,
-    readiness: input.readiness,
-  });
-  if (failures.length > 0) {
-    throw new Error(`Fixture scenario setup failed: ${failures.map((failure) => failure.message).join(" ")}`);
-  }
-
-  return { input, exercises: [exercise], prescriptionSources: sources };
+  return { input, exercises: [exercise] };
 }
 
 function main(): void {
-  const { input, exercises, prescriptionSources } = buildScenario();
+  const { input, exercises } = buildScenario();
 
-  const result = runEngine(input, exercises, prescriptionSources);
+  const result = runEngine(input, exercises);
   if (result.outcome !== "draft" || result.prescription?.status !== "prescribed") {
     throw new Error(
       `Fixture generation expected a prescribed draft but got outcome "${result.outcome}"` +

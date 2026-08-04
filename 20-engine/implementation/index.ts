@@ -22,16 +22,24 @@
  * or `exercises`.
  *
  * Prescription runs once, only against the final session draft (after any
- * substitution and reconstruction), via `prescribeEngineSession`. The
- * engine's own exercise knowledge base (`ExerciseDefinition`) carries none
- * of the data a prescription needs (role, capabilities, instructions, stop
- * conditions, athlete references, load profile) — `runEngine`'s optional
- * third parameter, `prescriptionSources`, is the only place that data can
- * come from today. Omitting it (or leaving an exercise out of it) never
- * fabricates a prescription: it produces a structured `"unavailable"`
- * result and leaves `sessionDraft` exactly as it would have been before
- * this parameter existed — this is what keeps every historical two-argument
- * call to `runEngine` behaving identically.
+ * substitution and reconstruction), via `prescribeEngineSession` — and it
+ * runs on every draft. `runEngine(input)` alone returns a selected,
+ * prescribed, explained session: the engine resolves its own prescription
+ * sources from `input` (see `resolveEnginePrescriptionSources`), deriving
+ * equipment capabilities from the declared environment, the range context
+ * from reported readiness, and athlete references from the athlete's
+ * recorded measurements. No caller is asked to supply registry data,
+ * choose a dose, or call the engine twice to discover which exercises were
+ * selected.
+ *
+ * The optional third parameter, `prescriptionSources`, is now an OVERRIDE
+ * rather than an opt-in switch: passing it replaces the derived map
+ * entirely, which is what registry-level tests and failure fixtures need.
+ * Omitting it no longer means "do not prescribe". Nothing is ever
+ * fabricated either way — an exercise with no resolvable source produces a
+ * structured gap on `unprescribedSelectedExercises`, with its reason, its
+ * Decision Trace entry and its warning, and `sessionDraft` still shows the
+ * exercise the engine selected.
  *
  * This file deliberately does NOT produce: `EngineOutput`,
  * `GeneratedSession`, `GeneratedModule`, `SelectedExercise`,
@@ -55,6 +63,7 @@ import type {
   ExerciseEligibilityResult,
   ExerciseSelectionResult,
   Identifier,
+  InitialSessionDraft,
   ScoredExercise,
   SelectedModule,
 } from "./types";
@@ -69,6 +78,8 @@ import { applySubstitution, findSubstituteCandidate } from "./substitutionEngine
 import { validateEngineInput } from "./validation";
 import { buildDecisionTrace, buildInvalidInputDecisionTrace } from "./decisionTrace";
 import type { ExercisePrescriptionSource } from "./prescription/buildPrescriptionInput";
+import { buildEngineSessionPrescriptionSources } from "./prescription/buildEngineSessionPrescriptionSources";
+import { deriveAthleteReferences } from "./prescription/deriveAthleteReferences";
 import { prescribeEngineSession } from "./prescription/prescribeEngineSession";
 import type { PrescriptionTraceContext } from "./prescription/prescriptionDecisionTrace";
 import { EXERCISE_KNOWLEDGE_BASE } from "./exerciseKnowledgeBase";
@@ -190,25 +201,19 @@ export function runEngine(
     substitutionPass.conflictResolutions,
   );
 
-  // Prescription runs only against the final draft — after substitution and
-  // reconstruction, never before (see the module docstring above) — and
-  // only when the caller opted in by passing `prescriptionSources` at all.
-  // A historical two-argument call must stay byte-for-byte identical to its
-  // pre-prescription behavior, so an omitted third argument never adds a
-  // `prescription` field or a `"prescription_generation"` trace entry.
-  if (prescriptionSources === undefined) {
-    return {
-      outcome: "draft",
-      validation,
-      selectedModules,
-      eligibilityResults,
-      scoredExercises,
-      sessionDraft: finalSessionResult.draft,
-      conflicts,
-      conflictResolutions: substitutionPass.conflictResolutions,
-      decisionTrace,
-    };
-  }
+  // Prescription runs against the final draft — after substitution and
+  // reconstruction, never before (see the module docstring above) — and it
+  // now runs on EVERY draft. When `prescriptionSources` is omitted, the
+  // engine resolves its own sources from `input`, so a plain
+  // `runEngine(input)` returns a selected, prescribed, explained session.
+  //
+  // The explicit third argument survives as an override for callers that
+  // genuinely need to control source data (registry-level tests, a fixture
+  // exercising a specific failure). It is no longer the switch that decides
+  // whether prescription happens at all: deciding that was never a caller's
+  // call to make.
+  const resolvedPrescriptionSources =
+    prescriptionSources ?? resolveEnginePrescriptionSources(input, finalSessionResult.draft);
 
   const prescriptionTraceContext: PrescriptionTraceContext = {
     idPrefix: `trace_${input.request.requestId}`,
@@ -216,7 +221,7 @@ export function runEngine(
   };
   const sessionPrescriptionResult = prescribeEngineSession(
     finalSessionResult.draft,
-    prescriptionSources,
+    resolvedPrescriptionSources,
     prescriptionTraceContext,
   );
   // Both lists are extended, never rebuilt: `buildDecisionTrace` runs before
@@ -241,6 +246,56 @@ export function runEngine(
     decisionTrace: decisionTraceWithPrescription,
     prescription: sessionPrescriptionResult.outcome,
   };
+}
+
+// -----------------------------------------------------------------------------
+// Prescription context (derived, never supplied)
+// -----------------------------------------------------------------------------
+
+/**
+ * Builds the prescription source map for `draft` entirely from `input`.
+ *
+ * Every element of the execution context is derived by CAS from athlete
+ * facts the engine already received — nothing is asked of the caller:
+ *
+ *   equipment capabilities  ← `input.environment`      (Lot 2)
+ *   range context           ← `input.readiness`        (Lot 3)
+ *   athlete references      ← `input.athleteProfile.performanceReferences`
+ *   load rounding           ← not applied; see below
+ *
+ * `loadRounding` is deliberately left undefined. It is a real prescription
+ * policy (an increment, a rounding mode and the rule id that justifies
+ * them), and no document in this repository specifies one for V0.1 —
+ * `resolveIntensity` already treats its absence as "do not round" and adds
+ * no rule id. Inventing a plate increment here would be a fabricated
+ * numerical decision underneath every computed load, so the honest V0.1
+ * position is that CAS applies no rounding rule and says so. The field
+ * stays on the low-level `PrescriptionExecutionContext` for the day a
+ * rounding policy is documented.
+ *
+ * A resolution failure (exercise absent from the registry, missing
+ * equipment capability, missing athlete reference) is never thrown and
+ * never fabricated around: the exercise simply gets no source, which
+ * `prescribeEngineSession` reports as a gap and
+ * `unprescribedSelectedExercises` exposes with its reason.
+ */
+function resolveEnginePrescriptionSources(
+  input: EngineInput,
+  draft: InitialSessionDraft,
+): ReadonlyMap<Identifier, ExercisePrescriptionSource> {
+  const selectedExerciseIds = draft.modules.flatMap((generatedModule) =>
+    generatedModule.exerciseSelection.candidates
+      .filter((candidate) => candidate.selected)
+      .map((candidate) => candidate.scoredExercise.exercise.id),
+  );
+
+  const { sources } = buildEngineSessionPrescriptionSources(selectedExerciseIds, {
+    environment: input.environment,
+    readiness: input.readiness,
+    athleteReferences: deriveAthleteReferences(input).references,
+  });
+
+  return sources;
 }
 
 // -----------------------------------------------------------------------------

@@ -37,6 +37,7 @@ export * from "./prescribeEngineSession";
 export * from "./equipmentCapabilities";
 export * from "./deriveEquipmentCapabilities";
 export * from "./deriveRangeContext";
+export * from "./deriveAthleteReferences";
 export * from "./athleteReferenceCatalog";
 export * from "./durationEstimationProfiles";
 export * from "./sourceRuleIdentifiers";

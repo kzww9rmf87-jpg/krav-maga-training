@@ -422,7 +422,7 @@ describe("selected-but-unprescribed exercises — gap shapes", () => {
 // -----------------------------------------------------------------------------
 
 describe("selected-but-unprescribed exercises — unchanged behavior", () => {
-  test("runEngine without prescriptionSources gains no prescription field and no omission warning", () => {
+  test("runEngine without prescriptionSources derives them and still discloses every omission", () => {
     const input = makeValidInput();
     const exercise = makeExercise();
 
@@ -431,9 +431,14 @@ describe("selected-but-unprescribed exercises — unchanged behavior", () => {
       throw new Error("Expected a draft.");
     }
 
-    expect("prescription" in result).toBe(false);
-    expect(result.decisionTrace.warnings).toEqual([]);
-    expect(result.decisionTrace.entries.filter((entry) => entry.id.endsWith("_omitted"))).toEqual([]);
+    // The engine now resolves its own sources. This synthetic exercise is
+    // not in the registry, so the omission is disclosed rather than hidden —
+    // which is exactly what Lot 1 guarantees, now reached without the caller
+    // having to opt in.
+    expect(result.prescription?.status).toBe("unavailable");
+    expect(result.prescription?.unprescribedSelectedExercises.map((gap) => gap.exerciseId)).toEqual([exercise.id]);
+    expect(result.decisionTrace.warnings).toHaveLength(1);
+    expect(result.decisionTrace.entries.filter((entry) => entry.id.endsWith("_omitted"))).toHaveLength(1);
   });
 
   test("invalid_input and blocked outcomes are untouched", () => {
