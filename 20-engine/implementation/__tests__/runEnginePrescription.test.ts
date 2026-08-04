@@ -82,7 +82,6 @@ describe("runEngine prescription integration", () => {
     const exerciseB = makeExercise({
       id: "exercise-b",
       setupTimeMinutes: 3,
-      defaultExerciseDurationMinutes: 9,
       fatigueProfile: {
         types: [],
         neural: 2,

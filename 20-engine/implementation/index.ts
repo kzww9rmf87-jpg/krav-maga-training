@@ -61,6 +61,7 @@ import type {
   EngineRunResult,
   ExerciseDefinition,
   ExerciseEligibilityResult,
+  DecisionTraceEntry,
   ExerciseSelectionResult,
   Identifier,
   InitialSessionDraft,
@@ -81,6 +82,7 @@ import type { ExercisePrescriptionSource } from "./prescription/buildPrescriptio
 import { buildEngineSessionPrescriptionSources } from "./prescription/buildEngineSessionPrescriptionSources";
 import { deriveAthleteReferences } from "./prescription/deriveAthleteReferences";
 import { prescribeEngineSession } from "./prescription/prescribeEngineSession";
+import { estimateSessionDuration, type SessionDurationEstimate } from "./prescription/estimatePrescriptionDuration";
 import type { PrescriptionTraceContext } from "./prescription/prescriptionDecisionTrace";
 import { EXERCISE_KNOWLEDGE_BASE } from "./exerciseKnowledgeBase";
 import { adaptCasSessionInput } from "./sessionInput/adaptCasSessionInput";
@@ -261,13 +263,46 @@ export function runEngine(
     resolvedPrescriptionSources,
     prescriptionTraceContext,
   );
-  // Both lists are extended, never rebuilt: `buildDecisionTrace` runs before
-  // prescription and cannot know about an omitted exercise, so the
-  // prescription stage contributes its own entries and its own warnings.
-  // The wording of each is owned by `prescribeEngineSession`, not here.
+  // Duration is estimated from the PRESCRIPTION, so it can only be known
+  // here — after the doses are resolved. `generateInitialSession` runs
+  // before prescription exists and therefore cannot produce it; the draft it
+  // returns is completed with the estimate below rather than guessing
+  // earlier from knowledge-base metadata that no exercise carries.
+  const durationEstimate =
+    sessionPrescriptionResult.outcome.status === "prescribed"
+      ? estimateSessionDuration(
+          sessionPrescriptionResult.outcome.session.exercises.map(
+            (prescribedExercise) => prescribedExercise.prescription,
+          ),
+        )
+      : null;
+
+  const sessionDraft: InitialSessionDraft =
+    durationEstimate === null || durationEstimate.totalMinutes === null
+      ? finalSessionResult.draft
+      : { ...finalSessionResult.draft, estimatedDurationMinutes: durationEstimate.totalMinutes };
+
+  // Conflicts are re-detected against the draft that now carries a duration.
+  // This is what finally makes `duration_session` reachable: before the
+  // estimate existed, `estimatedDurationMinutes` was always undefined and
+  // `detectDurationConflict` returned early every time.
+  const finalConflicts =
+    sessionDraft === finalSessionResult.draft ? conflicts : detectSessionConflicts(sessionDraft, input);
+
+  const durationTraceEntries = buildDurationTraceEntries(input, durationEstimate);
+
+  // The three lists are extended, never rebuilt: `buildDecisionTrace` runs
+  // before prescription and cannot know about an omitted exercise, a
+  // duration or a duration conflict. Each later stage contributes its own
+  // entries and warnings, and owns their wording.
   const decisionTraceWithPrescription = {
     ...decisionTrace,
-    entries: [...decisionTrace.entries, ...sessionPrescriptionResult.traceEntries],
+    entries: [
+      ...decisionTrace.entries,
+      ...sessionPrescriptionResult.traceEntries,
+      ...durationTraceEntries,
+      ...buildDurationConflictTraceEntries(input, conflicts, finalConflicts),
+    ],
     warnings: [...decisionTrace.warnings, ...sessionPrescriptionResult.warnings],
   };
 
@@ -277,12 +312,73 @@ export function runEngine(
     selectedModules,
     eligibilityResults,
     scoredExercises,
-    sessionDraft: finalSessionResult.draft,
-    conflicts,
+    sessionDraft,
+    conflicts: finalConflicts,
     conflictResolutions: substitutionPass.conflictResolutions,
     decisionTrace: decisionTraceWithPrescription,
     prescription: sessionPrescriptionResult.outcome,
   };
+}
+
+// -----------------------------------------------------------------------------
+// Duration trace
+// -----------------------------------------------------------------------------
+
+/**
+ * One `"duration_validation"` entry recording how the session's duration was
+ * estimated — or that it could not be. Emitted whenever prescription
+ * produced a session, so an unknown duration is stated rather than left as a
+ * silently missing field.
+ */
+function buildDurationTraceEntries(
+  input: EngineInput,
+  estimate: SessionDurationEstimate | null,
+): DecisionTraceEntry[] {
+  if (estimate === null) {
+    return [];
+  }
+
+  const decision =
+    estimate.totalMinutes === null
+      ? "Session duration could not be estimated."
+      : `Session duration estimated at ${estimate.totalMinutes} minute(s) against ${input.request.durationMinutes} requested.`;
+
+  return [
+    {
+      id: `trace_${input.request.requestId}_duration_estimation`,
+      timestamp: input.request.requestedAt,
+      stage: "duration_validation",
+      decision,
+      reasons: [...estimate.reasons],
+      inputReferences: ["request.durationMinutes"],
+      sourceRuleIds: [...estimate.sourceRuleIds],
+    },
+  ];
+}
+
+/** One entry per duration conflict that only became detectable once the estimate existed. */
+function buildDurationConflictTraceEntries(
+  input: EngineInput,
+  before: readonly DetectedConflict[],
+  after: readonly DetectedConflict[],
+): DecisionTraceEntry[] {
+  const known = new Set(before.map((conflict) => conflict.id));
+
+  return after
+    .filter((conflict) => !known.has(conflict.id))
+    .map((conflict) => ({
+      id: `trace_${input.request.requestId}_conflict_${conflict.id}`,
+      timestamp: input.request.requestedAt,
+      stage: "conflict_detection" as const,
+      decision: conflict.description,
+      reasons: [
+        `Conflict "${conflict.id}" of type "${conflict.type}", severity "${conflict.severity}".`,
+        conflict.resolutionRequired ? "Resolution is required." : "Resolution is not required.",
+      ],
+      affectedModules: conflict.affectedModules === undefined ? undefined : [...conflict.affectedModules],
+      affectedExerciseIds:
+        conflict.affectedExerciseIds === undefined ? undefined : [...conflict.affectedExerciseIds],
+    }));
 }
 
 // -----------------------------------------------------------------------------

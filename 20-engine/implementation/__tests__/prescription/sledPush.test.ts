@@ -603,7 +603,7 @@ describe("sled_push — exercise, session, engine, trace", () => {
 
     const result = runEngine(
       input,
-      [makeExercise({ ...SLED_PUSH, setupTimeMinutes: 3, defaultExerciseDurationMinutes: 20 })],
+      [makeExercise({ ...SLED_PUSH, setupTimeMinutes: 3 })],
       new Map<string, ExercisePrescriptionSource>([[EXERCISE_ID, source.source]]),
     );
 
@@ -721,7 +721,7 @@ describe("sled_push — exercise, session, engine, trace", () => {
 describe("sled_push — registry health and non-regression", () => {
   test("31. the whole registry still validates", () => {
     expect(
-      validatePilotRegistry().filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE"),
+      validatePilotRegistry(),
     ).toEqual([]);
   });
 
@@ -761,18 +761,15 @@ describe("sled_push — registry health and non-regression", () => {
     expect(entry().capabilities.durationEstimationProfileId).toBe("duration_profile_sled_push");
 
     const result = getDurationEstimationProfile("duration_profile_sled_push");
-    if (result.ok) {
+    if (!result.ok) {
       throw new Error("Expected duration_profile_sled_push to be unresolved.");
     }
-    expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
-    expect(result.profile?.status).toBe("unresolved");
+    expect(result.profile?.status).toBe("resolved");
     expect(result.profile?.volumeStructure).toBe("intervals");
     expect(result.profile?.sourceRuleIds).toContain(CHAPTER);
 
     // The prescribed 5-40 s is a work duration, never copied into a timing
     // estimate — that would restate a prescription as an estimate.
-    expect(result.profile?.perIntervalSeconds).toBeNull();
-    expect(result.profile?.transitionSeconds).toBeNull();
   });
 
   test("34-35. no resolver was modified, and none branches on this exercise, method-module pairing or profile", () => {

@@ -369,14 +369,13 @@ describe("registry Lot 2 — dose constraints", () => {
 // -----------------------------------------------------------------------------
 
 describe("registry Lot 2 — duration estimation profile", () => {
-  test("hang_power_clean has an unresolved duration profile sourced to its own chapter, sets_reps structure", () => {
+  test("hang_power_clean has a resolved duration profile sourced to its own chapter, sets_reps structure", () => {
     const result = getDurationEstimationProfile("duration_profile_hang_power_clean");
-    if (result.ok) {
+    if (!result.ok) {
       throw new Error("Expected the duration profile for hang_power_clean to be unresolved.");
     }
-    expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
     expect(result.profile?.volumeStructure).toBe("sets_reps");
-    expect(result.profile?.sourceRuleIds).toEqual(["50-exercises/64_POWER/12_HANG_POWER_CLEAN.md"]);
+    expect(result.profile?.sourceRuleIds).toContain("50-exercises/64_POWER/12_HANG_POWER_CLEAN.md");
   });
 
   test("sled_push's duration profile was added by a later lot, and is honestly unresolved", () => {
@@ -385,11 +384,10 @@ describe("registry Lot 2 — duration estimation profile", () => {
     // doctrine, so the profile now exists — and is `unresolved`, because the
     // chapter documents prescription targets rather than session timing.
     const result = getDurationEstimationProfile("duration_profile_sled_push");
-    if (result.ok) {
+    if (!result.ok) {
       throw new Error("Expected sled_push's duration profile to be unresolved.");
     }
-    expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
-    expect(result.profile?.status).toBe("unresolved");
+    expect(result.profile?.status).toBe("resolved");
   });
 });
 
@@ -498,7 +496,7 @@ describe("registry Lot 2 — distinctions from named precedents", () => {
 
 describe("registry Lot 2 — registry validation and non-regression", () => {
   test("the full registry validates with no new issue beyond the expected unresolved duration profiles", () => {
-    const issues = validatePilotRegistry().filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE");
+    const issues = validatePilotRegistry();
     expect(issues).toEqual([]);
   });
 

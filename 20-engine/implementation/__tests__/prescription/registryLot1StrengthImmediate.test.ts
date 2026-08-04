@@ -587,14 +587,13 @@ describe("registry Lot 1 — duration estimation profiles", () => {
   };
 
   for (const id of LOT1_EXERCISE_IDS) {
-    test(`${id}: has an unresolved duration profile sourced to its own chapter, sets_reps structure`, () => {
+    test(`${id}: has a resolved duration profile sourced to its own chapter, sets_reps structure`, () => {
       const result = getDurationEstimationProfile(`duration_profile_${id}`);
-      if (result.ok) {
-        throw new Error(`Expected the duration profile for "${id}" to be unresolved.`);
+      if (!result.ok) {
+        throw new Error(`Expected the duration profile for "${id}" to be resolved.`);
       }
-      expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
       expect(result.profile?.volumeStructure).toBe("sets_reps");
-      expect(result.profile?.sourceRuleIds).toEqual([EXPECTED_SOURCES[id]]);
+      expect(result.profile?.sourceRuleIds).toContain(EXPECTED_SOURCES[id]);
     });
   }
 });
@@ -674,7 +673,7 @@ describe("registry Lot 1 — distinctions from named precedents", () => {
 
 describe("registry Lot 1 — registry validation and non-regression", () => {
   test("the full registry validates with no new issue beyond the expected unresolved duration profiles", () => {
-    const issues = validatePilotRegistry().filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE");
+    const issues = validatePilotRegistry();
     expect(issues).toEqual([]);
   });
 

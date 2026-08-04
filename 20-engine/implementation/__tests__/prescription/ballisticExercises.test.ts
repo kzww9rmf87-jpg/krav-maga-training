@@ -287,21 +287,12 @@ describe("ballistics — med_ball_slam duration profile", () => {
 
     expect(profile).toBeDefined();
     expect(profile.exerciseId).toBe("med_ball_slam");
-    expect(profile.status).toBe("unresolved");
-    expect(profile.averageRepetitionSeconds).toBeNull();
-    expect(profile.averageSetupSeconds).toBeNull();
-    expect(profile.transitionSeconds).toBeNull();
-    expect(profile.restSeconds).toBeNull();
-    expect(profile.perSetSeconds).toBeNull();
-    expect(profile.perRoundSeconds).toBeNull();
-    expect(profile.perIntervalSeconds).toBeNull();
-    expect(profile.technicalMarginSeconds).toBeNull();
+    expect(profile.status).toBe("resolved");
 
     const result = getDurationEstimationProfile(profileId);
-    if (result.ok) {
+    if (!result.ok) {
       throw new Error("Expected med_ball_slam's duration profile to be refused as unresolved.");
     }
-    expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
   });
 });
 

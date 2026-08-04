@@ -170,13 +170,12 @@ describe("countermovement_jump — stop conditions", () => {
 });
 
 describe("countermovement_jump — duration estimation profile", () => {
-  test("has an unresolved profile sourced to its own chapter", () => {
+  test("has a resolved profile sourced to its own chapter", () => {
     const result = getDurationEstimationProfile("duration_profile_countermovement_jump");
-    if (result.ok) {
+    if (!result.ok) {
       throw new Error("Expected the duration profile to be unresolved.");
     }
-    expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
-    expect(result.profile?.sourceRuleIds).toEqual(["50-exercises/21_COUNTERMOVEMENT_JUMP"]);
+    expect(result.profile?.sourceRuleIds).toContain("50-exercises/21_COUNTERMOVEMENT_JUMP");
   });
 });
 
@@ -209,7 +208,7 @@ describe("countermovement_jump — distinct from other jumps", () => {
 
 describe("countermovement_jump — registry validation and non-regression", () => {
   test("the full registry validates with no new issue beyond the expected unresolved duration profiles", () => {
-    const issues = validatePilotRegistry().filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE");
+    const issues = validatePilotRegistry();
     expect(issues).toEqual([]);
   });
 

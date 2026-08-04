@@ -655,7 +655,6 @@ export interface ExerciseDefinition {
   evidenceLevel: EvidenceLevel;
   combatSportRelevance?: Partial<Record<CombatSport, Rating5>>;
   setupTimeMinutes?: number;
-  defaultExerciseDurationMinutes?: number;
   substitutionExerciseIds?: Identifier[];
 }
 

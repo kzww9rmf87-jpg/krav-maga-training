@@ -1,64 +1,73 @@
 /**
- * Combat Athlete System — Duration Estimation Profile Contract
+ * Combat Athlete System — Duration Estimation Coverage
  * Version 0.1
  *
- * Before this file, `ExercisePrescriptionCapabilities.durationEstimationProfileId`
- * was an opaque string (`"duration_profile_bench_press"`, ...) that only
- * ever had to be non-null — nothing in the pipeline resolved it to real
- * timing data, because no such data is documented anywhere in
- * `50-exercises/` or `20-engine/`.
+ * Which exercises the duration model covers, and under which volume
+ * structure.
  *
- * This file makes that gap explicit instead of hiding it behind a string.
- * A `DurationEstimationProfile` can represent, per documented volume
- * structure: average repetition time, average setup time, transition
- * time, rest time, per-set time, per-round time, per-interval time, and
- * an optional technical margin — but every pilot exercise's profile below
- * has every one of those fields set to `null` and `status: "unresolved"`,
- * because no source document gives real seconds for any of them. No
- * value here is invented. `getDurationEstimationProfile` refuses to
- * present an unresolved profile as usable — callers must check `status`
- * explicitly.
+ * THIS FILE HOLDS NO NUMBERS, on purpose. It used to declare a full set of
+ * per-exercise timing fields — average repetition seconds, setup, transition,
+ * per-set, per-round, per-interval, technical margin — every one of them
+ * `null`, because no source document gives them. That shape invited a second
+ * duration model to grow beside the real one, 75 independently-invented
+ * numbers deep.
+ *
+ * There is now exactly one duration model:
+ *
+ *   `durationEstimationModel.ts`      the engineering constants, one table
+ *   `estimatePrescriptionDuration.ts` the estimator, generic over structure
+ *                                     and method, reading the RESOLVED
+ *                                     prescription
+ *
+ * The estimator never reads this file. A profile here is a coverage record:
+ * it states that the exercise's prescription can be estimated, and names the
+ * volume structure it estimates under. `status: "resolved"` means exactly
+ * that — the exercise is covered — and no longer implies that per-exercise
+ * timing data was found, because none was and none was invented.
+ *
+ * The original refusal to fabricate timing data was right and is preserved.
+ * What changed is the recognition that most of a session's duration is not
+ * timing data at all: for 22 of the 75 entries the working time is a value
+ * the prescription itself resolves (a hold, a round, an interval), and the
+ * rest between efforts is prescribed for all 75. Only per-repetition time,
+ * per-metre time and setup remain genuinely undocumented, and those three
+ * live in one labelled engineering table rather than scattered here.
  */
 
 import type { Identifier } from "../types";
 import type { VolumeStructure } from "./types";
+import { SOURCE_DURATION_MODEL } from "./durationEstimationModel";
 
 export type DurationEstimationProfileStatus = "resolved" | "unresolved";
 
 export interface DurationEstimationProfile {
   profileId: Identifier;
   exerciseId: Identifier;
+  /**
+   * `"resolved"` means the duration model covers this exercise. It does NOT
+   * mean per-exercise timing data was found — see the file header.
+   */
   status: DurationEstimationProfileStatus;
+  /** The structure the estimator branches on for this exercise. */
   volumeStructure: VolumeStructure;
-  averageRepetitionSeconds: number | null;
-  averageSetupSeconds: number | null;
-  transitionSeconds: number | null;
-  restSeconds: number | null;
-  perSetSeconds: number | null;
-  perRoundSeconds: number | null;
-  perIntervalSeconds: number | null;
-  technicalMarginSeconds: number | null;
   sourceRuleIds: readonly Identifier[];
 }
 
-const unresolvedProfile = (
+/**
+ * A coverage record. `sourceRuleIds` names the exercise chapter the
+ * prescription was built from, plus the duration model that supplies
+ * whatever the chapter does not.
+ */
+const modelBackedProfile = (
   exerciseId: Identifier,
   volumeStructure: VolumeStructure,
   sourceRuleIds: readonly Identifier[],
 ): DurationEstimationProfile => ({
   profileId: `duration_profile_${exerciseId}`,
   exerciseId,
-  status: "unresolved",
+  status: "resolved",
   volumeStructure,
-  averageRepetitionSeconds: null,
-  averageSetupSeconds: null,
-  transitionSeconds: null,
-  restSeconds: null,
-  perSetSeconds: null,
-  perRoundSeconds: null,
-  perIntervalSeconds: null,
-  technicalMarginSeconds: null,
-  sourceRuleIds,
+  sourceRuleIds: [...sourceRuleIds, SOURCE_DURATION_MODEL],
 });
 
 /**
@@ -73,103 +82,103 @@ const unresolvedProfile = (
  * renaming.
  */
 const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
-  unresolvedProfile("bench_press", "sets_reps", ["50-exercises/07_BENCH_PRESS"]),
-  unresolvedProfile("back_squat", "sets_reps", ["50-exercises/01_BACK_SQUAT"]),
-  unresolvedProfile("trap_bar_deadlift", "sets_reps", ["50-exercises/03_TRAP_BAR_DEADLIFT"]),
-  unresolvedProfile("pull_up", "sets_reps", ["50-exercises/10_PULL_UP"]),
-  unresolvedProfile("farmer_carry", "sets_distance", ["50-exercises/66_CARRIES/10_FARMER_CARRY.md"]),
-  unresolvedProfile("pallof_press", "sets_duration", ["50-exercises/62_CORE/11_PALLOF_PRESS.md"]),
-  unresolvedProfile("box_jump", "sets_reps", ["50-exercises/63_PLYOMETRICS/10_BOX_JUMP.md"]),
+  modelBackedProfile("bench_press", "sets_reps", ["50-exercises/07_BENCH_PRESS"]),
+  modelBackedProfile("back_squat", "sets_reps", ["50-exercises/01_BACK_SQUAT"]),
+  modelBackedProfile("trap_bar_deadlift", "sets_reps", ["50-exercises/03_TRAP_BAR_DEADLIFT"]),
+  modelBackedProfile("pull_up", "sets_reps", ["50-exercises/10_PULL_UP"]),
+  modelBackedProfile("farmer_carry", "sets_distance", ["50-exercises/66_CARRIES/10_FARMER_CARRY.md"]),
+  modelBackedProfile("pallof_press", "sets_duration", ["50-exercises/62_CORE/11_PALLOF_PRESS.md"]),
+  modelBackedProfile("box_jump", "sets_reps", ["50-exercises/63_PLYOMETRICS/10_BOX_JUMP.md"]),
 
   // Force
-  unresolvedProfile("front_squat", "sets_reps", ["50-exercises/02_FRONT_SQUAT"]),
-  unresolvedProfile("romanian_deadlift", "sets_reps", ["50-exercises/04_ROMANIAN_DEADLIFT"]),
-  unresolvedProfile("overhead_press", "sets_reps", ["50-exercises/08_OVERHEAD_PRESS"]),
-  unresolvedProfile("bulgarian_split_squat", "sets_reps", ["50-exercises/06_BULGARIAN_SPLIT_SQUAT"]),
+  modelBackedProfile("front_squat", "sets_reps", ["50-exercises/02_FRONT_SQUAT"]),
+  modelBackedProfile("romanian_deadlift", "sets_reps", ["50-exercises/04_ROMANIAN_DEADLIFT"]),
+  modelBackedProfile("overhead_press", "sets_reps", ["50-exercises/08_OVERHEAD_PRESS"]),
+  modelBackedProfile("bulgarian_split_squat", "sets_reps", ["50-exercises/06_BULGARIAN_SPLIT_SQUAT"]),
 
   // Power
-  unresolvedProfile("push_press", "sets_reps", ["50-exercises/64_POWER/10_PUSH_PRESS.md"]),
-  unresolvedProfile("hang_high_pull", "sets_reps", ["50-exercises/64_POWER/11_HANG_HIGH_PULL.md"]),
-  unresolvedProfile("jump_shrug", "sets_reps", ["50-exercises/64_POWER/13_JUMP_SHRUG.md"]),
+  modelBackedProfile("push_press", "sets_reps", ["50-exercises/64_POWER/10_PUSH_PRESS.md"]),
+  modelBackedProfile("hang_high_pull", "sets_reps", ["50-exercises/64_POWER/11_HANG_HIGH_PULL.md"]),
+  modelBackedProfile("jump_shrug", "sets_reps", ["50-exercises/64_POWER/13_JUMP_SHRUG.md"]),
 
   // Core
-  unresolvedProfile("hollow_body_hold", "sets_duration", ["50-exercises/62_CORE/13_HOLLOW_BODY_HOLD.md"]),
-  unresolvedProfile("dragon_flag", "sets_duration", ["50-exercises/62_CORE/15_DRAGON_FLAG.md"]),
+  modelBackedProfile("hollow_body_hold", "sets_duration", ["50-exercises/62_CORE/13_HOLLOW_BODY_HOLD.md"]),
+  modelBackedProfile("dragon_flag", "sets_duration", ["50-exercises/62_CORE/15_DRAGON_FLAG.md"]),
 
   // Carries / Grip
-  unresolvedProfile("front_rack_carry", "sets_distance", ["50-exercises/66_CARRIES/11_FRONT_RACK_CARRY.md"]),
-  unresolvedProfile("sandbag_carry", "sets_distance", ["50-exercises/66_CARRIES/12_SANDBAG_CARRY.md"]),
-  unresolvedProfile("zercher_carry", "sets_distance", ["50-exercises/66_CARRIES/13_ZERCHER_CARRY.md"]),
-  unresolvedProfile("suitcase_carry", "sets_distance", ["50-exercises/62_CORE/17_SUITCASE_CARRY.md"]),
-  unresolvedProfile("overhead_carry", "sets_distance", ["50-exercises/62_CORE/18_OVERHEAD_CARRY.md"]),
-  unresolvedProfile("pinch_carry", "sets_distance", ["50-exercises/65_GRIP/12_PINCH_CARRY.md"]),
+  modelBackedProfile("front_rack_carry", "sets_distance", ["50-exercises/66_CARRIES/11_FRONT_RACK_CARRY.md"]),
+  modelBackedProfile("sandbag_carry", "sets_distance", ["50-exercises/66_CARRIES/12_SANDBAG_CARRY.md"]),
+  modelBackedProfile("zercher_carry", "sets_distance", ["50-exercises/66_CARRIES/13_ZERCHER_CARRY.md"]),
+  modelBackedProfile("suitcase_carry", "sets_distance", ["50-exercises/62_CORE/17_SUITCASE_CARRY.md"]),
+  modelBackedProfile("overhead_carry", "sets_distance", ["50-exercises/62_CORE/18_OVERHEAD_CARRY.md"]),
+  modelBackedProfile("pinch_carry", "sets_distance", ["50-exercises/65_GRIP/12_PINCH_CARRY.md"]),
 
   // Plyometrics
-  unresolvedProfile("depth_jump", "sets_reps", ["50-exercises/63_PLYOMETRICS/11_DEPTH_JUMP.md"]),
-  unresolvedProfile("broad_jump", "sets_reps", ["50-exercises/63_PLYOMETRICS/12_BROAD_JUMP.md"]),
-  unresolvedProfile("knee_jump", "sets_reps", ["50-exercises/63_PLYOMETRICS/13_KNEE_JUMP.md"]),
-  unresolvedProfile("lateral_bound", "sets_reps", ["50-exercises/63_PLYOMETRICS/14_LATERAL_BOUND.md"]),
-  unresolvedProfile("single_leg_hop", "sets_reps", ["50-exercises/63_PLYOMETRICS/15_SINGLE_LEG_HOP.md"]),
-  unresolvedProfile("split_squat_jump", "sets_reps", ["50-exercises/63_PLYOMETRICS/16_SPLIT_SQUAT_JUMP.md"]),
+  modelBackedProfile("depth_jump", "sets_reps", ["50-exercises/63_PLYOMETRICS/11_DEPTH_JUMP.md"]),
+  modelBackedProfile("broad_jump", "sets_reps", ["50-exercises/63_PLYOMETRICS/12_BROAD_JUMP.md"]),
+  modelBackedProfile("knee_jump", "sets_reps", ["50-exercises/63_PLYOMETRICS/13_KNEE_JUMP.md"]),
+  modelBackedProfile("lateral_bound", "sets_reps", ["50-exercises/63_PLYOMETRICS/14_LATERAL_BOUND.md"]),
+  modelBackedProfile("single_leg_hop", "sets_reps", ["50-exercises/63_PLYOMETRICS/15_SINGLE_LEG_HOP.md"]),
+  modelBackedProfile("split_squat_jump", "sets_reps", ["50-exercises/63_PLYOMETRICS/16_SPLIT_SQUAT_JUMP.md"]),
 
   // Ballistics
-  unresolvedProfile("med_ball_slam", "sets_reps", ["50-exercises/67_BALLISTICS/14_MED_BALL_SLAM.md"]),
-  unresolvedProfile("med_ball_chest_pass", "sets_reps", ["50-exercises/67_BALLISTICS/10_MED_BALL_CHEST_PASS.md"]),
-  unresolvedProfile("med_ball_overhead_throw", "sets_reps", [
+  modelBackedProfile("med_ball_slam", "sets_reps", ["50-exercises/67_BALLISTICS/14_MED_BALL_SLAM.md"]),
+  modelBackedProfile("med_ball_chest_pass", "sets_reps", ["50-exercises/67_BALLISTICS/10_MED_BALL_CHEST_PASS.md"]),
+  modelBackedProfile("med_ball_overhead_throw", "sets_reps", [
     "50-exercises/67_BALLISTICS/11_MED_BALL_OVERHEAD_THROW.md",
   ]),
-  unresolvedProfile("med_ball_shot_put_throw", "sets_reps", [
+  modelBackedProfile("med_ball_shot_put_throw", "sets_reps", [
     "50-exercises/67_BALLISTICS/15_MED_BALL_SHOT_PUT_THROW.md",
   ]),
-  unresolvedProfile("med_ball_reverse_throw", "sets_reps", [
+  modelBackedProfile("med_ball_reverse_throw", "sets_reps", [
     "50-exercises/67_BALLISTICS/16_MED_BALL_REVERSE_THROW.md",
   ]),
-  unresolvedProfile("med_ball_rotational_throw", "sets_reps", [
+  modelBackedProfile("med_ball_rotational_throw", "sets_reps", [
     "50-exercises/67_BALLISTICS/12_MED_BALL_ROTATIONAL_THROW.md",
   ]),
-  unresolvedProfile("med_ball_scoop_toss", "sets_reps", [
+  modelBackedProfile("med_ball_scoop_toss", "sets_reps", [
     "50-exercises/67_BALLISTICS/13_MED_BALL_SCOOP_TOSS.md",
   ]),
 
   // Robustness
-  unresolvedProfile("tibialis_raise", "sets_reps", ["50-exercises/41_TIBIALIS_RAISE"]),
-  unresolvedProfile("rotator_cuff_training", "sets_reps", ["50-exercises/42_ROTATOR_CUFF_TRAINING"]),
-  unresolvedProfile("wrist_strengthening", "sets_reps", ["50-exercises/43_WRIST_STRENGTHENING"]),
-  unresolvedProfile("soleus_raise", "sets_reps", ["50-exercises/44_SOLEUS_RAISE"]),
+  modelBackedProfile("tibialis_raise", "sets_reps", ["50-exercises/41_TIBIALIS_RAISE"]),
+  modelBackedProfile("rotator_cuff_training", "sets_reps", ["50-exercises/42_ROTATOR_CUFF_TRAINING"]),
+  modelBackedProfile("wrist_strengthening", "sets_reps", ["50-exercises/43_WRIST_STRENGTHENING"]),
+  modelBackedProfile("soleus_raise", "sets_reps", ["50-exercises/44_SOLEUS_RAISE"]),
 
   // Force/Tirage — first unblocked sub-lot
-  unresolvedProfile("countermovement_jump", "sets_reps", ["50-exercises/21_COUNTERMOVEMENT_JUMP"]),
+  modelBackedProfile("countermovement_jump", "sets_reps", ["50-exercises/21_COUNTERMOVEMENT_JUMP"]),
 
-  unresolvedProfile("copenhagen_plank", "sets_duration", ["50-exercises/19_COPENHAGEN_PLANK"]),
+  modelBackedProfile("copenhagen_plank", "sets_duration", ["50-exercises/19_COPENHAGEN_PLANK"]),
 
   // Force/Tirage — strength_accessory_straight_sets_v0_1 batch
-  unresolvedProfile("hip_thrust", "sets_reps", ["50-exercises/05_HIP_THRUST"]),
-  unresolvedProfile("chin_up", "sets_reps", ["50-exercises/11_CHIN_UP"]),
-  unresolvedProfile("barbell_row", "sets_reps", ["50-exercises/12_BARBELL_ROW"]),
+  modelBackedProfile("hip_thrust", "sets_reps", ["50-exercises/05_HIP_THRUST"]),
+  modelBackedProfile("chin_up", "sets_reps", ["50-exercises/11_CHIN_UP"]),
+  modelBackedProfile("barbell_row", "sets_reps", ["50-exercises/12_BARBELL_ROW"]),
 
   // Registry Lot 1 — Strength immediate
-  unresolvedProfile("chest_supported_row", "sets_reps", ["50-exercises/13_CHEST_SUPPORTED_ROW"]),
-  unresolvedProfile("dip", "sets_reps", ["50-exercises/14_DIP"]),
-  unresolvedProfile("landmine_press", "sets_reps", ["50-exercises/26_LANDMINE_PRESS"]),
-  unresolvedProfile("weighted_pull_up", "sets_reps", ["50-exercises/09_WEIGHTED_PULL_UP"]),
-  unresolvedProfile("neck_training", "sets_reps", ["50-exercises/34_NECK_TRAINING"]),
-  unresolvedProfile("nordic_hamstring_curl", "sets_reps", ["50-exercises/18_NORDIC_HAMSTRING_CURL"]),
+  modelBackedProfile("chest_supported_row", "sets_reps", ["50-exercises/13_CHEST_SUPPORTED_ROW"]),
+  modelBackedProfile("dip", "sets_reps", ["50-exercises/14_DIP"]),
+  modelBackedProfile("landmine_press", "sets_reps", ["50-exercises/26_LANDMINE_PRESS"]),
+  modelBackedProfile("weighted_pull_up", "sets_reps", ["50-exercises/09_WEIGHTED_PULL_UP"]),
+  modelBackedProfile("neck_training", "sets_reps", ["50-exercises/34_NECK_TRAINING"]),
+  modelBackedProfile("nordic_hamstring_curl", "sets_reps", ["50-exercises/18_NORDIC_HAMSTRING_CURL"]),
 
   // Registry Lot 2 — Power immediate (sled_push not integrated this lot; no
   // duration profile added for it)
-  unresolvedProfile("hang_power_clean", "sets_reps", ["50-exercises/64_POWER/12_HANG_POWER_CLEAN.md"]),
+  modelBackedProfile("hang_power_clean", "sets_reps", ["50-exercises/64_POWER/12_HANG_POWER_CLEAN.md"]),
 
   // Registry Lot 3 — Movement immediate
-  unresolvedProfile("bear_crawl", "sets_duration", ["50-exercises/37_BEAR_CRAWL"]),
-  unresolvedProfile("bridging", "sets_duration", ["50-exercises/39_BRIDGING"]),
-  unresolvedProfile("footwork_drills", "sets_duration", ["50-exercises/29_FOOTWORK_DRILLS"]),
-  unresolvedProfile("shadow_boxing", "sets_duration", ["50-exercises/28_SHADOW_BOXING"]),
-  unresolvedProfile("technical_stand_up", "sets_duration", ["50-exercises/35_TECHNICAL_STAND_UP"]),
-  unresolvedProfile("shrimping", "sets_duration", ["50-exercises/38_SHRIMPING"]),
+  modelBackedProfile("bear_crawl", "sets_duration", ["50-exercises/37_BEAR_CRAWL"]),
+  modelBackedProfile("bridging", "sets_duration", ["50-exercises/39_BRIDGING"]),
+  modelBackedProfile("footwork_drills", "sets_duration", ["50-exercises/29_FOOTWORK_DRILLS"]),
+  modelBackedProfile("shadow_boxing", "sets_duration", ["50-exercises/28_SHADOW_BOXING"]),
+  modelBackedProfile("technical_stand_up", "sets_duration", ["50-exercises/35_TECHNICAL_STAND_UP"]),
+  modelBackedProfile("shrimping", "sets_duration", ["50-exercises/38_SHRIMPING"]),
 
   // Registry Lot 4 — Combat movement immediate
-  unresolvedProfile("sprawl", "sets_duration", ["50-exercises/30_SPRAWL"]),
-  unresolvedProfile("shot_entries", "sets_duration", ["50-exercises/36_SHOT_ENTRIES"]),
+  modelBackedProfile("sprawl", "sets_duration", ["50-exercises/30_SPRAWL"]),
+  modelBackedProfile("shot_entries", "sets_duration", ["50-exercises/36_SHOT_ENTRIES"]),
 
   // Registry Lot 5 — Conditioning intervals (first `intervals` structure).
   //
@@ -180,7 +189,7 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // duration ESTIMATE needs. Deriving a total session duration by
   // multiplying the prescribed intervals is not estimation from documented
   // timing data, and is not done here.
-  unresolvedProfile("rowerg_intervals", "intervals", ["50-exercises/49_ROWERG_INTERVALS"]),
+  modelBackedProfile("rowerg_intervals", "intervals", ["50-exercises/49_ROWERG_INTERVALS"]),
 
   // Registry Lot 6 — Sprint intervals.
   //
@@ -192,7 +201,7 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // ESTIMATE, while the prescribed rest is resolved separately from the
   // numerical profile. Multiplying intervals by their duration to invent a
   // session length is not estimation from documented timing data.
-  unresolvedProfile("sprint_intervals", "intervals", ["50-exercises/47_SPRINT_INTERVALS"]),
+  modelBackedProfile("sprint_intervals", "intervals", ["50-exercises/47_SPRINT_INTERVALS"]),
 
   // Registry Lot 7 — Core repetition work (first `core` +
   // `straight_sets_repetitions` entry).
@@ -206,7 +215,7 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // `averageRepetitionSeconds` would be choosing a tempo the prescription
   // never selects — the numerical profile encodes `global_intent:
   // controlled`, not a phase timing. No value is derived from them here.
-  unresolvedProfile("ab_wheel", "sets_reps", ["50-exercises/62_CORE/10_AB_WHEEL.md"]),
+  modelBackedProfile("ab_wheel", "sets_reps", ["50-exercises/62_CORE/10_AB_WHEEL.md"]),
 
   // Registry Lot 8 — second Core repetition entry.
   //
@@ -219,7 +228,7 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // prescription does not select (the profile encodes `global_intent:
   // controlled`). Deriving seconds per repetition from them, then a total
   // from the repetition count, would be inventing timing data twice over.
-  unresolvedProfile("dead_bug", "sets_reps", ["50-exercises/62_CORE/12_DEAD_BUG.md"]),
+  modelBackedProfile("dead_bug", "sets_reps", ["50-exercises/62_CORE/12_DEAD_BUG.md"]),
 
   // Registry Lot 9 — third Core repetition entry.
   //
@@ -238,7 +247,7 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // alone would leave a profile that is half-real and still unusable, since
   // `getDurationEstimationProfile` refuses anything but a fully resolved
   // one. The honest state is unresolved until a documented model exists.
-  unresolvedProfile("hanging_leg_raise", "sets_reps", ["50-exercises/62_CORE/14_HANGING_LEG_RAISE.md"]),
+  modelBackedProfile("hanging_leg_raise", "sets_reps", ["50-exercises/62_CORE/14_HANGING_LEG_RAISE.md"]),
 
   // Registry Lot 10 — first Grip isometric entry.
   //
@@ -251,7 +260,7 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // them: no setup duration, nothing for aligning the plates, nothing for
   // the change between hands. Copying the prescribed hold into
   // `perSetSeconds` would restate a prescription as an estimate.
-  unresolvedProfile("plate_pinch", "sets_duration", ["50-exercises/65_GRIP/11_PLATE_PINCH.md"]),
+  modelBackedProfile("plate_pinch", "sets_duration", ["50-exercises/65_GRIP/11_PLATE_PINCH.md"]),
 
   // Registry Lot 11 — first combat bag entry.
   //
@@ -264,7 +273,7 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // time, no technical margin. Deriving a session duration by summing
   // work and recovery would understate it by exactly the preparation this
   // exercise demands most.
-  unresolvedProfile("heavy_bag_power_intervals", "intervals", ["50-exercises/27_HEAVY_BAG_POWER_INTERVALS"]),
+  modelBackedProfile("heavy_bag_power_intervals", "intervals", ["50-exercises/27_HEAVY_BAG_POWER_INTERVALS"]),
 
   // Registry Lot 12 — second battle-rope-family entry.
   //
@@ -279,7 +288,7 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // restate a prescription as an estimate. "Frequency: 1-3 sessions/week"
   // and "Typical Recovery: 24 hours" are planning-layer figures, not
   // session timing.
-  unresolvedProfile("battle_ropes", "intervals", ["50-exercises/46_BATTLE_ROPES.md"]),
+  modelBackedProfile("battle_ropes", "intervals", ["50-exercises/46_BATTLE_ROPES.md"]),
 
   // Registry Lot 13 — air-bike intervals, the last conditioning modality.
   //
@@ -293,7 +302,7 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // ignore the warm-up this fiche names as a documented risk.
   // "Frequency: 1-3 sessions/week" is a planning-layer figure, not session
   // timing.
-  unresolvedProfile("assault_bike_intervals", "intervals", ["50-exercises/48_ASSAULT_BIKE_INTERVALS"]),
+  modelBackedProfile("assault_bike_intervals", "intervals", ["50-exercises/48_ASSAULT_BIKE_INTERVALS"]),
 
   // Registry Lot 14 — first Grip repetition entry.
   //
@@ -306,7 +315,7 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // Multiplying repetitions by the eccentric duration would restate a
   // prescription as an estimate, and would ignore the setup this exercise
   // demands most: confirming the bar and the towel before every set.
-  unresolvedProfile("towel_pull_up", "sets_reps", ["50-exercises/65_GRIP/10_TOWEL_PULL_UP.md"]),
+  modelBackedProfile("towel_pull_up", "sets_reps", ["50-exercises/65_GRIP/10_TOWEL_PULL_UP.md"]),
 
   // Registry Lot 15 — the two rope entries.
   //
@@ -319,8 +328,8 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // documented distance and duration are prescription VARIABLES of those
   // exercises, not session timing, and deriving a duration from them would
   // convert one unrepresented unit into another.
-  unresolvedProfile("rope_climb", "sets_reps", ["50-exercises/65_GRIP/13_ROPE_CLIMB.md"]),
-  unresolvedProfile("rope_pull", "sets_reps", ["50-exercises/65_GRIP/14_ROPE_PULL.md"]),
+  modelBackedProfile("rope_climb", "sets_reps", ["50-exercises/65_GRIP/13_ROPE_CLIMB.md"]),
+  modelBackedProfile("rope_pull", "sets_reps", ["50-exercises/65_GRIP/14_ROPE_PULL.md"]),
 
   // Registry Lot 20 — the three partner grappling drills.
   //
@@ -339,9 +348,9 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // back-filled from the prescribed round duration: that would restate a
   // prescription as an estimate, the error already refused for towel_pull_up
   // and the two rope entries.
-  unresolvedProfile("pummeling", "rounds_duration", ["50-exercises/31_PUMMELING"]),
-  unresolvedProfile("wall_wrestling", "rounds_duration", ["50-exercises/32_WALL_WRESTLING"]),
-  unresolvedProfile("grip_fighting", "rounds_duration", ["50-exercises/33_GRIP_FIGHTING"]),
+  modelBackedProfile("pummeling", "rounds_duration", ["50-exercises/31_PUMMELING"]),
+  modelBackedProfile("wall_wrestling", "rounds_duration", ["50-exercises/32_WALL_WRESTLING"]),
+  modelBackedProfile("grip_fighting", "rounds_duration", ["50-exercises/33_GRIP_FIGHTING"]),
 
   // Registry Lot 21 — the first loaded locomotion entry.
   //
@@ -358,7 +367,7 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // verify the surface, the time to walk it back to the start between
   // efforts — which for a 40 m push is a real and unavoidable cost — and any
   // technical margin. None of them is documented, and none is invented.
-  unresolvedProfile("sled_push", "intervals", ["50-exercises/17_SLED_PUSH"]),
+  modelBackedProfile("sled_push", "intervals", ["50-exercises/17_SLED_PUSH"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(
@@ -372,10 +381,10 @@ export type DurationEstimationProfileResult =
   | { ok: false; failureCode: DurationEstimationProfileFailureCode; profile: DurationEstimationProfile | null };
 
 /**
- * Returns the profile only when it exists AND is `"resolved"`. An
- * `"unresolved"` profile is never returned as `ok: true` — the caller
- * still gets the profile object (for inspection/reporting) but must not
- * treat it as usable timing data.
+ * Returns the profile only when it exists AND is `"resolved"`, i.e. when the
+ * duration model covers the exercise. An `"unresolved"` profile is never
+ * returned as `ok: true`; the caller still receives the object for
+ * reporting but must not treat the exercise as estimable.
  */
 export function getDurationEstimationProfile(profileId: Identifier): DurationEstimationProfileResult {
   const profile = DURATION_ESTIMATION_PROFILES[profileId];

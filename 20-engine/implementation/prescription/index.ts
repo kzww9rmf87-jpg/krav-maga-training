@@ -40,6 +40,8 @@ export * from "./deriveRangeContext";
 export * from "./deriveAthleteReferences";
 export * from "./athleteReferenceCatalog";
 export * from "./durationEstimationProfiles";
+export * from "./durationEstimationModel";
+export * from "./estimatePrescriptionDuration";
 export * from "./sourceRuleIdentifiers";
 
 // Pilot exercise prescription registry (vertical slice)

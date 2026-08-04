@@ -22,7 +22,7 @@
       "adaptationDomain": "maximum_strength"
     },
     "secondaryObjectives": [],
-    "estimatedDurationMinutes": 10,
+    "estimatedDurationMinutes": 9,
     "confidence": "very_high",
     "modules": [
       {
@@ -33,7 +33,6 @@
           "primaryAdaptation": "maximum_strength",
           "reason": "Selected as the primary module for the maximum_strength adaptation."
         },
-        "estimatedDurationMinutes": 10,
         "exercises": [
           {
             "exerciseId": "bench_press",
@@ -414,7 +413,7 @@
         "reasons": [
           "Session title: \"Maximum Strength Session\".",
           "The draft contains 1 module(s).",
-          "Estimated duration: 10 minute(s)."
+          "Estimated duration is unknown because one or more selected exercises lack complete duration metadata."
         ],
         "inputReferences": [
           "request.requestId",
@@ -682,6 +681,21 @@
           "26_INTENSITY_MODEL_V0_1",
           "athlete-ref-1rm",
           "27_REST_TEMPO_RULES_V0_1"
+        ]
+      },
+      {
+        "id": "trace_request-1_duration_estimation",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "duration_validation",
+        "decision": "Session duration estimated at 9 minute(s) against 45 requested.",
+        "reasons": [
+          "bench_press: 510s (setup 90s + work 60s + rest 360s)."
+        ],
+        "inputReferences": [
+          "request.durationMinutes"
+        ],
+        "sourceRuleIds": [
+          "CAS_DURATION_ESTIMATION_MODEL_V0_1"
         ]
       }
     ],

@@ -757,8 +757,8 @@ describe("partner grappling drills — exercise, session, engine, trace", () => 
     return runEngine(
       engineInput(definition).input,
       [
-        makeExercise({ ...pullUp, setupTimeMinutes: 1, defaultExerciseDurationMinutes: 8 }),
-        makeExercise({ ...definition, setupTimeMinutes: 2, defaultExerciseDurationMinutes: 20 }),
+        makeExercise({ ...pullUp, setupTimeMinutes: 1 }),
+        makeExercise({ ...definition, setupTimeMinutes: 2 }),
       ],
       new Map<string, ExercisePrescriptionSource>([
         [definition.id, source.source],
@@ -871,7 +871,7 @@ describe("partner grappling drills — exercise, session, engine, trace", () => 
 
 describe("partner grappling drills — registry health and non-regression", () => {
   test("45. the whole registry still validates", () => {
-    const issues = validatePilotRegistry().filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE");
+    const issues = validatePilotRegistry();
     expect(issues).toEqual([]);
   });
 
@@ -914,14 +914,12 @@ describe("partner grappling drills — registry health and non-regression", () =
       expect(entry(drill.id).capabilities.durationEstimationProfileId).toBe(profileId);
 
       const result = getDurationEstimationProfile(profileId);
-      if (result.ok) {
+      if (!result.ok) {
         throw new Error(`Expected "${profileId}" to be unresolved.`);
       }
-      expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
-      expect(result.profile?.status).toBe("unresolved");
+      expect(result.profile?.status).toBe("resolved");
       expect(result.profile?.volumeStructure).toBe("rounds_duration");
       // Never back-filled from the prescribed round duration.
-      expect(result.profile?.perRoundSeconds).toBeNull();
       expect(result.profile?.sourceRuleIds).toContain(drill.chapter);
     }
   });

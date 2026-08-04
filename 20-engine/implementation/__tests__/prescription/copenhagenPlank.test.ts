@@ -259,14 +259,13 @@ describe("copenhagen_plank — stop conditions", () => {
 });
 
 describe("copenhagen_plank — duration estimation profile", () => {
-  test("has an unresolved profile sourced to its own chapter, sets_duration structure", () => {
+  test("has a resolved profile sourced to its own chapter, sets_duration structure", () => {
     const result = getDurationEstimationProfile("duration_profile_copenhagen_plank");
-    if (result.ok) {
+    if (!result.ok) {
       throw new Error("Expected the duration profile to be unresolved.");
     }
-    expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
     expect(result.profile?.volumeStructure).toBe("sets_duration");
-    expect(result.profile?.sourceRuleIds).toEqual(["50-exercises/19_COPENHAGEN_PLANK"]);
+    expect(result.profile?.sourceRuleIds).toContain("50-exercises/19_COPENHAGEN_PLANK");
   });
 });
 
@@ -300,7 +299,7 @@ describe("copenhagen_plank — distinct from pallof_press and hollow_body_hold",
 
 describe("copenhagen_plank — registry validation and non-regression", () => {
   test("the full registry validates with no new issue beyond the expected unresolved duration profiles", () => {
-    const issues = validatePilotRegistry().filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE");
+    const issues = validatePilotRegistry();
     expect(issues).toEqual([]);
   });
 

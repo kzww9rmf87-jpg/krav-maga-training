@@ -24,6 +24,7 @@ import {
   makeEnvironment,
   makeExercise,
   makeMedicalState,
+  makeReadiness,
   makeRequest,
   makeValidInput,
 } from "./fixtures";
@@ -112,9 +113,10 @@ describe("runEngine", () => {
     expect(result.conflicts.length).toBe(0);
     expect(result.conflictResolutions.length).toBe(0);
 
-    expect(result.sessionDraft.estimatedDurationMinutes).toBe(
-      (exercise.setupTimeMinutes ?? 0) + (exercise.defaultExerciseDurationMinutes ?? 0),
-    );
+    // Duration is estimated from the prescription. This synthetic exercise
+    // has no registry entry, so there is no dose to time and the engine
+    // reports no duration rather than inventing one.
+    expect(result.sessionDraft.estimatedDurationMinutes).toBeUndefined();
     expect(result.sessionDraft.confidence).toBe(selectedCandidates[0].scoredExercise.confidence);
 
     // Prescription now runs on every draft (see `runEngine`'s own
@@ -134,8 +136,30 @@ describe("runEngine", () => {
   });
 
   test("5. an exercise whose total duration exceeds the requested duration produces a duration_session conflict", () => {
-    const input = makeValidInput({ request: makeRequest({ durationMinutes: 10 }) });
-    const exercise = makeExercise({ setupTimeMinutes: 30, defaultExerciseDurationMinutes: 30 });
+    // A REAL registry exercise, so the duration comes from a real
+    // prescription. Before the duration model existed this conflict was
+    // unreachable in production: every estimate was undefined and
+    // `detectDurationConflict` returned early.
+    const exercise = EXERCISE_KNOWLEDGE_BASE.find((entry) => entry.id === "pummeling");
+    if (exercise === undefined) {
+      throw new Error("pummeling is expected to exist in the knowledge base.");
+    }
+    const input = makeValidInput({
+      // A combat athlete: without a primary combat sport this exercise's
+      // transfer value is neutral and it falls below the selection threshold.
+      athleteProfile: makeAthleteProfile({
+        experience: { generalTrainingLevel: "intermediate", primaryCombatSport: "krav_maga" },
+      }),
+      readiness: makeReadiness(),
+      environment: {
+        locationType: "combat_club",
+        availableEquipment: [{ type: "bodyweight" }, { type: "mat" }],
+        availableSpace: "large",
+        floorSafe: true,
+        partnerAvailable: true,
+      },
+      request: makeRequest({ durationMinutes: 15, primaryObjective: { adaptationDomain: "movement" } }),
+    });
 
     const result = runEngine(input, [exercise]);
 
@@ -233,7 +257,6 @@ describe("runEngine", () => {
     const exerciseB = makeExercise({
       id: "exercise-b",
       setupTimeMinutes: 3,
-      defaultExerciseDurationMinutes: 9,
       fatigueProfile: {
         types: [],
         neural: 2,
@@ -292,9 +315,7 @@ describe("runEngine", () => {
     );
     expect(remainingRecoveryConflict).toBeUndefined();
 
-    expect(result.sessionDraft.estimatedDurationMinutes).toBe(
-      (exerciseB.setupTimeMinutes ?? 0) + (exerciseB.defaultExerciseDurationMinutes ?? 0),
-    );
+    expect(result.sessionDraft.estimatedDurationMinutes).toBeUndefined();
     expect(result.sessionDraft.confidence).toBe(scoredB.confidence);
 
     const resolutionEntry = result.decisionTrace.entries.find((entry) => entry.stage === "conflict_resolution");
@@ -317,7 +338,6 @@ describe("runEngine", () => {
     const exerciseB = makeExercise({
       id: "exercise-b",
       setupTimeMinutes: 3,
-      defaultExerciseDurationMinutes: 9,
       fatigueProfile: {
         types: ["grip"],
         neural: 2,
@@ -383,7 +403,6 @@ describe("runEngine", () => {
     const exerciseB = makeExercise({
       id: "exercise-b",
       setupTimeMinutes: 3,
-      defaultExerciseDurationMinutes: 9,
       fatigueProfile: {
         types: [],
         neural: 2,

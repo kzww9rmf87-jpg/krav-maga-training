@@ -937,7 +937,7 @@ describe("Partner Grappling Rounds — genericity and non-regression", () => {
 
   test("35. the whole registry still validates, and every previously resolvable triple still resolves", () => {
     expect(
-      validatePilotRegistry().filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE"),
+      validatePilotRegistry(),
     ).toEqual([]);
 
     for (const otherProfile of NUMERICAL_PRESCRIPTION_PROFILES) {

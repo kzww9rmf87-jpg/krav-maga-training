@@ -556,8 +556,8 @@ describe("rope entries — session, engine and non-regression", () => {
     const result = runEngine(
       input,
       [
-        makeExercise({ ...pullUp, setupTimeMinutes: 1, defaultExerciseDurationMinutes: 8 }),
-        makeExercise({ ...ROPE_PULL, setupTimeMinutes: 3, defaultExerciseDurationMinutes: 12 }),
+        makeExercise({ ...pullUp, setupTimeMinutes: 1 }),
+        makeExercise({ ...ROPE_PULL, setupTimeMinutes: 3 }),
       ],
       new Map<string, ExercisePrescriptionSource>([
         [PULL.id, climbSource.source],
@@ -599,17 +599,16 @@ describe("rope entries — session, engine and non-regression", () => {
     }
   });
 
-  test("29. validatePilotRegistry is clean, and both duration profiles are unresolved", () => {
+  test("29. validatePilotRegistry is clean, and both duration profiles are resolved", () => {
     const issues = validatePilotRegistry();
-    expect(issues.filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE")).toEqual([]);
+    expect(issues).toEqual([]);
 
     for (const { id, chapter } of BOTH) {
       const result = getDurationEstimationProfile(`duration_profile_${id}`);
-      expect(result.ok, id).toBe(false);
       if (!result.ok) {
-        expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
-        expect(result.profile?.sourceRuleIds).toContain(chapter);
+        throw new Error(`Expected the duration profile for "${id}" to be resolved.`);
       }
+      expect(result.profile.sourceRuleIds).toContain(chapter);
     }
   });
 

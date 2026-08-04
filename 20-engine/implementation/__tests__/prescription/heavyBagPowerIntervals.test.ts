@@ -578,17 +578,15 @@ describe("heavy_bag_power_intervals — stop conditions and instructions", () =>
 describe("heavy_bag_power_intervals — validation, trace and end to end", () => {
   test("32. the registry validator reports nothing but the known unresolved duration profile", () => {
     const issues = validatePilotRegistry();
-    expect(issues.filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE")).toEqual([]);
-    expect(issues.some((issue) => issue.exerciseId === EXERCISE_ID)).toBe(true);
+    expect(issues).toEqual([]);
   });
 
-  test("33. the duration estimation profile is unresolved by convention and refuses to be used", () => {
+  test("33. the duration estimation profile is resolved and usable", () => {
     const result = getDurationEstimationProfile("duration_profile_heavy_bag_power_intervals");
-    expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
-      expect(result.profile?.sourceRuleIds).toContain(SOURCE_CHAPTER);
+      throw new Error("Expected the duration profile to be resolved.");
     }
+    expect(result.profile.sourceRuleIds).toContain(SOURCE_CHAPTER);
   });
 
   test("34. the decision trace names the profile, the explicit selection and both narrowings", () => {
@@ -687,7 +685,6 @@ describe("heavy_bag_power_intervals — validation, trace and end to end", () =>
     const exercise = makeExercise({
       ...HEAVY_BAG_POWER_INTERVALS,
       setupTimeMinutes: 5,
-      defaultExerciseDurationMinutes: 20,
     });
 
     const sourceResult = getExercisePrescriptionSource(EXERCISE_ID, VALID_CONTEXT);

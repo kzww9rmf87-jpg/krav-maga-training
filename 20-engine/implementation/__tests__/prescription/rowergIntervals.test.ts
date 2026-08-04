@@ -608,7 +608,6 @@ describe("rowerg_intervals — end-to-end prescription", () => {
     const exercise = makeExercise({
       ...ROWERG_INTERVALS,
       setupTimeMinutes: 2,
-      defaultExerciseDurationMinutes: 15,
     });
 
     const sourceResult = getExercisePrescriptionSource(EXERCISE_ID, VALID_CONTEXT);
@@ -720,24 +719,21 @@ describe("rowerg_intervals — determinism, non-mutation and non-regression", ()
     }
   });
 
-  test("27. the full registry validates with no blocking issue beyond the expected unresolved duration profiles", () => {
-    const issues = validatePilotRegistry();
-    expect(issues.filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE")).toEqual([]);
-
-    // Every entry, including the new one, reports exactly that one
-    // non-fatal gap — no more, no fewer.
-    expect(issues).toHaveLength(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).length);
-    expect(issues.some((issue) => issue.exerciseId === EXERCISE_ID)).toBe(true);
+  test("27. the full registry validates with no issue at all", () => {
+    // Every entry used to report one non-fatal UNRESOLVED_DURATION_PROFILE
+    // gap. The duration model now covers all of them, so the registry
+    // validates clean.
+    expect(validatePilotRegistry()).toEqual([]);
 
     const durationProfile = getDurationEstimationProfile(`duration_profile_${EXERCISE_ID}`);
-    if (durationProfile.ok) {
-      throw new Error("Expected the rowerg_intervals duration profile to be unresolved.");
+    if (!durationProfile.ok) {
+      throw new Error(`Expected the rowerg_intervals duration profile to be resolved, got ${durationProfile.failureCode}.`);
     }
-    expect(durationProfile.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
-    expect(durationProfile.profile?.volumeStructure).toBe("intervals");
-    expect(durationProfile.profile?.sourceRuleIds).toEqual([SOURCE_CHAPTER]);
-    // No timing value was invented to fill the gap.
-    expect(durationProfile.profile?.perIntervalSeconds).toBeNull();
-    expect(durationProfile.profile?.restSeconds).toBeNull();
+    expect(durationProfile.profile.volumeStructure).toBe("intervals");
+    // The chapter still sources the prescription; the duration model is
+    // named alongside it because setup time is its decision, not the
+    // chapter's.
+    expect(durationProfile.profile.sourceRuleIds).toContain(SOURCE_CHAPTER);
+    expect(durationProfile.profile.sourceRuleIds).toContain("CAS_DURATION_ESTIMATION_MODEL_V0_1");
   });
 });

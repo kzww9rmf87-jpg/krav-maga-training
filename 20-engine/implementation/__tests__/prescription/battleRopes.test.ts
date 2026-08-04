@@ -660,7 +660,6 @@ describe("battle_ropes — prescription, session, engine and trace", () => {
     const exercise = makeExercise({
       ...BATTLE_ROPES,
       setupTimeMinutes: 5,
-      defaultExerciseDurationMinutes: 20,
     });
 
     const sourceResult = getExercisePrescriptionSource(EXERCISE_ID, VALID_CONTEXT);
@@ -736,8 +735,7 @@ describe("battle_ropes — determinism, validation and non-regression", () => {
 
   test("34. validatePilotRegistry reports nothing but the known unresolved duration profiles", () => {
     const issues = validatePilotRegistry();
-    expect(issues.filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE")).toEqual([]);
-    expect(issues.some((issue) => issue.exerciseId === EXERCISE_ID)).toBe(true);
+    expect(issues).toEqual([]);
   });
 
   test("35. no regression on the 66 previous entries: each still prescribes with its own declared equipment", () => {
@@ -809,15 +807,14 @@ describe("battle_ropes — determinism, validation and non-regression", () => {
     expect(result.prescription.intensity.primaryMetric.type).toBe("impact_intent");
   });
 
-  test("36. the duration estimation profile is unresolved by convention and refuses to be used", () => {
+  test("36. the duration estimation profile is resolved and usable", () => {
     expect(entry().capabilities.durationEstimationProfileId).toBe("duration_profile_battle_ropes");
 
     const result = getDurationEstimationProfile("duration_profile_battle_ropes");
-    expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
-      expect(result.profile?.sourceRuleIds).toContain(SOURCE_CHAPTER);
+      throw new Error("Expected the duration profile to be resolved.");
     }
+    expect(result.profile.sourceRuleIds).toContain(SOURCE_CHAPTER);
   });
 
   test("37. no resolver branches on this exercise id or on its equipment identifiers", () => {

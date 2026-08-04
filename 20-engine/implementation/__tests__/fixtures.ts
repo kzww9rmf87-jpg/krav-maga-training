@@ -148,7 +148,6 @@ export function makeExercise(overrides: Partial<ExerciseDefinition> = {}): Exerc
     },
     evidenceLevel: "level_1",
     setupTimeMinutes: 2,
-    defaultExerciseDurationMinutes: 8,
     ...overrides,
   };
 }

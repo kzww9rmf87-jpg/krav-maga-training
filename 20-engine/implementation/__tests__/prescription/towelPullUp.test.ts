@@ -608,8 +608,8 @@ describe("towel_pull_up — prescription, engine and non-regression", () => {
     });
 
     const exercises = [
-      makeExercise({ ...pullUp, setupTimeMinutes: 1, defaultExerciseDurationMinutes: 8 }),
-      makeExercise({ ...TOWEL_PULL_UP, setupTimeMinutes: 3, defaultExerciseDurationMinutes: 12 }),
+      makeExercise({ ...pullUp, setupTimeMinutes: 1 }),
+      makeExercise({ ...TOWEL_PULL_UP, setupTimeMinutes: 3 }),
     ];
 
     const towelSource = getExercisePrescriptionSource(EXERCISE_ID, VALID_CONTEXT);
@@ -681,8 +681,7 @@ describe("towel_pull_up — prescription, engine and non-regression", () => {
 
   test("33. validatePilotRegistry reports nothing but the known unresolved duration profiles", () => {
     const issues = validatePilotRegistry();
-    expect(issues.filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE")).toEqual([]);
-    expect(issues.some((issue) => issue.exerciseId === EXERCISE_ID)).toBe(true);
+    expect(issues).toEqual([]);
   });
 
   test("34. no regression on the 68 previous entries: each still prescribes with its own declared equipment", () => {
@@ -727,14 +726,13 @@ describe("towel_pull_up — prescription, engine and non-regression", () => {
     }
   });
 
-  test("35. the duration estimation profile is unresolved by convention", () => {
+  test("35. the duration estimation profile is resolved", () => {
     expect(entry().capabilities.durationEstimationProfileId).toBe("duration_profile_towel_pull_up");
     const result = getDurationEstimationProfile("duration_profile_towel_pull_up");
-    expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
-      expect(result.profile?.sourceRuleIds).toContain(SOURCE_CHAPTER);
+      throw new Error("Expected the duration profile to be resolved.");
     }
+    expect(result.profile.sourceRuleIds).toContain(SOURCE_CHAPTER);
   });
 
   test("36. + 37. no resolver branches on this exercise, and the public contract is untouched", () => {

@@ -504,21 +504,21 @@ describe("registry Lot 4 — duration estimation profiles", () => {
   };
 
   for (const id of LOT4_EXERCISE_IDS) {
-    test(`${id}: has an unresolved duration profile sourced to its own chapter, sets_duration structure`, () => {
+    test(`${id}: has a resolved duration profile sourced to its own chapter, sets_duration structure`, () => {
       const result = getDurationEstimationProfile(`duration_profile_${id}`);
-      if (result.ok) {
-        throw new Error(`Expected the duration profile for "${id}" to be unresolved.`);
+      if (!result.ok) {
+        throw new Error(`Expected the duration profile for "${id}" to be resolved.`);
       }
-      expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
       expect(result.profile?.volumeStructure).toBe("sets_duration");
-      expect(result.profile?.sourceRuleIds).toEqual([EXPECTED_SOURCES[id]]);
+      expect(result.profile?.sourceRuleIds).toContain(EXPECTED_SOURCES[id]);
     });
   }
 
-  test("no more than 2 new duration profiles were added this lot, and no duration profile has any effect on the numerical prescription profiles (now 22) or the 57 historical entries", () => {
+  test("no more than 2 new duration profiles were added this lot, and duration profiles are resolved and have no effect on the numerical prescription profiles (now 22) or the 57 historical entries", () => {
     expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
-    expect(getDurationEstimationProfile("duration_profile_bench_press").ok).toBe(false);
-    expect(getDurationEstimationProfile("duration_profile_bear_crawl").ok).toBe(false);
+    // The duration model now covers every entry, bench_press included.
+    expect(getDurationEstimationProfile("duration_profile_bench_press").ok).toBe(true);
+    expect(getDurationEstimationProfile("duration_profile_bear_crawl").ok).toBe(true);
   });
 });
 
@@ -626,7 +626,7 @@ describe("registry Lot 4 — distinctions from named precedents", () => {
 
 describe("registry Lot 4 — registry validation and non-regression", () => {
   test("the full registry validates with no new issue beyond the expected unresolved duration profiles", () => {
-    const issues = validatePilotRegistry().filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE");
+    const issues = validatePilotRegistry();
     expect(issues).toEqual([]);
   });
 

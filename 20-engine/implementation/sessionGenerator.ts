@@ -232,21 +232,22 @@ function collectBlockedPrimaryModules(primaryResolutions: readonly ModuleResolut
 // -----------------------------------------------------------------------------
 
 /**
- * `setupTimeMinutes + defaultExerciseDurationMinutes`, only when both are
- * defined on the selected exercise. A missing value never defaults to `0`.
+ * Always `undefined` at assembly time, on purpose.
+ *
+ * Duration is estimated from the resolved PRESCRIPTION — sets, prescribed
+ * hold/round/interval durations, prescribed rest — and prescription runs
+ * after this stage. Nothing in `ExerciseDefinition` can honestly answer
+ * "how long does this take" before the dose exists, and the two
+ * knowledge-base fields that once tried (`setupTimeMinutes`,
+ * `defaultExerciseDurationMinutes`) were a second, competing duration model
+ * that no production exercise ever populated.
+ *
+ * `runEngine` completes the draft with the real estimate once
+ * `estimateSessionDuration` has run. The parameter is kept so the module
+ * shape and its call site do not change.
  */
-function computeModuleEstimatedDuration(candidate: SelectedExerciseCandidate | undefined): number | undefined {
-  if (candidate === undefined) {
-    return undefined;
-  }
-
-  const { setupTimeMinutes, defaultExerciseDurationMinutes } = candidate.scoredExercise.exercise;
-
-  if (setupTimeMinutes === undefined || defaultExerciseDurationMinutes === undefined) {
-    return undefined;
-  }
-
-  return setupTimeMinutes + defaultExerciseDurationMinutes;
+function computeModuleEstimatedDuration(_candidate: SelectedExerciseCandidate | undefined): number | undefined {
+  return undefined;
 }
 
 /**

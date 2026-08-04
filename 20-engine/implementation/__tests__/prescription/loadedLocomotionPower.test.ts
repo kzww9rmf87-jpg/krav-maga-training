@@ -514,7 +514,7 @@ describe("Loaded Locomotion Power — intensity, rest, tempo and doses", () => {
 describe("Loaded Locomotion Power — validation, genericity and non-regression", () => {
   test("22. the whole registry still validates, and every profile still resolves", () => {
     expect(
-      validatePilotRegistry().filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE"),
+      validatePilotRegistry(),
     ).toEqual([]);
 
     for (const candidate of NUMERICAL_PRESCRIPTION_PROFILES) {

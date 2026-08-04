@@ -671,7 +671,6 @@ describe("assault_bike_intervals — prescription, session, engine and trace", (
     const exercise = makeExercise({
       ...ASSAULT_BIKE_INTERVALS,
       setupTimeMinutes: 5,
-      defaultExerciseDurationMinutes: 20,
     });
 
     const sourceResult = getExercisePrescriptionSource(EXERCISE_ID, VALID_CONTEXT);
@@ -748,8 +747,7 @@ describe("assault_bike_intervals — determinism, validation and doctrine integr
 
   test("36. validatePilotRegistry reports nothing but the known unresolved duration profiles", () => {
     const issues = validatePilotRegistry();
-    expect(issues.filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE")).toEqual([]);
-    expect(issues.some((issue) => issue.exerciseId === EXERCISE_ID)).toBe(true);
+    expect(issues).toEqual([]);
   });
 
   test("37. no regression on the 67 previous entries: each still prescribes with its own declared equipment", () => {
@@ -825,15 +823,14 @@ describe("assault_bike_intervals — determinism, validation and doctrine integr
     }
   });
 
-  test("38. the duration estimation profile is unresolved by convention and refuses to be used", () => {
+  test("38. the duration estimation profile is resolved and usable", () => {
     expect(entry().capabilities.durationEstimationProfileId).toBe("duration_profile_assault_bike_intervals");
 
     const result = getDurationEstimationProfile("duration_profile_assault_bike_intervals");
-    expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
-      expect(result.profile?.sourceRuleIds).toContain(SOURCE_CHAPTER);
+      throw new Error("Expected the duration profile to be resolved.");
     }
+    expect(result.profile.sourceRuleIds).toContain(SOURCE_CHAPTER);
   });
 
   test("39. no resolver branches on this exercise id or on its equipment identifier", () => {

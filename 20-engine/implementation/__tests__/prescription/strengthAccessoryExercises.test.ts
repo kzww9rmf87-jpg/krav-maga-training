@@ -368,14 +368,13 @@ describe("strength accessory batch — duration estimation profiles", () => {
   };
 
   for (const id of STRENGTH_ACCESSORY_EXERCISE_IDS) {
-    test(`${id} has an unresolved profile sourced to its own chapter, sets_reps structure`, () => {
+    test(`${id} has a resolved profile sourced to its own chapter, sets_reps structure`, () => {
       const result = getDurationEstimationProfile(`duration_profile_${id}`);
-      if (result.ok) {
-        throw new Error(`Expected the duration profile for "${id}" to be unresolved.`);
+      if (!result.ok) {
+        throw new Error(`Expected the duration profile for "${id}" to be resolved.`);
       }
-      expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
       expect(result.profile?.volumeStructure).toBe("sets_reps");
-      expect(result.profile?.sourceRuleIds).toEqual([EXPECTED_SOURCES[id]]);
+      expect(result.profile?.sourceRuleIds).toContain(EXPECTED_SOURCES[id]);
     });
   }
 });
@@ -386,7 +385,7 @@ describe("strength accessory batch — duration estimation profiles", () => {
 
 describe("strength accessory batch — registry validation and non-regression", () => {
   test("the full registry validates with no new issue beyond the expected unresolved duration profiles", () => {
-    const issues = validatePilotRegistry().filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE");
+    const issues = validatePilotRegistry();
     expect(issues).toEqual([]);
   });
 

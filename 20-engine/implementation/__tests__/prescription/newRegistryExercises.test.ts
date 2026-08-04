@@ -474,21 +474,12 @@ describe("new registry exercises — duration profiles remain unresolved and inv
 
       expect(profile).toBeDefined();
       expect(profile.exerciseId).toBe(id);
-      expect(profile.status).toBe("unresolved");
-      expect(profile.averageRepetitionSeconds).toBeNull();
-      expect(profile.averageSetupSeconds).toBeNull();
-      expect(profile.transitionSeconds).toBeNull();
-      expect(profile.restSeconds).toBeNull();
-      expect(profile.perSetSeconds).toBeNull();
-      expect(profile.perRoundSeconds).toBeNull();
-      expect(profile.perIntervalSeconds).toBeNull();
-      expect(profile.technicalMarginSeconds).toBeNull();
+      expect(profile.status).toBe("resolved");
 
       const result = getDurationEstimationProfile(profileId);
-      if (result.ok) {
+      if (!result.ok) {
         throw new Error(`Expected "${id}"'s duration profile to be refused as unresolved.`);
       }
-      expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
     });
   }
 });

@@ -241,24 +241,24 @@ describe("registryVocabulary — duration estimation profiles", () => {
   test("8. an unresolved duration profile is refused as usable", () => {
     const result = getDurationEstimationProfile("duration_profile_bench_press");
 
-    if (result.ok) {
-      throw new Error("Expected the bench press duration profile to be refused as unresolved.");
+    if (!result.ok) {
+      throw new Error("Expected the bench press duration profile to be resolved.");
     }
-
-    expect(result.failureCode).toBe("DURATION_PROFILE_UNRESOLVED");
-    expect(result.profile?.status).toBe("unresolved");
+    expect(result.profile?.status).toBe("resolved");
   });
 
-  test("9. no duration profile contains an invented timing value", () => {
+  test("9. no duration profile carries timing numbers — there is only one duration model", () => {
+    // Profiles are coverage records. The engineering constants live in
+    // `durationEstimationModel.ts` and nowhere else, so a second, per-exercise
+    // set of numbers cannot grow back here.
     for (const profile of Object.values(DURATION_ESTIMATION_PROFILES)) {
-      expect(profile.averageRepetitionSeconds).toBeNull();
-      expect(profile.averageSetupSeconds).toBeNull();
-      expect(profile.transitionSeconds).toBeNull();
-      expect(profile.restSeconds).toBeNull();
-      expect(profile.perSetSeconds).toBeNull();
-      expect(profile.perRoundSeconds).toBeNull();
-      expect(profile.perIntervalSeconds).toBeNull();
-      expect(profile.technicalMarginSeconds).toBeNull();
+      expect(Object.keys(profile).sort()).toEqual([
+        "exerciseId",
+        "profileId",
+        "sourceRuleIds",
+        "status",
+        "volumeStructure",
+      ]);
     }
   });
 
@@ -285,12 +285,12 @@ describe("registryVocabulary — source rule identifiers", () => {
 
 describe("registryVocabulary — full registry validation", () => {
   test("10. every pilot registry entry passes validation, aside from the expected unresolved duration profile", () => {
-    const issues = validatePilotRegistry().filter((issue) => issue.code !== "UNRESOLVED_DURATION_PROFILE");
+    const issues = validatePilotRegistry();
     expect(issues).toEqual([]);
 
     // Every entry still legitimately reports the expected, non-fatal gap.
     const unresolvedIssues = validatePilotRegistry().filter((issue) => issue.code === "UNRESOLVED_DURATION_PROFILE");
-    expect(unresolvedIssues).toHaveLength(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).length);
+    expect(unresolvedIssues).toHaveLength(0);
   });
 
   test("validateRegistryEntry detects an impossible method/structure/equipment combination", () => {
