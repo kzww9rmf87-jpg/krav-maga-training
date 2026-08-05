@@ -16,6 +16,9 @@ import type { EngineSessionPrescriptionOutcome } from "./prescription/prescribeE
 // reuses the prescription layer's own reference shape rather than declaring
 // a second, drifting copy of it.
 import type { IntensityReference } from "./prescription/types";
+// Type-only, like the two above: `EngineRunResult` carries the duration
+// estimate the run produced rather than declaring a second shape for it.
+import type { SessionDurationEstimate } from "./prescription/estimatePrescriptionDuration";
 
 // -----------------------------------------------------------------------------
 // Generic primitives
@@ -1048,6 +1051,25 @@ export type EngineRunResult =
        * the pre-prescription draft above.
        */
       prescription?: EngineSessionPrescriptionOutcome;
+      /**
+       * The duration estimate `runEngine` computed from `prescription`, and
+       * the single canonical one for this run: the draft's
+       * `estimatedDurationMinutes`, the `"duration_validation"` trace entry,
+       * the time-budget reduction and the public per-exercise
+       * `estimatedDurationSeconds` all read THIS object. Nothing downstream
+       * re-runs the estimator — a second computation could disagree with
+       * the total the session was actually reduced against.
+       *
+       * `exerciseEstimates` is positionally aligned with
+       * `prescription.session.exercises` by construction (both come from
+       * the same prescribed session, in the same order).
+       *
+       * Absent — never `null` — when the run produced no estimate at all,
+       * which is exactly when prescription did not reach `"prescribed"`.
+       * An individual exercise can still be unestimable inside a present
+       * estimate; that is carried by its own `ok: false` entry.
+       */
+      durationEstimate?: SessionDurationEstimate;
     };
 
 // -----------------------------------------------------------------------------

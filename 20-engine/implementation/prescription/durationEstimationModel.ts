@@ -43,6 +43,15 @@
  * Nothing here claims documentary support. `SOURCE_DURATION_MODEL` is the
  * identifier that marks an estimate as resting on this engineering decision,
  * so any consumer can tell a computed component from a decided one.
+ *
+ * Since 2026-08-04 these constants are VISIBLE OUTSIDE THE ENGINE: the
+ * public contract publishes a per-exercise `estimatedDurationSeconds`, and
+ * every such number includes the setup time decided below (plus, for
+ * repetition- and distance-counted methods, the per-repetition or per-metre
+ * time). Changing a constant here therefore changes a number an external
+ * consumer displays. It is not a contract change — no shape moves, and the
+ * field was always an estimate — but it is no longer an internal-only edit,
+ * and the reasoning for any revision belongs in the commit that makes it.
  */
 
 import type { Identifier } from "../types";

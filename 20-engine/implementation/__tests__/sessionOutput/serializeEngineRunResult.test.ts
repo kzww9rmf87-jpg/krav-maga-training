@@ -13,7 +13,7 @@ import { serializeEngineRunResult } from "../../sessionOutput/serializeEngineRun
 import type { ExercisePrescriptionSource } from "../../prescription/buildPrescriptionInput";
 import type { PrescribeExerciseInput } from "../../prescription/prescribeExercise";
 import { getExercisePrescriptionSource } from "../../prescription/exercisePrescriptionRegistry";
-import type { ExerciseDefinition } from "../../types";
+import type { EngineRunResult, ExerciseDefinition } from "../../types";
 
 import { makeExercise, makeValidInput } from "../fixtures";
 import { makeCapabilities, makeOneRepMaxReference, makePrescribeExerciseInput } from "../prescription/fixtures";
@@ -262,6 +262,134 @@ describe("serializeEngineRunResult — outcome: draft", () => {
     expect(referencedIds).toEqual([...selectedIds].sort());
     expect(referencedIds.length).toBe(1);
     expect(["primary-exercise", "backup-exercise"]).toContain(referencedIds[0]);
+  });
+});
+
+describe("serializeEngineRunResult — per-exercise estimated duration", () => {
+  /** The fixture scenario, which prescribes end to end and therefore always carries an estimate. */
+  function prescribedRun() {
+    const { input, exercises } = buildScenario();
+    const result = runEngine(input, exercises);
+    if (result.outcome !== "draft" || result.prescription?.status !== "prescribed") {
+      throw new Error("Expected the scenario to produce a prescribed draft.");
+    }
+    return { result, exercises };
+  }
+
+  function prescribedOutput(result: EngineRunResult, exercises: readonly ExerciseDefinition[]) {
+    const output = serializeEngineRunResult(result, [...exercises], FIXED_GENERATED_AT);
+    if (output.outcome !== "draft" || output.prescription?.status !== "prescribed") {
+      throw new Error("Expected a prescribed serialized draft.");
+    }
+    return output.prescription.session.exercises;
+  }
+
+  test("publishes the estimate the engine computed — never a recomputation", () => {
+    const { result, exercises } = prescribedRun();
+    const estimates = result.durationEstimate?.exerciseEstimates;
+    if (estimates === undefined) {
+      throw new Error("Expected runEngine to attach a duration estimate to a prescribed draft.");
+    }
+
+    const serialized = prescribedOutput(result, exercises);
+    expect(serialized.length).toBe(estimates.length);
+
+    serialized.forEach((prescribedExercise, index) => {
+      const estimate = estimates[index];
+      if (estimate === undefined || !estimate.ok) {
+        throw new Error("Expected every exercise in this scenario to be estimable.");
+      }
+      // Same exercise, and the very same number — no second arithmetic.
+      expect(estimate.exerciseId).toBe(prescribedExercise.prescription.exerciseId);
+      expect(prescribedExercise.estimatedDurationSeconds).toBe(estimate.totalSeconds);
+      expect(Number.isInteger(prescribedExercise.estimatedDurationSeconds)).toBe(true);
+      expect(prescribedExercise.estimatedDurationSeconds).toBeGreaterThan(0);
+    });
+  });
+
+  test("publishes the same seconds the decision trace already states", () => {
+    const { result, exercises } = prescribedRun();
+    const serialized = prescribedOutput(result, exercises);
+
+    const durationEntry = result.decisionTrace.entries.find((entry) =>
+      entry.id.endsWith("_duration_estimation"),
+    );
+    if (durationEntry === undefined) {
+      throw new Error("Expected a duration estimation trace entry.");
+    }
+
+    // The explanation a consumer can read and the number it can display are
+    // the same estimate, so they can never contradict each other.
+    for (const prescribedExercise of serialized) {
+      expect(durationEntry.reasons).toContainEqual(
+        expect.stringContaining(
+          `${prescribedExercise.prescription.exerciseId}: ${prescribedExercise.estimatedDurationSeconds}s`,
+        ),
+      );
+    }
+  });
+
+  test("an exercise the estimator could not measure carries no key at all", () => {
+    const { result, exercises } = prescribedRun();
+    const estimate = result.durationEstimate;
+    if (estimate === undefined) {
+      throw new Error("Expected a duration estimate.");
+    }
+
+    const unestimable: EngineRunResult = {
+      ...result,
+      durationEstimate: {
+        ...estimate,
+        totalMinutes: null,
+        totalSeconds: null,
+        exerciseEstimates: estimate.exerciseEstimates.map((exerciseEstimate) => ({
+          ok: false as const,
+          exerciseId: exerciseEstimate.exerciseId,
+          failureCode: "UNSUPPORTED_VOLUME_STRUCTURE" as const,
+          message: "test: not estimable",
+        })),
+      },
+    };
+
+    for (const prescribedExercise of prescribedOutput(unestimable, exercises)) {
+      // Absent, not zero and not null: CAS states no duration rather than a wrong one.
+      expect("estimatedDurationSeconds" in prescribedExercise).toBe(false);
+    }
+  });
+
+  test("an estimate describing a different exercise is never published beside these doses", () => {
+    const { result, exercises } = prescribedRun();
+    const estimate = result.durationEstimate;
+    if (estimate === undefined) {
+      throw new Error("Expected a duration estimate.");
+    }
+
+    const misaligned: EngineRunResult = {
+      ...result,
+      durationEstimate: {
+        ...estimate,
+        exerciseEstimates: estimate.exerciseEstimates.map((exerciseEstimate) => ({
+          ...exerciseEstimate,
+          exerciseId: "some-other-exercise",
+        })),
+      },
+    };
+
+    for (const prescribedExercise of prescribedOutput(misaligned, exercises)) {
+      expect("estimatedDurationSeconds" in prescribedExercise).toBe(false);
+    }
+  });
+
+  test("a result carrying no estimate serializes exactly as it did before the field existed", () => {
+    const { result, exercises } = prescribedRun();
+    const { durationEstimate: _durationEstimate, ...withoutEstimate } = result;
+
+    const serialized = prescribedOutput(withoutEstimate, exercises);
+    expect(serialized.length).toBeGreaterThan(0);
+    for (const prescribedExercise of serialized) {
+      expect("estimatedDurationSeconds" in prescribedExercise).toBe(false);
+    }
+    expect(JSON.stringify(serialized)).not.toContain("estimatedDurationSeconds");
   });
 });
 

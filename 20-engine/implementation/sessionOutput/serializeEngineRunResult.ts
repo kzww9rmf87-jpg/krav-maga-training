@@ -36,6 +36,13 @@
  * aggregate `issues` list plus the ids that failed (`failedExerciseIds`),
  * derived by filtering `exerciseResults` for `ok: false`, never by new
  * judgment.
+ *
+ * `estimatedDurationSeconds` obeys the same rule as everything else here:
+ * it is READ from `result.durationEstimate`, the estimate `runEngine`
+ * already produced, and this file never calls the estimator. A duration
+ * computed here would be a second answer to a question the engine has
+ * already answered — and one that could disagree with the session total the
+ * time-budget reduction acted on.
  */
 
 import type {
@@ -57,6 +64,7 @@ import type { EngineSessionPrescriptionOutcome } from "../prescription/prescribe
 import type { PrescribeExerciseResult, ExercisePrescription } from "../prescription/prescribeExercise";
 import type { PrescribeSessionFailure, PrescribedSessionExercise, SessionPrescription } from "../prescription/prescribeSession";
 import type { PrescriptionSourceGap } from "../prescription/buildPrescriptionInput";
+import type { PrescriptionDurationEstimate } from "../prescription/estimatePrescriptionDuration";
 import type {
   DistanceTarget,
   DurationTarget,
@@ -509,21 +517,78 @@ function mapExercisePrescription(prescription: ExercisePrescription): CasExercis
   };
 }
 
-function mapPrescribedExercise(prescribedExercise: PrescribedSessionExercise): CasPrescribedExerciseV1 {
+/**
+ * The seconds to publish for one prescribed exercise, or `undefined` when
+ * there are none to publish.
+ *
+ * This function does no arithmetic: it reads `totalSeconds` off the estimate
+ * `runEngine` already produced. Recomputing here would create a second
+ * duration for the same exercise, able to disagree with the session total
+ * the engine reduced the session against — the very thing having one
+ * canonical estimate prevents.
+ *
+ * Three cases yield `undefined`, and all three mean the same thing to a
+ * consumer (no duration for this exercise):
+ * - the result carries no estimate at all (a hand-built `EngineRunResult`,
+ *   or a run whose prescription never reached `"prescribed"`);
+ * - the estimator failed on this exercise (`ok: false`) — an unmodelled
+ *   volume structure or incomplete resolved volume;
+ * - the estimate does not describe this exercise. Alignment is positional
+ *   and guaranteed by construction, so this last case cannot arise from a
+ *   real `runEngine` result; the id is still checked, because publishing
+ *   one exercise's duration beside another's doses would be a lie the type
+ *   system cannot catch, and silence is the honest failure.
+ */
+function readEstimatedDurationSeconds(
+  prescribedExercise: PrescribedSessionExercise,
+  estimate: PrescriptionDurationEstimate | undefined,
+): number | undefined {
+  if (estimate === undefined || !estimate.ok) {
+    return undefined;
+  }
+  if (estimate.exerciseId !== prescribedExercise.prescription.exerciseId) {
+    return undefined;
+  }
+  return estimate.totalSeconds;
+}
+
+function mapPrescribedExercise(
+  prescribedExercise: PrescribedSessionExercise,
+  estimate: PrescriptionDurationEstimate | undefined,
+): CasPrescribedExerciseV1 {
+  const estimatedDurationSeconds = readEstimatedDurationSeconds(prescribedExercise, estimate);
+
   return {
     order: prescribedExercise.order,
     blockId: prescribedExercise.blockId,
     required: prescribedExercise.required,
+    // Omitted, never set to `undefined`: an unestimable exercise carries no
+    // key at all, exactly as an unprescribed run carries no `prescription`
+    // key. `undefined` would survive in the TypeScript object and vanish in
+    // the JSON, so the two representations would disagree.
+    ...(estimatedDurationSeconds === undefined ? {} : { estimatedDurationSeconds }),
     prescription: mapExercisePrescription(prescribedExercise.prescription),
   };
 }
 
-function mapPrescribedSession(session: SessionPrescription): CasPrescribedSessionV1 {
+/**
+ * `exerciseEstimates` is positionally aligned with `session.exercises` —
+ * both are produced from the same prescribed session, in the same order (see
+ * `estimateFor` in `index.ts`). It is empty for any caller that has no
+ * estimate, and every exercise then serializes exactly as it did before this
+ * field existed.
+ */
+function mapPrescribedSession(
+  session: SessionPrescription,
+  exerciseEstimates: readonly PrescriptionDurationEstimate[],
+): CasPrescribedSessionV1 {
   return {
     sessionId: session.sessionId,
     sessionName: session.sessionName,
     modules: session.modules,
-    exercises: session.exercises.map(mapPrescribedExercise),
+    exercises: session.exercises.map((prescribedExercise, index) =>
+      mapPrescribedExercise(prescribedExercise, exerciseEstimates[index]),
+    ),
     sourceRuleIds: session.sourceRuleIds,
     status: session.status,
   };
@@ -574,14 +639,17 @@ function mapPrescriptionFailure(failure: PrescribeSessionFailure): CasPrescripti
  * the compiler checks, so it is covered by tests rather than by the type.
  * The same holds for `reasonCode` in `mapPrescriptionGap` above.
  */
-function mapPrescriptionOutcome(outcome: EngineSessionPrescriptionOutcome): CasPrescriptionOutcomeV1 {
+function mapPrescriptionOutcome(
+  outcome: EngineSessionPrescriptionOutcome,
+  exerciseEstimates: readonly PrescriptionDurationEstimate[],
+): CasPrescriptionOutcomeV1 {
   const unprescribedSelectedExercises = outcome.unprescribedSelectedExercises.map(mapPrescriptionGap);
 
   switch (outcome.status) {
     case "prescribed":
       return {
         status: "prescribed",
-        session: mapPrescribedSession(outcome.session),
+        session: mapPrescribedSession(outcome.session, exerciseEstimates),
         unprescribedSelectedExercises,
       };
     case "unavailable":
@@ -697,7 +765,10 @@ export function serializeEngineRunResult(
   const sessionDraft = mapSessionDraft(result.sessionDraft);
   const conflicts = result.conflicts.map(mapConflict);
   const conflictResolutions = result.conflictResolutions.map(mapConflictResolution);
-  const prescription = result.prescription === undefined ? undefined : mapPrescriptionOutcome(result.prescription);
+  const prescription =
+    result.prescription === undefined
+      ? undefined
+      : mapPrescriptionOutcome(result.prescription, result.durationEstimate?.exerciseEstimates ?? []);
 
   const exerciseReferences = buildExerciseReferences(
     collectReferencedExerciseIds({ decisionTrace, conflicts, conflictResolutions, sessionDraft, prescription }),

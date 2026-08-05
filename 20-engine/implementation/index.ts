@@ -456,6 +456,15 @@ export function runEngine(
     conflictResolutions: substitutionPass.conflictResolutions,
     decisionTrace: decisionTraceWithPrescription,
     prescription: workingPrescription.outcome,
+    // The estimate is attached, never recomputed downstream. It is the same
+    // object the draft's `estimatedDurationMinutes`, the duration trace
+    // entry and the time-budget reduction above were all decided from, so a
+    // consumer reading a per-exercise second and the session's minutes is
+    // reading one arithmetic, not two that happen to agree today.
+    //
+    // The key is omitted rather than set to `undefined` when no estimate
+    // exists, matching how `prescription` treats an absent value.
+    ...(durationEstimate === null ? {} : { durationEstimate }),
   };
 }
 

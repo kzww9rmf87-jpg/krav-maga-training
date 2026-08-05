@@ -214,6 +214,49 @@ describe("VITA boundary — the output is self-contained for display", () => {
     }
     expect(typeof output.sessionDraft.estimatedDurationMinutes).toBe("number");
   });
+
+  test("every prescribed exercise publishes its own duration, in whole seconds", () => {
+    if (output.outcome !== "draft" || output.prescription?.status !== "prescribed") {
+      throw new Error("Expected a prescribed draft.");
+    }
+
+    const exercises = output.prescription.session.exercises;
+    expect(exercises.length).toBeGreaterThan(1);
+
+    for (const prescribedExercise of exercises) {
+      const seconds = prescribedExercise.estimatedDurationSeconds;
+      // Every entry in the v0.1 registry is estimable, so a real session
+      // publishes a duration for each of its exercises. A consumer must
+      // still tolerate the field's absence — that contract is proved
+      // directly in the serializer tests, not assumed here.
+      expect(seconds, prescribedExercise.prescription.exerciseId).toBeDefined();
+      expect(Number.isInteger(seconds)).toBe(true);
+      expect(seconds).toBeGreaterThan(0);
+    }
+  });
+
+  test("the per-exercise seconds are a breakdown, not the session total", () => {
+    if (output.outcome !== "draft" || output.prescription?.status !== "prescribed") {
+      throw new Error("Expected a prescribed draft.");
+    }
+
+    const sumOfExercises = output.prescription.session.exercises.reduce(
+      (total, prescribedExercise) => total + (prescribedExercise.estimatedDurationSeconds ?? 0),
+      0,
+    );
+    const sessionMinutes = output.sessionDraft.estimatedDurationMinutes;
+    if (sessionMinutes === undefined) {
+      throw new Error("Expected the session draft to publish an estimated duration.");
+    }
+    const sessionSeconds = sessionMinutes * 60;
+
+    // The session additionally carries a transition between consecutive
+    // exercises, so a consumer summing the exercises would UNDER-state the
+    // session. `estimatedDurationMinutes` stays the only published session
+    // duration — this asserts the two numbers are not interchangeable.
+    expect(sumOfExercises).toBeGreaterThan(0);
+    expect(sumOfExercises).toBeLessThan(sessionSeconds);
+  });
 });
 
 describe("VITA boundary — the output does not echo sensitive input", () => {

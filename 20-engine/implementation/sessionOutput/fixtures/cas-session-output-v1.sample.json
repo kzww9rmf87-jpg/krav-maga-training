@@ -60,6 +60,7 @@
           "order": 1,
           "blockId": "strength",
           "required": true,
+          "estimatedDurationSeconds": 510,
           "prescription": {
             "exerciseId": "bench_press",
             "moduleId": "strength",

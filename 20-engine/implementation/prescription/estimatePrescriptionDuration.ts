@@ -17,6 +17,19 @@
  * Every estimate is broken down and labelled by provenance, so a reader can
  * always tell which seconds were computed from the prescription and which
  * rest on the engineering constants (see `durationEstimationModel.ts`).
+ *
+ * WHAT LEAVES THE ENGINE. `runEngine` attaches the `SessionDurationEstimate`
+ * this file produces to its result, and the public serializer publishes ONE
+ * number from it per exercise: `PrescriptionDurationEstimate.totalSeconds`,
+ * as `CasPrescribedExerciseV1.estimatedDurationSeconds`. The breakdown
+ * (`components`, per-kind seconds, provenance, explanations) stays internal
+ * — it is already published as prose in the `"duration_validation"` decision
+ * trace entry, which is where an explanation belongs.
+ *
+ * The `ok: false` case matters more now that a number is published: a
+ * structured failure becomes an ABSENT public field, never a zero and never
+ * a partial total. Keeping that discipline here is what keeps the public
+ * contract honest.
  */
 
 import type { Identifier } from "../types";

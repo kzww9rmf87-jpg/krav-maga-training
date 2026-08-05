@@ -89,6 +89,28 @@
  *   protects — this repository's own tests construct such literals. Every
  *   gap CAS serializes after this date carries `reasonCode`; only gaps in
  *   v1 objects predating this change can lack it.
+ * - 2026-08-04 — `CasPrescribedExerciseV1` gains an OPTIONAL
+ *   `estimatedDurationSeconds?`. The engine has estimated every prescribed
+ *   exercise since duration estimation existed — it is how the session
+ *   total is built and how the time-budget reduction decides what to give
+ *   up — but only the SESSION total was published. A consumer that wanted
+ *   to show "≈4 min" beside an exercise had no choice but to derive it from
+ *   sets, repetitions and rest, which is a training computation, and one it
+ *   would get wrong: setup time and the per-repetition constants live in
+ *   the engine's duration model, not in the published prescription.
+ *   Publishing the number CAS already computed removes the incentive to
+ *   reimplement it badly.
+ *   Additive under the clause above: the field is optional, so every
+ *   existing v1 object and every existing consumer still type-checks
+ *   unchanged, and no existing field changed type, meaning or optionality.
+ *   Unlike `unprescribedSelectedExercises`, this field is NOT always
+ *   emitted — an exercise CAS could not estimate carries no value at all,
+ *   which is the same discipline the estimator itself applies internally
+ *   (a structured failure, never a partial number).
+ *   `CasSessionDraftV1.estimatedDurationMinutes` is unchanged and remains
+ *   the only published SESSION duration; the per-exercise seconds do not
+ *   sum to it, because the session additionally carries a transition
+ *   between consecutive exercises.
  */
 
 import type {
@@ -499,6 +521,38 @@ export interface CasPrescribedExerciseV1 {
   order: number;
   blockId: Identifier;
   required: boolean;
+  /**
+   * How long CAS estimates this exercise takes, in whole seconds: its setup,
+   * its prescribed work, and the rest BETWEEN its efforts.
+   *
+   * It is an estimate, not a prescription. The doses in `prescription` are
+   * what CAS decided the athlete should do; this number is what performing
+   * them is expected to cost. Nothing in the session depends on the athlete
+   * matching it.
+   *
+   * Three things a consumer must not do with it:
+   * - do not treat it as a target or a countdown. It carries no per-set
+   *   timing, and an exercise finished faster or slower is not a deviation;
+   * - do not sum these numbers and call the result the session duration.
+   *   The session total additionally carries a transition between
+   *   consecutive exercises and is published, already computed, as
+   *   `CasSessionDraftV1.estimatedDurationMinutes`;
+   * - do not compute a missing value. Absence is stated below.
+   *
+   * Optional for two distinct reasons, and a consumer cannot tell them
+   * apart from the field alone — nor does it need to, because the response
+   * to both is the same: show no duration for that exercise.
+   * 1. Backward type compatibility: this shape predates the field, so
+   *    requiring it would break any consumer that builds a
+   *    `CasPrescribedExerciseV1` literal (see the contract evolution policy
+   *    at the top of this file).
+   * 2. CAS genuinely could not estimate this exercise — its volume
+   *    structure has no duration model, or the resolved volume lacks a
+   *    value the estimate needs. CAS omits the field rather than publishing
+   *    a guess; the `"duration_validation"` decision trace entry names the
+   *    exercise and the reason.
+   */
+  estimatedDurationSeconds?: number;
   prescription: CasExercisePrescriptionV1;
 }
 
