@@ -45,7 +45,24 @@
       }
     ]
   },
-  "conflicts": [],
+  "conflicts": [
+    {
+      "conflictId": "adequacy_duration_coverage",
+      "type": "duration",
+      "severity": "minor",
+      "probability": "high",
+      "description": "The session is estimated at 9 minute(s) against 45 requested (20% of the requested time, 36 minute(s) unused).",
+      "resolutionRequired": false
+    },
+    {
+      "conflictId": "adequacy_minimum_productive_duration",
+      "type": "duration",
+      "severity": "minor",
+      "probability": "high",
+      "description": "The session is estimated at 9 minute(s), below the 10-minute minimum productive duration for a 45-minute request.",
+      "resolutionRequired": false
+    }
+  ],
   "conflictResolutions": [],
   "prescription": {
     "status": "prescribed",
@@ -323,6 +340,37 @@
       "status": "complete"
     },
     "unprescribedSelectedExercises": []
+  },
+  "sessionAdequacy": {
+    "status": "partial",
+    "primaryAdaptationCovered": true,
+    "requestedDurationMinutes": 45,
+    "estimatedDurationMinutes": 9,
+    "durationCoverageRatio": 0.2,
+    "prescribedExerciseCount": 1,
+    "drivingExerciseIds": [
+      "bench_press"
+    ],
+    "repairAttempted": false,
+    "repairAddedExerciseIds": [],
+    "findings": [
+      {
+        "ruleId": "adequacy_duration_coverage",
+        "reasonCode": "DURATION_GROSSLY_UNDERFILLED",
+        "sourceRuleIds": [
+          "18_SESSION_GENERATION_PIPELINE_V0_1"
+        ],
+        "description": "The session is estimated at 9 minute(s) against 45 requested (20% of the requested time, 36 minute(s) unused)."
+      },
+      {
+        "ruleId": "adequacy_minimum_productive_duration",
+        "reasonCode": "BELOW_MINIMUM_PRODUCTIVE_DURATION",
+        "sourceRuleIds": [
+          "18_SESSION_GENERATION_PIPELINE_V0_1"
+        ],
+        "description": "The session is estimated at 9 minute(s), below the 10-minute minimum productive duration for a 45-minute request."
+      }
+    ]
   },
   "decisionTrace": {
     "traceId": "trace_request-1",
@@ -697,12 +745,58 @@
         "sourceRuleIds": [
           "CAS_DURATION_ESTIMATION_MODEL_V0_1"
         ]
+      },
+      {
+        "id": "trace_request-1_adequacy_duration_coverage",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "final_validation",
+        "decision": "Session adequacy rule \"adequacy_duration_coverage\" failed (DURATION_GROSSLY_UNDERFILLED).",
+        "reasons": [
+          "The session is estimated at 9 minute(s) against 45 requested (20% of the requested time, 36 minute(s) unused).",
+          "Source: 18_SESSION_GENERATION_PIPELINE_V0_1."
+        ],
+        "inputReferences": [
+          "request.durationMinutes",
+          "request.primaryObjective"
+        ]
+      },
+      {
+        "id": "trace_request-1_adequacy_minimum_productive_duration",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "final_validation",
+        "decision": "Session adequacy rule \"adequacy_minimum_productive_duration\" failed (BELOW_MINIMUM_PRODUCTIVE_DURATION).",
+        "reasons": [
+          "The session is estimated at 9 minute(s), below the 10-minute minimum productive duration for a 45-minute request.",
+          "Source: 18_SESSION_GENERATION_PIPELINE_V0_1."
+        ],
+        "inputReferences": [
+          "request.durationMinutes",
+          "request.primaryObjective"
+        ]
+      },
+      {
+        "id": "trace_request-1_session_adequacy",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "final_validation",
+        "decision": "Session adequacy: partial.",
+        "reasons": [
+          "Primary adaptation is driven by the prescribed session.",
+          "Estimated 9 minute(s) against 45 requested.",
+          "No repair was required: the primary module already holds an exercise that drives the requested adaptation."
+        ],
+        "inputReferences": [
+          "request.durationMinutes",
+          "request.primaryObjective"
+        ]
       }
     ],
     "rejectedExercises": [],
     "detectedConflicts": [],
     "conflictResolutions": [],
-    "warnings": []
+    "warnings": [
+      "The session is estimated at 9 minute(s) against 45 requested (20% of the requested time, 36 minute(s) unused).",
+      "The session is estimated at 9 minute(s), below the 10-minute minimum productive duration for a 45-minute request."
+    ]
   },
   "exerciseReferences": {
     "bench_press": {

@@ -294,7 +294,12 @@ describe("session composition — outcome and conflict semantics for emptied mod
       throw new Error("Expected a draft.");
     }
 
-    const missing = result.conflicts.filter((conflict) => conflict.type === "missing_data");
+    // Session adequacy also reports as `missing_data`, so this scenario is
+    // filtered to the emptied-module conflicts it is actually about. The
+    // adequacy conflict it now also raises is asserted in its own test below.
+    const missing = result.conflicts.filter(
+      (conflict) => conflict.type === "missing_data" && conflict.id.startsWith("missing_exercise_"),
+    );
     expect(missing.map((conflict) => conflict.id).sort()).toEqual([
       "missing_exercise_core",
       "missing_exercise_grip",
@@ -333,14 +338,38 @@ describe("session composition — outcome and conflict semantics for emptied mod
     }
   });
 
-  test("a module that keeps its exercise raises no conflict at all", () => {
+  test("a module that keeps its exercise raises no emptied-module conflict at all", () => {
     const result = runEngine(makeInput(45, ["grip", "core"]));
     if (result.outcome !== "draft") {
       throw new Error("Expected a draft.");
     }
 
-    expect(result.conflicts.filter((conflict) => conflict.type === "missing_data")).toEqual([]);
-    expect(result.decisionTrace.warnings).toEqual([]);
+    expect(
+      result.conflicts.filter(
+        (conflict) => conflict.type === "missing_data" && conflict.id.startsWith("missing_exercise_"),
+      ),
+    ).toEqual([]);
+  });
+
+  // The strength module of this scenario is composed entirely of accessory
+  // work (`chest_supported_row`, `neck_training`, `chin_up`). Before session
+  // adequacy existed, that came back silently as a normal maximum-strength
+  // session — the exact defect Lot H2 was opened for, sitting in a fixture.
+  test("a primary module holding only accessory work is reported, not passed off as a strength session", () => {
+    const result = runEngine(makeInput(45, ["grip", "core"]));
+    if (result.outcome !== "draft") {
+      throw new Error("Expected a draft.");
+    }
+
+    expect(result.sessionAdequacy.status).toBe("inadequate");
+    expect(result.sessionAdequacy.primaryAdaptationCovered).toBe(false);
+
+    const coverage = result.conflicts.find(
+      (conflict) => conflict.id === "adequacy_primary_adaptation_coverage",
+    );
+    expect(coverage?.severity).toBe("major");
+    expect(coverage?.resolutionRequired).toBe(true);
+    expect(result.decisionTrace.warnings).toContain(coverage?.description);
   });
 });
 

@@ -74,18 +74,36 @@ import { filterEligibleExercises } from "./exerciseSelector";
 import { selectCapabilityModules } from "./moduleSelector";
 import { scoreEligibleExercises } from "./scoringEngine";
 import { selectExercisesForModules } from "./exerciseFinalSelector";
-import { buildRemovalOrder, composeSession, withoutExercises, type SessionComposition } from "./sessionComposer";
+import {
+  buildRemovalOrder,
+  composeSession,
+  EXERCISES_PER_MODULE_ROLE,
+  isRedundantWith,
+  withoutExercises,
+  type SessionComposition,
+} from "./sessionComposer";
+import {
+  evaluateSessionAdequacy,
+  isDrivingRole,
+  type AdequacyPrescribedExercise,
+  type SessionAdequacyEvaluation,
+} from "./sessionAdequacy";
 import { generateInitialSession } from "./sessionGenerator";
 import { detectSessionConflicts } from "./conflictResolver";
 import { applySubstitution, findSubstituteCandidate } from "./substitutionEngine";
 import { validateEngineInput } from "./validation";
 import { buildDecisionTrace, buildInvalidInputDecisionTrace } from "./decisionTrace";
 import type { ExercisePrescriptionSource } from "./prescription/buildPrescriptionInput";
+import type { ExerciseRole } from "./prescription/types";
 import { buildEngineSessionPrescriptionSources } from "./prescription/buildEngineSessionPrescriptionSources";
 import { deriveAthleteReferences } from "./prescription/deriveAthleteReferences";
 import { prescribeEngineSession, type EngineSessionPrescriptionResult } from "./prescription/prescribeEngineSession";
 import { estimateSessionDuration, type SessionDurationEstimate } from "./prescription/estimatePrescriptionDuration";
 import type { PrescriptionTraceContext } from "./prescription/prescriptionDecisionTrace";
+import {
+  EXERCISE_PRESCRIPTION_REGISTRY,
+  isPilotExerciseId,
+} from "./prescription/exercisePrescriptionRegistry";
 import { EXERCISE_KNOWLEDGE_BASE } from "./exerciseKnowledgeBase";
 import { adaptCasSessionInput } from "./sessionInput/adaptCasSessionInput";
 import type { CasSessionInputV1 } from "./sessionInput/types";
@@ -389,6 +407,28 @@ export function runEngine(
     removedForTimeBudget.push({ exerciseId: removal.exerciseId, module: removal.module });
   }
 
+  // Adequacy repair runs AFTER the time-budget reduction and BEFORE the final
+  // estimate: it is the last stage that may still change what the session
+  // holds, and its own addition must be reflected in the duration that is
+  // published. It only ever acts on a session whose primary module drives
+  // nothing — never to fill remaining time.
+  const repair = attemptAdequacyRepair(
+    input,
+    selectedModules,
+    workingComposition,
+    workingSessionResult,
+    workingPrescription,
+    resolvedPrescriptionSources,
+    (repairedDraft) =>
+      prescriptionSources ?? resolveEnginePrescriptionSources(input, repairedDraft),
+    prescriptionTraceContext,
+  );
+  if (repair.addedExerciseIds.length > 0) {
+    workingComposition = repair.composition;
+    workingSessionResult = repair.sessionResult;
+    workingPrescription = repair.prescription;
+  }
+
   const durationEstimate = estimateFor(workingPrescription);
 
   const sessionDraft: InitialSessionDraft =
@@ -429,6 +469,43 @@ export function runEngine(
 
   const durationTraceEntries = buildDurationTraceEntries(input, durationEstimate);
 
+  // The last question in the pipeline, and the only stage that can ask it:
+  // eligibility, prescription feasibility and duration are all known here,
+  // and nowhere earlier. See `sessionAdequacy.ts` for why a session can pass
+  // every previous stage and still not be the session that was requested.
+  const prescriptionWasAvailable = workingPrescription.outcome.status === "prescribed";
+  const primaryModuleForAdequacy =
+    selectedModules.find((selectedModule) => selectedModule.role === "primary")?.module ?? null;
+  const adequacy = evaluateSessionAdequacy({
+    requestedDurationMinutes: input.request.durationMinutes,
+    estimatedDurationMinutes: durationEstimate?.totalMinutes ?? null,
+    primaryModule: primaryModuleForAdequacy,
+    prescriptionAvailable: prescriptionWasAvailable,
+    prescribedExercises: adequacyExercisesOf(workingPrescription),
+    unprescribedPrimaryExerciseIds:
+      workingPrescription.outcome.status === "prescribed" || workingPrescription.outcome.status === "unavailable"
+        ? (workingPrescription.outcome.unprescribedSelectedExercises ?? [])
+            .filter((gap) => gap.moduleId === primaryModuleForAdequacy)
+            .map((gap) => gap.exerciseId)
+        : [],
+    repairAttempted: repair.attempted,
+    repairAddedExerciseIds: repair.addedExerciseIds,
+  });
+
+  // Conflicts and warnings are raised only for a session that WAS prescribed.
+  //
+  // When prescription came back `unavailable`, the prescription layer has
+  // already said so in `missingSourceData`, in `unprescribedSelectedExercises`,
+  // in its own warnings and in its own trace entries. Restating it as an
+  // adequacy conflict would duplicate an existing signal rather than add one.
+  // `sessionAdequacy.status` still reports `inadequate` for such a session —
+  // the truth is published, once, in the field built to carry it.
+  const adequacyConflicts = prescriptionWasAvailable ? buildAdequacyConflicts(adequacy) : [];
+  const adequacyWarnings = prescriptionWasAvailable
+    ? adequacy.findings.map((finding) => finding.description)
+    : [];
+  const adequacyTraceEntries = buildAdequacyTraceEntries(input, adequacy);
+
   // The three lists are extended, never rebuilt: `buildDecisionTrace` runs
   // before prescription and cannot know about an omitted exercise, a
   // duration or a duration conflict. Each later stage contributes its own
@@ -441,8 +518,17 @@ export function runEngine(
       ...timeBudgetTraceEntries,
       ...durationTraceEntries,
       ...buildDurationConflictTraceEntries(input, conflicts, finalConflicts),
+      ...adequacyTraceEntries,
     ],
-    warnings: [...decisionTrace.warnings, ...workingPrescription.warnings, ...postReductionWarnings],
+    warnings: [
+      ...decisionTrace.warnings,
+      ...workingPrescription.warnings,
+      ...postReductionWarnings,
+      // Every adequacy finding reaches `warnings`, whatever its severity: a
+      // session that does not train what was asked must not be readable as
+      // complete by a consumer that only looks at warnings.
+      ...adequacyWarnings,
+    ],
   };
 
   return {
@@ -452,8 +538,9 @@ export function runEngine(
     eligibilityResults,
     scoredExercises,
     sessionDraft,
-    conflicts: finalConflicts,
+    conflicts: [...finalConflicts, ...adequacyConflicts],
     conflictResolutions: substitutionPass.conflictResolutions,
+    sessionAdequacy: adequacy,
     decisionTrace: decisionTraceWithPrescription,
     prescription: workingPrescription.outcome,
     // The estimate is attached, never recomputed downstream. It is the same
@@ -466,6 +553,308 @@ export function runEngine(
     // exists, matching how `prescription` treats an absent value.
     ...(durationEstimate === null ? {} : { durationEstimate }),
   };
+}
+
+// -----------------------------------------------------------------------------
+// Adequacy repair
+// -----------------------------------------------------------------------------
+
+/**
+ * The registry role of an exercise, or `null` when it is not in the pilot
+ * registry.
+ *
+ * Read from the SAME source the prescription layer resolves its role from,
+ * so a repair candidate is judged by exactly the classification the finished
+ * session will carry. Nothing here infers a role from a display name or an
+ * adaptation label — that inference is precisely what let a neck isometric
+ * stand in for a maximum-strength session.
+ */
+function registryRoleOf(exerciseId: Identifier): ExerciseRole | null {
+  return isPilotExerciseId(exerciseId) ? EXERCISE_PRESCRIPTION_REGISTRY[exerciseId].role : null;
+}
+
+/** Every prescribed exercise reduced to what the adequacy rules need. */
+function adequacyExercisesOf(prescription: EngineSessionPrescriptionResult): AdequacyPrescribedExercise[] {
+  if (prescription.outcome.status !== "prescribed") {
+    return [];
+  }
+  return prescription.outcome.session.exercises.map((prescribedExercise) => ({
+    exerciseId: prescribedExercise.prescription.exerciseId,
+    moduleId: prescribedExercise.prescription.moduleId,
+    role: prescribedExercise.prescription.role,
+  }));
+}
+
+/**
+ * Selects `exerciseId`, dropping `replacedExerciseId` when one is given.
+ *
+ * A module may not grow past `EXERCISES_PER_MODULE_ROLE`: that cap is the
+ * composer's own engineering decision, and repair is not entitled to overrule
+ * it. When the module is already full, repair SWAPS — the lowest-ranked
+ * support exercise makes room for the driver — rather than sprawling.
+ */
+function withExercise(
+  composition: SessionComposition,
+  exerciseId: Identifier,
+  replacedExerciseId: Identifier | null,
+): SessionComposition {
+  return {
+    decisions: composition.decisions,
+    selections: composition.selections.map((selection) => ({
+      module: selection.module,
+      role: selection.role,
+      candidates: selection.candidates.map((candidate) => {
+        const candidateId = candidate.scoredExercise.exercise.id;
+        if (!candidate.selected && candidateId === exerciseId) {
+          return {
+            ...candidate,
+            selected: true,
+            selectionReasons: [
+              ...candidate.selectionReasons,
+              "Added by adequacy repair: the highest-ranked prescribable candidate able to drive the requested adaptation.",
+            ],
+          };
+        }
+        if (candidate.selected && replacedExerciseId !== null && candidateId === replacedExerciseId) {
+          return {
+            ...candidate,
+            selected: false,
+            selectionReasons: [
+              ...candidate.selectionReasons,
+              "Given up by adequacy repair: the module was full and held no exercise driving the requested adaptation.",
+            ],
+          };
+        }
+        return candidate;
+      }),
+    })),
+  };
+}
+
+/** The `"draft"` half of `generateInitialSession`'s union — repair never returns a blocked session. */
+type DraftSessionResult = Extract<ReturnType<typeof generateInitialSession>, { outcome: "draft" }>;
+
+interface AdequacyRepairOutcome {
+  attempted: boolean;
+  addedExerciseIds: Identifier[];
+  composition: SessionComposition;
+  sessionResult: DraftSessionResult;
+  prescription: EngineSessionPrescriptionResult;
+}
+
+/**
+ * Attempts, ONCE and deterministically, to give a session that trains nothing
+ * of what was asked an exercise that does.
+ *
+ * WHAT THIS IS ALLOWED TO DO: promote the highest-ranked candidate the
+ * primary module ALREADY produced — already eligible, already scored, already
+ * ranked — that holds a driving role and can be prescribed. Nothing else. The
+ * candidate pool is not widened, no exercise is invented, no dose is altered,
+ * and no missing athlete reference is worked around: a candidate that cannot
+ * be prescribed is skipped, never forced.
+ *
+ * WHAT THIS MUST NEVER DO: add work because time remains. The Minimum
+ * Effective Session Principle forbids it, and this function is not an
+ * exception to it — repair runs ONLY when the primary module holds no driving
+ * exercise at all, never to fill a duration gap. A session that trains the
+ * right thing in 12 of 30 minutes is left exactly as it is.
+ *
+ * Returns the original inputs untouched when no repair is needed or none
+ * succeeds.
+ */
+function attemptAdequacyRepair(
+  input: EngineInput,
+  selectedModules: readonly SelectedModule[],
+  composition: SessionComposition,
+  sessionResult: DraftSessionResult,
+  prescription: EngineSessionPrescriptionResult,
+  prescriptionSources: ReadonlyMap<Identifier, ExercisePrescriptionSource>,
+  /**
+   * Sources for a repaired draft.
+   *
+   * The map above was resolved from the exercises that were ALREADY selected,
+   * so a promoted candidate is necessarily absent from it and would fail
+   * prescription for want of a source rather than for want of an athlete
+   * reference — repair would then never succeed, and would silently look as
+   * though no driver existed. When the caller supplied its own source map,
+   * this resolver returns it unchanged: deciding what a caller-controlled run
+   * may prescribe is not this function's call.
+   */
+  resolveSourcesFor: (draft: InitialSessionDraft) => ReadonlyMap<Identifier, ExercisePrescriptionSource>,
+  traceContext: PrescriptionTraceContext,
+): AdequacyRepairOutcome {
+  const unrepaired: AdequacyRepairOutcome = {
+    attempted: false,
+    addedExerciseIds: [],
+    composition,
+    sessionResult,
+    prescription,
+  };
+
+  const primaryModule = selectedModules.find((selectedModule) => selectedModule.role === "primary");
+  if (primaryModule === undefined || prescription.outcome.status !== "prescribed") {
+    return unrepaired;
+  }
+
+  const prescribed = adequacyExercisesOf(prescription);
+  const primaryPrescribed = prescribed.filter((exercise) => exercise.moduleId === primaryModule.module);
+  // Nothing to repair: either the module is empty (already blocked upstream)
+  // or something in it already drives the adaptation.
+  if (primaryPrescribed.length === 0 || primaryPrescribed.some((exercise) => isDrivingRole(exercise.role))) {
+    return unrepaired;
+  }
+
+  const primarySelection = composition.selections.find((selection) => selection.module === primaryModule.module);
+  if (primarySelection === undefined) {
+    return unrepaired;
+  }
+
+  const keptExercises = primarySelection.candidates
+    .filter((candidate) => candidate.selected)
+    .map((candidate) => candidate.scoredExercise.exercise);
+
+  // A module may not grow past `EXERCISES_PER_MODULE_ROLE`. That cap is the
+  // composer's engineering decision and repair is not entitled to overrule it.
+  //
+  // WHY REPAIR STOPS HERE RATHER THAN SWAPPING. Dropping a composed exercise to
+  // make room was tried and rejected: it silently reshaped sessions across the
+  // engine, discarding work the composer had deliberately ranked and kept. A
+  // module that is FULL of support work is a ranking outcome, and correcting a
+  // ranking is not this stage's business. CAS reports the inadequacy instead —
+  // which is what this lot is for.
+  if (keptExercises.length >= EXERCISES_PER_MODULE_ROLE[primaryModule.role]) {
+    return { ...unrepaired, attempted: true };
+  }
+
+  // Rank order is the selector's, not this function's: the first candidate
+  // that can carry the adaptation and can be prescribed wins, and the search
+  // stops there.
+  for (const candidate of primarySelection.candidates) {
+    if (candidate.selected) {
+      continue;
+    }
+    const exerciseId = candidate.scoredExercise.exercise.id;
+    const role = registryRoleOf(exerciseId);
+    if (role === null || !isDrivingRole(role)) {
+      continue;
+    }
+    // Repair obeys the composer's own redundancy rule (Rule 32): promoting a
+    // near-duplicate of work the session already holds would be adding an
+    // exercise for its own sake, which is what this whole area forbids.
+    if (keptExercises.some((kept) => isRedundantWith(candidate.scoredExercise.exercise, kept))) {
+      continue;
+    }
+
+    const repairedComposition = withExercise(composition, exerciseId, null);
+    const repairedSession = generateInitialSession(input, [...selectedModules], [...repairedComposition.selections]);
+    if (repairedSession.outcome === "blocked") {
+      continue;
+    }
+
+    const repairedPrescription = prescribeEngineSession(
+      repairedSession.draft,
+      resolveSourcesFor(repairedSession.draft),
+      traceContext,
+    );
+    if (repairedPrescription.outcome.status !== "prescribed") {
+      // The candidate could not be dosed safely — most often a missing
+      // athlete reference. Skipped, never fabricated around.
+      continue;
+    }
+    const nowDriving = adequacyExercisesOf(repairedPrescription).some(
+      (exercise) => exercise.moduleId === primaryModule.module && isDrivingRole(exercise.role),
+    );
+    if (!nowDriving) {
+      continue;
+    }
+
+    // The repaired session must still fit the time the athlete has. The
+    // time-budget reduction has already run at this point, so a repair that
+    // overshoots would undo a decision taken one stage earlier — and "a
+    // shorter valid session is superior to a longer incoherent session"
+    // applies to repaired sessions exactly as it applies to composed ones.
+    const repairedEstimate = estimateFor(repairedPrescription);
+    if (
+      repairedEstimate !== null &&
+      repairedEstimate.totalMinutes !== null &&
+      repairedEstimate.totalMinutes > input.request.durationMinutes
+    ) {
+      continue;
+    }
+
+    return {
+      attempted: true,
+      addedExerciseIds: [exerciseId],
+      composition: repairedComposition,
+      sessionResult: repairedSession,
+      prescription: repairedPrescription,
+    };
+  }
+
+  return { ...unrepaired, attempted: true };
+}
+
+/**
+ * The conflicts an adequacy evaluation raises.
+ *
+ * An uncovered primary objective is `major` and requires resolution: the
+ * session does not train what was asked. A duration finding on a session that
+ * DOES train the right thing is `minor` — it reaches `warnings` and is
+ * reported, but it does not claim the session is wrong.
+ */
+function buildAdequacyConflicts(evaluation: SessionAdequacyEvaluation): DetectedConflict[] {
+  return evaluation.findings.map((finding) => {
+    const isCoverageFinding =
+      finding.reasonCode === "PRIMARY_ADAPTATION_NOT_DRIVEN" ||
+      finding.reasonCode === "PRIMARY_CANDIDATES_UNPRESCRIBABLE";
+    return {
+      id: finding.ruleId,
+      type: isCoverageFinding ? ("missing_data" as const) : ("duration" as const),
+      severity: isCoverageFinding ? ("major" as const) : ("minor" as const),
+      probability: "high" as const,
+      description: finding.description,
+      resolutionRequired: isCoverageFinding,
+    };
+  });
+}
+
+/** One `final_validation` trace entry per adequacy rule, plus the verdict. */
+function buildAdequacyTraceEntries(
+  input: EngineInput,
+  evaluation: SessionAdequacyEvaluation,
+): DecisionTraceEntry[] {
+  const timestamp = input.request.requestedAt;
+  const entries: DecisionTraceEntry[] = evaluation.findings.map((finding) => ({
+    id: `trace_${input.request.requestId}_${finding.ruleId}`,
+    timestamp,
+    stage: "final_validation",
+    decision: `Session adequacy rule "${finding.ruleId}" failed (${finding.reasonCode}).`,
+    reasons: [finding.description, ...finding.sourceRuleIds.map((sourceRuleId) => `Source: ${sourceRuleId}.`)],
+    inputReferences: ["request.durationMinutes", "request.primaryObjective"],
+  }));
+
+  const repairReason = !evaluation.repairAttempted
+    ? "No repair was required: the primary module already holds an exercise that drives the requested adaptation."
+    : evaluation.repairAddedExerciseIds.length > 0
+      ? `Repair added ${evaluation.repairAddedExerciseIds.map((id) => `"${id}"`).join(", ")}: the highest-ranked prescribable candidate able to drive the requested adaptation.`
+      : "Repair was attempted and found no prescribable candidate able to drive the requested adaptation; no unrelated work was added in its place.";
+
+  entries.push({
+    id: `trace_${input.request.requestId}_session_adequacy`,
+    timestamp,
+    stage: "final_validation",
+    decision: `Session adequacy: ${evaluation.status}.`,
+    reasons: [
+      `Primary adaptation ${evaluation.primaryAdaptationCovered ? "is" : "is NOT"} driven by the prescribed session.`,
+      evaluation.estimatedDurationMinutes === null
+        ? "The session duration could not be estimated."
+        : `Estimated ${evaluation.estimatedDurationMinutes} minute(s) against ${evaluation.requestedDurationMinutes} requested.`,
+      repairReason,
+    ],
+    inputReferences: ["request.durationMinutes", "request.primaryObjective"],
+  });
+
+  return entries;
 }
 
 // -----------------------------------------------------------------------------

@@ -112,6 +112,15 @@ function runScenario(input: EngineInput) {
   return { selectedExerciseIds, result, ...built };
 }
 
+/** Warnings minus the session-adequacy findings — see `sessionAdequacy.ts`. */
+function omissionWarnings(result: {
+  decisionTrace: { warnings: readonly string[] };
+  sessionAdequacy?: { findings: readonly { description: string }[] };
+}): string[] {
+  const adequacy = new Set((result.sessionAdequacy?.findings ?? []).map((finding) => finding.description));
+  return result.decisionTrace.warnings.filter((warning) => !adequacy.has(warning));
+}
+
 describe("equipment capability derivation — the audit scenario is fixed", () => {
   test("every selected exercise is now prescribed, with no capability list supplied by the caller", () => {
     const { selectedExerciseIds, result, failures } = runScenario(makeAuditScenarioInput());
@@ -140,8 +149,10 @@ describe("equipment capability derivation — the audit scenario is fixed", () =
     expect(prescribedIds).toContain("assault_bike_intervals");
 
     // Nothing omitted, so Lot 1's disclosure surfaces are correctly silent.
+    // Session adequacy is a separate question and is asserted separately: this
+    // scenario's strength module happens to hold only accessory work.
     expect(result.prescription.unprescribedSelectedExercises).toEqual([]);
-    expect(result.decisionTrace.warnings).toEqual([]);
+    expect(omissionWarnings(result)).toEqual([]);
     expect(failures).toEqual([]);
   });
 
@@ -288,6 +299,6 @@ describe("equipment capability derivation — residual knowledge-base / registry
     expect(result.prescription.unprescribedSelectedExercises.map((gap) => gap.exerciseId)).toEqual([
       "hollow_body_hold",
     ]);
-    expect(result.decisionTrace.warnings).toHaveLength(1);
+    expect(omissionWarnings(result)).toHaveLength(1);
   });
 });

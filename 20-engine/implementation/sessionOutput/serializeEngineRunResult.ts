@@ -789,6 +789,26 @@ export function serializeEngineRunResult(
     conflicts,
     conflictResolutions,
     ...(prescription === undefined ? {} : { prescription }),
+    // Copied field by field rather than spread: the public contract and the
+    // engine's evaluation are separate types that happen to agree today, and
+    // a future internal field must not leak into the contract by accident.
+    sessionAdequacy: {
+      status: result.sessionAdequacy.status,
+      primaryAdaptationCovered: result.sessionAdequacy.primaryAdaptationCovered,
+      requestedDurationMinutes: result.sessionAdequacy.requestedDurationMinutes,
+      estimatedDurationMinutes: result.sessionAdequacy.estimatedDurationMinutes,
+      durationCoverageRatio: result.sessionAdequacy.durationCoverageRatio,
+      prescribedExerciseCount: result.sessionAdequacy.prescribedExerciseCount,
+      drivingExerciseIds: [...result.sessionAdequacy.drivingExerciseIds],
+      repairAttempted: result.sessionAdequacy.repairAttempted,
+      repairAddedExerciseIds: [...result.sessionAdequacy.repairAddedExerciseIds],
+      findings: result.sessionAdequacy.findings.map((finding) => ({
+        ruleId: finding.ruleId,
+        reasonCode: finding.reasonCode,
+        sourceRuleIds: [...finding.sourceRuleIds],
+        description: finding.description,
+      })),
+    },
     decisionTrace,
     exerciseReferences,
   };

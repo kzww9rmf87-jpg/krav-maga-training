@@ -16,6 +16,9 @@ import type { EngineSessionPrescriptionOutcome } from "./prescription/prescribeE
 // reuses the prescription layer's own reference shape rather than declaring
 // a second, drifting copy of it.
 import type { IntensityReference } from "./prescription/types";
+// Type-only, same rationale: `sessionAdequacy.ts` imports its domain types
+// from this file, so the reference cannot be a value import.
+import type { SessionAdequacyEvaluation } from "./sessionAdequacy";
 // Type-only, like the two above: `EngineRunResult` carries the duration
 // estimate the run produced rather than declaring a second shape for it.
 import type { SessionDurationEstimate } from "./prescription/estimatePrescriptionDuration";
@@ -1035,6 +1038,13 @@ export type EngineRunResult =
       eligibilityResults: ExerciseEligibilityResult[];
       scoredExercises: ScoredExercise[];
       sessionDraft: InitialSessionDraft;
+      /**
+       * Whether the finished session is actually the session that was
+       * requested — see `sessionAdequacy.ts`. Present on every draft: a
+       * caller must be able to tell "complete" from "usable but partial"
+       * from "does not fulfil the objective" without recomputing it.
+       */
+      sessionAdequacy: SessionAdequacyEvaluation;
       conflicts: DetectedConflict[];
       conflictResolutions: ConflictResolution[];
       decisionTrace: DecisionTrace;

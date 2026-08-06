@@ -111,6 +111,25 @@
  *   the only published SESSION duration; the per-exercise seconds do not
  *   sum to it, because the session additionally carries a transition
  *   between consecutive exercises.
+ * - 2026-08-06 — the `"draft"` outcome gains an OPTIONAL `sessionAdequacy?`.
+ *   A real request (maximum strength, 30 minutes, bodyweight only) returned a
+ *   contract-valid draft holding one accessory exercise and 8 minutes of work,
+ *   with no conflict and no warning. Every stage had done its job; no stage
+ *   was in a position to ask whether the finished session was still the
+ *   session that had been requested. `sessionAdequacy` is that answer:
+ *   `adequate` / `partial` / `inadequate`, with the rule ids, reason codes and
+ *   duration figures behind it.
+ *   Additive under the clause above: the field is optional, so every existing
+ *   v1 object and every existing consumer still type-checks unchanged, and no
+ *   existing field changed type, meaning or optionality. Every `"draft"`
+ *   output serialized after this date carries it; only v1 objects predating
+ *   this change can lack it.
+ *   A CONSUMER MUST NOT READ `outcome: "draft"` AS "USABLE SESSION" — it never
+ *   meant that, and this field is what makes the difference legible without
+ *   recomputing it. `conflicts` and `decisionTrace.warnings` carry the same
+ *   findings for a prescribed session; a session whose prescription is
+ *   `unavailable` reports `inadequate` here while its cause stays where it
+ *   already was, in `prescription.missingSourceData`.
  */
 
 import type {
@@ -127,6 +146,11 @@ import type {
   SeverityLevel,
   ValidationErrorCode,
 } from "../types";
+import type {
+  SessionAdequacyReasonCode,
+  SessionAdequacyRuleId,
+  SessionAdequacyStatus,
+} from "../sessionAdequacy";
 import type { TrainingMethodId } from "../prescription/contracts";
 import type { SessionPrescriptionFailureCode } from "../prescription/prescribeSession";
 import type { UnprescribedExerciseReasonCode } from "../prescription/buildPrescriptionInput";
@@ -729,6 +753,45 @@ export type CasExerciseReferencesV1 = Readonly<Record<Identifier, ExerciseRefere
 // Enveloppe publique
 // -----------------------------------------------------------------------------
 
+/**
+ * Whether the finished session is the session that was requested.
+ *
+ * - `adequate` — the requested adaptation is driven and the session uses the
+ *   requested time reasonably.
+ * - `partial` — the adaptation IS driven, but a named gap remains (typically
+ *   a large amount of unused time).
+ * - `inadequate` — CAS cannot claim to have fulfilled the primary objective.
+ *
+ * A short session is NOT inadequate by itself: the engine deliberately
+ * produces the smallest session that delivers the adaptation, and never adds
+ * work because time remains.
+ */
+export type CasSessionAdequacyStatusV1 = SessionAdequacyStatus;
+
+export interface CasSessionAdequacyFindingV1 {
+  ruleId: SessionAdequacyRuleId;
+  reasonCode: SessionAdequacyReasonCode;
+  sourceRuleIds: readonly Identifier[];
+  description: string;
+}
+
+export interface CasSessionAdequacyV1 {
+  status: CasSessionAdequacyStatusV1;
+  primaryAdaptationCovered: boolean;
+  requestedDurationMinutes: number;
+  /** `null` when the session could not be estimated. */
+  estimatedDurationMinutes: number | null;
+  /** Estimated ÷ requested, two decimals. `null` without an estimate. */
+  durationCoverageRatio: number | null;
+  prescribedExerciseCount: number;
+  /** Prescribed exercises in the primary module that drive the requested adaptation. */
+  drivingExerciseIds: readonly Identifier[];
+  /** Whether CAS tried to repair an uncovered session, and what it added. */
+  repairAttempted: boolean;
+  repairAddedExerciseIds: readonly Identifier[];
+  findings: readonly CasSessionAdequacyFindingV1[];
+}
+
 export type CasSessionOutputV1 =
   | {
       contractVersion: "cas-session-output.v1";
@@ -750,6 +813,7 @@ export type CasSessionOutputV1 =
       decisionTrace: CasDecisionTraceV1;
       exerciseReferences: CasExerciseReferencesV1;
     }
+
   | {
       contractVersion: "cas-session-output.v1";
       engineVersion: "0.1";
@@ -761,6 +825,8 @@ export type CasSessionOutputV1 =
       conflicts: readonly CasConflictV1[];
       conflictResolutions: readonly CasConflictResolutionV1[];
       prescription?: CasPrescriptionOutcomeV1;
+      /** See the v1 additive history entry of 2026-08-06. */
+      sessionAdequacy?: CasSessionAdequacyV1;
       decisionTrace: CasDecisionTraceV1;
       exerciseReferences: CasExerciseReferencesV1;
     };

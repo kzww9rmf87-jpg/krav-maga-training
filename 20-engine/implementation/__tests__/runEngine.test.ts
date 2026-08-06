@@ -132,7 +132,12 @@ describe("runEngine", () => {
       "exercise_scoring",
       "session_assembly",
     ]);
-    expect(stages.slice(5).every((stage) => stage === "prescription_generation")).toBe(true);
+    // The trace now ends with `final_validation`: session adequacy is the last
+    // question the pipeline asks, and it is asked on every draft.
+    expect(
+      stages.slice(5).every((stage) => stage === "prescription_generation" || stage === "final_validation"),
+    ).toBe(true);
+    expect(stages[stages.length - 1]).toBe("final_validation");
   });
 
   test("5. an exercise whose total duration exceeds the requested duration produces a duration_session conflict", () => {

@@ -1862,6 +1862,184 @@ It succeeds only when the returned session is the valid result of the complete d
 
 ---
 
+# Session Adequacy
+
+## Why this stage exists
+
+A real request through VITA — maximum strength, 30 minutes, bodyweight only, no
+recorded 1RM — returned a contract-valid draft containing one exercise: Neck
+Training, approximately 8 minutes of work, no conflict and no warning.
+
+Every stage had done its job. Neck Training is genuinely eligible, genuinely
+prescribable, and its knowledge-base entry genuinely declares
+`primaryAdaptation: maximum_strength`. No stage was in a position to ask whether
+the finished session was still the session that had been requested.
+
+Session Adequacy is that question, asked once, at the end.
+
+## Four distinct questions
+
+The pipeline previously collapsed four questions into two.
+
+| Question | Meaning | Stage |
+| --- | --- | --- |
+| Exercise eligibility | Can this athlete perform this exercise under the current constraints? | eligibility filtering |
+| Prescription feasibility | Can CAS safely and deterministically prescribe it? | prescription generation |
+| Adaptation coverage | Does the resulting session still meaningfully train the requested adaptation? | final validation |
+| Composition adequacy | Is the whole session coherent and useful? | final validation |
+
+A session can pass the first two and fail the last two. That is exactly what
+happened.
+
+## Adaptation coverage
+
+An exercise DRIVES an adaptation when its prescription role is a driving role.
+
+The role is read from the prescription registry — the same value the finished
+prescription carries. It is never inferred from a display name, and never from
+the knowledge-base `primaryAdaptation` field, which describes what an exercise
+trains rather than whether it can carry a session.
+
+Non-driving roles:
+
+```text
+accessory
+robustness
+```
+
+Every other role drives a session of its own kind: `conditioning` drives a
+conditioning session, `technical` a skill session, `recovery` a recovery
+session, `primary` and `secondary` by definition.
+
+The list is deliberately narrow. Adding a role to it declares that no session
+can be built out of that role alone, which is a domain decision — never a way to
+make a test pass.
+
+Coverage fails when the primary module holds prescribed work and none of it
+drives. It also fails when the session could not be prescribed at all: a session
+that holds no work covers nothing.
+
+## Duration adequacy
+
+Shortness is NOT the offence. The Minimum Effective Session Principle above
+states that the engine produces the smallest coherent session capable of
+delivering the adaptation, and never adds work because time remains. A
+20-minute session that genuinely delivers maximum strength is a correct result.
+
+Unused time is reported as EVIDENCE alongside a coverage verdict, never as a
+verdict on its own.
+
+Thresholds — engineering decisions, relative and absolute together, because a
+single ratio is fragile at both ends of the range:
+
+| Threshold | Value | Rationale |
+| --- | --- | --- |
+| `minimumDurationCoverageRatio` | 0.5 | Past half, "the engine judged less work sufficient" stops being a plausible reading of the gap. |
+| `maximumUnusedMinutes` | 15 | The smallest gap that could hold another meaningful piece of work. |
+| `shortRequestExemptionMinutes` | 20 | A short request is usually a deliberately narrow one. |
+| `minimumProductiveMinutes` | 10 | Roughly one working exercise with its rests. |
+
+Both the relative and the absolute test must fail before a session is reported
+as underfilled. Requests at or below the short-request exemption are exempt from
+the ratio rule; the absolute rule still applies.
+
+## Outcomes
+
+```text
+adequate    the adaptation is driven and the time is used reasonably
+partial     the adaptation IS driven, but a named gap remains
+inadequate  CAS cannot claim to have fulfilled the primary objective
+```
+
+Coverage decides between usable and not-what-was-asked-for. Duration can only
+downgrade a covered session to `partial`. A session that trains the right thing
+is never rejected for being short.
+
+## Repair hierarchy
+
+When the primary module drives nothing, CAS may attempt ONE deterministic
+repair before reporting: promote the highest-ranked candidate the module already
+produced — already eligible, already scored, already ranked — that holds a
+driving role and can be prescribed.
+
+Repair may never:
+
+* add work because time remains — the Minimum Effective Session Principle is not
+  suspended for repair, and repair runs only on a session that drives nothing;
+* widen the candidate pool beyond the module's own ranked bench;
+* promote a candidate redundant with work the session already holds (Rule 32);
+* push the session past the requested duration;
+* grow a module past `EXERCISES_PER_MODULE_ROLE`;
+* bypass a missing athlete reference, or invent a load, an intensity or a 1RM.
+
+A module already at its cap is REPORTED, not reshaped. Dropping a composed
+exercise to make room was considered and rejected: it silently reshaped sessions
+across the engine, discarding work the composer had deliberately ranked. A
+module full of support work is a ranking outcome, and correcting a ranking is
+not this stage's business.
+
+Every repair attempt — including one that adds nothing — appears in the Decision
+Trace.
+
+## Missing references
+
+A missing 1RM or other required loading reference remains a SAFE PRESCRIPTION
+FAILURE. Adequacy never works around one: a candidate that cannot be dosed is
+skipped, and a session whose required exercise cannot be dosed is reported
+`inadequate` with `PRIMARY_CANDIDATES_UNPRESCRIBABLE`, its cause staying where it
+already was — in `missingSourceData`.
+
+## Decision Trace
+
+Every adequacy rule that fails emits a `final_validation` entry carrying its rule
+id, its reason code and its source documents. One further entry always records
+the verdict, the duration figures and what repair did or did not do.
+
+Rule identifiers:
+
+```text
+adequacy_primary_adaptation_coverage
+adequacy_duration_coverage
+adequacy_minimum_productive_duration
+adequacy_primary_candidates_unprescribable
+```
+
+Reason codes:
+
+```text
+PRIMARY_ADAPTATION_NOT_DRIVEN
+PRIMARY_CANDIDATES_UNPRESCRIBABLE
+DURATION_GROSSLY_UNDERFILLED
+BELOW_MINIMUM_PRODUCTIVE_DURATION
+```
+
+## Manual-test regression scenario
+
+```text
+adaptation:  maximum_strength
+duration:    30 minutes
+equipment:   bodyweight only
+references:  none
+expected:    outcome draft, prescription prescribed, one accessory exercise,
+             approximately 8 minutes, sessionAdequacy.status = inadequate,
+             PRIMARY_ADAPTATION_NOT_DRIVEN raised as a major conflict
+```
+
+Conflicts and warnings are raised only for a session that WAS prescribed. When
+prescription is unavailable the prescription layer has already reported the
+cause, and restating it would duplicate an existing signal rather than add one;
+`sessionAdequacy.status` still reports `inadequate`.
+
+## Known limitation
+
+For `maximum_strength` with the V0.1 catalogue, scoring frequently ranks
+accessory work above compound lifts, filling the primary module to its cap with
+accessories. Adequacy reports this correctly, and repair correctly declines to
+reshape it. The ranking itself is a separate question, for the scoring model
+rather than for this stage.
+
+---
+
 # Final Principle
 
 The Session Generation Pipeline exists to ensure that a training session is never a random collection of exercises.

@@ -135,6 +135,24 @@ function runRealKnowledgeBaseScenario() {
   return { input, sources, selectedExerciseIds, result };
 }
 
+/**
+ * The warnings these tests are about: the omission warnings, with the session
+ * adequacy findings subtracted.
+ *
+ * Session adequacy contributes its own warnings to the same list (a session
+ * that trains nothing of what was asked must be visible to a consumer reading
+ * only `warnings`). These scenarios are about OMISSIONS, so they assert on the
+ * omission warnings alone — by removing exactly the adequacy findings rather
+ * than by matching on wording.
+ */
+function omissionWarnings(result: {
+  decisionTrace: { warnings: readonly string[] };
+  sessionAdequacy?: { findings: readonly { description: string }[] };
+}): string[] {
+  const adequacy = new Set((result.sessionAdequacy?.findings ?? []).map((finding) => finding.description));
+  return result.decisionTrace.warnings.filter((warning) => !adequacy.has(warning));
+}
+
 describe("selected-but-unprescribed exercises — real knowledge base end to end", () => {
   test("the audit scenario: two support exercises are omitted, and every omission is explicit", () => {
     const { selectedExerciseIds, result } = runRealKnowledgeBaseScenario();
@@ -197,7 +215,7 @@ describe("selected-but-unprescribed exercises — real knowledge base end to end
     }
 
     // 10. Warnings are consistent with the decision — one per omission.
-    expect(result.decisionTrace.warnings).toEqual([
+    expect(omissionWarnings(result)).toEqual([
       'Exercise "hollow_body_hold" (module "core") was selected for this session but could not be prescribed (PRESCRIPTION_SOURCE_NOT_PROVIDED).',
     ]);
   });
@@ -234,7 +252,7 @@ describe("selected-but-unprescribed exercises — real knowledge base end to end
       expect(output.exerciseReferences[gap.exerciseId]).toBeDefined();
     }
 
-    expect(output.decisionTrace.warnings).toHaveLength(1);
+    expect(omissionWarnings(result)).toHaveLength(1);
   });
 
   test("12. + 13. the scenario is deterministic and never mutates the knowledge base", () => {
@@ -302,7 +320,7 @@ describe("selected-but-unprescribed exercises — gap shapes", () => {
     expect("unprescribedSelectedExercises" in result.prescription).toBe(true);
 
     // No omission means no omission warning and no omission trace entry.
-    expect(result.decisionTrace.warnings).toEqual([]);
+    expect(omissionWarnings(result)).toEqual([]);
     expect(result.decisionTrace.entries.filter((entry) => entry.id.endsWith("_omitted"))).toEqual([]);
   });
 
@@ -323,7 +341,7 @@ describe("selected-but-unprescribed exercises — gap shapes", () => {
     expect(gap?.moduleId).toBe("conditioning");
     expect(gap?.required).toBe(false);
     expect(gap?.reasonCode).toBe("PRESCRIPTION_SOURCE_NOT_PROVIDED");
-    expect(result.decisionTrace.warnings).toHaveLength(1);
+    expect(omissionWarnings(result)).toHaveLength(1);
   });
 
   test("several non-required gaps: all reported, in session-draft order, without duplicates", () => {
@@ -359,7 +377,7 @@ describe("selected-but-unprescribed exercises — gap shapes", () => {
     // `missingSourceData` explains the status; the new field is the
     // complete omission record. For a purely required gap they agree.
     expect(result.prescription.unprescribedSelectedExercises).toEqual(result.prescription.missingSourceData);
-    expect(result.decisionTrace.warnings).toHaveLength(1);
+    expect(omissionWarnings(result)).toHaveLength(1);
   });
 
   test("mixed required + non-required gaps: nothing disappears", () => {
@@ -381,7 +399,7 @@ describe("selected-but-unprescribed exercises — gap shapes", () => {
 
     // Both omissions are traced and warned about — the required one included.
     expect(result.decisionTrace.entries.filter((entry) => entry.id.endsWith("_omitted"))).toHaveLength(2);
-    expect(result.decisionTrace.warnings).toHaveLength(2);
+    expect(omissionWarnings(result)).toHaveLength(2);
   });
 
   test("a failed prescription still reports its non-required gaps", () => {
@@ -443,7 +461,7 @@ describe("selected-but-unprescribed exercises — unchanged behavior", () => {
     // having to opt in.
     expect(result.prescription?.status).toBe("unavailable");
     expect(result.prescription?.unprescribedSelectedExercises.map((gap) => gap.exerciseId)).toEqual([exercise.id]);
-    expect(result.decisionTrace.warnings).toHaveLength(1);
+    expect(omissionWarnings(result)).toHaveLength(1);
     expect(result.decisionTrace.entries.filter((entry) => entry.id.endsWith("_omitted"))).toHaveLength(1);
   });
 
