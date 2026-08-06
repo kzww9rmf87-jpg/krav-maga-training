@@ -405,9 +405,17 @@ a repetition-based movement profile would mean inventing dose numbers
 
 ## Source material required, in priority order
 
-1. **A hypertrophy family** — the module is empty, its profile exists, and it
-   needs no athlete reference. Bodyweight and dumbbell variants would serve
-   every home profile at once.
+1. ~~**A hypertrophy family**~~ — **DELIVERED by Lot H2.2A.** Seven chapters in
+   `50-exercises/68_HYPERTROPHY/`, with a family overview and comparison
+   document: Push-Up, Split Squat, Single-Leg Hip Thrust, Goblet Squat,
+   Dumbbell Bench Press, One-Arm Dumbbell Row, Dumbbell Romanian Deadlift.
+   They cover horizontal push, horizontal pull, squat and hinge across the
+   bodyweight and dumbbell profiles, and every one prescribes through
+   `functional_hypertrophy_primary_v0_1` — RPE 7-9 or RIR 1-3, no athlete
+   loading reference required.
+   NOT YET INTEGRATED: the knowledge base and prescription registry are
+   unchanged, so the coverage matrix below still reads zero. Integration is a
+   separate lot.
 2. **Dumbbell and kettlebell strength** — press, row, squat, hinge, carry.
 3. **A repetition-based movement profile**, which would also unlock
    `turkish_get_up`.
@@ -417,6 +425,11 @@ Two documented families exist and were NOT added, because neither closes a gap
 above: `61-CABLE-COMBAT` (six sheets, loaded striking resistance — the full-gym
 profile already has 17 power drivers) and the medicine-ball family, which is
 already fully catalogued.
+
+Lot H2.2A has since written the hypertrophy source chapters that were missing.
+The statement above remains accurate for the catalogue itself: no exercise has
+been added to `exerciseKnowledgeBase.ts`, and the matrix is unchanged until an
+integration lot consumes those chapters.
 
 ## Unsupported combinations
 
