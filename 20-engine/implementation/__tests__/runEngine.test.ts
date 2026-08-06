@@ -125,17 +125,22 @@ describe("runEngine", () => {
     // exercise is not in the prescription registry, so the run ends with a
     // structured omission rather than a dose.
     const stages = result.decisionTrace.entries.map((entry) => entry.stage);
-    expect(stages.slice(0, 5)).toEqual([
+    // Selection stages, then the role-aware driver decision that closes
+    // composition, then prescription, then the adequacy verdict.
+    expect(stages.slice(0, 6)).toEqual([
       "input_validation",
       "module_selection",
       "eligibility_filtering",
       "exercise_scoring",
       "session_assembly",
+      // Lot H2.1: securing (or failing to secure) an adaptation driver is a
+      // composition decision and is traced as one.
+      "session_assembly",
     ]);
     // The trace now ends with `final_validation`: session adequacy is the last
     // question the pipeline asks, and it is asked on every draft.
     expect(
-      stages.slice(5).every((stage) => stage === "prescription_generation" || stage === "final_validation"),
+      stages.slice(6).every((stage) => stage === "prescription_generation" || stage === "final_validation"),
     ).toBe(true);
     expect(stages[stages.length - 1]).toBe("final_validation");
   });

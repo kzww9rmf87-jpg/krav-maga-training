@@ -274,6 +274,22 @@ const resolveRuleValue = (
   );
 };
 
+/**
+ * The identifier CAS publishes for an athlete reference it used.
+ *
+ * NOT the athlete's own `sourceId`. That value is caller-supplied free text —
+ * `"bench-1rm"`, or whatever the platform happened to record — and echoing it
+ * into the public output puts athlete-supplied data in the contract for no
+ * gain: the field exists to say WHICH reference produced the number, and
+ * `referenceType` answers that without quoting the caller back to itself.
+ *
+ * `vitaIntegrationBoundary.test.ts` has always forbidden echoing this value.
+ * It only became reachable when Lot H2.1 began securing primary drivers, which
+ * is when a percentage-of-1RM exercise first reached a composed session.
+ */
+const publishedReferenceSourceId = (reference: { referenceType: string }): Identifier =>
+  `athlete_reference:${reference.referenceType}`;
+
 const buildMetric = (
   rule: NumericalIntensityRule,
   value: number | string,
@@ -292,7 +308,12 @@ const buildMetric = (
         },
   unit: mapIntensityUnit(rule),
   scope: "per_exercise",
-  reference,
+  // The reference is published with a CAS-owned identifier, never the
+  // athlete's own — see `publishedReferenceSourceId`. Its value and unit are
+  // the athlete's real numbers and stay exactly as recorded: those ARE the
+  // prescription, and hiding them would leave the load unexplainable.
+  reference:
+    reference === null ? null : { ...reference, sourceId: publishedReferenceSourceId(reference) },
 });
 
 const buildCalculation = (
@@ -335,7 +356,7 @@ const buildCalculation = (
           name: "reference",
           value: reference.value,
           unit: reference.unit,
-          sourceId: reference.sourceId,
+          sourceId: publishedReferenceSourceId(reference),
         },
         {
           name: "percentage",
@@ -361,7 +382,7 @@ const buildCalculation = (
         name: "reference",
         value: reference.value,
         unit: reference.unit,
-        sourceId: reference.sourceId,
+        sourceId: publishedReferenceSourceId(reference),
       },
       {
         name: "percentage",
@@ -826,7 +847,11 @@ export const resolveIntensity = (
       ...(input.sourceRuleIds ?? []),
       ...profile.sourceRuleIds,
       ...rule.sourceRuleIds,
-      ...(reference === null ? [] : [reference.sourceId]),
+      // The athlete's reference is NOT a source rule. `sourceRuleIdentifiers.ts`
+      // admits exactly two shapes — an engine-document id and a
+      // `50-exercises/` path — and a caller-supplied reference id is neither.
+      // It was landing here as a third, ad hoc shape, and carrying athlete data
+      // into every downstream `sourceRuleIds` list with it.
       ...(input.loadRounding === undefined || input.loadRounding === null
         ? []
         : [input.loadRounding.ruleId]),

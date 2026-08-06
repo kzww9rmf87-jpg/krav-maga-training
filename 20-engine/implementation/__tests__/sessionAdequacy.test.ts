@@ -4,7 +4,6 @@ import { runEngine } from "../index";
 import {
   evaluateSessionAdequacy,
   isDrivingRole,
-  NON_DRIVING_EXERCISE_ROLES,
   SESSION_ADEQUACY_THRESHOLDS,
   type SessionAdequacyInput,
 } from "../sessionAdequacy";
@@ -51,6 +50,7 @@ function evaluationInput(overrides: Partial<SessionAdequacyInput> = {}): Session
     requestedDurationMinutes: 45,
     estimatedDurationMinutes: 40,
     primaryModule: "strength",
+    primaryAdaptation: "maximum_strength",
     prescriptionAvailable: true,
     prescribedExercises: [{ exerciseId: "bench_press", moduleId: "strength", role: "primary" }],
     unprescribedPrimaryExerciseIds: [],
@@ -92,7 +92,7 @@ describe("session adequacy — the reproduced manual-test failure", () => {
     expect(prescribed.map((prescription) => prescription.exerciseId)).toEqual(["neck_training"]);
     // The engine already knew this before Lot H2 — it simply never asked.
     expect(prescribed[0].role).toBe("accessory");
-    expect(isDrivingRole("accessory")).toBe(false);
+    expect(isDrivingRole("maximum_strength", "accessory")).toBe(false);
   });
 
   // 14. + 15. An inadequate draft is never reported as complete, and its
@@ -241,10 +241,17 @@ describe("session adequacy — coverage rules", () => {
   test("conditioning and technical roles drive their own sessions", () => {
     // The non-driving list is deliberately narrow: a conditioning session is
     // driven by conditioning work, a skill session by technical work.
-    expect(isDrivingRole("conditioning")).toBe(true);
-    expect(isDrivingRole("technical")).toBe(true);
-    expect(isDrivingRole("recovery")).toBe(true);
-    expect(NON_DRIVING_EXERCISE_ROLES).toEqual(["accessory", "robustness"]);
+    // A role drives an adaptation, or it does not — the question has no
+    // objective-free answer.
+    expect(isDrivingRole("conditioning", "conditioning")).toBe(true);
+    expect(isDrivingRole("specific_skill", "technical")).toBe(true);
+    expect(isDrivingRole("recovery", "recovery")).toBe(true);
+    // A robustness session IS built from the robustness module's accessory work.
+    expect(isDrivingRole("robustness", "accessory")).toBe(true);
+    // 15. and none of those roles drives maximum strength.
+    expect(isDrivingRole("maximum_strength", "conditioning")).toBe(false);
+    expect(isDrivingRole("maximum_strength", "technical")).toBe(false);
+    expect(isDrivingRole("maximum_strength", "robustness")).toBe(false);
   });
 
   // 16. An impossible objective fails safely and explainably.
@@ -275,16 +282,27 @@ describe("session adequacy — repair", () => {
   });
 
   // 12. + 13. A missing 1RM stays a safe prescription failure.
-  test("12. + 13. a missing 1RM remains a prescription failure — no load is fabricated", () => {
-    // Full barbell gym, no recorded 1RM: bench press is selected and cannot be
-    // dosed. CAS declines rather than guessing a load.
+  test("12. + 13. a missing 1RM never fabricates a load — feasibility steers the choice", () => {
+    // Full barbell gym, no recorded 1RM. Before Lot H2.1 this returned
+    // `unavailable`: bench_press was selected and could not be dosed. Feasibility
+    // is now consulted BEFORE the driver slot is reserved, so CAS secures a
+    // driver it can actually prescribe instead of failing the whole session.
+    //
+    // What has NOT changed: no 1RM, training max, estimated 1RM or percentage is
+    // invented anywhere. A percentage-of-1RM exercise stays unprescribable.
     const result = draftOf(["barbell", "bench", "rack", "plates"], 30);
-    if (result.prescription?.status !== "unavailable") {
-      throw new Error(`Expected an unavailable prescription, got "${result.prescription?.status}".`);
+    if (result.prescription?.status !== "prescribed") {
+      throw new Error(`Expected a prescribed session, got "${result.prescription?.status}".`);
     }
-    expect(result.prescription.missingSourceData.map((gap) => gap.exerciseId)).toContain("bench_press");
-    expect(result.sessionAdequacy.status).toBe("inadequate");
-    expect(result.sessionAdequacy.repairAddedExerciseIds).toEqual([]);
+
+    expect(result.sessionAdequacy.primaryAdaptationCovered).toBe(true);
+    const driver = result.sessionAdequacy.drivingExerciseIds[0];
+    expect(driver).toBeDefined();
+    // The driver CAS chose is one it could dose from what the athlete supplied.
+    expect(driver).not.toBe("bench_press");
+
+    // Nothing anywhere claims a one-rep max the athlete never recorded.
+    expect(JSON.stringify(result.prescription)).not.toContain("one_rep_max");
   });
 
   test("repair only ever considers driving roles from the primary module's own ranked bench", () => {
@@ -295,13 +313,13 @@ describe("session adequacy — repair", () => {
       if (!isPilotExerciseId(exerciseId)) {
         throw new Error(`${exerciseId} is expected to be in the pilot registry.`);
       }
-      expect(isDrivingRole(EXERCISE_PRESCRIPTION_REGISTRY[exerciseId].role)).toBe(false);
+      expect(isDrivingRole("maximum_strength", EXERCISE_PRESCRIPTION_REGISTRY[exerciseId].role)).toBe(false);
     }
     for (const exerciseId of ["bench_press", "back_squat", "trap_bar_deadlift"]) {
       if (!isPilotExerciseId(exerciseId)) {
         throw new Error(`${exerciseId} is expected to be in the pilot registry.`);
       }
-      expect(isDrivingRole(EXERCISE_PRESCRIPTION_REGISTRY[exerciseId].role)).toBe(true);
+      expect(isDrivingRole("maximum_strength", EXERCISE_PRESCRIPTION_REGISTRY[exerciseId].role)).toBe(true);
     }
   });
 
@@ -310,23 +328,12 @@ describe("session adequacy — repair", () => {
     expect(adequacy.repairAttempted).toBe(false);
   });
 
-  // 9. + 10. The guards that decide WHEN repair may act.
-  //
-  // Both are reachable with the real catalog, and both currently STOP repair —
-  // which is why no scenario in this suite shows an exercise being added:
-  //
-  // - a full gym ranks three accessories into the strength module, so the
-  //   module sits at `EXERCISES_PER_MODULE_ROLE.primary` and repair declines to
-  //   reshape it (a ranking outcome is not this stage's to correct);
-  // - a pull-up bar makes `pull_up` (a driving role) available, but it is
-  //   redundant with the `chin_up` the session already holds, so Rule 32 stops
-  //   it.
-  //
-  // The addition path is implemented and guarded; it is simply unreachable with
-  // the V0.1 catalog. That is a finding about the catalog and the scoring model,
-  // not a reason to loosen a guard.
-  test("9. a full primary module is reported rather than reshaped", () => {
-    // A recorded 1RM, so the session prescribes and repair can actually run.
+  // 9. The Lot H2 limitation, now closed by driver-first composition.
+  test("9. the driver is secured first, and accessories take the remaining slots", () => {
+    // Lot H2 measured this exact scenario ranking four accessories above every
+    // compound lift, filling the module before a driver was reached. Lot H2.1
+    // reserves the first slot structurally, so the driver is in the session —
+    // and score still decides everything after it.
     const result = runEngine(
       makeValidInput({
         athleteProfile: makeAthleteProfile({
@@ -357,14 +364,21 @@ describe("session adequacy — repair", () => {
     if (result.outcome !== "draft") {
       throw new Error(`Expected a draft, received "${result.outcome}".`);
     }
-    expect(result.sessionAdequacy.repairAttempted).toBe(true);
-    expect(result.sessionAdequacy.repairAddedExerciseIds).toEqual([]);
-    // Nothing was given up either: the composition is left exactly as composed.
-    expect(result.sessionAdequacy.prescribedExerciseCount).toBeGreaterThanOrEqual(3);
+
+    expect(result.sessionAdequacy.status).toBe("adequate");
+    expect(result.sessionAdequacy.primaryAdaptationCovered).toBe(true);
+    expect(result.sessionAdequacy.drivingExerciseIds.length).toBeGreaterThan(0);
+    // No post-hoc repair was needed: composition secured the driver itself.
+    expect(result.sessionAdequacy.repairAttempted).toBe(false);
   });
 
-  test("10. a driving candidate redundant with kept work is not promoted", () => {
-    // `pull_up` drives; `chin_up` is already held and is the same movement.
+  // 10. + 17. Redundancy is unchanged; what changed is which candidate reaches
+  // it first.
+  test("10. redundancy is resolved in the driver's favour, not against it", () => {
+    // `pull_up` (primary) and `chin_up` (accessory) are the same movement.
+    // Before Lot H2.1 the accessory won the slot on score and the driver was
+    // then dropped as redundant with it. Now the driver is secured first and
+    // the accessory is the one Rule 32 excludes.
     const result = draftOf(["bodyweight", "pull_up_bar"], 45);
     if (result.prescription?.status !== "prescribed") {
       throw new Error("Expected a prescribed session.");
@@ -372,10 +386,9 @@ describe("session adequacy — repair", () => {
     const prescribedIds = result.prescription.session.exercises.map(
       (exercise) => exercise.prescription.exerciseId,
     );
-    expect(prescribedIds).toContain("chin_up");
-    expect(prescribedIds).not.toContain("pull_up");
-    expect(result.sessionAdequacy.repairAddedExerciseIds).toEqual([]);
-    expect(result.sessionAdequacy.status).toBe("inadequate");
+    expect(prescribedIds).toContain("pull_up");
+    expect(prescribedIds).not.toContain("chin_up");
+    expect(result.sessionAdequacy.primaryAdaptationCovered).toBe(true);
   });
 });
 

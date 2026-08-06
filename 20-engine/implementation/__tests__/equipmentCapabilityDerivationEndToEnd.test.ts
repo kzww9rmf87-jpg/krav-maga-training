@@ -104,7 +104,17 @@ function runScenario(input: EngineInput) {
     readiness: input.readiness,
   });
 
-  const result = runEngine(input, undefined, built.sources);
+  // The engine derives its OWN sources here, which is what this file's title
+  // claims and what the product path does.
+  //
+  // It used to be handed `built.sources` — a map keyed by the ids the FIRST run
+  // happened to select. That made the harness circular: any change to
+  // composition or to the time-budget reduction could leave the second run
+  // selecting an exercise the first run had given up, which then looked like a
+  // missing prescription source rather than the harness artefact it was.
+  // `built` is still computed, and still asserted on, for the capability and
+  // range-context derivations this file is actually about.
+  const result = runEngine(input);
   if (result.outcome !== "draft") {
     throw new Error(`Expected a draft, got "${result.outcome}".`);
   }
@@ -127,13 +137,22 @@ describe("equipment capability derivation — the audit scenario is fixed", () =
 
     // The strength module contributes three exercises since Lot 7 composed
     // sessions from the ranked bench instead of taking only the top pick.
+    //
+    // Two changes since Lot H2.1, both deliberate:
+    // - `pull_up` replaces `chin_up`: the strength module now secures a
+    //   prescribable adaptation DRIVER before accessories take the remaining
+    //   slots, and the two are the same movement, so Rule 32 keeps only one;
+    // - `assault_bike_intervals` is no longer in the session: the driver costs
+    //   more time than the accessory it replaced, and the time-budget reduction
+    //   surrenders support work before primary work (Principle 1). The emptied
+    //   conditioning module raises its own `missing_exercise_*` conflict, which
+    //   is asserted where that behaviour belongs.
     expect(selectedExerciseIds).toEqual([
       "chest_supported_row",
       "neck_training",
-      "chin_up",
+      "pull_up",
       "plate_pinch",
       "pallof_press",
-      "assault_bike_intervals",
     ]);
 
     if (result.prescription?.status !== "prescribed") {
@@ -146,14 +165,25 @@ describe("equipment capability derivation — the audit scenario is fixed", () =
     );
     expect(prescribedIds).toEqual(selectedExerciseIds);
     expect(prescribedIds).toContain("pallof_press");
-    expect(prescribedIds).toContain("assault_bike_intervals");
+    // `assault_bike_intervals` is no longer part of this session — see the
+    // comment on the selection above. What this test guards is that every
+    // exercise the session DOES hold is dosed without a caller-supplied
+    // capability list, which remains true.
 
-    // Nothing omitted, so Lot 1's disclosure surfaces are correctly silent.
-    // Session adequacy is a separate question and is asserted separately: this
-    // scenario's strength module happens to hold only accessory work.
+    // Nothing was omitted for want of a prescription source, which is what this
+    // file guards: every exercise the session holds was dosed from capabilities
+    // CAS derived itself.
     expect(result.prescription.unprescribedSelectedExercises).toEqual([]);
-    expect(omissionWarnings(result)).toEqual([]);
     expect(failures).toEqual([]);
+
+    // One warning remains, and it is not an omission: since Lot H2.1 the
+    // strength module secures a driver, which costs more time than the accessory
+    // it replaced, so the time-budget reduction gives up the conditioning
+    // module. Principle 1 — support work is surrendered before primary work —
+    // and the removal is stated rather than hidden.
+    expect(omissionWarnings(result)).toEqual([
+      'The "conditioning" module is not represented in this session: "assault_bike_intervals" was selected and prescribed, then given up so the session fits the requested 45 minute(s).',
+    ]);
   });
 
   test("a fully-equipped gym derives the whole vocabulary, in canonical order", () => {

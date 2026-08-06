@@ -65,6 +65,7 @@
  */
 
 import type {
+  AdaptationDomain,
   CapabilityModule,
   ExerciseDefinition,
   ExerciseSelectionResult,
@@ -72,6 +73,8 @@ import type {
   SelectedExerciseCandidate,
   SelectedModule,
 } from "./types";
+import type { ExerciseRole } from "./prescription/types";
+import { isDriverRoleFor } from "./adaptationDrivers";
 
 // -----------------------------------------------------------------------------
 // The engineering decision
@@ -147,6 +150,12 @@ export interface ModuleCompositionDecision {
   keptExerciseIds: readonly Identifier[];
   /** Candidates passed over, each with the reason — never silently dropped. */
   rejected: readonly { exerciseId: Identifier; reason: string }[];
+  /**
+   * The exercise secured first as this session's adaptation driver, or `null`
+   * when the module reserved none (no policy, not the primary module, or no
+   * prescribable driver on the bench).
+   */
+  reservedDriverExerciseId?: Identifier | null;
 }
 
 export interface SessionComposition {
@@ -155,13 +164,83 @@ export interface SessionComposition {
 }
 
 /**
+ * What composition needs to know to apply the driver-first rule.
+ *
+ * Passed in rather than imported so this file keeps knowing nothing about the
+ * prescription registry: it receives a role lookup, not a registry.
+ *
+ * Omitting the policy composes by score alone — the pre-Lot-H2.1 behaviour,
+ * kept for callers that have no objective to serve (and for the tests that
+ * exercise composition in isolation).
+ */
+export interface CompositionPolicy {
+  /** The adaptation the PRIMARY module serves. */
+  primaryAdaptation: AdaptationDomain;
+  /** The registry role of a candidate, or `null` when it has none. */
+  roleOf: (exerciseId: Identifier) => ExerciseRole | null;
+  /**
+   * Whether a candidate can actually be prescribed with the athlete data
+   * available.
+   *
+   * A mechanically eligible exercise is not enough. Reserving a driver that
+   * cannot be dosed — a percentage-of-1RM lift for an athlete with no recorded
+   * 1RM — would turn a usable session into an unprescribable one, which is a
+   * worse answer than the accessory session it replaced.
+   *
+   * Feasibility is knowable HERE: a prescription source depends only on the
+   * exercise, the environment, the readiness and the athlete's references, all
+   * of which exist before composition runs. So the driver is chosen among
+   * candidates that survive feasibility, rather than reserved blind and
+   * repaired afterwards.
+   *
+   * This never duplicates prescription logic: it asks the prescription layer.
+   */
+  isPrescribable: (exerciseId: Identifier) => boolean;
+}
+
+/**
  * Composes every module's bench into its kept exercises.
  *
  * Candidates are taken in the order `scoringEngine` already ranked them —
- * this file never re-sorts. For each module, in order:
+ * this file never re-sorts and never re-scores. For each module, in order:
  *
  *   keep the highest-ranked candidate not redundant with one already kept,
  *   until the module's role cap is reached or the bench is exhausted.
+ *
+ * THE DRIVER-FIRST RULE (Lot H2.1). Before that loop runs, the PRIMARY module
+ * reserves its first slot for the highest-ranked candidate able to DRIVE the
+ * requested adaptation.
+ *
+ * Why a structural rule rather than a scoring change: measured on the real
+ * catalogue, a full-gym maximum-strength request ranked four accessory
+ * exercises above every compound lift — `chest_supported_row` 88.05,
+ * `neck_training` 88.05, `chin_up` 87.57, `hip_thrust` 87.57, against
+ * `bench_press` 84.71 and `back_squat` 63.14. Every one of them scored
+ * `objectiveRelevance: 100`, because that component reads the knowledge base's
+ * `primaryAdaptation`, which says `maximum_strength` for accessories too. What
+ * separated them was safety, fatigue and technical risk — and for a
+ * maximum-strength objective, high neural fatigue is what the work IS, not a
+ * defect to penalise. The quota was then consumed by accessories before any
+ * driver was reached.
+ *
+ * Correcting that by inflating a role multiplier would bend a scoring model
+ * that is meaningful elsewhere until it produced the right order here. The
+ * doctrine's own shape is structural — a module carries an objective — so the
+ * requirement is structural: SECURE A DRIVER, THEN RANK BY SCORE. Score still
+ * decides which driver, and still decides everything after it.
+ *
+ * The reservation decides WHICH exercises the module keeps, not the order they
+ * are performed in. `ModuleCompositionDecision.keptExerciseIds` lists the driver
+ * first because it was secured first, but the emitted session keeps the ranked
+ * order of `candidates`, exactly as before. Ordering a session — heavy compound
+ * before accessory, on a fresh athlete — is a real question with its own rules
+ * (`exercise_order` is already a conflict type) and is deliberately not decided
+ * here.
+ *
+ * When the bench holds no driver at all, nothing is reserved and composition is
+ * exactly what it was. That case is real — a bodyweight-only maximum-strength
+ * request has no eligible driver in the V0.1 catalogue — and it is for
+ * `sessionAdequacy.ts` to report, not for this file to paper over.
  *
  * Neither `selections` nor any candidate is mutated: each module yields a
  * new `ExerciseSelectionResult` whose candidates carry updated `selected`
@@ -170,6 +249,7 @@ export interface SessionComposition {
 export function composeSession(
   selections: readonly ExerciseSelectionResult[],
   selectedModules: readonly SelectedModule[],
+  policy?: CompositionPolicy,
 ): SessionComposition {
   const roleByModule = new Map(selectedModules.map((selected) => [selected.module, selected.role] as const));
   const decisions: ModuleCompositionDecision[] = [];
@@ -181,8 +261,31 @@ export function composeSession(
     const kept: SelectedExerciseCandidate[] = [];
     const rejected: { exerciseId: Identifier; reason: string }[] = [];
 
+    // Driver-first: the primary module reserves its first slot for the
+    // highest-ranked candidate that can carry the objective. `find` walks the
+    // bench in rank order, so "highest-ranked driver" is exactly what it
+    // returns — the reservation chooses the SLOT, never the ordering.
+    const reservedDriver =
+      policy !== undefined && role === "primary"
+        ? selection.candidates.find((candidate) => {
+            const exerciseId = candidate.scoredExercise.exercise.id;
+            return (
+              isDriverRoleFor(policy.primaryAdaptation, policy.roleOf(exerciseId)) &&
+              policy.isPrescribable(exerciseId)
+            );
+          })
+        : undefined;
+
+    if (reservedDriver !== undefined) {
+      kept.push(reservedDriver);
+    }
+
     for (const candidate of selection.candidates) {
       const exercise = candidate.scoredExercise.exercise;
+
+      if (candidate === reservedDriver) {
+        continue;
+      }
 
       if (kept.length >= cap) {
         rejected.push({
@@ -213,6 +316,7 @@ export function composeSession(
       role,
       keptExerciseIds: kept.map((candidate) => candidate.scoredExercise.exercise.id),
       rejected,
+      reservedDriverExerciseId: reservedDriver?.scoredExercise.exercise.id ?? null,
     });
 
     return {
@@ -230,7 +334,9 @@ export function composeSession(
           selectionReasons: [
             ...candidate.selectionReasons,
             isKept
-              ? `Composed into the session as one of ${kept.length} exercise(s) for the "${role}" module.`
+              ? candidate === reservedDriver
+                ? `Secured first as this session's adaptation driver: role "${policy?.roleOf(exerciseId) ?? "unknown"}" can drive "${policy?.primaryAdaptation}".`
+                : `Composed into the session as one of ${kept.length} exercise(s) for the "${role}" module.`
               : `Not composed into the session: the "${role}" module keeps ${kept.length} exercise(s).`,
           ],
         };

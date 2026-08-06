@@ -2040,6 +2040,140 @@ rather than for this stage.
 
 ---
 
+# Primary-Driver Selection
+
+## The defect this closes
+
+Lot H2 detected inadequate sessions and deliberately left composition alone. It
+recorded a limitation: accessory work could rank above compound work and fill a
+module's quota before any driver was reached.
+
+Measured on the real catalogue, a full-gym maximum-strength request ranked:
+
+```text
+1. chest_supported_row   accessory   88.05
+2. neck_training         accessory   88.05
+3. chin_up               accessory   87.57
+4. hip_thrust            accessory   87.57
+5. bench_press           primary     84.71
+...
+12. back_squat           primary     63.14
+```
+
+All twelve scored `objectiveRelevance: 100`. That component reads the knowledge
+base's `primaryAdaptation`, which says `maximum_strength` for an accessory too —
+so the one component that should discriminate did not. What separated them was
+safety, fatigue cost and technical risk. For a maximum-strength objective, high
+neural fatigue is what the work IS, not a defect to penalise.
+
+The quota then filled with the first three.
+
+## Why the correction is structural
+
+Scoring is NOT changed by this lot. Inflating a role multiplier until compound
+lifts win would bend a model that is meaningful elsewhere, and would have to be
+re-bent for every objective.
+
+The doctrine's own shape is structural — a module carries an objective — so the
+requirement is structural:
+
+```text
+SECURE A DRIVER, THEN RANK BY SCORE
+```
+
+Score still decides WHICH driver, and still decides every remaining slot.
+
+## Primary driver
+
+An exercise drives an adaptation when its PRESCRIPTION-REGISTRY ROLE is one the
+adaptation admits. `adaptationDrivers.ts` holds that relation:
+
+| Adaptation | Driving roles |
+| --- | --- |
+| `maximum_strength`, `power`, `functional_hypertrophy` | `primary`, `secondary` |
+| `conditioning` | + `conditioning` |
+| `specific_skill` | + `technical` |
+| `movement` | + `technical`, `corrective`, `recovery` |
+| `recovery` | + `recovery`, `corrective`, `technical` |
+| `robustness` | + `robustness`, `accessory`, `corrective` |
+
+"Driver" is a RELATION between a role and an adaptation, never a property of a
+role. Lot H2 used one fixed list of support roles, which was objective-blind and
+would have failed a robustness session built from the robustness module's own
+accessory work — which is exactly what a robustness session is.
+
+No new role vocabulary, no new field, no display metadata touched. An exercise
+with no registry role never drives anything: absence of evidence is not evidence
+of capability.
+
+## Prescription feasibility comes first
+
+A mechanically eligible exercise is not enough. The driver slot is reserved
+among candidates that CAN BE PRESCRIBED with the athlete data available, using
+the same source builder the prescription layer uses — never a reimplementation
+of it.
+
+Feasibility is knowable at selection time: a prescription source depends only on
+the exercise, the environment, the readiness and the athlete's references, all
+of which exist before composition runs.
+
+This is what makes a barbell gym WITHOUT a recorded 1RM produce a real session:
+`bench_press` needs a percentage of 1RM and is passed over, and the next ranked
+prescribable driver takes the slot. Before, the whole session came back
+`unavailable`.
+
+Nothing is fabricated. No 1RM, training max, estimated 1RM, RPE, RIR, percentage
+or bodyweight substitution is invented anywhere. An exercise that cannot be dosed
+is skipped, never forced.
+
+## Quotas and redundancy
+
+The reservation takes ONE slot. `EXERCISES_PER_MODULE_ROLE` is unchanged and is
+never exceeded; the remaining slots fill by score as before; Rule 32 redundancy
+still applies to every candidate.
+
+Redundancy now resolves in the driver's favour rather than against it. `pull_up`
+(driving) and `chin_up` (accessory) are the same movement: the accessory used to
+win the slot on score and the driver was then dropped as redundant with it. The
+rule is unchanged — the order in which candidates reach it is.
+
+The reservation decides WHICH exercises a module keeps, not the order they are
+performed in. Session ordering has its own rules (`exercise_order` is already a
+conflict type) and is deliberately not decided here.
+
+## When no driver exists
+
+Nothing is reserved and composition is exactly what it was. This is real: a
+bodyweight-only maximum-strength request has NO eligible driver in the V0.1
+catalogue — every compound lift is rejected at eligibility for want of
+equipment, and the strength module's ranked bench holds one accessory.
+
+That session stays `inadequate`, and `sessionAdequacy` reports it. Lot H2.1 does
+not invent a driver, widen the equipment assumptions, or lower the requirement
+to make the session look complete.
+
+## Decision Trace
+
+One `session_assembly` entry per session, `<requestId>_driver_requirement`,
+placed with the other composition entries so the trace reads in pipeline order.
+It answers:
+
+* what the objective required — the driving roles for this adaptation;
+* which exercise was secured, and with which role;
+* why it was secured — driving role AND prescribable;
+* what was composed behind it, in score order;
+* or, when none was secured, that no candidate was both driving and
+  prescribable and that nothing was substituted in its place.
+
+## Interaction with session adequacy
+
+Selection and adequacy read the SAME relation from `adaptationDrivers.ts`, so
+they can never disagree about what a driver is. Adequacy remains the check of
+last resort: it still runs on every draft, and still reports any composition
+failure that selection could not resolve.
+
+---
+
 # Final Principle
 
 The Session Generation Pipeline exists to ensure that a training session is never a random collection of exercises.

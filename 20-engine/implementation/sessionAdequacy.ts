@@ -43,7 +43,8 @@
  * result in.
  */
 
-import type { CapabilityModule, Identifier } from "./types";
+import type { AdaptationDomain, CapabilityModule, Identifier } from "./types";
+import { driverRolesFor, isDriverRoleFor } from "./adaptationDrivers";
 import type { ExerciseRole } from "./prescription/types";
 
 // -----------------------------------------------------------------------------
@@ -51,32 +52,22 @@ import type { ExerciseRole } from "./prescription/types";
 // -----------------------------------------------------------------------------
 
 /**
- * The roles that never carry a session objective by themselves.
+ * Whether a role drives THIS session's adaptation.
  *
- * DELIBERATELY NARROW. `ExerciseRole` already exists and is already resolved
- * for every prescribed exercise — this file reads it rather than inventing a
- * second classification, and rather than inferring anything from display
- * names. But most of that vocabulary IS a legitimate session driver depending
- * on what was asked:
+ * Lot H2 asked this question with one fixed list of support roles, which was
+ * objective-blind and therefore wrong in both directions: it correctly refused
+ * an accessory-only maximum-strength session, but it would equally have
+ * refused a ROBUSTNESS session built from the robustness module's accessory
+ * work — `tibialis_raise`, `soleus_raise`, `wrist_strengthening` are all
+ * `accessory` in the registry, and that is exactly what a robustness session
+ * is made of.
  *
- * - `conditioning` drives a conditioning session (`rowerg_intervals`,
- *   `sprint_intervals`, `assault_bike_intervals`);
- * - `technical` drives a skill session (`shadow_boxing`, `footwork_drills`,
- *   `sprawl`);
- * - `primary` and `secondary` drive by definition;
- * - `recovery` and `corrective` drive a recovery or corrective session.
- *
- * Only these two never do. An accessory complements a lift; a robustness
- * exercise hardens a tissue. Neither is the reason an athlete asked for a
- * session, whatever adaptation their knowledge-base entry names.
- *
- * ADDING A ROLE HERE IS A DOMAIN DECISION, not a way to make a test pass: it
- * declares that no session can be built out of that role alone.
+ * `adaptationDrivers.ts` holds the relation, stated once and shared with the
+ * composer, so selection and adequacy can never disagree about what a driver
+ * is.
  */
-export const NON_DRIVING_EXERCISE_ROLES: readonly ExerciseRole[] = ["accessory", "robustness"];
-
-export function isDrivingRole(role: ExerciseRole): boolean {
-  return !NON_DRIVING_EXERCISE_ROLES.includes(role);
+export function isDrivingRole(adaptation: AdaptationDomain, role: ExerciseRole | null): boolean {
+  return isDriverRoleFor(adaptation, role);
 }
 
 // -----------------------------------------------------------------------------
@@ -186,6 +177,8 @@ export interface SessionAdequacyInput {
   estimatedDurationMinutes: number | null;
   /** `null` when no primary module was selected. */
   primaryModule: CapabilityModule | null;
+  /** The adaptation the primary module serves — decides which roles drive it. */
+  primaryAdaptation: AdaptationDomain;
   /**
    * Whether the session as a whole was prescribed.
    *
@@ -241,6 +234,7 @@ export function evaluateSessionAdequacy(input: SessionAdequacyInput): SessionAde
     requestedDurationMinutes,
     estimatedDurationMinutes,
     primaryModule,
+    primaryAdaptation,
     prescriptionAvailable,
     prescribedExercises,
     unprescribedPrimaryExerciseIds,
@@ -252,7 +246,9 @@ export function evaluateSessionAdequacy(input: SessionAdequacyInput): SessionAde
     primaryModule === null
       ? []
       : prescribedExercises.filter((exercise) => exercise.moduleId === primaryModule);
-  const drivingExercises = primaryExercises.filter((exercise) => isDrivingRole(exercise.role));
+  const drivingExercises = primaryExercises.filter((exercise) =>
+    isDrivingRole(primaryAdaptation, exercise.role),
+  );
   const findings: SessionAdequacyFinding[] = [];
 
   // Rule 1 — primary adaptation coverage.
@@ -283,7 +279,9 @@ export function evaluateSessionAdequacy(input: SessionAdequacyInput): SessionAde
         sourceRuleIds: [MODULE_ENGINE_SOURCE, PIPELINE_SOURCE],
         description: `The "${primaryModule}" module carries this session's objective, but every exercise prescribed for it is support work (${primaryExercises
           .map((exercise) => `"${exercise.exerciseId}" (${exercise.role})`)
-          .join(", ")}). No exercise drives the requested adaptation.`,
+          .join(", ")}). Driving "${primaryAdaptation}" requires one of: ${driverRolesFor(primaryAdaptation)
+        .map((driverRole) => `"${driverRole}"`)
+        .join(", ")}.`,
       });
     }
 

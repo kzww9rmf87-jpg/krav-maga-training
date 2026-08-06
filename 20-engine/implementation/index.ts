@@ -82,6 +82,7 @@ import {
   withoutExercises,
   type SessionComposition,
 } from "./sessionComposer";
+import { driverRolesFor } from "./adaptationDrivers";
 import {
   evaluateSessionAdequacy,
   isDrivingRole,
@@ -276,7 +277,41 @@ export function runEngine(
   // session actually holds. It never pads to fill the requested time —
   // see `sessionComposer.ts` for the Minimum Effective Session Principle
   // this implements.
-  const composition = composeSession(rankedSelections, selectedModules);
+  // The objective the primary module serves decides which roles may drive it.
+  // Composition receives a role LOOKUP, never the registry itself, so the
+  // selection layer stays free of prescription coupling.
+  const primaryModuleSelection = selectedModules.find((selectedModule) => selectedModule.role === "primary");
+  // Feasibility is resolved for every candidate the primary module could keep,
+  // using the SAME source builder the prescription layer uses — never a
+  // reimplementation of it. When the caller supplied its own source map, that
+  // map is the authority.
+  const primaryCandidateIds =
+    primaryModuleSelection === undefined
+      ? []
+      : (rankedSelections.find((selection) => selection.module === primaryModuleSelection.module)?.candidates ?? []).map(
+          (candidate) => candidate.scoredExercise.exercise.id,
+        );
+  const feasibleDriverIds =
+    prescriptionSources === undefined
+      ? new Set(
+          buildEngineSessionPrescriptionSources(primaryCandidateIds, {
+            environment: input.environment,
+            readiness: input.readiness,
+            athleteReferences: deriveAthleteReferences(input).references,
+          }).sources.keys(),
+        )
+      : new Set(prescriptionSources.keys());
+
+  const compositionPolicy =
+    primaryModuleSelection === undefined
+      ? undefined
+      : {
+          primaryAdaptation: primaryModuleSelection.primaryAdaptation,
+          roleOf: registryRoleOf,
+          isPrescribable: (exerciseId: Identifier) => feasibleDriverIds.has(exerciseId),
+        };
+
+  const composition = composeSession(rankedSelections, selectedModules, compositionPolicy);
   const exerciseSelections = [...composition.selections];
 
   const sessionResult = generateInitialSession(input, selectedModules, exerciseSelections);
@@ -480,6 +515,7 @@ export function runEngine(
     requestedDurationMinutes: input.request.durationMinutes,
     estimatedDurationMinutes: durationEstimate?.totalMinutes ?? null,
     primaryModule: primaryModuleForAdequacy,
+    primaryAdaptation: primaryModuleSelection?.primaryAdaptation ?? input.request.primaryObjective.adaptationDomain,
     prescriptionAvailable: prescriptionWasAvailable,
     prescribedExercises: adequacyExercisesOf(workingPrescription),
     unprescribedPrimaryExerciseIds:
@@ -514,6 +550,10 @@ export function runEngine(
     ...decisionTrace,
     entries: [
       ...decisionTrace.entries,
+      // Placed with the other `session_assembly` entries rather than appended:
+      // securing a driver IS a composition decision, and the trace reads in
+      // pipeline order.
+      ...buildDriverSelectionTraceEntries(input, primaryModuleSelection, workingComposition, registryRoleOf),
       ...workingPrescription.traceEntries,
       ...timeBudgetTraceEntries,
       ...durationTraceEntries,
@@ -553,6 +593,63 @@ export function runEngine(
     // exists, matching how `prescription` treats an absent value.
     ...(durationEstimate === null ? {} : { durationEstimate }),
   };
+}
+
+/**
+ * Trace entries for the role-aware selection decision.
+ *
+ * Answers, without prose parsing: what did this objective require, which roles
+ * could drive it, which candidate was secured and why, and which candidates
+ * were deferred behind it.
+ */
+function buildDriverSelectionTraceEntries(
+  input: EngineInput,
+  primaryModule: SelectedModule | undefined,
+  composition: SessionComposition,
+  roleOf: (exerciseId: Identifier) => ExerciseRole | null,
+): DecisionTraceEntry[] {
+  if (primaryModule === undefined) {
+    return [];
+  }
+
+  const decision = composition.decisions.find((entry) => entry.module === primaryModule.module);
+  if (decision === undefined) {
+    return [];
+  }
+
+  const adaptation = primaryModule.primaryAdaptation;
+  const reserved = decision.reservedDriverExerciseId ?? null;
+  const timestamp = input.request.requestedAt;
+
+  const deferred = decision.keptExerciseIds
+    .filter((exerciseId) => exerciseId !== reserved)
+    .map((exerciseId) => `"${exerciseId}" (${roleOf(exerciseId) ?? "no registry role"})`);
+
+  return [
+    {
+      id: `trace_${input.request.requestId}_driver_requirement`,
+      timestamp,
+      stage: "session_assembly",
+      decision:
+        reserved === null
+          ? `No adaptation driver could be secured for the "${primaryModule.module}" module.`
+          : `Exercise "${reserved}" secured as the adaptation driver for the "${primaryModule.module}" module.`,
+      reasons: [
+        `Driving "${adaptation}" requires one of: ${driverRolesFor(adaptation)
+          .map((role) => `"${role}"`)
+          .join(", ")}.`,
+        reserved === null
+          ? "No candidate on this module's ranked bench held a driving role AND could be prescribed with the athlete data available; nothing was substituted in its place."
+          : `Role "${roleOf(reserved) ?? "unknown"}" drives "${adaptation}", and the exercise is prescribable with the athlete data available.`,
+        deferred.length === 0
+          ? "No further exercise was composed into this module."
+          : `Composed behind the driver, in score order: ${deferred.join(", ")}.`,
+      ],
+      inputReferences: ["request.primaryObjective"],
+      affectedModules: [primaryModule.module],
+      ...(reserved === null ? {} : { affectedExerciseIds: [reserved] }),
+    },
+  ];
 }
 
 // -----------------------------------------------------------------------------
@@ -700,7 +797,7 @@ function attemptAdequacyRepair(
   const primaryPrescribed = prescribed.filter((exercise) => exercise.moduleId === primaryModule.module);
   // Nothing to repair: either the module is empty (already blocked upstream)
   // or something in it already drives the adaptation.
-  if (primaryPrescribed.length === 0 || primaryPrescribed.some((exercise) => isDrivingRole(exercise.role))) {
+  if (primaryPrescribed.length === 0 || primaryPrescribed.some((exercise) => isDrivingRole(primaryModule.primaryAdaptation, exercise.role))) {
     return unrepaired;
   }
 
@@ -735,7 +832,7 @@ function attemptAdequacyRepair(
     }
     const exerciseId = candidate.scoredExercise.exercise.id;
     const role = registryRoleOf(exerciseId);
-    if (role === null || !isDrivingRole(role)) {
+    if (!isDrivingRole(primaryModule.primaryAdaptation, role)) {
       continue;
     }
     // Repair obeys the composer's own redundancy rule (Rule 32): promoting a
@@ -762,7 +859,9 @@ function attemptAdequacyRepair(
       continue;
     }
     const nowDriving = adequacyExercisesOf(repairedPrescription).some(
-      (exercise) => exercise.moduleId === primaryModule.module && isDrivingRole(exercise.role),
+      (exercise) =>
+        exercise.moduleId === primaryModule.module &&
+        isDrivingRole(primaryModule.primaryAdaptation, exercise.role),
     );
     if (!nowDriving) {
       continue;

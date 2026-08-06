@@ -158,11 +158,13 @@ describe("selected-but-unprescribed exercises — real knowledge base end to end
     const { selectedExerciseIds, result } = runRealKnowledgeBaseScenario();
 
     // 1. Several exercises are present in the session draft.
-    // The strength module contributes three exercises since Lot 7.
+    // The strength module contributes three exercises since Lot 7, and since
+    // Lot H2.1 the first of them is a prescribable adaptation DRIVER —
+    // `pull_up` rather than the `chin_up` that outranked it on score alone.
     expect(selectedExerciseIds).toEqual([
       "chest_supported_row",
       "neck_training",
-      "chin_up",
+      "pull_up",
       "hollow_body_hold",
     ]);
 
@@ -174,7 +176,7 @@ describe("selected-but-unprescribed exercises — real knowledge base end to end
     const prescribedIds = result.prescription.session.exercises.map(
       (prescribedExercise) => prescribedExercise.prescription.exerciseId,
     );
-    expect(prescribedIds).toEqual(["chest_supported_row", "neck_training", "chin_up"]);
+    expect(prescribedIds).toEqual(["chest_supported_row", "neck_training", "pull_up"]);
 
     // 4. The status deliberately stays "prescribed" — unchanged by this lot.
     expect(result.prescription.status).toBe("prescribed");

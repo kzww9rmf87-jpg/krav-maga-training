@@ -351,25 +351,44 @@ describe("session composition — outcome and conflict semantics for emptied mod
     ).toEqual([]);
   });
 
-  // The strength module of this scenario is composed entirely of accessory
-  // work (`chest_supported_row`, `neck_training`, `chin_up`). Before session
-  // adequacy existed, that came back silently as a normal maximum-strength
-  // session — the exact defect Lot H2 was opened for, sitting in a fixture.
-  test("a primary module holding only accessory work is reported, not passed off as a strength session", () => {
+  // This scenario's strength module used to be composed entirely of accessory
+  // work (`chest_supported_row`, `neck_training`, `chin_up`) because score alone
+  // decided the quota. Lot H2 detected that and reported it; Lot H2.1 secures a
+  // prescribable driver first, so the module now holds one.
+  test("the primary module secures an adaptation driver before accessories take the remaining slots", () => {
     const result = runEngine(makeInput(45, ["grip", "core"]));
     if (result.outcome !== "draft") {
       throw new Error("Expected a draft.");
     }
 
-    expect(result.sessionAdequacy.status).toBe("inadequate");
-    expect(result.sessionAdequacy.primaryAdaptationCovered).toBe(false);
+    expect(result.sessionAdequacy.primaryAdaptationCovered).toBe(true);
+    expect(result.sessionAdequacy.drivingExerciseIds.length).toBeGreaterThan(0);
+    expect(result.sessionAdequacy.status).not.toBe("inadequate");
 
-    const coverage = result.conflicts.find(
-      (conflict) => conflict.id === "adequacy_primary_adaptation_coverage",
+    // No adequacy coverage conflict remains: the composition itself is correct,
+    // rather than being correct only after a post-hoc repair.
+    expect(
+      result.conflicts.find((conflict) => conflict.id === "adequacy_primary_adaptation_coverage"),
+    ).toBeUndefined();
+
+    // The driver was SECURED first — it took the reserved slot rather than
+    // whatever the score ranked highest. The order the session is PERFORMED in
+    // is a separate question and is unchanged by this lot: the emitted module
+    // still lists its exercises in ranked order.
+    const primaryModule = result.sessionDraft.modules.find(
+      (generatedModule) => generatedModule.selectedModule.role === "primary",
     );
-    expect(coverage?.severity).toBe("major");
-    expect(coverage?.resolutionRequired).toBe(true);
-    expect(result.decisionTrace.warnings).toContain(coverage?.description);
+    const keptIds = (primaryModule?.exerciseSelection.candidates ?? [])
+      .filter((candidate) => candidate.selected)
+      .map((candidate) => candidate.scoredExercise.exercise.id);
+    expect(keptIds).toContain(result.sessionAdequacy.drivingExerciseIds[0]);
+
+    // The accessory that used to occupy the slot on score alone is the one
+    // deferred, and the reason says so.
+    const driverCandidate = primaryModule?.exerciseSelection.candidates.find(
+      (candidate) => candidate.scoredExercise.exercise.id === result.sessionAdequacy.drivingExerciseIds[0],
+    );
+    expect(driverCandidate?.selectionReasons.join(" ")).toContain("Secured first as this session's adaptation driver");
   });
 });
 

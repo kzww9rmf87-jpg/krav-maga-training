@@ -117,7 +117,7 @@
                   "referenceType": "one_rep_max",
                   "value": 100,
                   "unit": "kilograms",
-                  "sourceId": "athlete-ref-1rm",
+                  "sourceId": "athlete_reference:one_rep_max",
                   "measuredAt": null,
                   "validUntil": null,
                   "confidence": "validated"
@@ -132,7 +132,7 @@
                     "name": "reference",
                     "value": 100,
                     "unit": "kilograms",
-                    "sourceId": "athlete-ref-1rm"
+                    "sourceId": "athlete_reference:one_rep_max"
                   },
                   {
                     "name": "percentage",
@@ -156,8 +156,7 @@
                 "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
                 "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
                 "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
-                "26_INTENSITY_MODEL_V0_1",
-                "athlete-ref-1rm"
+                "26_INTENSITY_MODEL_V0_1"
               ],
               "status": "complete"
             },
@@ -185,7 +184,6 @@
                 "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
                 "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
                 "26_INTENSITY_MODEL_V0_1",
-                "athlete-ref-1rm",
                 "27_REST_TEMPO_RULES_V0_1"
               ],
               "status": "complete"
@@ -206,7 +204,6 @@
                 "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
                 "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
                 "26_INTENSITY_MODEL_V0_1",
-                "athlete-ref-1rm",
                 "27_REST_TEMPO_RULES_V0_1"
               ],
               "status": "complete"
@@ -320,7 +317,6 @@
               "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
               "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
               "26_INTENSITY_MODEL_V0_1",
-              "athlete-ref-1rm",
               "27_REST_TEMPO_RULES_V0_1"
             ],
             "status": "complete"
@@ -334,7 +330,6 @@
         "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
         "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
         "26_INTENSITY_MODEL_V0_1",
-        "athlete-ref-1rm",
         "27_REST_TEMPO_RULES_V0_1"
       ],
       "status": "complete"
@@ -475,6 +470,26 @@
         "confidence": "very_high"
       },
       {
+        "id": "trace_request-1_driver_requirement",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "session_assembly",
+        "decision": "Exercise \"bench_press\" secured as the adaptation driver for the \"strength\" module.",
+        "reasons": [
+          "Driving \"maximum_strength\" requires one of: \"primary\", \"secondary\".",
+          "Role \"primary\" drives \"maximum_strength\", and the exercise is prescribable with the athlete data available.",
+          "No further exercise was composed into this module."
+        ],
+        "inputReferences": [
+          "request.primaryObjective"
+        ],
+        "affectedExerciseIds": [
+          "bench_press"
+        ],
+        "affectedModules": [
+          "strength"
+        ]
+      },
+      {
         "id": "trace_request-1_prescription_generation_bench_press_method",
         "timestamp": "2026-01-15T08:00:00.000Z",
         "stage": "prescription_generation",
@@ -560,8 +575,7 @@
           "32_MODULE_PRESCRIPTION_PROFILES_V0_1",
           "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
           "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
-          "26_INTENSITY_MODEL_V0_1",
-          "athlete-ref-1rm"
+          "26_INTENSITY_MODEL_V0_1"
         ]
       },
       {
@@ -585,7 +599,6 @@
           "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
           "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
           "26_INTENSITY_MODEL_V0_1",
-          "athlete-ref-1rm",
           "27_REST_TEMPO_RULES_V0_1"
         ]
       },
@@ -610,7 +623,6 @@
           "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
           "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
           "26_INTENSITY_MODEL_V0_1",
-          "athlete-ref-1rm",
           "27_REST_TEMPO_RULES_V0_1"
         ]
       },
@@ -679,7 +691,6 @@
           "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
           "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
           "26_INTENSITY_MODEL_V0_1",
-          "athlete-ref-1rm",
           "27_REST_TEMPO_RULES_V0_1"
         ]
       },
@@ -704,7 +715,6 @@
           "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
           "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
           "26_INTENSITY_MODEL_V0_1",
-          "athlete-ref-1rm",
           "27_REST_TEMPO_RULES_V0_1"
         ]
       },
@@ -727,7 +737,6 @@
           "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
           "33_EXERCISE_PRESCRIPTION_CAPABILITIES_V0_1",
           "26_INTENSITY_MODEL_V0_1",
-          "athlete-ref-1rm",
           "27_REST_TEMPO_RULES_V0_1"
         ]
       },
