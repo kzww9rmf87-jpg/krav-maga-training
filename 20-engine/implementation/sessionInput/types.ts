@@ -97,6 +97,11 @@ import type {
   TechnicalLevel,
 } from "../types";
 import type { IntensityReferenceType } from "../prescription/types";
+import type {
+  CapabilityObservationProvenance,
+  CapabilityObservationSide,
+  CapabilityObservationType,
+} from "../athleteCapability";
 
 // -----------------------------------------------------------------------------
 // Athlete — identity, experience, goals, preferences
@@ -159,6 +164,43 @@ export interface CasAthletePreferenceV1 {
  * reported as unprescribed rather than dosed from a stale maximum. CAS never
  * estimates one of these from training history.
  */
+/**
+ * One piece of evidence about what the athlete can currently DO.
+ *
+ * Added by Lot H2.5A. Additive and optional under the policy above: a request
+ * that omits `capabilityObservations` behaves exactly as before.
+ *
+ * DISTINCT FROM `CasPerformanceReferenceV1`, deliberately. A performance
+ * reference is a LOAD (a tested one-rep max, a training max) and feeds intensity
+ * resolution. A capability observation is a REPETITION CAPACITY for one named
+ * exercise, and must never reach a load calculation. Keeping them apart is what
+ * stops "20 push-ups" from ever becoming a number of kilograms.
+ *
+ * BINDING IS BY EXACT CANONICAL EXERCISE. A `push_up` observation is evidence
+ * about push-ups — not about bench pressing, not a horizontal-push score. CAS
+ * performs no transfer between exercises, because no chapter documents one.
+ *
+ * VITA collects these. CAS interprets them. VITA must never decide what a
+ * number means.
+ */
+export interface CasAthleteCapabilityObservationV1 {
+  /** Canonical CAS exercise id. */
+  exerciseId: Identifier;
+  observationType: CapabilityObservationType;
+  /** Whole repetitions performed. */
+  repetitions: number;
+  /** External load for `repetitions_at_load`; `null` for bodyweight work. */
+  loadValue: number | null;
+  /** Unit of `loadValue` — required whenever a load is given. */
+  loadUnit: string | null;
+  /** Repetitions in reserve at the end of the set, when actually observed. */
+  repetitionsInReserve: number | null;
+  side: CapabilityObservationSide;
+  provenance: CapabilityObservationProvenance;
+  /** ISO-8601 instant, or `null` when the platform recorded none. */
+  observedAt: string | null;
+}
+
 export interface CasPerformanceReferenceV1 {
   referenceType: IntensityReferenceType;
   value: number | string;
@@ -175,6 +217,11 @@ export interface CasAthleteProfileV1 {
   goals: readonly CasAthleteGoalV1[];
   preferences?: CasAthletePreferenceV1;
   performanceReferences?: readonly CasPerformanceReferenceV1[];
+  /**
+   * What the athlete can currently do, per exercise. Optional: Lot H2.5A added
+   * it, and every request written before it stays valid.
+   */
+  capabilityObservations?: readonly CasAthleteCapabilityObservationV1[];
 }
 
 // -----------------------------------------------------------------------------

@@ -569,6 +569,192 @@ of a repetition-based `movement` profile.
 
 ---
 
+# Athlete Capability — Lot H2.5A
+
+## The principle
+
+```text
+CAS interprets capability.
+VITA collects capability evidence.
+```
+
+VITA decides how to ask an athlete how many push-ups they can do. It never
+decides what the answer means.
+
+## The blocker
+
+CAS produced a useful bodyweight hypertrophy session and prescribed the same
+push-up set to an athlete who can perform six repetitions and to one who can
+perform twenty. The second is nowhere near the prescribed proximity to failure,
+and no selection or sequencing work fixes it: the engine had never been told what
+the athlete can do.
+
+## What was already there, and what was missing
+
+Nine `IntensityReferenceType` values — a tested one-rep max, a training max, a
+baseline velocity — all of them LOADS or RATES, bound to the athlete rather than
+to an exercise, and consumed by `resolveIntensity` to compute a number of
+kilograms. `validUntil` is the one staleness rule in the repository.
+
+There was no way to say "this athlete does twenty push-ups". A repetition
+capacity is not a load, and must never reach a load calculation — which is why
+`CapabilityObservation` is a separate vocabulary rather than a tenth reference
+type.
+
+## The observation
+
+```text
+exerciseId            canonical CAS exercise
+observationType       max_repetitions | repetitions_at_load
+repetitions           whole repetitions performed
+loadValue / loadUnit  external load, for repetitions_at_load
+repetitionsInReserve  when actually observed
+side                  left | right | both
+provenance            measured_test | completed_session | self_reported
+observedAt            ISO-8601, or null
+```
+
+TWO observation types, deliberately. The question "has this variation become too
+easy" is only answerable where the prescription is a REPETITION range.
+`timed_hold` was considered and rejected: the mechanism would be identical for a
+`sets_duration` exercise, but no chapter documents what a too-easy isometric hold
+is, and the duration profiles carry no proximity-to-failure companion like RIR.
+A field CAS cannot interpret is worse than an absent one.
+
+PROVENANCE IS STRUCTURAL, not a confidence score. No document states how much
+more a measured test is worth than a self-report, so no weighting was invented.
+The provenance travels with the observation for a later rule to use.
+
+## Binding: exact canonical exercise, and nothing weaker
+
+A `push_up` observation is evidence about push-ups. It is not evidence about
+bench pressing, not a "horizontal push score", not an upper-body rating. A
+pull-up maximum is not a vertical-pull score a row can borrow.
+
+NO TRANSFER EXISTS ANYWHERE. Transfer between exercises is a training claim, it
+would need a source, and no chapter in this repository makes one.
+
+There is also no athlete-level state. An athlete who performs forty push-ups may
+manage two pull-ups, and a single label would be false about at least one.
+
+## The window is derived, never chosen
+
+ONE relation governs both bounds: to perform N repetitions with R held back, an
+athlete's demonstrated maximum must be at least N + R. Applied to the two ends of
+the prescription envelope:
+
+```text
+minimum = minimum prescribed repetitions + MINIMUM RIR   (easiest valid point)
+maximum = maximum prescribed repetitions + MAXIMUM RIR   (hardest valid point)
+```
+
+An athlete below the minimum cannot satisfy even the easiest valid point. An
+athlete above the maximum cannot reach the prescribed proximity to failure
+ANYWHERE in the range — every prescribed set is easier than prescribed.
+
+| Profile | Repetitions | RIR | Window |
+| --- | --- | --- | --- |
+| `functional_hypertrophy_primary_v0_1` | 6–12 | 1–3 | **7–15** |
+| `strength_primary_straight_sets_v0_1` | 3–6 | 1–3 | **4–9** |
+
+THE NUMBERS 7, 15, 4 AND 9 APPEAR IN NO RULE. They are 6+1, 12+3, 3+1 and 6+3,
+and that arithmetic is each profile's own. A profile with no documented RIR rule
+contributes no reserve at either end, and its window is simply its repetition
+range — nothing is invented to fill the gap.
+
+*Corrected in H2.5A.1.* The first implementation derived the lower bound from the
+repetition minimum alone, which was asymmetric: it compared a CAPACITY against a
+repetition COUNT while the upper bound compared a capacity against a capacity. Six
+push-ups was called "within", when six prescribed repetitions at RIR 1 needs a
+demonstrated maximum of seven.
+
+## Capability states
+
+```text
+insufficient_evidence       no usable observation for this exercise
+below_prescription_range    cannot satisfy even the easiest valid point
+within_prescription_range   the prescription is reachable at the prescribed effort
+above_prescription_range    the prescription can no longer challenge
+incompatible_observation    the exercise is not prescribed as a repetition range
+```
+
+`below_prescription_range` DOES NOT MEAN THE EXERCISE IS FORBIDDEN. It means the
+demonstrated capacity cannot currently satisfy the requested prescription
+envelope — a statement about the envelope's fit, not about whether the athlete
+may perform the movement.
+
+## Worked examples
+
+| Case | Observation | Exercise | State | Window | Reading | Action taken |
+| --- | --- | --- | --- | --- | --- | --- |
+| no history | — | push_up | `insufficient_evidence` | — | unknown | none |
+| capacity 6 | 6 reps | push_up | `below_prescription_range` | 7–15 | envelope does not fit | none |
+| capacity 7 | 7 reps | push_up | `within_prescription_range` | 7–15 | suitable | none |
+| capacity 10 | 10 reps | push_up | `within_prescription_range` | 7–15 | suitable | none |
+| capacity 15 | 15 reps | push_up | `within_prescription_range` | 7–15 | suitable | none |
+| capacity 16 | 16 reps | push_up | `above_prescription_range` | 7–15 | too easy | none |
+| capacity 20 | 20 reps | push_up | `above_prescription_range` | 7–15 | too easy | none |
+| pull-ups 12 | 12 reps | pull_up | `above_prescription_range` | 4–9 | too easy | none |
+| DB press | 10 @ 22.5 kg | dumbbell_bench_press | `within_prescription_range` | 7–15 | suitable | none |
+
+The last column is the point of the lot.
+
+## Assessment is not action
+
+This lot decides that a variation is reachable, too hard or too easy. It does
+NOT choose a progression, name a harder variation, or change a dose.
+
+A session generated with a forty-repetition push-up observation is byte-identical
+to one generated without it, apart from the trace. Deciding push-ups have become
+too easy and deciding what to do about it are different decisions, and the second
+needs a progression graph this repository does not yet represent. Lot H2.5B owns
+it.
+
+`decline_push_up` is not catalogued, and CAS did not conjure one.
+
+## Staleness: deliberately unresolved
+
+`validUntil` remains the only staleness rule, and it is an EXPLICIT expiry the
+platform records rather than an age the engine guesses.
+
+No document defines how long a repetition maximum stays true. A push-up maximum
+from three months ago may be exactly right or badly out of date, and "30 days"
+would be a number invented here. `observedAt` is carried, preserved and published
+in the trace, and no rule acts on it. When a source documents a decay, the rule
+belongs in `athleteCapability.ts`.
+
+## Rejected observations are reported
+
+An observation that is structurally unusable — a fractional repetition count, a
+load without a unit, an uncatalogued exercise — is reported in the Decision Trace
+with its code, never repaired and never silently dropped. Implausible data is a
+fact about the platform, and hiding it would help nobody.
+
+## Public contract
+
+`cas-session-input.v1`, additive and optional:
+`athleteProfile.capabilityObservations?`. A request that omits it behaves exactly
+as before, and the contract version is unchanged.
+
+## What VITA must collect in H2.5B
+
+Per exercise, and only where the athlete can answer honestly: a repetition
+count, the load and unit when an implement is used, the side for unilateral work,
+where the number came from, and when.
+
+## What VITA must never derive
+
+Whether a number means beginner, intermediate or advanced. Which variation comes
+next. Whether the athlete should progress. Whether an observation is sufficient,
+stale or transferable. All of that is CAS's.
+
+## Still out of scope
+
+Cycles, week-to-week progression, deloads, scheduled reassessment, automatic
+testing protocols.
+
+---
+
 # Definition of Success
 
 The Exercise Knowledge Base succeeds when every exercise can answer one simple question.

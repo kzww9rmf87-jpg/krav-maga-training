@@ -84,6 +84,18 @@ import {
 } from "./sessionComposer";
 import { driverRolesFor } from "./adaptationDrivers";
 import {
+  assessCapability,
+  observationFor,
+  validateObservation,
+  type CapabilityAssessment,
+  type CapabilityObservation,
+  type RejectedCapabilityObservation,
+} from "./athleteCapability";
+import {
+  NUMERICAL_PRESCRIPTION_PROFILES,
+  type NumericalPrescriptionProfile,
+} from "./prescription/prescriptionKnowledge";
+import {
   adjacentSharedRegions,
   FRESHNESS_TIERS,
   sequenceSession,
@@ -478,6 +490,10 @@ export function runEngine(
   const sequencing = sequencePrescribedSession(input, workingPrescription, selectedModules, exercises);
   workingPrescription = sequencing.prescription;
 
+  // Capability is assessed against the session CAS actually settled on, so the
+  // exercises judged are the ones the athlete would perform.
+  const capability = assessSessionCapability(input, workingPrescription, exercises);
+
   const durationEstimate = estimateFor(workingPrescription);
 
   const sessionDraft: InitialSessionDraft =
@@ -569,6 +585,7 @@ export function runEngine(
       // pipeline order.
       ...buildDriverSelectionTraceEntries(input, primaryModuleSelection, workingComposition, registryRoleOf),
       ...buildSequencingTraceEntries(input, sequencing.sequence),
+      ...buildCapabilityTraceEntries(input, capability.assessments, capability.rejected),
       ...workingPrescription.traceEntries,
       ...timeBudgetTraceEntries,
       ...durationTraceEntries,
@@ -665,6 +682,121 @@ function buildDriverSelectionTraceEntries(
       ...(reserved === null ? {} : { affectedExerciseIds: [reserved] }),
     },
   ];
+}
+
+// -----------------------------------------------------------------------------
+// Athlete capability
+// -----------------------------------------------------------------------------
+
+/**
+ * Assesses every prescribed exercise against what the athlete can actually do.
+ *
+ * ADVISORY IN THIS LOT. The assessment reaches the Decision Trace and changes
+ * nothing else: no exercise is swapped, no dose is altered, no progression is
+ * chosen. Deciding that push-ups have become too easy and deciding what to do
+ * about it are different decisions, and the second needs a progression graph
+ * this repository does not yet represent. Lot H2.5B owns that.
+ *
+ * An athlete who supplied no observations gets `insufficient_evidence` for every
+ * exercise and a session identical to the one they got before this lot existed.
+ */
+function assessSessionCapability(
+  input: EngineInput,
+  prescription: EngineSessionPrescriptionResult,
+  exercises: readonly ExerciseDefinition[],
+): { assessments: CapabilityAssessment[]; rejected: RejectedCapabilityObservation[] } {
+  const observations = input.athleteProfile.capabilityObservations ?? [];
+  const catalogued = new Set(exercises.map((exercise) => exercise.id));
+
+  // Structurally unusable observations are REPORTED and then set aside. They
+  // are never repaired, and never silently dropped.
+  const rejected: RejectedCapabilityObservation[] = [];
+  const usable: CapabilityObservation[] = [];
+  for (const observation of observations) {
+    const rejection = validateObservation(observation, (exerciseId) => catalogued.has(exerciseId));
+    if (rejection === null) {
+      usable.push(observation);
+    } else {
+      rejected.push(rejection);
+    }
+  }
+
+  if (prescription.outcome.status !== "prescribed") {
+    return { assessments: [], rejected };
+  }
+
+  const assessments = prescription.outcome.session.exercises.map((prescribedExercise) => {
+    const exerciseId = prescribedExercise.prescription.exerciseId;
+    return assessCapability({
+      exerciseId,
+      // Exact binding only. An observation about another exercise is not
+      // evidence about this one, however similar the two movements look.
+      observation: observationFor(exerciseId, usable),
+      profile: numericalProfileForExercise(exerciseId),
+    });
+  });
+
+  return { assessments, rejected };
+}
+
+/** The numerical profile an exercise resolves, when it names one explicitly. */
+function numericalProfileForExercise(exerciseId: Identifier): NumericalPrescriptionProfile | null {
+  if (!isPilotExerciseId(exerciseId)) {
+    return null;
+  }
+  const profileId = EXERCISE_PRESCRIPTION_REGISTRY[exerciseId].numericalProfileId;
+  if (profileId === undefined || profileId === null) {
+    return null;
+  }
+  return NUMERICAL_PRESCRIPTION_PROFILES.find((profile) => profile.profileId === profileId) ?? null;
+}
+
+/** Trace entries for the capability assessment. */
+function buildCapabilityTraceEntries(
+  input: EngineInput,
+  assessments: readonly CapabilityAssessment[],
+  rejected: readonly RejectedCapabilityObservation[],
+): DecisionTraceEntry[] {
+  if (assessments.length === 0 && rejected.length === 0) {
+    return [];
+  }
+
+  const timestamp = input.request.requestedAt;
+  const entries: DecisionTraceEntry[] = assessments.map((assessment) => ({
+    id: `trace_${input.request.requestId}_capability_${assessment.exerciseId}`,
+    timestamp,
+    stage: "athlete_state_evaluation",
+    decision: `Capability for "${assessment.exerciseId}": ${assessment.state}.`,
+    reasons: [
+      assessment.description,
+      assessment.observation === null
+        ? "No observation was supplied for this exercise."
+        : `Observation: ${assessment.observation.repetitions} repetition(s), type "${assessment.observation.observationType}", provenance "${assessment.observation.provenance}", observed at ${assessment.observation.observedAt ?? "an unrecorded time"}.`,
+      assessment.prescriptionWindow !== null
+        ? `Compared with ${assessment.prescriptionWindow.minimum}-${assessment.prescriptionWindow.maximum} repetitions, derived from ${assessment.prescriptionWindow.profileId}.`
+        : assessment.observation === null
+          ? "Nothing was compared: the comparison needs an observation."
+          : "This exercise is not prescribed as a repetition range, so a repetition count cannot be compared with it.",
+      // The boundary this lot refuses to cross, stated on every assessment.
+      "Assessment only: no progression was chosen and no dose was changed.",
+    ],
+    inputReferences: ["athleteProfile.capabilityObservations"],
+    affectedExerciseIds: [assessment.exerciseId],
+    sourceRuleIds: [...assessment.sourceRuleIds],
+  }));
+
+  for (const rejection of rejected) {
+    entries.push({
+      id: `trace_${input.request.requestId}_capability_rejected_${rejection.exerciseId}`,
+      timestamp,
+      stage: "athlete_state_evaluation",
+      decision: `Capability observation for "${rejection.exerciseId}" was not usable (${rejection.code}).`,
+      reasons: [rejection.reason, "The observation was reported rather than repaired or discarded."],
+      inputReferences: ["athleteProfile.capabilityObservations"],
+    });
+  }
+
+  return entries;
 }
 
 // -----------------------------------------------------------------------------

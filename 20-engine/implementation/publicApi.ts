@@ -102,6 +102,7 @@ export type {
   CasCompletedSessionV1,
   CasMedicalStateV1,
   CasPainReportV1,
+  CasAthleteCapabilityObservationV1,
   CasPerformanceReferenceV1,
   CasReadinessStateV1,
   CasSessionInputV1,

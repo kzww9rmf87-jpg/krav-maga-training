@@ -521,6 +521,27 @@
         ]
       },
       {
+        "id": "trace_request-1_capability_bench_press",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "athlete_state_evaluation",
+        "decision": "Capability for \"bench_press\": insufficient_evidence.",
+        "reasons": [
+          "No usable capability observation is recorded for \"bench_press\", so its difficulty for this athlete is unknown.",
+          "No observation was supplied for this exercise.",
+          "Nothing was compared: the comparison needs an observation.",
+          "Assessment only: no progression was chosen and no dose was changed."
+        ],
+        "inputReferences": [
+          "athleteProfile.capabilityObservations"
+        ],
+        "affectedExerciseIds": [
+          "bench_press"
+        ],
+        "sourceRuleIds": [
+          "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1"
+        ]
+      },
+      {
         "id": "trace_request-1_prescription_generation_bench_press_method",
         "timestamp": "2026-01-15T08:00:00.000Z",
         "stage": "prescription_generation",

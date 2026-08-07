@@ -46,8 +46,10 @@ import type {
   TrainingRequest,
 } from "../types";
 import type { IntensityReference } from "../prescription/types";
+import type { CapabilityObservation } from "../athleteCapability";
 
 import type {
+  CasAthleteCapabilityObservationV1,
   CasAthleteProfileV1,
   CasAvailableEquipmentV1,
   CasAthleteGoalV1,
@@ -140,6 +142,37 @@ function adaptAthleteProfile(profile: CasAthleteProfileV1): AthleteProfile {
       profile.performanceReferences === undefined
         ? undefined
         : profile.performanceReferences.map(adaptPerformanceReference),
+    // Copied field by field, like every other adapted shape: the public and
+    // internal types happen to agree today, and a spread would let a future
+    // public field leak inward unnoticed.
+    capabilityObservations:
+      profile.capabilityObservations === undefined
+        ? undefined
+        : profile.capabilityObservations.map(adaptCapabilityObservation),
+  };
+}
+
+/**
+ * A capability observation, copied across the boundary unchanged.
+ *
+ * No interpretation happens here — not a unit conversion, not a default, not a
+ * clamp. Whether the observation is usable is
+ * `athleteCapability.validateObservation`'s decision, and what it MEANS is
+ * `assessCapability`'s.
+ */
+function adaptCapabilityObservation(
+  observation: CasAthleteCapabilityObservationV1,
+): CapabilityObservation {
+  return {
+    exerciseId: observation.exerciseId,
+    observationType: observation.observationType,
+    repetitions: observation.repetitions,
+    loadValue: observation.loadValue,
+    loadUnit: observation.loadUnit,
+    repetitionsInReserve: observation.repetitionsInReserve,
+    side: observation.side,
+    provenance: observation.provenance,
+    observedAt: observation.observedAt,
   };
 }
 

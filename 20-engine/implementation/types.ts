@@ -16,6 +16,8 @@ import type { EngineSessionPrescriptionOutcome } from "./prescription/prescribeE
 // reuses the prescription layer's own reference shape rather than declaring
 // a second, drifting copy of it.
 import type { IntensityReference } from "./prescription/types";
+// Type-only, same rationale as the imports above.
+import type { CapabilityObservation } from "./athleteCapability";
 // Type-only, same rationale: `sessionAdequacy.ts` imports its domain types
 // from this file, so the reference cannot be a value import.
 import type { SessionAdequacyEvaluation } from "./sessionAdequacy";
@@ -370,6 +372,14 @@ export interface AthleteProfile {
    * `athleteReferenceCatalog.ts`.
    */
   performanceReferences?: readonly IntensityReference[];
+  /**
+   * What the athlete can currently do, per exercise (Lot H2.5A).
+   *
+   * Evidence, never a label: `athleteCapability.ts` compares each observation
+   * with the exercise's OWN documented prescription range. Absent means the
+   * question was never asked, which is not the same as "beginner".
+   */
+  capabilityObservations?: CapabilityObservation[];
 }
 
 // -----------------------------------------------------------------------------
