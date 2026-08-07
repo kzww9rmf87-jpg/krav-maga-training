@@ -596,10 +596,10 @@ describe("Loaded Locomotion Power — validation, genericity and non-regression"
     // is what it was for; what still has to hold is that NOTHING ELSE moved
     // onto the new profile, and that the doctrine was not quietly widened to
     // fit a second exercise it was never written for.
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
-    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(76);
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(33);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(82);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(82);
+    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(83);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(34);
 
     const consumers = Object.values(EXERCISE_PRESCRIPTION_REGISTRY).filter(
       (registryEntry) => registryEntry.numericalProfileId === PROFILE_ID,

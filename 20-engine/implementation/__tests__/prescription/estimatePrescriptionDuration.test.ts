@@ -67,7 +67,7 @@ function prescribe(exerciseId: string): ExercisePrescription {
 
 describe("duration estimation — coverage of the whole registry", () => {
   test("every registry entry has a resolved duration profile", () => {
-    expect(REGISTRY_IDS).toHaveLength(75);
+    expect(REGISTRY_IDS).toHaveLength(82);
 
     for (const exerciseId of REGISTRY_IDS) {
       const profile = DURATION_ESTIMATION_PROFILES[`duration_profile_${exerciseId}`];

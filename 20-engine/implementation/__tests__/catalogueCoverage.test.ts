@@ -112,7 +112,7 @@ function driversFor(profile: ProfileName, adaptation: AdaptationDomain): string[
 const EXPECTED_DRIVER_COUNTS: Record<ProfileName, Partial<Record<AdaptationDomain, number>>> = {
   bodyweight: {
     maximum_strength: 0,
-    functional_hypertrophy: 0,
+    functional_hypertrophy: 3,
     power: 5,
     conditioning: 0,
     robustness: 4,
@@ -120,7 +120,7 @@ const EXPECTED_DRIVER_COUNTS: Record<ProfileName, Partial<Record<AdaptationDomai
   },
   bodyweight_bar: {
     maximum_strength: 1,
-    functional_hypertrophy: 0,
+    functional_hypertrophy: 3,
     power: 5,
     conditioning: 0,
     robustness: 5,
@@ -128,7 +128,7 @@ const EXPECTED_DRIVER_COUNTS: Record<ProfileName, Partial<Record<AdaptationDomai
   },
   bands: {
     maximum_strength: 0,
-    functional_hypertrophy: 0,
+    functional_hypertrophy: 3,
     power: 5,
     conditioning: 0,
     robustness: 5,
@@ -136,7 +136,7 @@ const EXPECTED_DRIVER_COUNTS: Record<ProfileName, Partial<Record<AdaptationDomai
   },
   dumbbells: {
     maximum_strength: 0,
-    functional_hypertrophy: 0,
+    functional_hypertrophy: 6,
     power: 5,
     conditioning: 0,
     robustness: 4,
@@ -144,7 +144,7 @@ const EXPECTED_DRIVER_COUNTS: Record<ProfileName, Partial<Record<AdaptationDomai
   },
   kettlebell: {
     maximum_strength: 0,
-    functional_hypertrophy: 0,
+    functional_hypertrophy: 4,
     power: 5,
     conditioning: 0,
     robustness: 4,
@@ -152,7 +152,7 @@ const EXPECTED_DRIVER_COUNTS: Record<ProfileName, Partial<Record<AdaptationDomai
   },
   medicine_ball: {
     maximum_strength: 0,
-    functional_hypertrophy: 0,
+    functional_hypertrophy: 3,
     power: 11,
     conditioning: 0,
     robustness: 4,
@@ -160,7 +160,7 @@ const EXPECTED_DRIVER_COUNTS: Record<ProfileName, Partial<Record<AdaptationDomai
   },
   full_gym: {
     maximum_strength: 10,
-    functional_hypertrophy: 0,
+    functional_hypertrophy: 7,
     power: 17,
     conditioning: 2,
     robustness: 7,
@@ -181,37 +181,62 @@ describe("catalogue coverage — prescribable drivers per equipment profile", ()
   }
 });
 
-describe("catalogue coverage — the gaps this measurement exists to name", () => {
-  // The single largest gap, and the one that needs no engine work to close:
-  // the prescription layer already carries `functional_hypertrophy_primary_v0_1`
-  // (3-4 sets, 6-12 reps, RPE 7-9 or RIR 1-3, `requiresExerciseSpecificLoadRule:
-  // false`), so a hypertrophy exercise would be prescribable WITHOUT any athlete
-  // loading reference. The knowledge base simply contains no exercise in that
-  // module.
-  test("the functional_hypertrophy module is empty catalogue-wide", () => {
+describe("catalogue coverage — the gap Lot H2.2B closed", () => {
+  // Lot H2.2 recorded `functional_hypertrophy` as empty at every equipment
+  // level: not one exercise, not even in a fully equipped gym, so every
+  // hypertrophy request returned `blocked`. The prescription profile had existed
+  // throughout — `functional_hypertrophy_primary_v0_1`, 3-4 sets of 6-12 at
+  // RPE 7-9, `requiresExerciseSpecificLoadRule: false` — and had no consumer.
+  //
+  // H2.2A wrote the source chapters; H2.2B integrated them. This is the record
+  // that the module is populated and that the athletes who had nothing now have
+  // something.
+  test("the functional_hypertrophy module is populated", () => {
     const hypertrophyExercises = EXERCISE_KNOWLEDGE_BASE.filter(
       (exercise) => exercise.module === "functional_hypertrophy",
     );
-    expect(hypertrophyExercises).toEqual([]);
-
-    // Not even a fully equipped gym can serve a hypertrophy request.
-    expect(driversFor("full_gym", "functional_hypertrophy")).toEqual([]);
+    expect(hypertrophyExercises).toHaveLength(7);
+    for (const exercise of hypertrophyExercises) {
+      expect(exercise.primaryAdaptation).toBe("functional_hypertrophy");
+    }
   });
 
-  // Every profile an athlete can assemble at home is unable to drive the two
-  // adaptations that motivate most physical preparation.
-  test("no home equipment profile can drive strength or hypertrophy, except a pull-up bar", () => {
+  test("an athlete with NO equipment can now train hypertrophy", () => {
+    // Push, squat and hinge. The horizontal pull is absent and stays absent:
+    // it needs something to pull against, and the family says so rather than
+    // substituting a vertical pull and calling it equivalent.
+    expect(driversFor("bodyweight", "functional_hypertrophy").sort()).toEqual([
+      "push_up",
+      "single_leg_hip_thrust",
+      "split_squat",
+    ]);
+  });
+
+  test("a dumbbell athlete gains the horizontal pull and loaded variants", () => {
+    const drivers = driversFor("dumbbells", "functional_hypertrophy");
+    expect(drivers).toContain("one_arm_dumbbell_row");
+    expect(drivers).toContain("goblet_squat");
+    expect(drivers).toContain("dumbbell_romanian_deadlift");
+    // The bench press needs a bench, which this profile does not have.
+    expect(drivers).not.toContain("dumbbell_bench_press");
+  });
+
+  test("a kettlebell athlete gets the goblet squat, and only what the source supports", () => {
+    const drivers = driversFor("kettlebell", "functional_hypertrophy");
+    // The Goblet Squat's chapter names "Dumbbell or Kettlebell" under Required.
+    expect(drivers).toContain("goblet_squat");
+    // Nothing else was generalized to kettlebells: the other implement entries
+    // name dumbbells only.
+    expect(drivers).not.toContain("one_arm_dumbbell_row");
+    expect(drivers).not.toContain("dumbbell_romanian_deadlift");
+  });
+
+  // What did NOT change, and must not: maximum strength is a different question
+  // and the hypertrophy family is not an answer to it.
+  test("no home equipment profile can drive MAXIMUM STRENGTH, except a pull-up bar", () => {
     for (const profile of ["bodyweight", "bands", "dumbbells", "kettlebell"] as ProfileName[]) {
       expect(driversFor(profile, "maximum_strength")).toEqual([]);
-      expect(driversFor(profile, "functional_hypertrophy")).toEqual([]);
     }
-
-    // The lone exception, and it is instructive: `pull_up` is a `strength`
-    // /`primary` registry entry whose own `supportedIntensityTypes` are
-    // `["rpe", "rir"]`, so it takes the RPE branch of
-    // `strength_primary_straight_sets_v0_1` instead of the percentage-of-1RM
-    // branch. Bodyweight maximum strength IS supported doctrine — for movements
-    // hard enough that 3-6 repetitions sit at RPE 7.5-9.
     expect(driversFor("bodyweight_bar", "maximum_strength")).toEqual(["pull_up"]);
   });
 
@@ -294,12 +319,21 @@ describe("catalogue coverage — what the matrix means for a real request", () =
 
   // 22. + 23. + 24. + 25. Each scenario's outcome is exactly what the matrix
   // predicts. None is falsely presented as a usable session.
-  test("A. bodyweight / hypertrophy: blocked — the module holds no exercise at all", () => {
-    expect(generate("bodyweight", "functional_hypertrophy", 30).outcome).toBe("blocked");
+  test("A. bodyweight / hypertrophy: a real session, where there used to be none", () => {
+    const result = generate("bodyweight", "functional_hypertrophy", 30);
+    if (result.outcome !== "draft") {
+      throw new Error(`Expected a draft, received "${result.outcome}".`);
+    }
+    expect(result.sessionAdequacy.primaryAdaptationCovered).toBe(true);
+    expect(result.sessionAdequacy.status).toBe("adequate");
   });
 
-  test("C. dumbbells / hypertrophy: blocked for the same reason", () => {
-    expect(generate("dumbbells", "functional_hypertrophy", 45).outcome).toBe("blocked");
+  test("C. dumbbells / hypertrophy: likewise", () => {
+    const result = generate("dumbbells", "functional_hypertrophy", 45);
+    if (result.outcome !== "draft") {
+      throw new Error(`Expected a draft, received "${result.outcome}".`);
+    }
+    expect(result.sessionAdequacy.primaryAdaptationCovered).toBe(true);
   });
 
   test("E. bands / maximum strength: inadequate, accessory-only — the Lot H2 shape", () => {

@@ -106,6 +106,14 @@ const FROZEN_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
  * has no pre-Lot-0 behavior to preserve.
  */
 const EXPLICIT_PROFILE_BY_EXERCISE: Readonly<Record<string, string>> = {
+  // Functional hypertrophy (Lot H2.2B) — each names its profile explicitly.
+  push_up: "functional_hypertrophy_primary_v0_1",
+  split_squat: "functional_hypertrophy_primary_v0_1",
+  single_leg_hip_thrust: "functional_hypertrophy_primary_v0_1",
+  goblet_squat: "functional_hypertrophy_primary_v0_1",
+  dumbbell_bench_press: "functional_hypertrophy_primary_v0_1",
+  one_arm_dumbbell_row: "functional_hypertrophy_primary_v0_1",
+  dumbbell_romanian_deadlift: "functional_hypertrophy_primary_v0_1",
   // Registry Lot 5 — the first entry on the ambiguous
   // (conditioning, work_rest_intervals, conditioning) triple.
   rowerg_intervals: "conditioning_long_intervals_v0_1",

@@ -368,6 +368,16 @@ const PILOT_PROFILES: readonly DurationEstimationProfile[] = [
   // efforts — which for a 40 m push is a real and unavoidable cost — and any
   // technical margin. None of them is documented, and none is invented.
   modelBackedProfile("sled_push", "intervals", ["50-exercises/17_SLED_PUSH"]),
+
+  // Functional hypertrophy (Lot H2.2B). Every entry is `sets_reps`, so the
+  // estimator's existing repetition branch covers them with no new number.
+  modelBackedProfile("push_up", "sets_reps", ["50-exercises/68_HYPERTROPHY/10_PUSH_UP.md"]),
+  modelBackedProfile("split_squat", "sets_reps", ["50-exercises/68_HYPERTROPHY/11_SPLIT_SQUAT.md"]),
+  modelBackedProfile("single_leg_hip_thrust", "sets_reps", ["50-exercises/68_HYPERTROPHY/12_SINGLE_LEG_HIP_THRUST.md"]),
+  modelBackedProfile("goblet_squat", "sets_reps", ["50-exercises/68_HYPERTROPHY/13_GOBLET_SQUAT.md"]),
+  modelBackedProfile("dumbbell_bench_press", "sets_reps", ["50-exercises/68_HYPERTROPHY/14_DUMBBELL_BENCH_PRESS.md"]),
+  modelBackedProfile("one_arm_dumbbell_row", "sets_reps", ["50-exercises/68_HYPERTROPHY/15_ONE_ARM_DUMBBELL_ROW.md"]),
+  modelBackedProfile("dumbbell_romanian_deadlift", "sets_reps", ["50-exercises/68_HYPERTROPHY/16_DUMBBELL_ROMANIAN_DEADLIFT.md"]),
 ];
 
 export const DURATION_ESTIMATION_PROFILES: Record<Identifier, DurationEstimationProfile> = Object.fromEntries(

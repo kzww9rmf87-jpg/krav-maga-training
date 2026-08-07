@@ -332,6 +332,15 @@ export const PILOT_EXERCISE_IDS = [
   // profile: the doctrine commit already created it, and this entry only
   // declares its own documented bounds.
   "sled_push",
+  // Registry Lot 22 (H2.2B) — the first consumers of the
+  // `functional_hypertrophy` module anywhere in the registry.
+  "push_up",
+  "split_squat",
+  "single_leg_hip_thrust",
+  "goblet_squat",
+  "dumbbell_bench_press",
+  "one_arm_dumbbell_row",
+  "dumbbell_romanian_deadlift",
 ] as const;
 
 export type PilotExerciseId = (typeof PILOT_EXERCISE_IDS)[number];
@@ -11592,6 +11601,843 @@ const sledPushEntry: ExercisePrescriptionRegistryEntry = {
   sourceRuleIds: [SOURCE_SLED_PUSH, SOURCE_METHOD_CATALOGUE, SOURCE_MODULE_PROFILES, SOURCE_NUMERICAL_TABLES],
 };
 
+
+// -----------------------------------------------------------------------------
+// Functional hypertrophy — Lot H2.2B
+// -----------------------------------------------------------------------------
+//
+// The first entries in the `functional_hypertrophy` module. All seven resolve
+// `functional_hypertrophy_primary_v0_1` (3-4 sets, 6-12 repetitions, RPE 7-9 or
+// RIR 1-3, 90-180 s rest), which has existed in the numerical tables throughout
+// and had no consumer until now.
+//
+// NO ATHLETE REFERENCE IS REQUIRED by any of them. The profile declares
+// `requiresExerciseSpecificLoadRule: false` and every entry below declares an
+// empty `requiredAthleteReferenceTypes`, so this family prescribes for an
+// athlete who has never recorded a one-repetition maximum. That is the whole
+// reason it can serve the initial target user.
+//
+// PROGRESSION LEVEL IS NOT INFERRED. The chapters document progressions —
+// decline push-ups, weighted variations, rear-foot elevation — but CAS collects
+// no athlete input that could choose between them, so none is prescribed. Where
+// bodyweight becomes too easy the chapter's progression list is advice for a
+// coach, not a decision the engine may take.
+const SOURCE_PUSH_UP = "50-exercises/68_HYPERTROPHY/10_PUSH_UP.md";
+const SOURCE_SPLIT_SQUAT = "50-exercises/68_HYPERTROPHY/11_SPLIT_SQUAT.md";
+const SOURCE_SINGLE_LEG_HIP_THRUST = "50-exercises/68_HYPERTROPHY/12_SINGLE_LEG_HIP_THRUST.md";
+const SOURCE_GOBLET_SQUAT = "50-exercises/68_HYPERTROPHY/13_GOBLET_SQUAT.md";
+const SOURCE_DUMBBELL_BENCH_PRESS = "50-exercises/68_HYPERTROPHY/14_DUMBBELL_BENCH_PRESS.md";
+const SOURCE_ONE_ARM_DUMBBELL_ROW = "50-exercises/68_HYPERTROPHY/15_ONE_ARM_DUMBBELL_ROW.md";
+const SOURCE_DUMBBELL_ROMANIAN_DEADLIFT = "50-exercises/68_HYPERTROPHY/16_DUMBBELL_ROMANIAN_DEADLIFT.md";
+
+// -----------------------------------------------------------------------------
+
+const pushUpInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "push_up_setup",
+    "setup",
+    "Set the hands under the shoulders, the feet together or hip width apart, and brace the trunk so the ribs stay down and the pelvis stays level before the first repetition.",
+    "high",
+    true,
+    SOURCE_PUSH_UP,
+  ),
+  makeInstruction(
+    "push_up_execution",
+    "execution",
+    "Lower the chest under control with the elbows at roughly forty-five degrees from the trunk, reach the bottom position without letting the hips sag, and press the ground away to full elbow extension.",
+    "high",
+    true,
+    SOURCE_PUSH_UP,
+  ),
+];
+
+const pushUpStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "push_up_technical_failure",
+    description:
+      "The set is terminated if the hips sag, the pelvis rotates, the head leads the descent, the elbows flare toward ninety degrees, or the range of motion shortens.",
+    sourceRuleIds: [SOURCE_PUSH_UP],
+  }),
+  painCondition({
+    conditionId: "push_up_pain",
+    description: "The set is terminated on any shoulder, elbow or wrist pain.",
+    sourceRuleIds: [SOURCE_PUSH_UP],
+  }),
+  completionCondition({
+    conditionId: "push_up_completion",
+    description:
+      "The set is complete when the prescribed repetitions have been performed at the prescribed proximity to failure with the trunk position maintained.",
+    sourceRuleIds: [SOURCE_PUSH_UP],
+  }),
+];
+
+const pushUpEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "push_up",
+  moduleId: "functional_hypertrophy",
+  role: "primary",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "push_up",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    // RPE and RIR only. The chapter prescribes proximity to failure, and no
+    // percentage of a one-repetition maximum is documented — deliberately, so
+    // the family can be prescribed to an athlete who has never tested one.
+    supportedIntensityTypes: ["rpe", "rir"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["phase_intent"],
+    laterality: "bilateral",
+    // A unilateral exercise counts its repetitions PER SIDE — the chapters say
+    // "per leg" and "per side" — and the compatibility layer rejects the pair
+    // (unilateral, total_repetitions) outright.
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "tempo_control", "technical_quality_observation"],
+    // `requiredEquipmentCapabilities` is a CONJUNCTION, so an exercise usable
+    // with either of two implements cannot express that here — the alternative
+    // lives in `supportedLoadingModes`, exactly as `chest_supported_row` already
+    // does. Eligibility has already checked the athlete owns one: the knowledge
+    // base carries the `any_of`.
+    //
+    // The bodyweight entries require NOTHING, because their chapters say
+    // Required: None. Declaring `open_space` here would make them selectable but
+    // unprescribable for an athlete who has not declared it — the failure mode
+    // `hollow_body_hold` already demonstrates.
+    requiredEquipmentCapabilities: [],
+    // No athlete reference of any kind: this is what makes the hypertrophy
+    // family prescribable on the day an athlete installs the application.
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["push_up_setup", "push_up_execution"],
+    requiredStopConditionIds: [
+      "push_up_technical_failure",
+      "push_up_pain",
+      "push_up_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_push_up",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_PUSH_UP, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "rir"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: ["phase_intent"],
+  preferredTempoType: "phase_intent",
+  instructionDefinitions: pushUpInstructions,
+  stopConditionDefinitions: pushUpStopConditions,
+  // Declared explicitly rather than left to unique-triple lookup. The triple
+  // (functional_hypertrophy, straight_sets_repetitions, primary) is unique today,
+  // so resolution would succeed either way — but Table Group 15's auditability
+  // convention asks consuming entries to name their profile, and a second
+  // hypertrophy profile would otherwise make these ambiguous silently.
+  numericalProfileId: "functional_hypertrophy_primary_v0_1",
+  exerciseDoseConstraints: null,
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [
+    SOURCE_PUSH_UP,
+    SOURCE_METHOD_CATALOGUE,
+    SOURCE_MODULE_PROFILES,
+    SOURCE_NUMERICAL_TABLES,
+  ],
+};
+
+// -----------------------------------------------------------------------------
+
+const splitSquatInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "split_squat_setup",
+    "setup",
+    "Take a split stance long enough that the front shin stays near vertical at the bottom, with the pelvis square to the front and the trunk tall.",
+    "high",
+    true,
+    SOURCE_SPLIT_SQUAT,
+  ),
+  makeInstruction(
+    "split_squat_execution",
+    "execution",
+    "Lower the rear knee toward the floor under control, keep the pelvis square, and drive back up through the whole front foot without pushing off the rear foot.",
+    "high",
+    true,
+    SOURCE_SPLIT_SQUAT,
+  ),
+];
+
+const splitSquatStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "split_squat_technical_failure",
+    description:
+      "The set is terminated if the pelvis rotates toward the working leg, the trunk collapses forward, the front knee travels past a stable position, or depth shortens.",
+    sourceRuleIds: [SOURCE_SPLIT_SQUAT],
+  }),
+  painCondition({
+    conditionId: "split_squat_pain",
+    description: "The set is terminated on any knee, hip or ankle pain.",
+    sourceRuleIds: [SOURCE_SPLIT_SQUAT],
+  }),
+  completionCondition({
+    conditionId: "split_squat_completion",
+    description:
+      "The set is complete when the prescribed repetitions have been performed on the working leg at the prescribed proximity to failure, with depth and pelvic position maintained.",
+    sourceRuleIds: [SOURCE_SPLIT_SQUAT],
+  }),
+];
+
+const splitSquatEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "split_squat",
+  moduleId: "functional_hypertrophy",
+  role: "primary",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "split_squat",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    // RPE and RIR only. The chapter prescribes proximity to failure, and no
+    // percentage of a one-repetition maximum is documented — deliberately, so
+    // the family can be prescribed to an athlete who has never tested one.
+    supportedIntensityTypes: ["rpe", "rir"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["phase_intent"],
+    laterality: "unilateral",
+    // A unilateral exercise counts its repetitions PER SIDE — the chapters say
+    // "per leg" and "per side" — and the compatibility layer rejects the pair
+    // (unilateral, total_repetitions) outright.
+    volumeInterpretations: ["repetitions_per_side"],
+    capabilityTags: ["countable_repetitions", "tempo_control", "technical_quality_observation"],
+    // `requiredEquipmentCapabilities` is a CONJUNCTION, so an exercise usable
+    // with either of two implements cannot express that here — the alternative
+    // lives in `supportedLoadingModes`, exactly as `chest_supported_row` already
+    // does. Eligibility has already checked the athlete owns one: the knowledge
+    // base carries the `any_of`.
+    //
+    // The bodyweight entries require NOTHING, because their chapters say
+    // Required: None. Declaring `open_space` here would make them selectable but
+    // unprescribable for an athlete who has not declared it — the failure mode
+    // `hollow_body_hold` already demonstrates.
+    requiredEquipmentCapabilities: [],
+    // No athlete reference of any kind: this is what makes the hypertrophy
+    // family prescribable on the day an athlete installs the application.
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["split_squat_setup", "split_squat_execution"],
+    requiredStopConditionIds: [
+      "split_squat_technical_failure",
+      "split_squat_pain",
+      "split_squat_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_split_squat",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_SPLIT_SQUAT, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "rir"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: ["phase_intent"],
+  preferredTempoType: "phase_intent",
+  instructionDefinitions: splitSquatInstructions,
+  stopConditionDefinitions: splitSquatStopConditions,
+  // Declared explicitly rather than left to unique-triple lookup. The triple
+  // (functional_hypertrophy, straight_sets_repetitions, primary) is unique today,
+  // so resolution would succeed either way — but Table Group 15's auditability
+  // convention asks consuming entries to name their profile, and a second
+  // hypertrophy profile would otherwise make these ambiguous silently.
+  numericalProfileId: "functional_hypertrophy_primary_v0_1",
+  exerciseDoseConstraints: null,
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [
+    SOURCE_SPLIT_SQUAT,
+    SOURCE_METHOD_CATALOGUE,
+    SOURCE_MODULE_PROFILES,
+    SOURCE_NUMERICAL_TABLES,
+  ],
+};
+
+// -----------------------------------------------------------------------------
+
+const singleLegHipThrustInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "single_leg_hip_thrust_setup",
+    "setup",
+    "Lie supine with one foot planted, the other leg held clear of the floor, the ribs down and the pelvis level.",
+    "high",
+    true,
+    SOURCE_SINGLE_LEG_HIP_THRUST,
+  ),
+  makeInstruction(
+    "single_leg_hip_thrust_execution",
+    "execution",
+    "Drive through the heel of the working foot to full hip extension without extending the lumbar spine, hold briefly at the top, and lower under control.",
+    "high",
+    true,
+    SOURCE_SINGLE_LEG_HIP_THRUST,
+  ),
+];
+
+const singleLegHipThrustStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "single_leg_hip_thrust_technical_failure",
+    description:
+      "The set is terminated if the lumbar spine extends in place of the hip, the pelvis drops on the unsupported side, or full hip extension is no longer reached.",
+    sourceRuleIds: [SOURCE_SINGLE_LEG_HIP_THRUST],
+  }),
+  painCondition({
+    conditionId: "single_leg_hip_thrust_pain",
+    description: "The set is terminated on any hip, lumbar or hamstring pain.",
+    sourceRuleIds: [SOURCE_SINGLE_LEG_HIP_THRUST],
+  }),
+  completionCondition({
+    conditionId: "single_leg_hip_thrust_completion",
+    description:
+      "The set is complete when the prescribed repetitions have been performed on the working side at the prescribed proximity to failure, with a level pelvis throughout.",
+    sourceRuleIds: [SOURCE_SINGLE_LEG_HIP_THRUST],
+  }),
+];
+
+const singleLegHipThrustEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "single_leg_hip_thrust",
+  moduleId: "functional_hypertrophy",
+  role: "primary",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "single_leg_hip_thrust",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    // RPE and RIR only. The chapter prescribes proximity to failure, and no
+    // percentage of a one-repetition maximum is documented — deliberately, so
+    // the family can be prescribed to an athlete who has never tested one.
+    supportedIntensityTypes: ["rpe", "rir"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["bodyweight"],
+    supportedTempoTypes: ["phase_intent"],
+    laterality: "unilateral",
+    // A unilateral exercise counts its repetitions PER SIDE — the chapters say
+    // "per leg" and "per side" — and the compatibility layer rejects the pair
+    // (unilateral, total_repetitions) outright.
+    volumeInterpretations: ["repetitions_per_side"],
+    capabilityTags: ["countable_repetitions", "tempo_control", "technical_quality_observation"],
+    // `requiredEquipmentCapabilities` is a CONJUNCTION, so an exercise usable
+    // with either of two implements cannot express that here — the alternative
+    // lives in `supportedLoadingModes`, exactly as `chest_supported_row` already
+    // does. Eligibility has already checked the athlete owns one: the knowledge
+    // base carries the `any_of`.
+    //
+    // The bodyweight entries require NOTHING, because their chapters say
+    // Required: None. Declaring `open_space` here would make them selectable but
+    // unprescribable for an athlete who has not declared it — the failure mode
+    // `hollow_body_hold` already demonstrates.
+    requiredEquipmentCapabilities: [],
+    // No athlete reference of any kind: this is what makes the hypertrophy
+    // family prescribable on the day an athlete installs the application.
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["single_leg_hip_thrust_setup", "single_leg_hip_thrust_execution"],
+    requiredStopConditionIds: [
+      "single_leg_hip_thrust_technical_failure",
+      "single_leg_hip_thrust_pain",
+      "single_leg_hip_thrust_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_single_leg_hip_thrust",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_SINGLE_LEG_HIP_THRUST, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "rir"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: ["phase_intent"],
+  preferredTempoType: "phase_intent",
+  instructionDefinitions: singleLegHipThrustInstructions,
+  stopConditionDefinitions: singleLegHipThrustStopConditions,
+  // Declared explicitly rather than left to unique-triple lookup. The triple
+  // (functional_hypertrophy, straight_sets_repetitions, primary) is unique today,
+  // so resolution would succeed either way — but Table Group 15's auditability
+  // convention asks consuming entries to name their profile, and a second
+  // hypertrophy profile would otherwise make these ambiguous silently.
+  numericalProfileId: "functional_hypertrophy_primary_v0_1",
+  exerciseDoseConstraints: {
+    // The chapter's Loading Profile documents 8-12 repetitions, narrower at the
+    // bottom than the shared hypertrophy profile's 6-12. Only the minimum is
+    // stated: the exercise's own documented bound narrows the profile, never
+    // widens it.
+    minimumDose: { sets: null, repetitions: 8, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: null,
+    sourceRuleIds: [SOURCE_SINGLE_LEG_HIP_THRUST],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [
+    SOURCE_SINGLE_LEG_HIP_THRUST,
+    SOURCE_METHOD_CATALOGUE,
+    SOURCE_MODULE_PROFILES,
+    SOURCE_NUMERICAL_TABLES,
+  ],
+};
+
+// -----------------------------------------------------------------------------
+
+const gobletSquatInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "goblet_squat_setup",
+    "setup",
+    "Hold a single implement close to the chest, set the feet at a comfortable squat stance, and brace before descending.",
+    "high",
+    true,
+    SOURCE_GOBLET_SQUAT,
+  ),
+  makeInstruction(
+    "goblet_squat_execution",
+    "execution",
+    "Descend under control with the knees tracking out and the whole foot in contact with the floor, reach a controlled depth with a neutral spine, and stand up through the middle of the foot.",
+    "high",
+    true,
+    SOURCE_GOBLET_SQUAT,
+  ),
+];
+
+const gobletSquatStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "goblet_squat_technical_failure",
+    description:
+      "The set is terminated if the implement drifts from the chest, the trunk collapses forward, the heels lift, the knees collapse inward, or depth shortens.",
+    sourceRuleIds: [SOURCE_GOBLET_SQUAT],
+  }),
+  painCondition({
+    conditionId: "goblet_squat_pain",
+    description: "The set is terminated on any knee, hip or lumbar pain.",
+    sourceRuleIds: [SOURCE_GOBLET_SQUAT],
+  }),
+  completionCondition({
+    conditionId: "goblet_squat_completion",
+    description:
+      "The set is complete when the prescribed repetitions have been performed at the prescribed proximity to failure, with depth and trunk position maintained.",
+    sourceRuleIds: [SOURCE_GOBLET_SQUAT],
+  }),
+];
+
+const gobletSquatEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "goblet_squat",
+  moduleId: "functional_hypertrophy",
+  role: "primary",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "goblet_squat",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    // RPE and RIR only. The chapter prescribes proximity to failure, and no
+    // percentage of a one-repetition maximum is documented — deliberately, so
+    // the family can be prescribed to an athlete who has never tested one.
+    supportedIntensityTypes: ["rpe", "rir"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["dumbbell", "kettlebell"],
+    supportedTempoTypes: ["phase_intent"],
+    laterality: "bilateral",
+    // A unilateral exercise counts its repetitions PER SIDE — the chapters say
+    // "per leg" and "per side" — and the compatibility layer rejects the pair
+    // (unilateral, total_repetitions) outright.
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "tempo_control", "technical_quality_observation"],
+    // `requiredEquipmentCapabilities` is a CONJUNCTION, so an exercise usable
+    // with either of two implements cannot express that here — the alternative
+    // lives in `supportedLoadingModes`, exactly as `chest_supported_row` already
+    // does. Eligibility has already checked the athlete owns one: the knowledge
+    // base carries the `any_of`.
+    //
+    // The bodyweight entries require NOTHING, because their chapters say
+    // Required: None. Declaring `open_space` here would make them selectable but
+    // unprescribable for an athlete who has not declared it — the failure mode
+    // `hollow_body_hold` already demonstrates.
+    requiredEquipmentCapabilities: ["dumbbell_or_kettlebell"],
+    // No athlete reference of any kind: this is what makes the hypertrophy
+    // family prescribable on the day an athlete installs the application.
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["goblet_squat_setup", "goblet_squat_execution"],
+    requiredStopConditionIds: [
+      "goblet_squat_technical_failure",
+      "goblet_squat_pain",
+      "goblet_squat_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_goblet_squat",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_GOBLET_SQUAT, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "rir"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: ["phase_intent"],
+  preferredTempoType: "phase_intent",
+  instructionDefinitions: gobletSquatInstructions,
+  stopConditionDefinitions: gobletSquatStopConditions,
+  // Declared explicitly rather than left to unique-triple lookup. The triple
+  // (functional_hypertrophy, straight_sets_repetitions, primary) is unique today,
+  // so resolution would succeed either way — but Table Group 15's auditability
+  // convention asks consuming entries to name their profile, and a second
+  // hypertrophy profile would otherwise make these ambiguous silently.
+  numericalProfileId: "functional_hypertrophy_primary_v0_1",
+  exerciseDoseConstraints: null,
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [
+    SOURCE_GOBLET_SQUAT,
+    SOURCE_METHOD_CATALOGUE,
+    SOURCE_MODULE_PROFILES,
+    SOURCE_NUMERICAL_TABLES,
+  ],
+};
+
+// -----------------------------------------------------------------------------
+
+const dumbbellBenchPressInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "dumbbell_bench_press_setup",
+    "setup",
+    "Lie supine on the bench with the shoulder blades set down and back, the implements over the shoulders and the wrists stacked over the elbows.",
+    "high",
+    true,
+    SOURCE_DUMBBELL_BENCH_PRESS,
+  ),
+  makeInstruction(
+    "dumbbell_bench_press_execution",
+    "execution",
+    "Lower both implements under control to the level of the chest, then press both at the same rate to full elbow extension without losing scapular position.",
+    "high",
+    true,
+    SOURCE_DUMBBELL_BENCH_PRESS,
+  ),
+];
+
+const dumbbellBenchPressStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "dumbbell_bench_press_technical_failure",
+    description:
+      "The set is terminated if one side presses ahead of the other, the elbows flare toward ninety degrees, the athlete bounces out of the bottom position, or scapular position is lost.",
+    sourceRuleIds: [SOURCE_DUMBBELL_BENCH_PRESS],
+  }),
+  painCondition({
+    conditionId: "dumbbell_bench_press_pain",
+    description: "The set is terminated on any shoulder, elbow or wrist pain.",
+    sourceRuleIds: [SOURCE_DUMBBELL_BENCH_PRESS],
+  }),
+  completionCondition({
+    conditionId: "dumbbell_bench_press_completion",
+    description:
+      "The set is complete when the prescribed repetitions have been performed at the prescribed proximity to failure, with both sides moving symmetrically.",
+    sourceRuleIds: [SOURCE_DUMBBELL_BENCH_PRESS],
+  }),
+];
+
+const dumbbellBenchPressEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "dumbbell_bench_press",
+  moduleId: "functional_hypertrophy",
+  role: "primary",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "dumbbell_bench_press",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    // RPE and RIR only. The chapter prescribes proximity to failure, and no
+    // percentage of a one-repetition maximum is documented — deliberately, so
+    // the family can be prescribed to an athlete who has never tested one.
+    supportedIntensityTypes: ["rpe", "rir"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["dumbbell"],
+    supportedTempoTypes: ["phase_intent"],
+    laterality: "bilateral",
+    // A unilateral exercise counts its repetitions PER SIDE — the chapters say
+    // "per leg" and "per side" — and the compatibility layer rejects the pair
+    // (unilateral, total_repetitions) outright.
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "tempo_control", "technical_quality_observation"],
+    // `requiredEquipmentCapabilities` is a CONJUNCTION, so an exercise usable
+    // with either of two implements cannot express that here — the alternative
+    // lives in `supportedLoadingModes`, exactly as `chest_supported_row` already
+    // does. Eligibility has already checked the athlete owns one: the knowledge
+    // base carries the `any_of`.
+    //
+    // The bodyweight entries require NOTHING, because their chapters say
+    // Required: None. Declaring `open_space` here would make them selectable but
+    // unprescribable for an athlete who has not declared it — the failure mode
+    // `hollow_body_hold` already demonstrates.
+    requiredEquipmentCapabilities: ["dumbbell", "bench"],
+    // No athlete reference of any kind: this is what makes the hypertrophy
+    // family prescribable on the day an athlete installs the application.
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["dumbbell_bench_press_setup", "dumbbell_bench_press_execution"],
+    requiredStopConditionIds: [
+      "dumbbell_bench_press_technical_failure",
+      "dumbbell_bench_press_pain",
+      "dumbbell_bench_press_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_dumbbell_bench_press",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_DUMBBELL_BENCH_PRESS, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "rir"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: ["phase_intent"],
+  preferredTempoType: "phase_intent",
+  instructionDefinitions: dumbbellBenchPressInstructions,
+  stopConditionDefinitions: dumbbellBenchPressStopConditions,
+  // Declared explicitly rather than left to unique-triple lookup. The triple
+  // (functional_hypertrophy, straight_sets_repetitions, primary) is unique today,
+  // so resolution would succeed either way — but Table Group 15's auditability
+  // convention asks consuming entries to name their profile, and a second
+  // hypertrophy profile would otherwise make these ambiguous silently.
+  numericalProfileId: "functional_hypertrophy_primary_v0_1",
+  exerciseDoseConstraints: null,
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [
+    SOURCE_DUMBBELL_BENCH_PRESS,
+    SOURCE_METHOD_CATALOGUE,
+    SOURCE_MODULE_PROFILES,
+    SOURCE_NUMERICAL_TABLES,
+  ],
+};
+
+// -----------------------------------------------------------------------------
+
+const oneArmDumbbellRowInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "one_arm_dumbbell_row_setup",
+    "setup",
+    "Support the trunk on a stable surface so the spine stays neutral and the trunk stays square, with the working arm hanging at full extension.",
+    "high",
+    true,
+    SOURCE_ONE_ARM_DUMBBELL_ROW,
+  ),
+  makeInstruction(
+    "one_arm_dumbbell_row_execution",
+    "execution",
+    "Start the movement with the shoulder blade rather than the hand, pull the implement toward the hip, and lower under control to full extension without rotating the trunk.",
+    "high",
+    true,
+    SOURCE_ONE_ARM_DUMBBELL_ROW,
+  ),
+];
+
+const oneArmDumbbellRowStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "one_arm_dumbbell_row_technical_failure",
+    description:
+      "The set is terminated if the trunk rotates to assist the pull, the shoulder shrugs toward the ear, momentum is taken from the legs, or the range of motion shortens.",
+    sourceRuleIds: [SOURCE_ONE_ARM_DUMBBELL_ROW],
+  }),
+  painCondition({
+    conditionId: "one_arm_dumbbell_row_pain",
+    description: "The set is terminated on any shoulder, elbow or lumbar pain.",
+    sourceRuleIds: [SOURCE_ONE_ARM_DUMBBELL_ROW],
+  }),
+  completionCondition({
+    conditionId: "one_arm_dumbbell_row_completion",
+    description:
+      "The set is complete when the prescribed repetitions have been performed on the working side at the prescribed proximity to failure, with the trunk square throughout.",
+    sourceRuleIds: [SOURCE_ONE_ARM_DUMBBELL_ROW],
+  }),
+];
+
+const oneArmDumbbellRowEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "one_arm_dumbbell_row",
+  moduleId: "functional_hypertrophy",
+  role: "primary",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "one_arm_dumbbell_row",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    // RPE and RIR only. The chapter prescribes proximity to failure, and no
+    // percentage of a one-repetition maximum is documented — deliberately, so
+    // the family can be prescribed to an athlete who has never tested one.
+    supportedIntensityTypes: ["rpe", "rir"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["dumbbell"],
+    supportedTempoTypes: ["phase_intent"],
+    laterality: "unilateral",
+    // A unilateral exercise counts its repetitions PER SIDE — the chapters say
+    // "per leg" and "per side" — and the compatibility layer rejects the pair
+    // (unilateral, total_repetitions) outright.
+    volumeInterpretations: ["repetitions_per_side"],
+    capabilityTags: ["countable_repetitions", "tempo_control", "technical_quality_observation"],
+    // `requiredEquipmentCapabilities` is a CONJUNCTION, so an exercise usable
+    // with either of two implements cannot express that here — the alternative
+    // lives in `supportedLoadingModes`, exactly as `chest_supported_row` already
+    // does. Eligibility has already checked the athlete owns one: the knowledge
+    // base carries the `any_of`.
+    //
+    // The bodyweight entries require NOTHING, because their chapters say
+    // Required: None. Declaring `open_space` here would make them selectable but
+    // unprescribable for an athlete who has not declared it — the failure mode
+    // `hollow_body_hold` already demonstrates.
+    requiredEquipmentCapabilities: ["dumbbell"],
+    // No athlete reference of any kind: this is what makes the hypertrophy
+    // family prescribable on the day an athlete installs the application.
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["one_arm_dumbbell_row_setup", "one_arm_dumbbell_row_execution"],
+    requiredStopConditionIds: [
+      "one_arm_dumbbell_row_technical_failure",
+      "one_arm_dumbbell_row_pain",
+      "one_arm_dumbbell_row_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_one_arm_dumbbell_row",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_ONE_ARM_DUMBBELL_ROW, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "rir"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: ["phase_intent"],
+  preferredTempoType: "phase_intent",
+  instructionDefinitions: oneArmDumbbellRowInstructions,
+  stopConditionDefinitions: oneArmDumbbellRowStopConditions,
+  // Declared explicitly rather than left to unique-triple lookup. The triple
+  // (functional_hypertrophy, straight_sets_repetitions, primary) is unique today,
+  // so resolution would succeed either way — but Table Group 15's auditability
+  // convention asks consuming entries to name their profile, and a second
+  // hypertrophy profile would otherwise make these ambiguous silently.
+  numericalProfileId: "functional_hypertrophy_primary_v0_1",
+  exerciseDoseConstraints: {
+    // The chapter's Loading Profile documents 8-12 repetitions, narrower at the
+    // bottom than the shared hypertrophy profile's 6-12. Only the minimum is
+    // stated: the exercise's own documented bound narrows the profile, never
+    // widens it.
+    minimumDose: { sets: null, repetitions: 8, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: null,
+    sourceRuleIds: [SOURCE_ONE_ARM_DUMBBELL_ROW],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [
+    SOURCE_ONE_ARM_DUMBBELL_ROW,
+    SOURCE_METHOD_CATALOGUE,
+    SOURCE_MODULE_PROFILES,
+    SOURCE_NUMERICAL_TABLES,
+  ],
+};
+
+// -----------------------------------------------------------------------------
+
+const dumbbellRomanianDeadliftInstructions: InstructionDefinition[] = [
+  makeInstruction(
+    "dumbbell_romanian_deadlift_setup",
+    "setup",
+    "Stand with the implements in front of the thighs, the upper back set, and a soft but fixed knee angle.",
+    "high",
+    true,
+    SOURCE_DUMBBELL_ROMANIAN_DEADLIFT,
+  ),
+  makeInstruction(
+    "dumbbell_romanian_deadlift_execution",
+    "execution",
+    "Push the hips back with the implements tracking close to the legs, descend only as far as hamstring length allows without the spine rounding, then drive the hips forward to stand.",
+    "high",
+    true,
+    SOURCE_DUMBBELL_ROMANIAN_DEADLIFT,
+  ),
+];
+
+const dumbbellRomanianDeadliftStopConditions: StopConditionDefinition[] = [
+  technicalFailureCondition({
+    conditionId: "dumbbell_romanian_deadlift_technical_failure",
+    description:
+      "The set is terminated if the lower back rounds, the movement becomes a squat, the implements drift away from the legs, or the athlete descends past a neutral spine.",
+    sourceRuleIds: [SOURCE_DUMBBELL_ROMANIAN_DEADLIFT],
+  }),
+  painCondition({
+    conditionId: "dumbbell_romanian_deadlift_pain",
+    description: "The set is terminated on any lumbar, hamstring or hip pain.",
+    sourceRuleIds: [SOURCE_DUMBBELL_ROMANIAN_DEADLIFT],
+  }),
+  completionCondition({
+    conditionId: "dumbbell_romanian_deadlift_completion",
+    description:
+      "The set is complete when the prescribed repetitions have been performed at the prescribed proximity to failure, with a neutral spine throughout.",
+    sourceRuleIds: [SOURCE_DUMBBELL_ROMANIAN_DEADLIFT],
+  }),
+];
+
+const dumbbellRomanianDeadliftEntry: ExercisePrescriptionRegistryEntry = {
+  exerciseId: "dumbbell_romanian_deadlift",
+  moduleId: "functional_hypertrophy",
+  role: "primary",
+  explicitMethodId: "straight_sets_repetitions",
+  capabilities: {
+    exerciseId: "dumbbell_romanian_deadlift",
+    version: "0.1",
+    status: "documented",
+    supportedMethodIds: ["straight_sets_repetitions"],
+    supportedVolumeStructures: ["sets_reps"],
+    // RPE and RIR only. The chapter prescribes proximity to failure, and no
+    // percentage of a one-repetition maximum is documented — deliberately, so
+    // the family can be prescribed to an athlete who has never tested one.
+    supportedIntensityTypes: ["rpe", "rir"],
+    preferredIntensityTypes: ["rpe"],
+    supportedLoadingModes: ["dumbbell"],
+    supportedTempoTypes: ["phase_intent"],
+    laterality: "bilateral",
+    // A unilateral exercise counts its repetitions PER SIDE — the chapters say
+    // "per leg" and "per side" — and the compatibility layer rejects the pair
+    // (unilateral, total_repetitions) outright.
+    volumeInterpretations: ["total_repetitions"],
+    capabilityTags: ["countable_repetitions", "tempo_control", "technical_quality_observation"],
+    // `requiredEquipmentCapabilities` is a CONJUNCTION, so an exercise usable
+    // with either of two implements cannot express that here — the alternative
+    // lives in `supportedLoadingModes`, exactly as `chest_supported_row` already
+    // does. Eligibility has already checked the athlete owns one: the knowledge
+    // base carries the `any_of`.
+    //
+    // The bodyweight entries require NOTHING, because their chapters say
+    // Required: None. Declaring `open_space` here would make them selectable but
+    // unprescribable for an athlete who has not declared it — the failure mode
+    // `hollow_body_hold` already demonstrates.
+    requiredEquipmentCapabilities: ["dumbbell"],
+    // No athlete reference of any kind: this is what makes the hypertrophy
+    // family prescribable on the day an athlete installs the application.
+    requiredAthleteReferenceTypes: [],
+    requiredInstructionIds: ["dumbbell_romanian_deadlift_setup", "dumbbell_romanian_deadlift_execution"],
+    requiredStopConditionIds: [
+      "dumbbell_romanian_deadlift_technical_failure",
+      "dumbbell_romanian_deadlift_pain",
+      "dumbbell_romanian_deadlift_completion",
+    ],
+    durationEstimationProfileId: "duration_profile_dumbbell_romanian_deadlift",
+    substitutionCapabilityTags: [],
+    sourceRuleIds: [SOURCE_DUMBBELL_ROMANIAN_DEADLIFT, SOURCE_CAPABILITIES_DOC],
+  },
+  supportedIntensityTypes: ["rpe", "rir"],
+  preferredIntensityType: "rpe",
+  supportedTempoTypes: ["phase_intent"],
+  preferredTempoType: "phase_intent",
+  instructionDefinitions: dumbbellRomanianDeadliftInstructions,
+  stopConditionDefinitions: dumbbellRomanianDeadliftStopConditions,
+  // Declared explicitly rather than left to unique-triple lookup. The triple
+  // (functional_hypertrophy, straight_sets_repetitions, primary) is unique today,
+  // so resolution would succeed either way — but Table Group 15's auditability
+  // convention asks consuming entries to name their profile, and a second
+  // hypertrophy profile would otherwise make these ambiguous silently.
+  numericalProfileId: "functional_hypertrophy_primary_v0_1",
+  exerciseDoseConstraints: {
+    // The chapter's Loading Profile documents 8-12 repetitions, narrower at the
+    // bottom than the shared hypertrophy profile's 6-12. Only the minimum is
+    // stated: the exercise's own documented bound narrows the profile, never
+    // widens it.
+    minimumDose: { sets: null, repetitions: 8, durationSeconds: null, distanceMeters: null, rounds: null, workIntervals: null },
+    maximumDose: null,
+    sourceRuleIds: [SOURCE_DUMBBELL_ROMANIAN_DEADLIFT],
+  },
+  exerciseIntensityConstraints: null,
+  exerciseRestConstraints: null,
+  sourceRuleIds: [
+    SOURCE_DUMBBELL_ROMANIAN_DEADLIFT,
+    SOURCE_METHOD_CATALOGUE,
+    SOURCE_MODULE_PROFILES,
+    SOURCE_NUMERICAL_TABLES,
+  ],
+};
+
 // -----------------------------------------------------------------------------
 
 /**
@@ -11694,6 +12540,15 @@ export const EXERCISE_PRESCRIPTION_REGISTRY = {
   grip_fighting: gripFightingEntry,
 
   sled_push: sledPushEntry,
+
+  // Functional hypertrophy (Lot H2.2B)
+  push_up: pushUpEntry,
+  split_squat: splitSquatEntry,
+  single_leg_hip_thrust: singleLegHipThrustEntry,
+  goblet_squat: gobletSquatEntry,
+  dumbbell_bench_press: dumbbellBenchPressEntry,
+  one_arm_dumbbell_row: oneArmDumbbellRowEntry,
+  dumbbell_romanian_deadlift: dumbbellRomanianDeadliftEntry,
 } as const satisfies Record<PilotExerciseId, ExercisePrescriptionRegistryEntry>;
 
 export const isPilotExerciseId = (value: unknown): value is PilotExerciseId =>

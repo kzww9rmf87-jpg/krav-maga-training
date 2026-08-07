@@ -158,7 +158,9 @@ describe("registryVocabulary — equipment capabilities", () => {
     // +1 for sled (Registry Lot 21 — Sled push: the knowledge base's own
     // pre-existing EquipmentType, finally expressible here; one atom, never
     // sled + plates).
-    expect(EQUIPMENT_CAPABILITY_IDS.length).toBe(PREVIOUSLY_EXISTING_IDS.length + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 1 + 1 + 1 + 1);
+    // The trailing `+ 1` is Lot H2.2B's `dumbbell_or_kettlebell` equivalence
+    // group, added for the Goblet Squat's documented `dumbbell | kettlebell`.
+    expect(EQUIPMENT_CAPABILITY_IDS.length).toBe(PREVIOUSLY_EXISTING_IDS.length + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 1 + 1 + 1 + 1 + 1);
   });
 
   test("an unknown equipment identifier is still rejected after the addition", () => {
@@ -402,6 +404,15 @@ describe("registryVocabulary — carry loading modes corrected to match document
 
   test("6. no other pilot registry entry's supportedLoadingModes changed", () => {
     const EXPECTED_LOADING_MODES: Record<string, readonly string[]> = {
+      // Functional hypertrophy (Lot H2.2B). The three bodyweight entries load
+      // nothing; the four implement entries name only what their chapters do.
+      push_up: ["bodyweight"],
+      split_squat: ["bodyweight"],
+      single_leg_hip_thrust: ["bodyweight"],
+      goblet_squat: ["dumbbell", "kettlebell"],
+      dumbbell_bench_press: ["dumbbell"],
+      one_arm_dumbbell_row: ["dumbbell"],
+      dumbbell_romanian_deadlift: ["dumbbell"],
       bench_press: ["barbell", "added_external_load"],
       back_squat: ["barbell", "added_external_load"],
       trap_bar_deadlift: ["barbell", "added_external_load"],
@@ -536,8 +547,8 @@ describe("registryVocabulary — carry loading modes corrected to match document
   });
 
   test("7. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(82);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(82);
   });
 
   test("8. every retained value (plate, sandbag, barbell) is a known, documented LoadingMode", () => {
@@ -650,12 +661,12 @@ describe("registryVocabulary — pinch_carry represents only the Bilateral Varia
     for (const [id, text] of Object.entries(OTHER_ENTRY_FIRST_INSTRUCTION)) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id as PilotExerciseId].instructionDefinitions[0].text).toBe(text);
     }
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(82);
   });
 
   test("9. the registry still contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(82);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(82);
   });
 
   test("10. explicitMethodId, supportedMethodIds, supportedVolumeStructures and stop conditions are unchanged", () => {
@@ -804,6 +815,13 @@ const DOSE_NARROWING_EXCEPTIONS = [
   // written from this chapter; the entry states them anyway so it carries its
   // own documented range, the rope_pull precedent.
   "sled_push",
+  // Registry Lot 22 (H2.2B) — three hypertrophy entries whose chapters document
+  // 8-12 repetitions, narrower at the bottom than the shared profile's 6-12.
+  // Each states only the minimum: an exercise's own bound narrows the profile,
+  // never widens it. The other four match the profile exactly and stay null.
+  "single_leg_hip_thrust",
+  "one_arm_dumbbell_row",
+  "dumbbell_romanian_deadlift",
 ] as const;
 
 describe("registryVocabulary — exerciseDoseConstraints", () => {
@@ -814,7 +832,7 @@ describe("registryVocabulary — exerciseDoseConstraints", () => {
       }
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseDoseConstraints).toBeNull();
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(82);
   });
 
   test("tibialis_raise, rotator_cuff_training, soleus_raise, copenhagen_plank, hip_thrust and barbell_row narrow exerciseDoseConstraints; wrist_strengthening and chin_up do not", () => {
@@ -898,7 +916,7 @@ describe("registryVocabulary — exerciseIntensityConstraints / exerciseRestCons
         expect(EXERCISE_PRESCRIPTION_REGISTRY[id].exerciseRestConstraints).toBeNull();
       }
     }
-    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(82);
   });
 
   test("every rest-narrowing entry declares its own documented window; the three set-based ones narrow rest alone, and the interval-based one is scoped between intervals", () => {

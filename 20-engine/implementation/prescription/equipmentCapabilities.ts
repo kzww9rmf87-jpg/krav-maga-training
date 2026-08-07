@@ -58,6 +58,12 @@ export const EQUIPMENT_CAPABILITY_IDS = [
   // Equivalence groups — "any one of several interchangeable implements"
   "loaded_carry_implement",
   "cable_or_band_resistance",
+  // Lot H2.2B. The Goblet Squat's chapter names "Dumbbell or Kettlebell" under
+  // Required, and its knowledge-base clause is exactly `any_of[dumbbell |
+  // kettlebell]`. Like `cable_or_band_resistance`, this group is that clause
+  // restated — exact, not coarser — so it authorizes nothing the exercise's own
+  // requirement does not already allow.
+  "dumbbell_or_kettlebell",
   // Environmental / spatial capabilities (not a physical item)
   "safe_landing_surface",
   // Added during the family-by-family registry extension (Force / Power /

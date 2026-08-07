@@ -91,15 +91,15 @@ describe("rowerg_intervals — registry, knowledge base and profile counts", () 
     // 59 historical + rowerg_intervals (this lot) + sprint_intervals
     // (Registry Lot 6). The two lists below are what this test actually
     // guards; the total is derived from them, never the other way round.
-    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(82);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(82);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
     expect(PILOT_EXERCISE_IDS).toContain(EXERCISE_ID);
   });
 
   test("2. the knowledge base still holds exactly 76 ExerciseDefinitions — none added, none removed", () => {
-    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(76);
-    expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(76);
+    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(83);
+    expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(83);
   });
 
   test("3. the numerical prescription profiles number 22 — this lot created none", () => {
@@ -141,7 +141,7 @@ describe("rowerg_intervals — registry, knowledge base and profile counts", () 
     // test keeps proving what it was written to prove — that rowerg_intervals
     // was the only exercise this lot introduced — instead of silently
     // absorbing any future addition.
-    const ADDED_BY_LATER_LOTS = ["sprint_intervals", "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting", "sled_push"] as const;
+    const ADDED_BY_LATER_LOTS = ["sprint_intervals", "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting", "sled_push", "push_up", "split_squat", "single_leg_hip_thrust", "goblet_squat", "dumbbell_bench_press", "one_arm_dumbbell_row", "dumbbell_romanian_deadlift"] as const;
 
     expect(HISTORICAL_IDS).toHaveLength(59);
     expect([...HISTORICAL_IDS, EXERCISE_ID, ...ADDED_BY_LATER_LOTS].sort()).toEqual(
@@ -691,7 +691,7 @@ describe("rowerg_intervals — determinism, non-mutation and non-regression", ()
     // The 59 entries that predate this lot: everything except this lot's own
     // entry and the ids added by later lots (each of which has its own
     // non-regression coverage in its own test file).
-    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "sprint_intervals", "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting", "sled_push"];
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "sprint_intervals", "ab_wheel", "dead_bug", "hanging_leg_raise", "plate_pinch", "heavy_bag_power_intervals", "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting", "sled_push", "push_up", "split_squat", "single_leg_hip_thrust", "goblet_squat", "dumbbell_bench_press", "one_arm_dumbbell_row", "dumbbell_romanian_deadlift"];
     const historicalIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(historicalIds).toHaveLength(59);
 

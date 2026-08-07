@@ -590,6 +590,14 @@ describe("runEngine — default exercise catalog wiring", () => {
       "wall_wrestling",
       "grip_fighting",
       "shot_entries",
+      // Functional hypertrophy (Lot H2.2B), appended in catalogue order.
+      "push_up",
+      "split_squat",
+      "single_leg_hip_thrust",
+      "goblet_squat",
+      "dumbbell_bench_press",
+      "one_arm_dumbbell_row",
+      "dumbbell_romanian_deadlift",
     ]);
   });
 

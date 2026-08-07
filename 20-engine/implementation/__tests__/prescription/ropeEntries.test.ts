@@ -116,14 +116,14 @@ const readChapter = (relative: string) =>
 
 describe("rope entries — registry, knowledge base, profile and equipment counts", () => {
   test("1. the registry grew from 69 to exactly 71 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(82);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(82);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
   test("2. the knowledge base still holds exactly 76 ExerciseDefinitions", () => {
-    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(76);
-    expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(76);
+    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(83);
+    expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(83);
   });
 
   test("3. the numerical profiles stay at 22 — this lot created none", () => {
@@ -134,7 +134,7 @@ describe("rope entries — registry, knowledge base, profile and equipment count
   });
 
   test("4. the equipment vocabulary went from 30 to 31 — `rope`, the only identifier this lot added", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(33);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(34);
     expect(isEquipmentCapabilityId("rope")).toBe(true);
     // No anchor or load id was invented for either chapter.
     for (const invented of ["climbing_rope", "anchored_load", "rope_anchor", "pulling_sled"]) {
@@ -616,7 +616,7 @@ describe("rope entries — session, engine and non-regression", () => {
     // The three partner grappling drills were added by a later lot (Registry
     // Lot 20) and are covered by their own file, so they are excluded here
     // exactly as this lot's own two entries are.
-    const ADDED_BY_LATER_LOTS: readonly string[] = ["pummeling", "wall_wrestling", "grip_fighting", "sled_push"];
+    const ADDED_BY_LATER_LOTS: readonly string[] = ["pummeling", "wall_wrestling", "grip_fighting", "sled_push", "push_up", "split_squat", "single_leg_hip_thrust", "goblet_squat", "dumbbell_bench_press", "one_arm_dumbbell_row", "dumbbell_romanian_deadlift"];
     const previousIds = PILOT_EXERCISE_IDS.filter(
       (id) => id !== CLIMB.id && id !== PULL.id && !ADDED_BY_LATER_LOTS.includes(id),
     );

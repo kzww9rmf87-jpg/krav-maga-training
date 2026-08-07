@@ -46,11 +46,11 @@ const knowledgeBaseSource = (): string =>
 
 describe("prescription registry V0.1 — closing state", () => {
   test("1. the four closing counters are 75 / 76 / 23 / 33", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
-    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(76);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(82);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(82);
+    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(83);
     expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(33);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(34);
   });
 
   test("2. turkish_get_up is the ONE exercise in the catalogue with no registry entry", () => {

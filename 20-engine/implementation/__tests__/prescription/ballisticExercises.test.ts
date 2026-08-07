@@ -430,7 +430,7 @@ describe("ballistics — new throw variants: presence, identity and vocabulary",
   }
 
   test("the registry now contains exactly 44 active exercises", () => {
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(82);
   });
 });
 
@@ -643,7 +643,7 @@ describe("ballistics — new throw variants: determinism and non-mutation", () =
     const PREVIOUSLY_EXISTING_IDS = Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).filter(
       (id) => !NEW_IDS.includes(id as (typeof NEW_IDS)[number]),
     );
-    expect(PREVIOUSLY_EXISTING_IDS).toHaveLength(69);
+    expect(PREVIOUSLY_EXISTING_IDS).toHaveLength(76);
     for (const id of PREVIOUSLY_EXISTING_IDS) {
       expect(EXERCISE_PRESCRIPTION_REGISTRY[id as keyof typeof EXERCISE_PRESCRIPTION_REGISTRY].capabilities.requiredEquipmentCapabilities).not.toContain(
         "wall",

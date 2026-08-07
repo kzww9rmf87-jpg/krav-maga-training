@@ -93,14 +93,14 @@ function prescribe(rangeContext: PrescriptionExecutionContext["rangeContext"] = 
 
 describe("heavy_bag_power_intervals — registry, knowledge base, profile and equipment counts", () => {
   test("1. the registry grew from 65 to exactly 66 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(82);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(82);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
   test("2. the knowledge base still holds exactly 76 ExerciseDefinitions — none added, none removed", () => {
-    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(76);
-    expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(76);
+    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(83);
+    expect(new Set(EXERCISE_KNOWLEDGE_BASE.map((exercise) => exercise.id)).size).toBe(83);
   });
 
   test("3. the numerical profiles went from 17 to 18 — INT-POWER, implemented once, by the preceding commit; a later lot added GRIP-REPETITION-STRENGTH, bringing the total to 22", () => {
@@ -109,7 +109,7 @@ describe("heavy_bag_power_intervals — registry, knowledge base, profile and eq
   });
 
   test("4. the equipment vocabulary went from 25 to 26 — `heavy_bag`, the only identifier this lot added", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(33);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(34);
     expect(isEquipmentCapabilityId("heavy_bag")).toBe(true);
     // Aligned 1:1 with a pre-existing knowledge-base `EquipmentType` member —
     // nothing was added to that union for this entry.
@@ -740,7 +740,7 @@ describe("heavy_bag_power_intervals — determinism and non-regression", () => {
 
     // The 65 entries that predate this lot: everything except this lot's own
     // entry and the ids added by later lots, each covered by its own file.
-    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting", "sled_push"];
+    const ADDED_BY_THIS_OR_LATER_LOTS: readonly string[] = [EXERCISE_ID, "battle_ropes", "assault_bike_intervals", "towel_pull_up", "rope_climb", "rope_pull", "pummeling", "wall_wrestling", "grip_fighting", "sled_push", "push_up", "split_squat", "single_leg_hip_thrust", "goblet_squat", "dumbbell_bench_press", "one_arm_dumbbell_row", "dumbbell_romanian_deadlift"];
     const previousIds = PILOT_EXERCISE_IDS.filter((id) => !ADDED_BY_THIS_OR_LATER_LOTS.includes(id));
     expect(previousIds).toHaveLength(65);
 
@@ -814,7 +814,7 @@ describe("heavy_bag_power_intervals — determinism and non-regression", () => {
 
     // Exactly one profile and one equipment id were added by this whole lot.
     expect(NUMERICAL_PRESCRIPTION_PROFILES).toHaveLength(23);
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(33);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(34);
     expect(getNumericalPrescriptionProfileById(PROFILE_ID)!.sourceRuleIds).toEqual([
       "34_NUMERICAL_PRESCRIPTION_TABLES_V0_1",
     ]);

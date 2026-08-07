@@ -316,15 +316,18 @@ physical-preparation sessions.
 
 ## Coverage matrix — prescribable drivers
 
+Measured by `__tests__/catalogueCoverage.test.ts`. The hypertrophy column is the
+one Lot H2.2B changed; every other number is untouched.
+
 | Equipment profile | max strength | hypertrophy | power | conditioning | robustness | skill |
 | --- | --- | --- | --- | --- | --- | --- |
-| bodyweight | **0** | **0** | 5 | **0** | 4 | 2 |
-| bodyweight + pull-up bar | 1 | **0** | 5 | **0** | 5 | 2 |
-| bands | **0** | **0** | 5 | **0** | 5 | 2 |
-| dumbbells | **0** | **0** | 5 | **0** | 4 | 2 |
-| kettlebell | **0** | **0** | 5 | **0** | 4 | 2 |
-| medicine ball | **0** | **0** | 11 | **0** | 4 | 2 |
-| full gym | 10 | **0** | 17 | 2 | 7 | 7 |
+| bodyweight | **0** | 3 | 5 | **0** | 4 | 2 |
+| bodyweight + pull-up bar | 1 | 3 | 5 | **0** | 5 | 2 |
+| bands | **0** | 3 | 5 | **0** | 5 | 2 |
+| dumbbells | **0** | 6 | 5 | **0** | 4 | 2 |
+| kettlebell | **0** | 4 | 5 | **0** | 4 | 2 |
+| medicine ball | **0** | 3 | 11 | **0** | 4 | 2 |
+| full gym | 10 | 7 | 17 | 2 | 7 | 7 |
 
 ## What the matrix says
 
@@ -438,6 +441,131 @@ A request is honestly `inadequate` — not a defect — when the matrix shows ze
 * bodyweight-only maximum strength (the Lot H2 regression);
 * any home-profile hypertrophy;
 * any home-profile conditioning.
+
+---
+
+# Hypertrophy Runtime Integration — Lot H2.2B
+
+## Status
+
+The seven chapters in `50-exercises/68_HYPERTROPHY/` are live. Every hypertrophy
+request that previously returned `blocked` now returns a session.
+
+| Exercise | Pattern | Equipment | Laterality |
+| --- | --- | --- | --- |
+| `push_up` | horizontal push | none | bilateral |
+| `split_squat` | squat | none | unilateral |
+| `single_leg_hip_thrust` | hinge | none | unilateral |
+| `goblet_squat` | squat | dumbbell **or** kettlebell | bilateral |
+| `dumbbell_bench_press` | horizontal push | dumbbells + bench | bilateral |
+| `one_arm_dumbbell_row` | horizontal pull | dumbbell | unilateral |
+| `dumbbell_romanian_deadlift` | hinge | dumbbells | bilateral |
+
+All seven are `module: functional_hypertrophy`, `role: primary`, and resolve
+`functional_hypertrophy_primary_v0_1`: 3-4 sets, 6-12 repetitions, RPE 7-9 or
+RIR 1-3, 90-180 s rest.
+
+## No athlete reference is required
+
+Every entry declares an empty `requiredAthleteReferenceTypes`, and the profile
+declares `requiresExerciseSpecificLoadRule: false`. An athlete who has never
+tested a one-repetition maximum can be prescribed this entire family on the day
+they install the application.
+
+Nothing in the family supports `percentage_1rm`, and a generated session's
+prescription contains neither the string `one_rep_max` nor `percentage_1rm` —
+asserted, not assumed.
+
+## Canonicalization
+
+Each of these is a SEPARATE canonical exercise rather than a second prescription
+on an existing one, and the reason is the contract rather than preference:
+
+* `ExerciseDefinition` carries ONE `module` and ONE `primaryAdaptation`;
+* `EXERCISE_PRESCRIPTION_REGISTRY` holds ONE entry per exercise id.
+
+A single canonical exercise therefore cannot carry both a maximum-strength and a
+hypertrophy prescription. `goblet_squat` is not `back_squat` at a different
+intensity; it is a different entity with a different adaptation, a different
+equipment requirement and a different load ceiling.
+
+`split_squat` is distinct from `bulgarian_split_squat` on the source's own terms:
+the rear foot is grounded, and `06_BULGARIAN_SPLIT_SQUAT` names the Split Squat
+as its regression.
+
+## Movement patterns and loaded regions
+
+Transcribed strictly, and this is load-bearing rather than cosmetic. No chapter
+lists `isometric` as a movement pattern — the isometric work each describes is a
+CONTRACTION profile, and the brace is carried by `anti_extension` or
+`anti_rotation`. `bodyRegionsLoaded` takes each chapter's Primary and Secondary
+muscles only; Stabilizers are excluded, so a push-up does not claim to load the
+abdomen.
+
+Rule 32 calls two exercises redundant when they share an adaptation, a movement
+pattern AND a loaded region. Carrying `isometric` and `abdomen` on every entry
+made the whole family mutually redundant, and a 30-minute bodyweight session
+composed ONE exercise where three were available.
+
+## Equipment modelling
+
+`requiredEquipmentCapabilities` is a conjunction, so an exercise usable with
+either of two implements cannot express that there. Two mechanisms carry it:
+
+* the alternative lives in `supportedLoadingModes`, and
+* eligibility has already checked the athlete owns one, because the knowledge
+  base carries the `any_of` clause.
+
+The Goblet Squat additionally required a new equivalence group,
+`dumbbell_or_kettlebell` — the chapter's `dumbbell | kettlebell` restated as one
+id, on the `cable_or_band_resistance` precedent. It is EXACT, not coarser, so it
+authorizes nothing the exercise's own requirement does not already allow.
+`EquipmentCapabilityId` is deliberately not part of the public contract, so this
+is not a contract change.
+
+The three bodyweight entries require NOTHING. Declaring `open_space` would make
+them selectable but unprescribable for an athlete who has not declared it — the
+failure mode `hollow_body_hold` already demonstrates.
+
+## Representative sessions
+
+Produced by the engine under domain rules, not hardcoded:
+
+```text
+bodyweight / 30 min   push_up + single_leg_hip_thrust + split_squat     27 min
+bodyweight / 20 min   push_up + single_leg_hip_thrust                   17 min
+dumbbells  / 30 min   one_arm_dumbbell_row + push_up + hip_thrust       27 min
+kettlebell / 30 min   push_up + single_leg_hip_thrust + goblet_squat    25 min
+```
+
+The 20-minute session holds two exercises rather than three because the time
+budget removed the third — not because a rule caps it.
+
+## What is still unsupported
+
+**Bodyweight horizontal pull.** A horizontal pull needs something to pull
+against. No exercise in this family provides it without equipment, and CAS does
+not substitute a vertical pull and call it equivalent.
+
+**Bodyweight maximum strength.** Unchanged by this lot and still correctly
+`inadequate`. A hypertrophy exercise cannot establish maximum-strength coverage:
+coverage is decided by the exercise's own adaptation.
+
+**Progression level.** The chapters document progressions — decline push-ups,
+weighted variations, rear-foot elevation — but CAS collects no athlete input that
+could choose between them, so none is prescribed. Where bodyweight becomes too
+easy, the chapter's progression list is advice for a coach, not a decision the
+engine may take. This is the single largest limitation of the family, and
+closing it needs an input, not an exercise.
+
+**Vertical push, and bands.** No overhead press and no band movement exists at
+any equipment level.
+
+## Remaining catalogue gaps
+
+Unchanged by this lot: `conditioning` still needs a machine, `recovery` still has
+no exercise, and `turkish_get_up` remains catalogued but unprescribable for want
+of a repetition-based `movement` profile.
 
 ---
 

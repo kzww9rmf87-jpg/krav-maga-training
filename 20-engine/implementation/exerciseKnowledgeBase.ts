@@ -11761,6 +11761,378 @@ export const OVERHEAD_CARRY: ExerciseDefinition = {
 };
 
 
+
+// -----------------------------------------------------------------------------
+// Functional hypertrophy — Lot H2.2B
+// -----------------------------------------------------------------------------
+//
+// The first exercises in the `functional_hypertrophy` module. Until this lot the
+// module was empty at every equipment level, so every hypertrophy request came
+// back `blocked` — see `02_EXERCISE_KNOWLEDGE_BASE.md`.
+//
+// Every entry is transcribed from a chapter in `50-exercises/68_HYPERTROPHY/`.
+// Nothing here is inferred from a similar exercise: where a chapter is silent,
+// the field is omitted rather than borrowed.
+//
+// MOVEMENT PATTERNS AND LOADED REGIONS are transcribed strictly. No chapter
+// lists `isometric` as a movement pattern — the isometric work each describes is
+// a CONTRACTION profile, and the brace is already carried by `anti_extension` or
+// `anti_rotation`. `bodyRegionsLoaded` takes each chapter's Primary and Secondary
+// muscles only; Stabilizers are excluded, so a push-up does not claim to load the
+// abdomen.
+//
+// This matters beyond accuracy: Rule 32 calls two exercises redundant when they
+// share an adaptation, a movement pattern AND a loaded region. Carrying
+// `isometric` and `abdomen` on every entry made the whole family mutually
+// redundant, and a bodyweight session composed one exercise where three were
+// available.
+//
+// EVIDENCE LEVEL. All seven carry `level_2`. The chapters grade the movement
+// PATTERNS four or five stars, but grade the specific variations — the goblet
+// position, the grounded split stance, the one-arm supported row — as limited
+// evidence, and label every combat-transfer claim expert consensus. `level_2`
+// records the weaker of the two, which is the honest reading.
+//
+// WHY THESE ARE SEPARATE CANONICAL EXERCISES rather than new prescriptions on
+// `bench_press`, `romanian_deadlift` or `bulgarian_split_squat`: an
+// `ExerciseDefinition` carries ONE `module` and ONE `primaryAdaptation`, and the
+// prescription registry holds ONE entry per exercise id. A single canonical
+// exercise cannot carry both a maximum-strength and a hypertrophy prescription
+// in the current contract. The choice is made by the contract, not by
+// preference.
+
+/**
+ * Push-Up — `50-exercises/68_HYPERTROPHY/10_PUSH_UP.md`.
+ *
+ * Bodyweight horizontal press. No equipment is required at all, which is why it is
+// the family's entry point for an athlete with nothing.
+ *
+ * `module: "functional_hypertrophy"` and
+ * `primaryAdaptation: "functional_hypertrophy"` come from the chapter's Primary
+ * Classification. The chapter states explicitly that this is not a
+ * maximum-strength exercise, and nothing here claims otherwise.
+ */
+export const PUSH_UP: ExerciseDefinition = {
+  id: "push_up",
+  name: "Push-Up",
+  module: "functional_hypertrophy",
+  primaryAdaptation: "functional_hypertrophy",
+  physicalQualities: ["relative_strength", "muscular_endurance", "trunk_strength", "tissue_capacity"],
+  movementPatterns: ["horizontal_push", "anti_extension"],
+  forceVectors: ["horizontal"],
+  // No equipment requirement: the chapter lists Required as None.
+  requiredEquipment: [],
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  unilateral: false,
+  bodyRegionsLoaded: ["chest", "shoulder", "upper_arm"],
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["horizontal_push", "anti_extension"], absolute: true },
+    { description: "Acute elbow injury.", region: "elbow", prohibitedPatterns: ["horizontal_push", "anti_extension"], absolute: true },
+    { description: "Acute wrist injury.", region: "wrist", prohibitedPatterns: ["horizontal_push", "anti_extension"], absolute: true },
+  ],
+  fatigueProfile: {
+    types: [],
+    neural: 1,
+    muscular: 3,
+    metabolic: 2,
+    connectiveTissue: 1,
+    technical: 1,
+  },
+  evidenceLevel: "level_2",
+  setupTimeMinutes: 1,
+};
+
+/**
+ * Split Squat — `50-exercises/68_HYPERTROPHY/11_SPLIT_SQUAT.md`.
+ *
+ * Grounded split stance — DISTINCT from `bulgarian_split_squat`, whose rear foot is
+// elevated. `06_BULGARIAN_SPLIT_SQUAT` names the Split Squat as its own regression.
+ *
+ * `module: "functional_hypertrophy"` and
+ * `primaryAdaptation: "functional_hypertrophy"` come from the chapter's Primary
+ * Classification. The chapter states explicitly that this is not a
+ * maximum-strength exercise, and nothing here claims otherwise.
+ */
+export const SPLIT_SQUAT: ExerciseDefinition = {
+  id: "split_squat",
+  name: "Split Squat",
+  module: "functional_hypertrophy",
+  primaryAdaptation: "functional_hypertrophy",
+  physicalQualities: ["relative_strength", "muscular_endurance", "balance", "coordination", "stability"],
+  movementPatterns: ["squat"],
+  forceVectors: ["vertical"],
+  // No equipment requirement: the chapter lists Required as None.
+  requiredEquipment: [],
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  unilateral: true,
+  bodyRegionsLoaded: ["thigh", "hip"],
+  contraindications: [
+    { description: "Acute knee injury.", region: "knee", prohibitedPatterns: ["squat"], absolute: true },
+    { description: "Acute hip injury.", region: "hip", prohibitedPatterns: ["squat"], absolute: true },
+    { description: "Acute ankle injury.", region: "ankle", prohibitedPatterns: ["squat"], absolute: true },
+  ],
+  fatigueProfile: {
+    types: [],
+    neural: 2,
+    muscular: 3,
+    metabolic: 3,
+    connectiveTissue: 2,
+    technical: 2,
+  },
+  evidenceLevel: "level_2",
+  setupTimeMinutes: 1,
+};
+
+/**
+ * Single-Leg Hip Thrust — `50-exercises/68_HYPERTROPHY/12_SINGLE_LEG_HIP_THRUST.md`.
+ *
+ * Bodyweight hip extension at short muscle length. The lowest-cost entry in the
+// family and the only hinge available with no equipment.
+ *
+ * `module: "functional_hypertrophy"` and
+ * `primaryAdaptation: "functional_hypertrophy"` come from the chapter's Primary
+ * Classification. The chapter states explicitly that this is not a
+ * maximum-strength exercise, and nothing here claims otherwise.
+ */
+export const SINGLE_LEG_HIP_THRUST: ExerciseDefinition = {
+  id: "single_leg_hip_thrust",
+  name: "Single-Leg Hip Thrust",
+  module: "functional_hypertrophy",
+  primaryAdaptation: "functional_hypertrophy",
+  physicalQualities: ["relative_strength", "muscular_endurance", "stability", "tissue_capacity"],
+  movementPatterns: ["hinge", "anti_rotation"],
+  forceVectors: ["horizontal"],
+  // No equipment requirement: the chapter lists Required as None.
+  requiredEquipment: [],
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  unilateral: true,
+  bodyRegionsLoaded: ["hip", "thigh"],
+  contraindications: [
+    { description: "Acute hip injury.", region: "hip", prohibitedPatterns: ["hinge", "anti_rotation"], absolute: true },
+    { description: "Acute lumbar injury.", region: "lumbar_spine", prohibitedPatterns: ["hinge", "anti_rotation"], absolute: true },
+    { description: "Acute hamstring injury.", region: "thigh", prohibitedPatterns: ["hinge", "anti_rotation"], absolute: true },
+  ],
+  fatigueProfile: {
+    types: [],
+    neural: 1,
+    muscular: 3,
+    metabolic: 2,
+    connectiveTissue: 1,
+    technical: 1,
+  },
+  evidenceLevel: "level_2",
+  setupTimeMinutes: 1,
+};
+
+/**
+ * Goblet Squat — `50-exercises/68_HYPERTROPHY/13_GOBLET_SQUAT.md`.
+ *
+ * The only loaded squat in the catalogue that needs neither barbell nor rack.
+// `any_of` dumbbell/kettlebell is taken directly from the chapter's Equipment
+// Requirements, which names both.
+ *
+ * `module: "functional_hypertrophy"` and
+ * `primaryAdaptation: "functional_hypertrophy"` come from the chapter's Primary
+ * Classification. The chapter states explicitly that this is not a
+ * maximum-strength exercise, and nothing here claims otherwise.
+ */
+export const GOBLET_SQUAT: ExerciseDefinition = {
+  id: "goblet_squat",
+  name: "Goblet Squat",
+  module: "functional_hypertrophy",
+  primaryAdaptation: "functional_hypertrophy",
+  physicalQualities: ["relative_strength", "muscular_endurance", "trunk_strength", "mobility", "stability"],
+  movementPatterns: ["squat"],
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "any_of",
+        items: [
+          { kind: "equipment", equipment: "dumbbell" },
+          { kind: "equipment", equipment: "kettlebell" },
+        ],
+      },
+    ],
+  },
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  unilateral: false,
+  bodyRegionsLoaded: ["thigh", "hip", "lumbar_spine"],
+  contraindications: [
+    { description: "Acute knee injury.", region: "knee", prohibitedPatterns: ["squat"], absolute: true },
+    { description: "Acute hip injury.", region: "hip", prohibitedPatterns: ["squat"], absolute: true },
+    { description: "Acute lumbar injury.", region: "lumbar_spine", prohibitedPatterns: ["squat"], absolute: true },
+  ],
+  fatigueProfile: {
+    types: [],
+    neural: 2,
+    muscular: 3,
+    metabolic: 3,
+    connectiveTissue: 2,
+    technical: 1,
+  },
+  evidenceLevel: "level_2",
+  setupTimeMinutes: 2,
+};
+
+/**
+ * Dumbbell Bench Press — `50-exercises/68_HYPERTROPHY/14_DUMBBELL_BENCH_PRESS.md`.
+ *
+ * Requires a bench: the chapter lists it under Required, not Optional.
+ *
+ * `module: "functional_hypertrophy"` and
+ * `primaryAdaptation: "functional_hypertrophy"` come from the chapter's Primary
+ * Classification. The chapter states explicitly that this is not a
+ * maximum-strength exercise, and nothing here claims otherwise.
+ */
+export const DUMBBELL_BENCH_PRESS: ExerciseDefinition = {
+  id: "dumbbell_bench_press",
+  name: "Dumbbell Bench Press",
+  module: "functional_hypertrophy",
+  primaryAdaptation: "functional_hypertrophy",
+  physicalQualities: ["relative_strength", "muscular_endurance", "stability", "coordination"],
+  movementPatterns: ["horizontal_push"],
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "dumbbell" },
+          { kind: "equipment", equipment: "bench" },
+        ],
+      },
+    ],
+  },
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  unilateral: false,
+  bodyRegionsLoaded: ["chest", "shoulder", "upper_arm"],
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["horizontal_push"], absolute: true },
+    { description: "Acute elbow injury.", region: "elbow", prohibitedPatterns: ["horizontal_push"], absolute: true },
+    { description: "Acute wrist injury.", region: "wrist", prohibitedPatterns: ["horizontal_push"], absolute: true },
+  ],
+  fatigueProfile: {
+    types: [],
+    neural: 2,
+    muscular: 3,
+    metabolic: 2,
+    connectiveTissue: 2,
+    technical: 1,
+  },
+  evidenceLevel: "level_2",
+  setupTimeMinutes: 2,
+};
+
+/**
+ * One-Arm Dumbbell Row — `50-exercises/68_HYPERTROPHY/15_ONE_ARM_DUMBBELL_ROW.md`.
+ *
+ * The family's only horizontal pull. A bench is Optional in the chapter, so it is
+// not required here: the trunk can be supported on a knee or any stable surface.
+ *
+ * `module: "functional_hypertrophy"` and
+ * `primaryAdaptation: "functional_hypertrophy"` come from the chapter's Primary
+ * Classification. The chapter states explicitly that this is not a
+ * maximum-strength exercise, and nothing here claims otherwise.
+ */
+export const ONE_ARM_DUMBBELL_ROW: ExerciseDefinition = {
+  id: "one_arm_dumbbell_row",
+  name: "One-Arm Dumbbell Row",
+  module: "functional_hypertrophy",
+  primaryAdaptation: "functional_hypertrophy",
+  physicalQualities: ["relative_strength", "muscular_endurance", "grip_strength", "trunk_strength", "stability"],
+  movementPatterns: ["horizontal_pull", "anti_rotation"],
+  forceVectors: ["horizontal"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "dumbbell" },
+        ],
+      },
+    ],
+  },
+  minimumTechnicalLevel: 1,
+  complexity: "low",
+  unilateral: true,
+  bodyRegionsLoaded: ["thoracic_spine", "shoulder", "upper_arm"],
+  contraindications: [
+    { description: "Acute shoulder injury.", region: "shoulder", prohibitedPatterns: ["horizontal_pull", "anti_rotation"], absolute: true },
+    { description: "Acute elbow injury.", region: "elbow", prohibitedPatterns: ["horizontal_pull", "anti_rotation"], absolute: true },
+    { description: "Acute lumbar injury.", region: "lumbar_spine", prohibitedPatterns: ["horizontal_pull", "anti_rotation"], absolute: true },
+  ],
+  fatigueProfile: {
+    types: ["grip"],
+    neural: 1,
+    muscular: 3,
+    metabolic: 2,
+    connectiveTissue: 1,
+    technical: 1,
+  },
+  evidenceLevel: "level_2",
+  setupTimeMinutes: 1,
+};
+
+/**
+ * Dumbbell Romanian Deadlift — `50-exercises/68_HYPERTROPHY/16_DUMBBELL_ROMANIAN_DEADLIFT.md`.
+ *
+ * Eccentric loading through hamstring length: the chapter records a 48-72 hour
+// recovery window, the longest in the family.
+ *
+ * `module: "functional_hypertrophy"` and
+ * `primaryAdaptation: "functional_hypertrophy"` come from the chapter's Primary
+ * Classification. The chapter states explicitly that this is not a
+ * maximum-strength exercise, and nothing here claims otherwise.
+ */
+export const DUMBBELL_ROMANIAN_DEADLIFT: ExerciseDefinition = {
+  id: "dumbbell_romanian_deadlift",
+  name: "Dumbbell Romanian Deadlift",
+  module: "functional_hypertrophy",
+  primaryAdaptation: "functional_hypertrophy",
+  physicalQualities: ["relative_strength", "muscular_endurance", "mobility", "grip_strength", "tissue_capacity"],
+  movementPatterns: ["hinge"],
+  forceVectors: ["vertical"],
+  requiredEquipment: [],
+  requirements: {
+    required: [
+      {
+        kind: "all_of",
+        items: [
+          { kind: "equipment", equipment: "dumbbell" },
+        ],
+      },
+    ],
+  },
+  minimumTechnicalLevel: 2,
+  complexity: "moderate",
+  unilateral: false,
+  bodyRegionsLoaded: ["thigh", "hip", "lumbar_spine"],
+  contraindications: [
+    { description: "Acute lumbar injury.", region: "lumbar_spine", prohibitedPatterns: ["hinge"], absolute: true },
+    { description: "Acute hamstring injury.", region: "thigh", prohibitedPatterns: ["hinge"], absolute: true },
+    { description: "Acute hip injury.", region: "hip", prohibitedPatterns: ["hinge"], absolute: true },
+  ],
+  fatigueProfile: {
+    types: ["grip"],
+    neural: 2,
+    muscular: 3,
+    metabolic: 2,
+    connectiveTissue: 3,
+    technical: 2,
+  },
+  evidenceLevel: "level_2",
+  setupTimeMinutes: 1,
+};
+
 export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   MED_BALL_CHEST_PASS,
   MED_BALL_SLAM,
@@ -11838,6 +12210,15 @@ export const EXERCISE_KNOWLEDGE_BASE: readonly ExerciseDefinition[] = [
   WALL_WRESTLING,
   GRIP_FIGHTING,
   SHOT_ENTRIES,
+
+  // Functional hypertrophy (Lot H2.2B)
+  PUSH_UP,
+  SPLIT_SQUAT,
+  SINGLE_LEG_HIP_THRUST,
+  GOBLET_SQUAT,
+  DUMBBELL_BENCH_PRESS,
+  ONE_ARM_DUMBBELL_ROW,
+  DUMBBELL_ROMANIAN_DEADLIFT,
 ];
 
 /**

@@ -171,13 +171,13 @@ function betweenRoundsRest(id: string, rangeContext: PrescriptionExecutionContex
 
 describe("partner grappling drills — registry, knowledge base, profile and equipment counts", () => {
   test("1. the registry grew from 71 to exactly 74 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(82);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(82);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
   test("2. the knowledge base stays at 76 ExerciseDefinitions — no definition was added or edited", () => {
-    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(76);
+    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(83);
     for (const drill of DRILLS) {
       const definition = EXERCISE_KNOWLEDGE_BASE.find((exercise) => exercise.id === drill.id);
       expect(definition, drill.id).toBe(drill.definition);
@@ -192,7 +192,7 @@ describe("partner grappling drills — registry, knowledge base, profile and equ
   });
 
   test("4. the equipment vocabulary went from 31 to 32 — `usable_wall`, the only identifier this lot added", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(33);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(34);
     expect(isEquipmentCapabilityId("usable_wall")).toBe(true);
 
     // It mirrors the knowledge base's own EnvironmentCapability name, the
@@ -220,7 +220,7 @@ describe("partner grappling drills — registry, knowledge base, profile and equ
   test("6. no other exercise was added: the 71 previous ids plus these three account for every key", () => {
     // sled_push was added by a later lot (Registry Lot 21) and is covered by
     // its own file, so it is excluded here exactly as this lot's own three are.
-    const ADDED_BY_LATER_LOTS: readonly string[] = ["sled_push"];
+    const ADDED_BY_LATER_LOTS: readonly string[] = ["sled_push", "push_up", "split_squat", "single_leg_hip_thrust", "goblet_squat", "dumbbell_bench_press", "one_arm_dumbbell_row", "dumbbell_romanian_deadlift"];
     const previousIds = PILOT_EXERCISE_IDS.filter(
       (id) => !(DRILL_IDS as readonly string[]).includes(id) && !ADDED_BY_LATER_LOTS.includes(id),
     );
@@ -876,8 +876,17 @@ describe("partner grappling drills — registry health and non-regression", () =
   });
 
   test("46. no regression on the 71 previous entries: each still prescribes with its own declared equipment", () => {
+    // The hypertrophy family arrived in Lot H2.2B, after this lot, and is
+    // covered by its own file.
+    const LATER_LOT_IDS: readonly string[] = [
+      "push_up", "split_squat", "single_leg_hip_thrust", "goblet_squat",
+      "dumbbell_bench_press", "one_arm_dumbbell_row", "dumbbell_romanian_deadlift",
+    ];
     const previousIds = PILOT_EXERCISE_IDS.filter(
-      (id) => !(DRILL_IDS as readonly string[]).includes(id) && id !== "sled_push",
+      (id) =>
+        !(DRILL_IDS as readonly string[]).includes(id) &&
+        id !== "sled_push" &&
+        !LATER_LOT_IDS.includes(id),
     );
     expect(previousIds).toHaveLength(71);
 

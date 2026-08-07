@@ -120,13 +120,13 @@ const readChapter = () => readFileSync(new URL(`../../../../${CHAPTER}`, import.
 
 describe("sled_push — registry, knowledge base, profile and equipment counts", () => {
   test("1. the registry grew from 74 to exactly 75 entries", () => {
-    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(82);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(82);
     expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY).sort()).toEqual([...PILOT_EXERCISE_IDS].sort());
   });
 
   test("2. the knowledge base stays at 76 ExerciseDefinitions — none was added or edited", () => {
-    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(76);
+    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(83);
     expect(EXERCISE_KNOWLEDGE_BASE.find((exercise) => exercise.id === EXERCISE_ID)).toBe(SLED_PUSH);
     expect(SLED_PUSH.module).toBe("power");
     expect(SLED_PUSH.primaryAdaptation).toBe("power");
@@ -138,7 +138,7 @@ describe("sled_push — registry, knowledge base, profile and equipment counts",
   });
 
   test("4. the equipment vocabulary went from 32 to 33 — `sled`, the only identifier this lot added", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(33);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(34);
     expect(isEquipmentCapabilityId("sled")).toBe(true);
 
     // ONE atom, not two: the chapter names "Weighted Sled" as a single
@@ -726,7 +726,10 @@ describe("sled_push — registry health and non-regression", () => {
   });
 
   test("32. no regression on the 74 previous entries: each still prescribes with its own declared equipment", () => {
-    const previousIds = PILOT_EXERCISE_IDS.filter((id) => id !== EXERCISE_ID);
+    const ADDED_BY_LATER_LOTS: readonly string[] = ["push_up", "split_squat", "single_leg_hip_thrust", "goblet_squat", "dumbbell_bench_press", "one_arm_dumbbell_row", "dumbbell_romanian_deadlift"];
+    const previousIds = PILOT_EXERCISE_IDS.filter(
+      (id) => id !== EXERCISE_ID && !ADDED_BY_LATER_LOTS.includes(id),
+    );
     expect(previousIds).toHaveLength(74);
 
     for (const id of previousIds) {

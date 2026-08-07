@@ -801,8 +801,8 @@ describe("Partner Grappling Rounds — genericity and non-regression", () => {
     // 71" while the foundation shipped alone. Registry Lot 20 consumed the
     // foundation, which is what it was for; what still has to hold is that
     // NOTHING ELSE moved onto the new method or the new profile.
-    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(75);
-    expect(PILOT_EXERCISE_IDS).toHaveLength(75);
+    expect(Object.keys(EXERCISE_PRESCRIPTION_REGISTRY)).toHaveLength(82);
+    expect(PILOT_EXERCISE_IDS).toHaveLength(82);
 
     for (const drill of FUTURE_DRILLS) {
       expect(PILOT_EXERCISE_IDS as readonly string[]).toContain(drill);
@@ -827,7 +827,7 @@ describe("Partner Grappling Rounds — genericity and non-regression", () => {
   });
 
   test("31. the knowledge base stays at 76 ExerciseDefinitions, and the three drills keep their partner requirement", () => {
-    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(76);
+    expect(EXERCISE_KNOWLEDGE_BASE).toHaveLength(83);
 
     for (const drill of FUTURE_DRILLS) {
       const definition = EXERCISE_KNOWLEDGE_BASE.find((exercise) => exercise.id === drill);
@@ -840,7 +840,7 @@ describe("Partner Grappling Rounds — genericity and non-regression", () => {
   });
 
   test("32. the foundation added no equipment identifier — the one later addition is wall_wrestling's, not the method's", () => {
-    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(33);
+    expect(EQUIPMENT_CAPABILITY_IDS).toHaveLength(34);
     // The method requires a PERSON, and a person is not an implement: no
     // generic "partner" identifier exists in the equipment vocabulary, and
     // the foundation added none. Registry Lot 20 added exactly one id,

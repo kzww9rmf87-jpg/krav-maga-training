@@ -178,6 +178,7 @@ const UNMAPPED_EQUIPMENT_TYPES = Object.entries(CAPABILITY_BY_EQUIPMENT_TYPE)
 const EQUIVALENCE_GROUP_MEMBERS = {
   cable_or_band_resistance: ["cable_machine", "resistance_band"],
   loaded_carry_implement: ["dumbbell", "kettlebell", "farmer_handle", "trap_bar", "barbell", "sandbag"],
+  dumbbell_or_kettlebell: ["dumbbell", "kettlebell"],
 } as const satisfies Partial<Record<EquipmentCapabilityId, readonly EquipmentType[]>>;
 
 // -----------------------------------------------------------------------------

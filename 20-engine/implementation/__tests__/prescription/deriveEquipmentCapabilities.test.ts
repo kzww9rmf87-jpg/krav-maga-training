@@ -74,7 +74,7 @@ describe("deriveEquipmentCapabilities — mapping table integrity", () => {
       makeEnvironment(ALL_EQUIPMENT_TYPES, { floorSafe: true, usableWall: true }),
     );
     expect([...fullyEquipped].sort()).toEqual([...EQUIPMENT_CAPABILITY_IDS].sort());
-    expect(fullyEquipped).toHaveLength(33);
+    expect(fullyEquipped).toHaveLength(34);
   });
 
   test("every equivalence-group member is a real EquipmentType", () => {
