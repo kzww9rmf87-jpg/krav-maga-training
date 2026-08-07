@@ -490,6 +490,37 @@
         ]
       },
       {
+        "id": "trace_request-1_sequencing_bench_press",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "session_assembly",
+        "decision": "Exercise \"bench_press\" sequenced at position 1 of 1.",
+        "reasons": [
+          "Sequence class \"objective_driver\" for a \"maximum_strength\" objective.",
+          "No documented freshness requirement; the stimulus survives being performed late.",
+          "Freshness demand 0, documented systemic load 6."
+        ],
+        "inputReferences": [
+          "request.primaryObjective"
+        ],
+        "affectedExerciseIds": [
+          "bench_press"
+        ]
+      },
+      {
+        "id": "trace_request-1_sequencing_summary",
+        "timestamp": "2026-01-15T08:00:00.000Z",
+        "stage": "session_assembly",
+        "decision": "Session sequenced: \"bench_press\".",
+        "reasons": [
+          "Ordered by sequence class, then by freshness demand, then by documented systemic load, then by canonical id.",
+          "Selection score decides WHICH exercises are in the session; it does not decide their order.",
+          "No two consecutive exercises load a common body region."
+        ],
+        "inputReferences": [
+          "request.primaryObjective"
+        ]
+      },
+      {
         "id": "trace_request-1_prescription_generation_bench_press_method",
         "timestamp": "2026-01-15T08:00:00.000Z",
         "stage": "prescription_generation",

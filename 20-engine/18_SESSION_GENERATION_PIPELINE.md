@@ -2174,6 +2174,171 @@ failure that selection could not resolve.
 
 ---
 
+# Session Sequencing
+
+## What decided the order before
+
+Nothing did.
+
+`buildPrescriptionInput.ts` assigns `order: exercises.length + 1` while walking
+`draft.modules` and, inside each module, the candidates in SCORING RANK.
+Execution order was therefore selection score order — an artefact of iteration,
+never a training decision.
+
+Measured on the real catalogue, a full-gym maximum-strength session returned:
+
+```text
+1. chest_supported_row   accessory
+2. neck_training         accessory
+3. bench_press           PRIMARY, documented neural fatigue 4
+```
+
+The athlete performed neck work and rows before the heavy press. Lot H2.1
+guarantees a driver is SELECTED; nothing protected its POSITION.
+
+## The rule
+
+```text
+SELECTION SCORE DECIDES WHICH EXERCISES ARE IN THE SESSION.
+IT DOES NOT DECIDE THEIR ORDER.
+```
+
+Ordering is a separate, explicit comparator in `sessionSequencer.ts`, applied
+after every stage that can still change the session's contents — including the
+adequacy repair, which can add a driver.
+
+## The comparator
+
+Four keys, in order. Every tie is broken, and the last key always separates.
+
+| Key | Question |
+| --- | --- |
+| 1. sequence class | what kind of work is this, FOR THIS OBJECTIVE? |
+| 2. freshness demand | what degrades most when performed tired? |
+| 3. systemic load | which is the larger movement, among equals? |
+| 4. canonical id | a stable, meaningless, always-available tie-break |
+
+Nothing reads a clock, a random source, or the order the exercises arrived in.
+Shuffling the input changes nothing.
+
+## Sequence classes
+
+```text
+0  objective_driver          drives the requested adaptation
+1  primary_module_support    in the primary module, not driving
+2  secondary_module_work
+3  support_module_work
+4  deferred_conditioning     conditioning, when conditioning is NOT the objective
+5  closing_recovery          recovery/mobility, when neither is the objective
+```
+
+THE CLASS IS OBJECTIVE-AWARE, AND A ROLE NAME NEVER DECIDES POSITION. Membership
+uses `isDriverRoleFor(requestedAdaptation, role)` — the same relation H2.1 uses to
+secure a driver. So the same exercise moves:
+
+* `soleus_raise` is support work in a maximum-strength session and the OBJECTIVE
+  DRIVER in a robustness session;
+* `assault_bike_intervals` leads a conditioning session and is deferred in a
+  strength one;
+* `shadow_boxing` drives a specific-skill objective;
+* `bear_crawl` drives a movement objective rather than closing it.
+
+## Freshness demand
+
+Not "how hard is it" — "how much is lost by doing it late". A jump performed
+fatigued is a different exercise; a set of accessory rows performed fatigued is
+the same exercise, slightly heavier.
+
+| Tier | Condition | Rationale |
+| --- | --- | --- |
+| 3 ballistic | movement pattern `jump`, `throw` or `sprint` | velocity IS the stimulus, and velocity is the first thing fatigue takes |
+| 2 technical | `complexity` high/very_high, or documented technical fatigue ≥ 4 | coordination degrades before force, and a degraded rehearsal teaches the degraded pattern |
+| 1 neural | documented neural fatigue ≥ 4 | expressible load falls with central fatigue long before the muscle is exhausted |
+| 0 none | everything else | the stimulus survives being performed late |
+
+Every input is metadata that ALREADY EXISTED. No field was added to the knowledge
+base for sequencing, and nothing is inferred from a display name.
+
+## Systemic load
+
+`neural + muscular + metabolic`, descending — the larger movement first among
+exercises that are otherwise equal.
+
+A deliberately DOCUMENTED proxy for "bigger movement". The alternative is
+guessing which exercises are "compound" from their names, which this repository
+forbids. It is what puts `split_squat` ahead of `push_up` in a bodyweight
+hypertrophy session.
+
+## Primary-driver protection
+
+For any objective, the driver sits in class 0 and therefore precedes all support
+work. An exercise can only precede it by being a driver too, and then only by
+demanding more freshness — a ballistic primer before a heavy lift, which is a
+training decision rather than an accident.
+
+## Power and freshness
+
+When power is the objective, every ballistic exercise precedes every
+non-ballistic one, asserted rather than assumed. No contrast or complex method is
+implemented, because CAS documents none; introducing one would be inventing
+doctrine.
+
+## Conditioning interference
+
+Conditioning that is not the objective falls to class 4 — after the strength and
+power work it would otherwise degrade. When conditioning IS the objective it is a
+driver and leads. The decision belongs to CAS, and is made from the exercise's own
+adaptation rather than its module name.
+
+## Adjacent shared regions: reported, not reordered
+
+Consecutive exercises that load a common body region are recorded in the Decision
+Trace and left where they are.
+
+Separating them would mean overriding the freshness ordering above, and no
+document in this repository states which of the two should win. Choosing silently
+would be inventing doctrine; a full adjacency optimizer would be worse. The
+observation is published so the question stays visible.
+
+## What sequencing never does
+
+* it never changes which exercises are in the session;
+* it never changes a dose;
+* it never adds an exercise;
+* it never fabricates a warm-up.
+
+Verified across ten regression scenarios against the pre-sequencing engine: order
+changed in five, and in every one the exercise set, the prescriptions keyed by
+exercise, the estimated duration and the adequacy verdict were identical.
+
+`estimateSessionDuration` counts exercises and transitions rather than reading
+their order, so the published duration is unaffected.
+
+## Warm-up is out of scope
+
+No exercise in the catalogue is a warm-up, no module produces one, and no
+prescription profile describes preparation work. Sequencing applies to the
+prescribed work the engine actually selected, and this lot does not invent a
+preparation phase to put in front of it.
+
+## Decision Trace
+
+One `session_assembly` entry per sequenced exercise —
+`<requestId>_sequencing_<exerciseId>` — naming its position, its sequence class
+for this objective, its freshness rationale and its two numeric keys. One summary
+entry, `<requestId>_sequencing_summary`, states the comparator, states that
+selection score did not decide the order, and lists any consecutive pair sharing a
+loaded region.
+
+## Public contract
+
+Unchanged. The exercise array order was always the session's order; this lot
+makes it MEAN something. `order` is renumbered to match, contiguous from 1.
+
+VITA must present the sequence CAS returns and must not reorder it.
+
+---
+
 # Final Principle
 
 The Session Generation Pipeline exists to ensure that a training session is never a random collection of exercises.

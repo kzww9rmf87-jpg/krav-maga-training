@@ -84,6 +84,13 @@ import {
 } from "./sessionComposer";
 import { driverRolesFor } from "./adaptationDrivers";
 import {
+  adjacentSharedRegions,
+  FRESHNESS_TIERS,
+  sequenceSession,
+  type SequenceCandidate,
+  type SequencedCandidate,
+} from "./sessionSequencer";
+import {
   evaluateSessionAdequacy,
   isDrivingRole,
   type AdequacyPrescribedExercise,
@@ -464,6 +471,13 @@ export function runEngine(
     workingPrescription = repair.prescription;
   }
 
+  // Sequencing runs last among the stages that may touch the session, and
+  // changes only position. It must follow the adequacy repair — repair can still
+  // add a driver, and a driver that arrives after sequencing would be sequenced
+  // nowhere.
+  const sequencing = sequencePrescribedSession(input, workingPrescription, selectedModules, exercises);
+  workingPrescription = sequencing.prescription;
+
   const durationEstimate = estimateFor(workingPrescription);
 
   const sessionDraft: InitialSessionDraft =
@@ -554,6 +568,7 @@ export function runEngine(
       // securing a driver IS a composition decision, and the trace reads in
       // pipeline order.
       ...buildDriverSelectionTraceEntries(input, primaryModuleSelection, workingComposition, registryRoleOf),
+      ...buildSequencingTraceEntries(input, sequencing.sequence),
       ...workingPrescription.traceEntries,
       ...timeBudgetTraceEntries,
       ...durationTraceEntries,
@@ -650,6 +665,131 @@ function buildDriverSelectionTraceEntries(
       ...(reserved === null ? {} : { affectedExerciseIds: [reserved] }),
     },
   ];
+}
+
+// -----------------------------------------------------------------------------
+// Session sequencing
+// -----------------------------------------------------------------------------
+
+/**
+ * Reorders the prescribed exercises, and renumbers `order` to match.
+ *
+ * Sequencing changes NOTHING but position: the same exercises, the same doses,
+ * the same count. `estimateSessionDuration` counts exercises and transitions
+ * rather than reading their order, so the published duration is unaffected —
+ * which is why this runs before the estimate rather than after, and why the
+ * estimate is not recomputed differently because of it.
+ */
+function sequencePrescribedSession(
+  input: EngineInput,
+  prescription: EngineSessionPrescriptionResult,
+  selectedModules: readonly SelectedModule[],
+  exercises: readonly ExerciseDefinition[],
+): { prescription: EngineSessionPrescriptionResult; sequence: SequencedCandidate[] } {
+  if (prescription.outcome.status !== "prescribed") {
+    return { prescription, sequence: [] };
+  }
+
+  const catalogue = new Map(exercises.map((exercise) => [exercise.id, exercise] as const));
+  const moduleRoleByModule = new Map(
+    selectedModules.map((selectedModule) => [selectedModule.module, selectedModule.role] as const),
+  );
+
+  const prescribed = prescription.outcome.session.exercises;
+  const candidates: SequenceCandidate[] = [];
+  for (const prescribedExercise of prescribed) {
+    const exercise = catalogue.get(prescribedExercise.prescription.exerciseId);
+    if (exercise === undefined) {
+      // An exercise the caller's catalogue does not describe cannot be
+      // classified. Rather than guess a position, sequencing declines entirely
+      // and the session keeps the order it already had.
+      return { prescription, sequence: [] };
+    }
+    candidates.push({
+      exerciseId: exercise.id,
+      exercise,
+      role: registryRoleOf(exercise.id),
+      moduleRole: moduleRoleByModule.get(prescribedExercise.prescription.moduleId) ?? "support",
+    });
+  }
+
+  const sequence = sequenceSession(candidates, {
+    requestedAdaptation: input.request.primaryObjective.adaptationDomain,
+  });
+
+  const byExerciseId = new Map(
+    prescribed.map((prescribedExercise) => [prescribedExercise.prescription.exerciseId, prescribedExercise] as const),
+  );
+  const reordered = sequence.map((candidate, index) => {
+    const original = byExerciseId.get(candidate.exerciseId);
+    if (original === undefined) {
+      throw new Error(`Sequencing lost exercise "${candidate.exerciseId}" from the prescribed session.`);
+    }
+    return { ...original, order: index + 1 };
+  });
+
+  return {
+    prescription: {
+      ...prescription,
+      outcome: {
+        ...prescription.outcome,
+        session: { ...prescription.outcome.session, exercises: reordered },
+      },
+    },
+    sequence,
+  };
+}
+
+/** One `session_assembly` entry per sequenced exercise, plus the shared rules. */
+function buildSequencingTraceEntries(
+  input: EngineInput,
+  sequence: readonly SequencedCandidate[],
+): DecisionTraceEntry[] {
+  if (sequence.length === 0) {
+    return [];
+  }
+
+  const timestamp = input.request.requestedAt;
+  const adaptation = input.request.primaryObjective.adaptationDomain;
+  const entries: DecisionTraceEntry[] = sequence.map((candidate, index) => ({
+    id: `trace_${input.request.requestId}_sequencing_${candidate.exerciseId}`,
+    timestamp,
+    stage: "session_assembly",
+    decision: `Exercise "${candidate.exerciseId}" sequenced at position ${index + 1} of ${sequence.length}.`,
+    reasons: [
+      `Sequence class "${candidate.sequenceClass}" for a "${adaptation}" objective.`,
+      candidate.freshnessDemand === FRESHNESS_TIERS.ballistic
+        ? "Ballistic work: velocity is the stimulus, and velocity is the first thing fatigue takes."
+        : candidate.freshnessDemand === FRESHNESS_TIERS.technical
+          ? "Technically demanding: coordination degrades before force does."
+          : candidate.freshnessDemand === FRESHNESS_TIERS.neural
+            ? "Neurally expensive: expressible load falls with central fatigue."
+            : "No documented freshness requirement; the stimulus survives being performed late.",
+      `Freshness demand ${candidate.freshnessDemand}, documented systemic load ${candidate.systemicLoad}.`,
+    ],
+    inputReferences: ["request.primaryObjective"],
+    affectedExerciseIds: [candidate.exerciseId],
+  }));
+
+  const sharedRegions = adjacentSharedRegions(sequence);
+  entries.push({
+    id: `trace_${input.request.requestId}_sequencing_summary`,
+    timestamp,
+    stage: "session_assembly",
+    decision: `Session sequenced: ${sequence.map((candidate) => `"${candidate.exerciseId}"`).join(" then ")}.`,
+    reasons: [
+      "Ordered by sequence class, then by freshness demand, then by documented systemic load, then by canonical id.",
+      "Selection score decides WHICH exercises are in the session; it does not decide their order.",
+      sharedRegions.length === 0
+        ? "No two consecutive exercises load a common body region."
+        : `Consecutive exercises sharing a loaded region: ${sharedRegions
+            .map((finding) => `"${finding.first}" then "${finding.second}" (${finding.regions.join(", ")})`)
+            .join("; ")}. Reported rather than reordered: separating them would override the freshness ordering, and no document states which should win.`,
+    ],
+    inputReferences: ["request.primaryObjective"],
+  });
+
+  return entries;
 }
 
 // -----------------------------------------------------------------------------

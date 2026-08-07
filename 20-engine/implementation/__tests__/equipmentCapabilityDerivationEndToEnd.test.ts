@@ -163,7 +163,10 @@ describe("equipment capability derivation — the audit scenario is fixed", () =
     const prescribedIds = result.prescription.session.exercises.map(
       (prescribedExercise) => prescribedExercise.prescription.exerciseId,
     );
-    expect(prescribedIds).toEqual(selectedExerciseIds);
+    // Compared as a SET. Since Lot H2.3 the prescribed array is the EXECUTION
+    // order, which is a training decision; selection order is not. Every
+    // selected exercise is still prescribed — that is what this asserts.
+    expect([...prescribedIds].sort()).toEqual([...selectedExerciseIds].sort());
     expect(prescribedIds).toContain("pallof_press");
     // `assault_bike_intervals` is no longer part of this session — see the
     // comment on the selection above. What this test guards is that every

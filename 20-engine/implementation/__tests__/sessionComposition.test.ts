@@ -110,7 +110,10 @@ describe("session composition — a session is more than one exercise", () => {
     const prescribedIds = result.prescription.session.exercises.map(
       (prescribedExercise) => prescribedExercise.prescription.exerciseId,
     );
-    expect(prescribedIds).toEqual(composedExerciseIds(makeInput(45, ["grip", "core"])));
+    // Compared as a SET. Since Lot H2.3 the prescribed array is the EXECUTION
+    // order, which is a training decision; selection order is not. Every
+    // selected exercise is still prescribed — that is what this asserts.
+    expect([...prescribedIds].sort()).toEqual([...composedExerciseIds(makeInput(45, ["grip", "core"]))].sort());
     expect(prescribedIds.length).toBeGreaterThan(3);
   });
 

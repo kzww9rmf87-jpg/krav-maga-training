@@ -110,7 +110,10 @@ describe("runEngine(input) — one call returns a prescribed session", () => {
     );
 
     expect(selectedIds.length).toBeGreaterThan(1);
-    expect(prescribedIds).toEqual(selectedIds);
+    // Compared as a SET. Since Lot H2.3 the prescribed array is the EXECUTION
+    // order, which is a training decision; selection order is not. Every
+    // selected exercise is still prescribed — that is what this asserts.
+    expect([...prescribedIds].sort()).toEqual([...selectedIds].sort());
     expect(result.prescription.unprescribedSelectedExercises).toEqual([]);
 
     // Every prescription is complete, not a shell.

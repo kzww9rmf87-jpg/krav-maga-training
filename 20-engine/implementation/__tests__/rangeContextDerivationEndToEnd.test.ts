@@ -80,9 +80,19 @@ function runScenario(readiness: ReadinessState) {
     throw new Error(`Expected a prescribed draft, got "${result.outcome}".`);
   }
 
-  const [first] = result.prescription.session.exercises;
+  // The exercise under test is NAMED rather than taken by position. This file
+  // asks how readiness reaches a dose, and the answer is only visible on the
+  // primary driver: `pull_up` drops from three sets to two under low readiness,
+  // while the accessories beside it hold at three.
+  //
+  // Before Lot H2.3 this read `exercises[0]`, which happened to be the driver;
+  // sequencing now guarantees it, but naming the subject says what the test
+  // means instead of relying on that.
+  const first = result.prescription.session.exercises.find(
+    (exercise) => exercise.prescription.exerciseId === "pull_up",
+  );
   if (first === undefined) {
-    throw new Error("Expected at least one prescribed exercise.");
+    throw new Error("Expected pull_up to be prescribed.");
   }
 
   const betweenSets = first.prescription.rest?.betweenSets;
@@ -113,7 +123,12 @@ describe("readiness → dose — the caller no longer chooses the range context"
     expect(decision.level).toBe("normal");
     expect(decision.rangeContext).toBe("normal");
     expect(sets).toBe(3);
-    expect(restSeconds).toBe(120);
+    // 180 s is the strength PRIMARY profile's normal rest. The former 120 was
+    // `chest_supported_row`'s accessory rest, read by position: before Lot H2.3
+    // this scenario's neutral run happened to put the accessory first and its
+    // low-readiness run the driver, so the file compared two different exercises
+    // across runs. Naming `pull_up` fixes the comparison, and this is its value.
+    expect(restSeconds).toBe(180);
   });
 
   test("an excellent athlete is dosed identically — high readiness never progresses on its own", () => {

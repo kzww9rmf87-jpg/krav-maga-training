@@ -176,7 +176,8 @@ describe("selected-but-unprescribed exercises — real knowledge base end to end
     const prescribedIds = result.prescription.session.exercises.map(
       (prescribedExercise) => prescribedExercise.prescription.exerciseId,
     );
-    expect(prescribedIds).toEqual(["chest_supported_row", "neck_training", "pull_up"]);
+    // Execution order since Lot H2.3: the driver leads, accessories follow.
+    expect(prescribedIds).toEqual(["pull_up", "chest_supported_row", "neck_training"]);
 
     // 4. The status deliberately stays "prescribed" — unchanged by this lot.
     expect(result.prescription.status).toBe("prescribed");
